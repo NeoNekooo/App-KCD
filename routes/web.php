@@ -11,6 +11,9 @@ use App\Http\Controllers\SiswaController;
 // Controller Akademik
 use App\Http\Controllers\Admin\Akademik\SemesterController;
 use App\Http\Controllers\Admin\Akademik\TapelController;
+use App\Http\Controllers\Admin\Akademik\ProgramKeahlianController;
+use App\Http\Controllers\Admin\Akademik\PaketKeahlianController; 
+use App\Http\Controllers\Admin\Akademik\JurusanController;
 
 // Controller Kesiswaan
 use App\Http\Controllers\Admin\Kesiswaan\DaftarCalonPesertaDidikController;
@@ -32,7 +35,7 @@ use App\Http\Controllers\Admin\Settings\ApiSettingsController; // Pastikan ini d
 |--------------------------------------------------------------------------
 */
 Route::get('/', function () {
-    return view('welcome');
+    return view('admin.dashboard');
 });
 
 
@@ -68,6 +71,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::patch('tapel/{tapel}/toggle', [TapelController::class, 'toggleStatus'])->name('tapel.toggle');
         Route::resource('semester', SemesterController::class)->only(['index']);
         Route::patch('semester/{semester}/toggle', [SemesterController::class, 'toggle'])->name('semester.toggle');
+        Route::resource('program-keahlian', ProgramKeahlianController::class)->only(['index']);
+        Route::resource('paket-keahlian', PaketKeahlianController::class)->only(['index']);
+        Route::resource('jurusan', JurusanController::class)->only(['index']);
     });
 
     Route::prefix('kesiswaan')->name('kesiswaan.')->group(function() {
