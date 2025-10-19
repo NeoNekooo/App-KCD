@@ -48,7 +48,7 @@ Route::post('/submitForm', [LandingPpdbController::class, 'submitForm'])->name('
 
 /*
 |--------------------------------------------------------------------------
-| Rute Panel Admin
+| Rute Panel Ppdb
 |--------------------------------------------------------------------------
 */
 Route::prefix('ppdb')->name('ppdb.')->group(function() {
