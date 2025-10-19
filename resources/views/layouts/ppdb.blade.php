@@ -47,8 +47,6 @@
 
         <!-- Notification Container (for success/error messages) -->
         <div id="notification" class="text-white p-4 rounded-lg shadow-xl flex items-center space-x-3 max-w-sm">
-            <i data-lucide="check-circle" class="w-6 h-6"></i>
-            <span id="notification-message">Pendaftaran berhasil!</span>
         </div>
         <!-- Navbar -->
         @include('layouts.partials.ppdb.navbar')
@@ -64,6 +62,29 @@
         <!-- Script Module untuk Logika Aplikasi dan Firebase -->
         <script type="module" src="{{ asset('assets/js/ppdb.js') }}"></script>
         
+        <script>
+            window.showNotification = function(message, isError = false) {
+                const notification = document.getElementById('notification');
+                notification.classList.remove('bg-secondary-green', 'bg-red-500');
+                notification.classList.add(isError ? 'bg-red-500' : 'bg-secondary-green');
+                const iconHtml = `<i data-lucide="${isError ? 'x-octagon' : 'check-circle'}" class="w-6 h-6"></i>`;
+                notification.innerHTML = `${iconHtml}<span id="notification-message" class="ml-2">${message}</span>`;
+                notification.classList.remove('hidden');
+                notification.classList.add('show');
+                setTimeout(() => {
+                    notification.classList.add('hidden');
+                    notification.classList.remove('show');
+                }, 5000);
+                lucide.createIcons();
+            };
+
+
+            document.addEventListener('DOMContentLoaded', function() {
+                @if(session('success'))
+                    showNotification("{{ session('success') }}", false);
+                @endif
+            });
+        </script>
     </body>
 
 </html>

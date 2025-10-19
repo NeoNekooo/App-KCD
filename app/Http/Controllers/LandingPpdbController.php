@@ -115,6 +115,7 @@ class LandingPpdbController extends Controller
             'jenis_kelamin' => 'nullable|in:L,P',
             'tempat_lahir'  => 'nullable|string|max:100',
             'tgl_lahir'     => 'nullable|date',
+            'alamat_lengkap'=> 'nullable|string',
             'nama_ayah'     => 'nullable|string|max:255',
             'nama_ibu'      => 'nullable|string|max:255',
             'kontak'        => 'nullable|string|max:20',

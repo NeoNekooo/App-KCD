@@ -38,6 +38,7 @@ return new class extends Migration
             $table->string('jurusan')->nullable();
             $table->string('ukuran_pakaian')->nullable();
             $table->decimal('pembayaran', 12, 2)->default(0);
+            $table->string('alamat_lengkap')->nullable();
             $table->string('status')->nullable();
             $table->timestamps();
         });
