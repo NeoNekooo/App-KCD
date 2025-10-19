@@ -19,7 +19,7 @@
                         data-aos="zoom-in" data-aos-duration="1000">
                         <!-- IFRAME PETA LOKASI SMK Nurul Islam Affandiyah Cianjur -->
                         <iframe
-                            src="https://maps.google.com/maps?q={{ urlencode($profilSekolah->alamat ?? '') }}&t=&z=15&ie=UTF8&iwloc=&output=embed"
+                            src="https://maps.google.com/maps?q={{ urlencode($kontakPpdb->alamat ?? '') }}&t=&z=15&ie=UTF8&iwloc=&output=embed"
                             frameborder="0" style="border:0;" allowfullscreen="" aria-hidden="false" tabindex="0"
                             loading="lazy" title="Google Map Lokasi SMK Nurul Islam Affandiyah Cianjur"
                             class="absolute inset-0 w-full h-full"></iframe>
@@ -33,24 +33,22 @@
                             <li class="flex items-start">
                                 <i data-lucide="map-pin"
                                     class="w-6 h-6 mr-4 mt-0.5 text-secondary-green flex-shrink-0"></i>
-                                <span class="text-gray-700 font-medium">Jl. Raya Cianjur Bandung Km. 09 Desa Selajambe
-                                    Kec. Sukaluyu Kab. Cianjur</span>
+                                <span class="text-gray-700 font-medium">{{ $kontakPpdb->alamat ?? '-'}}</span>
                             </li>
                             <li class="flex items-start">
                                 <i data-lucide="phone"
                                     class="w-6 h-6 mr-4 mt-0.5 text-secondary-green flex-shrink-0"></i>
-                                <span class="text-gray-700 font-medium">{{ $profilSekolah->telepon ?? '-'}} (Layanan PPDB)</span>
+                                <span class="text-gray-700 font-medium">{{ $kontakPpdb->nomer_ppdb ?? '-'}} (Layanan PPDB)</span>
                             </li>
                             <li class="flex items-start">
                                 <i data-lucide="mail"
                                     class="w-6 h-6 mr-4 mt-0.5 text-secondary-green flex-shrink-0"></i>
-                                <span class="text-gray-700 font-medium">{{ $profilSekolah->email ?? 'example@gmail.com' }}</span>
+                                <span class="text-gray-700 font-medium">{{ $kontakPpdb->email ?? 'example@gmail.com' }}</span>
                             </li>
                             <li class="flex items-start">
                                 <i data-lucide="clock"
                                     class="w-6 h-6 mr-4 mt-0.5 text-secondary-green flex-shrink-0"></i>
-                                <span class="text-gray-700 font-medium">Jam Pelayanan PPDB: Hari Senin-Sabtu Jam 08.00 -
-                                    15.00 WIB</span>
+                                <span class="text-gray-700 font-medium">Jam Pelayanan PPDB: {{ $kontakPpdb->jam_pelayanan }}</span>
                             </li>
                         </ul>
                     </div>

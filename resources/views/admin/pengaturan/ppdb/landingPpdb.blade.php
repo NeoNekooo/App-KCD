@@ -26,6 +26,11 @@
             Kompetensi
           </button>
         </li>
+        <li class="nav-item">
+          <button type="button" class="nav-link" data-bs-toggle="tab" data-bs-target="#tab4" role="tab">
+            Kontak
+          </button>
+        </li>
       </ul>
     </div>
 
@@ -166,6 +171,64 @@
         </div>
       </div>
 
+      {{-- TAB 4 : KONTAK --}}
+      <div class="tab-pane fade" id="tab4" role="tabpanel">
+        <!-- Row 1: Nomer PPDB & Jam Pelayanan -->
+        <div class="row mb-4">
+          <div class="col-md-4">
+            <label class="form-label fw-semibold">Nomer PPDB</label>
+            <input type="text" name="nomer_ppdb" class="form-control" placeholder="Masukkan Nomer PPDB"
+                   value="{{ old('nomer_ppdb', $kontak->nomer_ppdb ?? '') }}">
+          </div>
+          <div class="col-md-8">
+            <label class="form-label fw-semibold">Jam Pelayanan PPDB</label>
+            <input type="text" name="jam_pelayanan_ppdb" class="form-control" placeholder="Masukkan Jam Pelayanan"
+                   value="{{ old('jam_pelayanan_ppdb', $kontak->jam_pelayanan ?? '') }}">
+          </div>
+        </div>
+      
+        <!-- Row 2: Email, Facebook, Instagram, YouTube -->
+        <div class="row mb-4">
+          <div class="col-md-3">
+            <label class="form-label fw-semibold">Email</label>
+            <input type="email" name="email" class="form-control" placeholder="Masukkan Email"
+                   value="{{ old('email', $kontak->email ?? '') }}">
+          </div>
+          <div class="col-md-3">
+            <label class="form-label fw-semibold">Facebook</label>
+            <input type="text" name="facebook" class="form-control" placeholder="Link Facebook"
+                   value="{{ old('facebook', $kontak->facebook ?? '') }}">
+          </div>
+          <div class="col-md-3">
+            <label class="form-label fw-semibold">Instagram</label>
+            <input type="text" name="instagram" class="form-control" placeholder="Link Instagram"
+                   value="{{ old('instagram', $kontak->instagram ?? '') }}">
+          </div>
+          <div class="col-md-3">
+            <label class="form-label fw-semibold">YouTube</label>
+            <input type="text" name="youtube" class="form-control" placeholder="Link YouTube"
+                   value="{{ old('youtube', $kontak->youtube ?? '') }}">
+          </div>
+        </div>
+      
+        <!-- Row 3: Alamat -->
+        <div class="mb-4">
+          <label class="form-label fw-semibold">Alamat</label>
+          <textarea id="alamatInput" name="alamat" class="form-control" rows="2" placeholder="Masukkan Alamat">{{ old('alamat', $kontak->alamat ?? '') }}</textarea>
+        </div>
+      
+        <!-- Row 4: Live Preview Google Maps -->
+        <div class="mb-4">
+          <label class="form-label fw-semibold">Live Preview Alamat</label>
+          <div style="width: 100%; height: 400px; overflow: hidden; border-radius: 8px; border:1px solid #ddd;">
+            <iframe id="alamatMap"
+                    src="https://maps.google.com/maps?q={{ urlencode($kontak->alamat ?? '') }}&t=&z=15&ie=UTF8&iwloc=&output=embed"
+                    width="100%" height="100%" frameborder="0" style="border:0;" allowfullscreen></iframe>
+          </div>
+        </div>
+
+      </div>
+
       {{-- Tombol Simpan Semua --}}
       <div class="text-end mt-4">
         <button type="submit" class="btn btn-primary">Simpan Semua</button>
@@ -282,5 +345,18 @@
   });
 
 </script>
+
+
+<!-- Script Live Update Maps -->
+<script>
+  const alamatInput = document.getElementById('alamatInput');
+  const alamatMap = document.getElementById('alamatMap');
+
+  alamatInput.addEventListener('input', () => {
+    const alamat = encodeURIComponent(alamatInput.value);
+    alamatMap.src = `https://maps.google.com/maps?q=${alamat}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
+  });
+</script>
+
 
 @endsection

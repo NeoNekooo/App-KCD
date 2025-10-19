@@ -35,17 +35,17 @@
                         <h4 class="text-lg font-semibold mb-4 text-gray-300">Ikuti Kami</h4>
                         <div class="flex space-x-4 text-2xl">
                             <!-- Facebook - Tambahkan class 'social-link' dan 'facebook' -->
-                            <a href="#" target="_blank"
+                            <a href="https://facebook.com/{{ $kontakPpdb->facebook }}" target="_blank"
                                 class="social-link facebook text-gray-400 transition duration-300">
                                 <i class="fab fa-facebook-f"></i>
                             </a>
                             <!-- Instagram - Tambahkan class 'social-link' dan 'instagram' -->
-                            <a href="#" target="_blank"
+                            <a href="https://instagram.com/{{ $kontakPpdb->instagram }}" target="_blank"
                                 class="social-link instagram text-gray-400 transition duration-300">
                                 <i class="fab fa-instagram"></i>
                             </a>
                             <!-- YouTube - Tambahkan class 'social-link' dan 'youtube' -->
-                            <a href="#" target="_blank"
+                            <a href="https://youtube.com/{{ $kontakPpdb->youtube }}" target="_blank"
                                 class="social-link youtube text-gray-400 transition duration-300">
                                 <i class="fab fa-youtube"></i>
                             </a>

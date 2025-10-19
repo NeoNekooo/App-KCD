@@ -7,10 +7,8 @@ use Illuminate\Http\Request;
 use App\Models\BerandaPpdb;
 use App\Models\KeunggulanPpdb;
 use App\Models\KompetensiPpdb;
-use App\Models\CalonSiswa;
-use App\Models\SyaratPendaftaran;
+use App\Models\KontakPpdb;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 
 class PpdbController extends Controller
 {
@@ -19,8 +17,9 @@ class PpdbController extends Controller
         $beranda = BerandaPpdb::first();
         $keunggulanList = KeunggulanPpdb::all();
         $kompetensiList = KompetensiPpdb::all();
+        $kontak = KontakPpdb::first(); 
 
-        return view('admin.pengaturan.ppdb.landingPpdb', compact('beranda', 'keunggulanList', 'kompetensiList'));
+        return view('admin.pengaturan.ppdb.landingPpdb', compact('beranda', 'keunggulanList', 'kompetensiList', 'kontak'));
     }
 
     public function store(Request $request)
@@ -105,8 +104,18 @@ class PpdbController extends Controller
         
             $kompetensi->save();
         }
+
+        // KONTAK PPDB
+        $kontak = KontakPpdb::first() ?? new KontakPpdb();
+        $kontak->nomer_ppdb = $request->nomer_ppdb;
+        $kontak->jam_pelayanan = $request->jam_pelayanan_ppdb;
+        $kontak->email = $request->email;
+        $kontak->facebook = $request->facebook;
+        $kontak->instagram = $request->instagram;
+        $kontak->youtube = $request->youtube;
+        $kontak->alamat = $request->alamat;
+        $kontak->save();
     
         return back()->with('success', 'Data Landing PPDB berhasil disimpan.');
     }
-
 }

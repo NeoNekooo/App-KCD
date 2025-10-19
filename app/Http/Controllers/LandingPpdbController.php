@@ -98,11 +98,8 @@ class LandingPpdbController extends Controller
     }
 
     public function kontak() {
-        return view('landing.ppdb.kontak');
-    }
 
-    public function submitForm(Request $request) {
-        dd($request->all());
+        return view('landing.ppdb.kontak');
     }
 
     public function formulirStore(Request $request)
