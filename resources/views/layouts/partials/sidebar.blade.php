@@ -402,19 +402,12 @@
                 <i class="menu-icon tf-icons bx bxs-window-alt"></i>
                 <div data-i18n="Landing Page">Landing Page</div>
             </a>
-            <ul class="menu-sub">
-                <li class="menu-item {{ request()->is('admin/ppdb*') ? 'open' : '' }}">
-                    <a href="javascript:void(0);" class="menu-link menu-toggle">
-                        <div data-i18n="Landing PPDB">Landing PPDB</div>
+            <ul class="menu-sub">   
+                <li
+                    class="menu-item {{ request()->routeIs('admin.ppdb.landing') ? 'active' : '' }}">
+                    <a href="{{ route('admin.ppdb.landing.index') }}" class="menu-link">
+                        <div data-i18n="Tahun PPDB">Landing PPDB</div>
                     </a>
-                    <ul class="menu-sub">
-                        {{-- <li
-                            class="menu-item {{ request()->routeIs('admin.ppdb.landing.index') ? 'active' : '' }}">
-                            <a href="{{ route('admin.ppdb.landing.index') }}" class="menu-link">
-                                <div data-i18n="Beranda">Beranda</div>
-                            </a>
-                        </li> --}}
-                    </ul>
                 </li>
             </ul>
         </li>

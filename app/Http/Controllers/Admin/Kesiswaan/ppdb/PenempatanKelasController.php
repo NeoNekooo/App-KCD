@@ -54,24 +54,22 @@ class PenempatanKelasController extends Controller
 
 
     public function updateKelas(Request $request)
-{
-    $siswaIds = $request->input('siswa_id', []);
-    $kelasTujuan = $request->input('kelas_tujuan');
+    {
+        $siswaIds = $request->input('siswa_id', []);
+        $kelasTujuan = $request->input('kelas_tujuan');
 
-    if (empty($siswaIds) || !$kelasTujuan) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Data tidak lengkap'
-        ]);
+        if (empty($siswaIds) || !$kelasTujuan) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Data tidak lengkap'
+            ]);
+        }
+
+        \App\Models\CalonSiswa::whereIn('id', $siswaIds)
+            ->update(['kelas_tujuan' => $kelasTujuan]);
+
+        
+    return redirect()->back()->with('success', 'Siswa berhasil ditempatkan!');
     }
-
-    \App\Models\CalonSiswa::whereIn('id', $siswaIds)
-        ->update(['kelas_tujuan' => $kelasTujuan]);
-
-    return response()->json([
-        'success' => true,
-        'message' => 'Berhasil update kelas'
-    ]);
-}
 
 }

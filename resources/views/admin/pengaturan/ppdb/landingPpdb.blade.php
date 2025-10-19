@@ -37,6 +37,7 @@
           <label class="form-label fw-semibold">Slogan Utama</label>
           <input type="text" name="slogan_utama" class="form-control" placeholder="Masukkan slogan utama"
                  value="{{ old('slogan_utama', $beranda->slogan_utama ?? '') }}">
+          <small class="text-muted">jika bagian teks -nya mau berwarna kuning di awali "||"</small>
         </div>
         <div class="mb-4">
           <label class="form-label fw-semibold">Deskripsi Singkat</label>
@@ -44,8 +45,9 @@
         </div>
         <div class="mb-4">
           <label class="form-label fw-semibold">Point Keunggulan Pertama</label>
-          <input type="text" name="point_keunggulan_1" class="form-control"
-                 value="{{ old('point_keunggulan_1', $beranda->point_keunggulan_1 ?? '') }}">
+          <textarea name="point_keunggulan_1" class="form-control" rows="2">{{ old('point_keunggulan_1', $beranda->point_keunggulan_1 ?? '') }}</textarea>
+
+          <small class="text-muted">jika point lebih dari satu, di setiap kalimat menggunakan ","</small>
         </div>
       </div>
 

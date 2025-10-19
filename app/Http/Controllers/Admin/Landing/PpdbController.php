@@ -7,7 +7,10 @@ use Illuminate\Http\Request;
 use App\Models\BerandaPpdb;
 use App\Models\KeunggulanPpdb;
 use App\Models\KompetensiPpdb;
+use App\Models\CalonSiswa;
+use App\Models\SyaratPendaftaran;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class PpdbController extends Controller
 {

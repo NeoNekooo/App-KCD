@@ -12,8 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('jalur_pendaftarans', function (Blueprint $table) {
-            $table->bigIncrements('id');
-            $table->unsignedBigInteger('tahunPelajaran_id')->index('jalur_pendaftarans_tahunpelajaran_id_foreign');
+            $table->id();
+            $table->foreignId('tahunPelajaran_id')->constrained('tahun_pelajarans')->onDelete('cascade');
             $table->string('kode')->nullable();
             $table->string('jalur')->nullable();
             $table->string('keterangan')->nullable();
