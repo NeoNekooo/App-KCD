@@ -111,7 +111,7 @@
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <h2 class="text-3xl sm:text-4xl font-extrabold text-gray-900 text-center mb-16" data-aos="zoom-in"
                     data-aos-duration="600">
-                    4 Langkah Mudah Pendaftaran PPDB SMAKNIS
+                    4 Langkah Mudah Pendaftaran PPDB {{ $profilSekolah->singkatan ?? ''}}
                 </h2>
 
                 <div class="relative flex flex-col items-center">
