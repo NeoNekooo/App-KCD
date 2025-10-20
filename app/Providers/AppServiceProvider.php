@@ -7,6 +7,8 @@ use Illuminate\Pagination\Paginator; // 1. Tambahkan baris ini
 use App\Models\ProfilSekolah;
 use App\Models\KontakPpdb;
 use Illuminate\Support\Facades\View;
+use Illuminate\Support\Facades\Schema;
+
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -32,7 +34,10 @@ class AppServiceProvider extends ServiceProvider
 
 
         // Mengirim data KontakPpdb ke semua view
-        View::share('kontakPpdb', KontakPpdb::first());
+            if (Schema::hasTable('kontak_ppdbs')) {
+            $kontak = KontakPpdb::first();
+            view()->share('kontak', $kontak);
+        }
 
     }
 }
