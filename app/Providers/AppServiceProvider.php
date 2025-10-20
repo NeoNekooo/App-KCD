@@ -30,11 +30,14 @@ class AppServiceProvider extends ServiceProvider
 
 
         // Mengirim data ProfilSekolah ke semua view
-        View::share('profilSekolah', ProfilSekolah::first());
+        if (Schema::hasTable('profil_sekolahs')) {
+            $profilSekolah = ProfilSekolah::first();
+            view()->share('profilSekolah', $profilSekolah);
+        }
 
 
         // Mengirim data KontakPpdb ke semua view
-            if (Schema::hasTable('kontak_ppdbs')) {
+        if (Schema::hasTable('kontak_ppdbs')) {
             $kontak = KontakPpdb::first();
             view()->share('kontak', $kontak);
         }
