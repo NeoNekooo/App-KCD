@@ -39,7 +39,7 @@ class AppServiceProvider extends ServiceProvider
         // Mengirim data KontakPpdb ke semua view
         if (Schema::hasTable('kontak_ppdbs')) {
             $kontak = KontakPpdb::first();
-            view()->share('kontak', $kontak);
+            view()->share('kontakPpdb', $kontakPpdb);
         }
 
     }
