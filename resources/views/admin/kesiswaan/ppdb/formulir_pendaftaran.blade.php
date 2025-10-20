@@ -148,9 +148,9 @@
                                     <option value="">- Pilih Kelas -</option>
                                     @for($i=65; $i<=75; $i++)
                                         @php $huruf = chr($i); @endphp
-                                        <option value="9 {{ $huruf }}" 
-                                            {{ old('kelas', $formulir->kelas ?? '') == "9 $huruf" ? 'selected' : '' }} required>
-                                            9 {{ $huruf }}
+                                        <option value="IX {{ $huruf }}" 
+                                            {{ old('kelas', $formulir->kelas ?? '') == "IX $huruf" ? 'selected' : '' }} required>
+                                            IX {{ $huruf }}
                                         </option>
                                     @endfor
                                 </select>

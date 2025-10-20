@@ -46,30 +46,6 @@ class FormulirPendaftaranController extends Controller
         ));
     }
 
-    public function create()
-    {
-        $tahunAktif = TahunPelajaran::where('is_active', 1)->first();
-
-        $jalurs = $tahunAktif
-            ? JalurPendaftaran::where('tahunPelajaran_id', $tahunAktif->id)
-                ->where('is_active', true)
-                ->get()
-            : collect();
-
-        $syarats = $tahunAktif
-            ? SyaratPendaftaran::where('tahunPelajaran_id', $tahunAktif->id)
-                ->where('is_active', true)
-                ->get()
-            : collect();
-
-        return view('admin.kesiswaan.ppdb.formulir_pendaftaran_form', [
-            'formulir'   => null,
-            'jalurs'     => $jalurs,
-            'tahunAktif' => $tahunAktif,
-            'syarats'    => $syarats,
-        ]);
-    }
-
     public function store(Request $request)
     {
         $validated = $request->validate([

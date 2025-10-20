@@ -3,7 +3,7 @@
         <header class="bg-white shadow-md sticky top-0 z-50">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
                 <div class="text-2xl font-extrabold text-primary-blue">
-                    PPDB SMAKNIS
+                    PPDB {{ $profilSekolah->singkatan ?? ''}}
                 </div>
                 <!-- Navigasi Desktop -->
                 <nav class="hidden md:flex space-x-8 text-gray-600 font-medium h-full items-center">

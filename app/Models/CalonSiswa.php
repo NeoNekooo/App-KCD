@@ -35,6 +35,7 @@ class CalonSiswa extends Model
         'jurusan', 
         'ukuran_pakaian', 
         'pembayaran',
+        'alamat_lengkap',
         'status'
     ];
 

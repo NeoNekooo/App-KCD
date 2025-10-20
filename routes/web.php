@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Models\SyaratPendaftaran; // <---- tambahkan baris ini
 
 // --- CONTROLLER UTAMA ---
 use App\Http\Controllers\ProfilSekolahController;
@@ -59,6 +60,9 @@ use App\Http\Controllers\Admin\Rombel\RombelMapelPilihanController;
 use App\Http\Controllers\Admin\Rombel\RombelWaliController;
 
 
+use App\Http\Controllers\Admin\Landing\PpdbController;
+
+
 /*
 |--------------------------------------------------------------------------
 | Rute Web Utama
@@ -80,6 +84,17 @@ Route::prefix('ppdb')->name('ppdb.')->group(function() {
     Route::get('/daftar-calon-siswa', [LandingPpdbController::class, 'daftarCalonSiswa'])->name('daftarCalonSiswa');
     Route::get('/formulir-pendaftaran', [LandingPpdbController::class, 'formulirPendaftaran'])->name('formulirPendaftaran');
     Route::get('/kontak', [LandingPpdbController::class, 'kontak'])->name('kontak');
+
+    Route::get('/api/syarat-by-jalur/{jalurId}', function ($jalurId) {
+        return SyaratPendaftaran::where('is_active', true)
+            ->where('jalurPendaftaran_id', $jalurId)
+            ->select('id', 'syarat', 'is_active')
+            ->get();
+    });
+
+
+    // Tambahkan route POST untuk submit form pendaftaran
+    Route::post('/formulir-pendaftaran/store', [LandingPpdbController::class, 'formulirStore'])->name('formulir.store');
 });
 
 /*
@@ -229,7 +244,7 @@ Route::resource('ekstrakurikuler', EkstrakurikulerController::class)
             Route::resource('laporan-quota', LaporanQuotaController::class);
         });
     });
-
+    
     // --- GRUP ROMBONGAN BELAJAR ---
     Route::prefix('rombel')->name('rombel.')->group(function () {
         // All routes kept as they are custom index/create views
@@ -269,6 +284,15 @@ Route::resource('ekstrakurikuler', EkstrakurikulerController::class)
         Route::get('get-siswa-by-rombel/{rombel}', [IndisiplinerSiswaController::class, 'getSiswaByRombel'])->name('getSiswaByRombel');
         Route::get('rekapitulasi', [IndisiplinerSiswaController::class, 'rekapitulasiIndex'])->name('rekapitulasi.index');
     });
+
+    Route::prefix('ppdb')->name('ppdb.')->group(function () {
+    
+        Route::resource('landing', PpdbController::class);
+        
+        Route::post('submit', [PpdbController::class, 'submitForm'])->name('submit');
+    });
 });
+
+
 
 require __DIR__.'/auth.php';

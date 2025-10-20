@@ -18,6 +18,7 @@ class DatabaseSeeder extends Seeder
             JurusanSeeder::class,
             KurikulumSeeder::class,
             EkstrakurikulerSeeder::class,
+            TingkatSeeder::class,
         ]);
 
         // 3. Aktifkan kembali pengecekan foreign key

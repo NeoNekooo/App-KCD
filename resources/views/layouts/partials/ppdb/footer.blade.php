@@ -5,7 +5,7 @@
 
                     <!-- Kolom 1: Profil -->
                     <div data-aos="fade-up" data-aos-delay="100" class="col-span-2 md:col-span-1">
-                        <h4 class="text-xl font-extrabold mb-4 text-secondary-green">SMAKNIS</h4>
+                        <h4 class="text-xl font-extrabold mb-4 text-secondary-green">{{ $profilSekolah->singkatan ?? ''}}</h4>
                         <p class="text-gray-400 text-sm leading-relaxed">
                             Mencetak generasi unggul yang siap menghadapi tantangan global dengan integritas dan
                             inovasi.
@@ -16,10 +16,10 @@
                     <div data-aos="fade-up" data-aos-delay="200">
                         <h4 class="text-lg font-semibold mb-4 text-gray-300">Tautan Cepat</h4>
                         <ul class="space-y-3 text-sm">
-                            <li><a href="#jurusan"
+                            <li><a href="{{ route('ppdb.kompetensiKeahlian') }}"
                                     class="text-gray-400 hover:text-secondary-green transition duration-300">Kompetensi
                                     Keahlian</a></li>
-                            <li><a href="#program"
+                            <li><a href="{{ route('ppdb.beranda') }}/#program"
                                     class="text-gray-400 hover:text-secondary-green transition duration-300">Keunggulan
                                     Sekolah</a></li>
                             <li><a href="#" class="text-gray-400 hover:text-secondary-green transition duration-300">FAQ
@@ -35,17 +35,17 @@
                         <h4 class="text-lg font-semibold mb-4 text-gray-300">Ikuti Kami</h4>
                         <div class="flex space-x-4 text-2xl">
                             <!-- Facebook - Tambahkan class 'social-link' dan 'facebook' -->
-                            <a href="#" target="_blank"
+                            <a href="https://facebook.com/{{ $kontakPpdb->facebook }}" target="_blank"
                                 class="social-link facebook text-gray-400 transition duration-300">
                                 <i class="fab fa-facebook-f"></i>
                             </a>
                             <!-- Instagram - Tambahkan class 'social-link' dan 'instagram' -->
-                            <a href="#" target="_blank"
+                            <a href="https://instagram.com/{{ $kontakPpdb->instagram }}" target="_blank"
                                 class="social-link instagram text-gray-400 transition duration-300">
                                 <i class="fab fa-instagram"></i>
                             </a>
                             <!-- YouTube - Tambahkan class 'social-link' dan 'youtube' -->
-                            <a href="#" target="_blank"
+                            <a href="https://youtube.com/{{ $kontakPpdb->youtube }}" target="_blank"
                                 class="social-link youtube text-gray-400 transition duration-300">
                                 <i class="fab fa-youtube"></i>
                             </a>
