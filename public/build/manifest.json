@@ -1,6 +1,6 @@
 {
   "resources/css/app.css": {
-    "file": "assets/app-Bij8QHps.css",
+    "file": "assets/app-CGbdvLpp.css",
     "src": "resources/css/app.css",
     "isEntry": true,
     "names": [
@@ -8,72 +8,12 @@
     ]
   },
   "resources/js/app.js": {
-    "file": "assets/app-D4biasQT.js",
+    "file": "assets/app-szdf9br9.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
     "css": [
-      "assets/app-BANeyv10.css"
+      "assets/app-CqHPwba4.css"
     ]
-  },
-  "resources/sneat/assets/css/demo.css": {
-    "file": "assets/demo-DKF97Pzq.css",
-    "src": "resources/sneat/assets/css/demo.css",
-    "isEntry": true,
-    "names": [
-      "demo.css"
-    ]
-  },
-  "resources/sneat/assets/vendor/css/core.css": {
-    "file": "assets/core-BM0yxGGe.css",
-    "src": "resources/sneat/assets/vendor/css/core.css",
-    "isEntry": true,
-    "names": [
-      "core.css"
-    ]
-  },
-  "resources/sneat/assets/vendor/css/pages/page-auth.css": {
-    "file": "assets/page-auth-QYJbNaqY.css",
-    "src": "resources/sneat/assets/vendor/css/pages/page-auth.css",
-    "isEntry": true,
-    "names": [
-      "page-auth.css"
-    ]
-  },
-  "resources/sneat/assets/vendor/css/theme-default.css": {
-    "file": "assets/theme-default-Cvi8fpCy.css",
-    "src": "resources/sneat/assets/vendor/css/theme-default.css",
-    "isEntry": true,
-    "names": [
-      "theme-default.css"
-    ]
-  },
-  "resources/sneat/assets/vendor/fonts/boxicons.css": {
-    "file": "assets/boxicons-DO3fTVR1.css",
-    "src": "resources/sneat/assets/vendor/fonts/boxicons.css",
-    "isEntry": true,
-    "names": [
-      "boxicons.css"
-    ]
-  },
-  "resources/sneat/assets/vendor/fonts/boxicons/boxicons.eot": {
-    "file": "assets/boxicons-fqDhfsHa.eot",
-    "src": "resources/sneat/assets/vendor/fonts/boxicons/boxicons.eot"
-  },
-  "resources/sneat/assets/vendor/fonts/boxicons/boxicons.svg": {
-    "file": "assets/boxicons-e1o-z2FJ.svg",
-    "src": "resources/sneat/assets/vendor/fonts/boxicons/boxicons.svg"
-  },
-  "resources/sneat/assets/vendor/fonts/boxicons/boxicons.ttf": {
-    "file": "assets/boxicons-BBsJ98nm.ttf",
-    "src": "resources/sneat/assets/vendor/fonts/boxicons/boxicons.ttf"
-  },
-  "resources/sneat/assets/vendor/fonts/boxicons/boxicons.woff": {
-    "file": "assets/boxicons-kvn6whdv.woff",
-    "src": "resources/sneat/assets/vendor/fonts/boxicons/boxicons.woff"
-  },
-  "resources/sneat/assets/vendor/fonts/boxicons/boxicons.woff2": {
-    "file": "assets/boxicons-i616DiHt.woff2",
-    "src": "resources/sneat/assets/vendor/fonts/boxicons/boxicons.woff2"
   }
 }
