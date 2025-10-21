@@ -1,31 +1,29 @@
-import './bootstrap';
-import Alpine from 'alpinejs';
+import "./bootstrap";
+import Alpine from "alpinejs";
 
 window.Alpine = Alpine;
 Alpine.start();
-// ==> BAGIAN PALING PENTING ADA DI SINI <==
-// 1. Import JQuery dari path tema Sneat Anda dan tampung dalam variabel `$`.
-// import $ from '~sneat/vendor/libs/jquery/jquery.js';
 
-// 2. Jadikan variabel `$` tersebut global agar bisa diakses di mana saja.
-window.jQuery = window.$ = $;
+// Sneat Vendor JS - Library dasar
+import "~sneat/vendor/libs/jquery/jquery.js";
+import "~sneat/vendor/libs/popper/popper.js";
+import "~sneat/vendor/js/bootstrap.js";
+import "~sneat/vendor/libs/perfect-scrollbar/perfect-scrollbar.js";
+
+// =================================================================
+// ==> HELPER HARUS DI-IMPORT SEBELUM MENU DAN MAIN <==
+// File ini mendefinisikan objek 'config' yang dibutuhkan oleh script lain.
+import "~sneat/vendor/js/helpers.js";
 // =================================================================
 
-// Lanjutkan dengan import sisa file Sneat Vendor JS
-import '~sneat/vendor/libs/popper/popper.js';
-import '~sneat/vendor/js/bootstrap.js';
-import '~sneat/vendor/libs/perfect-scrollbar/perfect-scrollbar.js';
-import '~sneat/vendor/js/helpers.js';
-import '~sneat/vendor/js/menu.js';
-import '~sneat/vendor/libs/apex-charts/apexcharts.js';
+// Script yang bergantung pada 'helpers.js'
+import "~sneat/vendor/js/menu.js";
 
-// Import Select2 dan temanya
-import 'select2';
-import 'select2/dist/css/select2.css';
-import 'select2-bootstrap-5-theme/dist/select2-bootstrap-5-theme.css';
+// Sneat Core JS - Script utama tema
+import "~sneat/js/main.js";
 
-// Import sisa file Sneat Core JS
-import '~sneat/js/main.js';
-import '~sneat/js/dashboards-analytics.js';
-import '~sneat/js/ui-modals.js';
-import '~sneat/js/ui-toasts.js';
+// Page-specific JS - Bisa diletakkan setelah script utama
+import "~sneat/vendor/libs/apex-charts/apexcharts.js";
+import "~sneat/js/dashboards-analytics.js";
+import "~sneat/js/ui-modals.js";
+import "~sneat/js/ui-toasts.js";
