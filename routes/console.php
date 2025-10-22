@@ -10,5 +10,9 @@ Artisan::command('inspire', function () {
 
 Schedule::command('absensi:alfa')
     ->weekdays() // Hanya berjalan di hari kerja (Senin - Jumat)
-    ->dailyAt('17:00') // Jalankan setiap hari pada jam 5 sore
+    ->dailyAt('12:00') // Jalankan setiap hari pada jam 12 siang
     ->timezone('Asia/Jakarta'); // Sangat disarankan untuk menentukan zona waktu
+
+Schedule::command('queue:work --stop-when-empty')
+    ->everyMinute()
+    ->withoutOverlapping();

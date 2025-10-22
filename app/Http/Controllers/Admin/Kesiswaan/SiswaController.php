@@ -76,55 +76,42 @@ class SiswaController extends Controller
      */
 
     public function update(Request $request, Siswa $siswa)
-    {
-        // 1. Validasi semua input
-        $validatedData = $request->validate([
-            'nama' => 'required|string|max:255',
-            'foto' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
-            'nis' => 'nullable|string',
-            'nisn' => 'nullable|string',
-            'nik' => 'nullable|string',
-            'jenis_kelamin' => 'required|in:L,P',
-            'tempat_lahir' => 'nullable|string',
-            'tanggal_lahir' => 'nullable|date',
-            'agama_id_str' => 'nullable|string',
-            'alamat_jalan' => 'nullable|string',
-            'rt' => 'nullable|string',
-            'rw' => 'nullable|string',
-            'nama_dusun' => 'nullable|string',
-            'desa_kelurahan' => 'nullable|string',
-            'kecamatan' => 'nullable|string',
-            'kode_pos' => 'nullable|string',
-            'nomor_hp' => 'nullable|string',
-            'email' => 'nullable|email',
-            'nama_ayah' => 'nullable|string',
-            'nik_ayah' => 'nullable|string',
-            'pekerjaan_ayah_id_str' => 'nullable|string',
-            'nama_ibu_kandung' => 'nullable|string',
-            'nik_ibu' => 'nullable|string',
-            'pekerjaan_ibu_id_str' => 'nullable|string',
-            'nama_wali' => 'nullable|string',
-            'nik_wali' => 'nullable|string',
-            'pekerjaan_wali_id_str' => 'nullable|string',
-        ]);
+{
+    // 1. Validasi hanya untuk input yang ada di database dan form
+    $validatedData = $request->validate([
+        'nama' => 'required|string|max:255',
+        'foto' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+        'nipd' => 'nullable|string', // Menggunakan 'nipd'
+        'nisn' => 'nullable|string',
+        'nik' => 'nullable|string',
+        'jenis_kelamin' => 'required|in:L,P',
+        'tempat_lahir' => 'nullable|string',
+        'tanggal_lahir' => 'nullable|date',
+        'agama_id_str' => 'nullable|string',
+        'nomor_telepon_seluler' => 'nullable|string', // Menggunakan 'nomor_telepon_seluler'
+        'email' => 'nullable|email',
+        'nama_ayah' => 'nullable|string',
+        'pekerjaan_ayah_id_str' => 'nullable|string',
+        'nama_ibu' => 'nullable|string', // Menggunakan 'nama_ibu'
+        'pekerjaan_ibu_id_str' => 'nullable|string',
+        'nama_wali' => 'nullable|string',
+        'pekerjaan_wali_id_str' => 'nullable|string',
+    ]);
 
-        // 2. Tangani upload file foto secara terpisah
-        if ($request->hasFile('foto')) {
-            // Hapus foto lama jika ada
-            if ($siswa->foto) {
-                Storage::disk('public')->delete($siswa->foto);
-            }
-            // Simpan foto baru dan dapatkan path-nya
-            $path = $request->file('foto')->store('siswa/foto', 'public');
-            // Timpa key 'foto' di data yang sudah divalidasi dengan path string
-            $validatedData['foto'] = $path;
+    // 2. Tangani upload file foto
+    if ($request->hasFile('foto')) {
+        if ($siswa->foto) {
+            Storage::disk('public')->delete($siswa->foto);
         }
-
-        // 3. Update siswa dengan data yang sudah bersih dan benar
-        $siswa->update($validatedData);
-
-        return redirect()->route('admin.kesiswaan.siswa.index')->with('success', 'Data siswa berhasil diperbarui.');
+        $path = $request->file('foto')->store('siswa/foto', 'public');
+        $validatedData['foto'] = $path;
     }
+
+    // 3. Update data siswa
+    $siswa->update($validatedData);
+
+    return redirect()->route('admin.kesiswaan.siswa.index')->with('success', 'Data siswa berhasil diperbarui.');
+}
 
     public function destroy(Siswa $siswa)
     {

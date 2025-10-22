@@ -134,6 +134,8 @@ Route::prefix('admin')->name('admin.')->group(function () { // Added middleware(
             Route::get('/', [AbsensiSiswaController::class, 'index'])->name('index');
             Route::get('/form', [AbsensiSiswaController::class, 'show'])->name('show_form');
             Route::post('/', [AbsensiSiswaController::class, 'store'])->name('store');
+               Route::get('/get-recent-scans', [AbsensiSiswaController::class, 'getRecentScans'])->name('get_recent_scans');
+            Route::get('/absensi/get-unscanned-data', [AbsensiSiswaController::class, 'getUnscannedData'])->name('get_unscanned_data');
             Route::get('/scanner', [AbsensiSiswaController::class, 'showScanner'])->name('show_scanner');
             Route::post('/handle-scan', [AbsensiSiswaController::class, 'handleScan'])->name('handle_scan');
             Route::get('/todays-scans', [AbsensiSiswaController::class, 'getTodaysScans'])->name('get_todays_scans');
@@ -244,7 +246,7 @@ Route::resource('ekstrakurikuler', EkstrakurikulerController::class)
             Route::resource('laporan-quota', LaporanQuotaController::class);
         });
     });
-    
+
     // --- GRUP ROMBONGAN BELAJAR ---
     Route::prefix('rombel')->name('rombel.')->group(function () {
         // All routes kept as they are custom index/create views
@@ -286,9 +288,9 @@ Route::resource('ekstrakurikuler', EkstrakurikulerController::class)
     });
 
     Route::prefix('ppdb')->name('ppdb.')->group(function () {
-    
+
         Route::resource('landing', PpdbController::class);
-        
+
         Route::post('submit', [PpdbController::class, 'submitForm'])->name('submit');
     });
 });
