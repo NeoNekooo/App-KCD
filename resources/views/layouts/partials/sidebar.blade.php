@@ -251,6 +251,11 @@
                         <div data-i18n="Data Siswa">Data Siswa</div>
                     </a>
                 </li>
+                    <li class="menu-item {{ request()->routeIs('admin.kesiswaan.siswa.cetak_massal_index') ? 'active' : '' }}">
+                    <a href="{{ route('admin.kesiswaan.siswa.cetak_massal_index') }}" class="menu-link">
+                        <div data-i18n="Cetak Kartu Massal">Cetak Kartu Massal</div>
+                    </a>
+                </li>
             </ul>
         </li>
 
@@ -343,24 +348,6 @@
             </ul>
         </li>
 
-        <li class="menu-item {{ request()->is('admin/laporan*') ? 'open' : '' }}">
-            <a href="javascript:void(0);" class="menu-link menu-toggle">
-                <i class="menu-icon tf-icons bx bxs-report"></i>
-                <div data-i18n="Laporan">Laporan</div>
-            </a>
-            <ul class="menu-sub">
-                <li class="menu-item {{ request()->is('admin/laporan/absensi') ? 'active' : '' }}">
-                    <a href="{{ route('admin.laporan.absensi.index') }}" class="menu-link">
-                        <div data-i18n="Laporan Absensi">Laporan Absensi</div>
-                    </a>
-                </li>
-                <li class="menu-item {{ request()->routeIs('admin.laporan.absensi.tanpa_pulang') ? 'active' : '' }}">
-                    <a href="{{ route('admin.laporan.absensi.tanpa_pulang') }}" class="menu-link">
-                        <div data-i18n="Tanpa Absen Pulang">Tanpa Absen Pulang</div>
-                    </a>
-                </li>
-            </ul>
-        </li>
 
         <!-- Laporan -->
 <li class="menu-item {{ request()->is('admin/laporan*') ? 'open' : '' }}">

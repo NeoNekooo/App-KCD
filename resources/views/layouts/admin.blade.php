@@ -4,7 +4,7 @@
   class="light-style layout-menu-fixed"
   dir="ltr"
   data-theme="theme-default"
-  data-assets-path="{{ asset('sneat/assets/') }}" 
+  data-assets-path="{{ asset('sneat/assets/') }}"
   data-template="vertical-menu-template-free"
 >
   <head>
@@ -23,7 +23,7 @@
   <body>
 
     <!-- Toast -->
-        
+
      @include('layouts.partials.toast')
 
     <div class="layout-wrapper layout-content-navbar">
@@ -72,7 +72,7 @@
             @endif
           });
           </script>
-          
+
     @stack('scripts')
     @vite(['resources/js/app.js'])
   </body>

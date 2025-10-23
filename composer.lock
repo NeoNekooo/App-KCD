@@ -4160,8 +4160,7 @@
             ],
             "support": {
                 "source": "https://github.com/symfony/console/tree/v7.3.4"
-                "source": "https://github.com/symfony/console/tree/v7.3.4"
-            },
+            },  
             "funding": [
                 {
                     "url": "https://symfony.com/sponsor",
@@ -4318,17 +4317,13 @@
         {
             "name": "symfony/error-handler",
             "version": "v7.3.4",
-            "version": "v7.3.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/error-handler.git",
                 "reference": "99f81bc944ab8e5dae4f21b4ca9972698bbad0e4"
-                "reference": "99f81bc944ab8e5dae4f21b4ca9972698bbad0e4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/error-handler/zipball/99f81bc944ab8e5dae4f21b4ca9972698bbad0e4",
-                "reference": "99f81bc944ab8e5dae4f21b4ca9972698bbad0e4",
                 "url": "https://api.github.com/repos/symfony/error-handler/zipball/99f81bc944ab8e5dae4f21b4ca9972698bbad0e4",
                 "reference": "99f81bc944ab8e5dae4f21b4ca9972698bbad0e4",
                 "shasum": ""
