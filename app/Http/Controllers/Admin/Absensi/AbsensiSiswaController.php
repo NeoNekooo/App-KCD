@@ -62,7 +62,7 @@ class AbsensiSiswaController extends Controller
 
         $absensiRecords = AbsensiSiswa::where('tanggal', $tanggal)
             ->whereIn('siswa_id', $siswas->pluck('id'))
-            ->get()
+            ->get() 
             ->keyBy('siswa_id');
         
         $pengaturan = DB::table('pengaturan_absensi')->first();
