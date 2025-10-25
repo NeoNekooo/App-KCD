@@ -2,19 +2,22 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Rombel extends Model {
-    public function wali()
+class Rombel extends Model
 {
-    // 'ptk_id' adalah kolom di tabel 'rombels'
-    // 'id' adalah kolom di tabel 'gtks'/'ptk'
-    return $this->belongsTo(Gtk::class, 'ptk_id', 'id');
+    use HasFactory;
+
+    protected $table = 'rombels';
+
+    protected $casts = [
+        'anggota_rombel' => 'array',
+        'pembelajaran'   => 'array',
+    ];
+
+    public function waliKelas()
+{
+    return $this->belongsTo(Gtk::class, 'ptk_id', 'ptk_id');
 }
-    public function jurusan() {
-        return $this->belongsTo(Jurusan::class);
-    }
-    public function kurikulum() {
-        return $this->belongsTo(Kurikulum::class);
-    }
 }

@@ -1,18 +1,25 @@
 <?php
 
-        namespace App\Models;
+namespace App\Models;
 
-        use Illuminate\Database\Eloquent\Factories\HasFactory;
-        use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
-        class TugasPegawai extends Model
-        {
-            use HasFactory;
+class TugasPegawai extends Model
+{
+    use HasFactory;
 
-            protected $guarded = [];
+    protected $table = 'tugas_pegawais';
 
-            public function pegawai()
-            {
-                return $this->belongsTo(Pegawai::class);
-            }
-        }
+    protected $guarded = [];
+
+    public function pegawai()
+    {
+        return $this->belongsTo(Pegawai::class);
+    }
+
+   public function gtk()
+    {
+        return $this->belongsTo(Gtk::class, 'pegawai_id', 'ptk_id');
+    }
+}
