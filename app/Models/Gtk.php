@@ -11,8 +11,19 @@ class Gtk extends Model
 
     protected $guarded = [];
 
+    /**
+     * Relasi ke banyak tugas pegawai (riwayat tugas).
+     */
     public function riwayatTugas()
-{
-   return $this->hasMany(TugasPegawai::class, 'pegawai_id', 'ptk_id');
-}
+    {
+       return $this->hasMany(TugasPegawai::class, 'pegawai_id', 'ptk_id');
+    }
+
+    /**
+     * Relasi ke rombel jika GTK ini adalah wali kelas.
+     */
+    public function rombelWali()
+    {
+        return $this->hasOne(Rombel::class, 'ptk_id', 'ptk_id');
+    }
 }

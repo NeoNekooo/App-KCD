@@ -13,13 +13,13 @@ class TugasPegawai extends Model
 
     protected $guarded = [];
 
-    public function pegawai()
+    /**
+     * Relasi ke model Gtk untuk mengambil data pegawai.
+     */
+    public function gtk()
     {
-        return $this->belongsTo(Pegawai::class);
-    }
-
-   public function gtk()
-    {
+        // Menghubungkan 'pegawai_id' (di tabel ini) 
+        // dengan 'ptk_id' (di tabel 'gtks')
         return $this->belongsTo(Gtk::class, 'pegawai_id', 'ptk_id');
     }
 }

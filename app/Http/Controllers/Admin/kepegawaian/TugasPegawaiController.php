@@ -4,9 +4,10 @@ namespace App\Http\Controllers\Admin\Kepegawaian;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Models\Rombel; // <- IMPORT MODEL ROMBEL
-use App\Models\Ekstrakurikuler; // <- IMPORT MODEL EKSTRAKURIKULER
-use App\Models\Gtk; // <- IMPORT MODEL GTK/PTK (Sesuaikan nama model Anda)
+use App\Models\Rombel;
+// use App\Models\Ekstrakurikuler; // <-- DIKOMENTARI
+use App\Models\Gtk;
+use App\Models\TugasPegawai; 
 
 class TugasPegawaiController extends Controller
 {
@@ -15,39 +16,52 @@ class TugasPegawaiController extends Controller
      */
     public function index()
     {
-        // 1. Mengambil data Wali Kelas dari tabel 'rombels'
-        // Kita gunakan 'wali' sebagai nama relasi
-        $rombels = Rombel::with('wali')
-            ->whereNotNull('ptk_id') // Hanya ambil rombel yang punya wali kelas
+        // --- AMBIL DATA TUGAS POKOK ---
+        
+        // TODO: Ganti ini dengan logika untuk mengambil tahun & semester aktif
+        $tahunAktif = '2024/2025';
+        $semesterAktif = 'Ganjil';
+
+        $tugasPokok = TugasPegawai::with('gtk')
+            ->where('tahun_pelajaran', $tahunAktif)
+            ->where('semester', $semesterAktif)
             ->get();
 
-        // 2. Mengambil data Pembina dari tabel 'ekstrakurikulers'
-        // Kita gunakan 'pembina' sebagai nama relasi
-        $ekskuls = Ekstrakurikuler::with('pembina')
-            ->whereNotNull('pembina_id') // Hanya ambil eskul yang punya pembina
+
+        // --- AMBIL DATA TUGAS TAMBAHAN ---
+        
+        // 1. Wali Kelas
+        $waliKelas = Rombel::with('waliKelas') 
+            ->whereNotNull('ptk_id')
             ->get();
 
-        // 3. Mengambil data Tugas Tambahan dari tabel 'gtks'
-        // Ganti string '...' dengan nama jabatan yang Anda anggap tugas tambahan
-        $tugasTambahan = Gtk::whereIn('jabatan_ptk_id_str', [
+        // 2. Pembina Ekskul (DIKOMENTARI)
+        // $pembinaEkskul = Ekstrakurikuler::with('pembina')
+        //     ->whereNotNull('pembina_id')
+        //     ->get();
+
+        // 3. Jabatan Struktural
+        $jabatanStruktural = Gtk::whereIn('jabatan_ptk_id_str', [
             'Kepala Sekolah',
             'Wakil Kepala Sekolah Bidang Kurikulum',
             'Wakil Kepala Sekolah Bidang Kesiswaan',
             'Kepala Program Keahlian'
-            // Tambahkan jabatan lain jika perlu
         ])->get();
 
 
+        // 4. KIRIM SEMUA DATA KE VIEW
         return view('admin.kepegawaian.tugas-pegawai.index', compact(
-            'rombels',
-            'ekskuls',
-            'tugasTambahan'
+            'tugasPokok',
+            'waliKelas',
+            // 'pembinaEkskul', // <-- DIKOMENTARI
+            'jabatanStruktural',
+            'tahunAktif',
+            'semesterAktif'
         ));
     }
 
     /**
      * Show the form for creating a new resource.
-     * (Dilewati oleh route Anda)
      */
     public function create()
     {
@@ -59,13 +73,11 @@ class TugasPegawaiController extends Controller
      */
     public function store(Request $request)
     {
-        // Logika untuk menyimpan data (jika Anda menambahkannya via modal)
-        // return back()->with('success', 'Tugas berhasil disimpan');
+        //
     }
 
     /**
      * Display the specified resource.
-     * (Dilewati oleh route Anda)
      */
     public function show(string $id)
     {
@@ -74,7 +86,6 @@ class TugasPegawaiController extends Controller
 
     /**
      * Show the form for editing the specified resource.
-     * (Dilewati oleh route Anda)
      */
     public function edit(string $id)
     {
@@ -86,8 +97,7 @@ class TugasPegawaiController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        // Logika untuk update data (jika Anda mengeditnya via modal)
-        // return back()->with('success', 'Tugas berhasil diperbarui');
+        //
     }
 
     /**
@@ -95,7 +105,6 @@ class TugasPegawaiController extends Controller
      */
     public function destroy(string $id)
     {
-        // Logika untuk menghapus data
-        // return back()->with('success', 'Tugas berhasil dihapus');
+        //
     }
 }
