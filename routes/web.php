@@ -57,34 +57,21 @@ Route::prefix('admin')->name('admin.')->group(function () {
     // Dashboard
     Route::get('/dashboard', function () { return view('admin.dashboard'); })->name('dashboard');
 
-    // --- GRUP PENGATURAN ---
-    Route::prefix('pengaturan')->name('pengaturan.')->group(function() {
-
-        Route::get('/profil_sekolah', [ProfilSekolahController::class, 'edit'])->name('profil_sekolah.edit');
-        Route::put('/profil_sekolah', [ProfilSekolahController::class, 'update'])->name('profil_sekolah.update');
-        Route::prefix('webservice')->name('webservice.')->group(function () {
-            Route::get('/', [ApiSettingsController::class, 'index'])->name('index');
-        });
-    });
-
-    // --- GRUP KEPEGAWAIAN ---
-    Route::prefix('kepegawaian')->name('kepegawaian.')->group(function() {
-        Route::resource('pegawai', PegawaiController::class);
-
-       Route::get('sekolah', [SekolahController::class, 'index'])->name('sekolah.index');
-    Route::put('sekolah', [SekolahController::class, 'update'])->name('sekolah.update');
+    // --- GRUP PENGATURAN --- (dari V1)
+    Route::prefix('pengaturan')->name('pengaturan.')->group(function () {
+        Route::get('sekolah', [SekolahController::class, 'index'])->name('sekolah.index');
+        Route::put('sekolah', [SekolahController::class, 'update'])->name('sekolah.update');
         Route::get('/webservice', [ApiSettingsController::class, 'index'])->name('webservice.index');
     });
 
-    // --- GRUP KEPEGAWAIAN ---
-     Route::prefix('kepegawaian')->name('kepegawaian.')->group(function() {
+    // --- GRUP KEPEGAWAIAN --- (Struktur dari V1)
+    Route::prefix('kepegawaian')->name('kepegawaian.')->group(function () {
         // Route untuk Guru
         Route::prefix('guru')->name('guru.')->controller(GtkController::class)->group(function () {
             Route::get('/', 'indexGuru')->name('index');
             Route::get('/export/excel', 'exportGuruExcel')->name('export.excel');
         });
 
-<<<<<<< HEAD
         // Route untuk Tenaga Kependidikan
         Route::prefix('tenaga-kependidikan')->name('tendik.')->controller(GtkController::class)->group(function () {
             Route::get('/', 'indexTendik')->name('index');
@@ -101,13 +88,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('gtk/{id}/upload-media', [GtkController::class, 'uploadMedia'])->name('gtk.upload_media');
 
         // Route untuk Tugas Pegawai
-
         Route::resource('tugas-pegawai', TugasPegawaiController::class)->except(['create', 'edit', 'show']);
-=======
-Route::get('/gtk/multiple-show', [GtkController::class, 'showMultiple'])
-    ->name('gtk.show-multiple')
-    ;
->>>>>>> 5b50e3a60be24540c43a4d2e8a8321f0958fbbae
     });
 
 
@@ -167,9 +148,6 @@ Route::get('/gtk/multiple-show', [GtkController::class, 'showMultiple'])
 
         // Wali (ROUTE BARU DITAMBAHKAN)
         Route::get('/wali/create', [RombelWaliController::class, 'create'])->name('wali.create');
-<<<<<<< HEAD
-        Route::get('/wali', [RombelWaliController::class, 'index'])->name('wali.index');
-=======
     });
 
     // --- GRUP INDISIPLINER SISWA ---
@@ -202,7 +180,6 @@ Route::get('/gtk/multiple-show', [GtkController::class, 'showMultiple'])
         Route::resource('landing', PpdbController::class);
 
         Route::post('submit', [PpdbController::class, 'submitForm'])->name('submit');
->>>>>>> 5b50e3a60be24540c43a4d2e8a8321f0958fbbae
     });
 });
 

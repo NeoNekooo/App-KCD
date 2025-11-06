@@ -3,16 +3,12 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Pagination\Paginator; // 1. Tambahkan baris ini
-<<<<<<< HEAD
+use Illuminate\Pagination\Paginator;
 use App\Models\ProfilSekolah;
 use App\Models\KontakPpdb;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\Schema;
-
-=======
-use Carbon\Carbon; // <-- Tambahkan ini
->>>>>>> origin/modul/kepegawaian
+use Carbon\Carbon;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -29,10 +25,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        Paginator::useBootstrapFive(); // 2. Tambahkan baris ini
-<<<<<<< HEAD
-        // Mengirim semua data siswa ke view tertentu
+        Paginator::useBootstrapFive();
 
+        // Mengatur lokal default untuk Carbon (penanganan tanggal & waktu) ke Bahasa Indonesia
+        Carbon::setLocale('id');
 
         // Mengirim data ProfilSekolah ke semua view
         if (Schema::hasTable('profil_sekolahs')) {
@@ -40,17 +36,10 @@ class AppServiceProvider extends ServiceProvider
             view()->share('profilSekolah', $profilSekolah);
         }
 
-
         // Mengirim data KontakPpdb ke semua view
         if (Schema::hasTable('kontak_ppdbs')) {
             $kontakPpdb = KontakPpdb::first();
             view()->share('kontakPpdb', $kontakPpdb);
         }
-
-=======
-        // Mengatur lokal default untuk Carbon (penanganan tanggal & waktu) ke Bahasa Indonesia
-        Carbon::setLocale('id');
->>>>>>> origin/modul/kepegawaian
     }
 }
-

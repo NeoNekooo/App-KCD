@@ -11,18 +11,21 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('tugas_pegawais', function (Blueprint $table) {
-            $table->bigIncrements('id');
-            $table->unsignedBigInteger('pegawai_id')->index('tugas_pegawais_pegawai_id_foreign');
-            $table->string('tahun_pelajaran');
-            $table->string('semester');
-            $table->string('tugas_pokok');
-            $table->string('nomor_sk')->nullable();
-            $table->date('tmt')->nullable();
-            $table->integer('jumlah_jam')->default(0);
-            $table->text('keterangan')->nullable();
-            $table->timestamps();
-        });
+        // TAMBAHKAN PENGECEKAN INI
+        if (!Schema::hasTable('tugas_pegawais')) {
+            Schema::create('tugas_pegawais', function (Blueprint $table) {
+                $table->bigIncrements('id');
+                $table->unsignedBigInteger('pegawai_id')->index('tugas_pegawais_pegawai_id_foreign');
+                $table->string('tahun_pelajaran');
+                $table->string('semester');
+                $table->string('tugas_pokok');
+                $table->string('nomor_sk')->nullable();
+                $table->date('tmt')->nullable();
+                $table->integer('jumlah_jam')->default(0);
+                $table->text('keterangan')->nullable();
+                $table->timestamps();
+            });
+        } // TUTUP PENGECEKAN DI SINI
     }
 
     /**

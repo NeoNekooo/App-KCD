@@ -9,11 +9,6 @@ class Gtk extends Model
 {
     use HasFactory;
 
-<<<<<<< HEAD
-        protected $table = 'gtks'; // Menentukan nama tabel secara eksplisit
-        protected $guarded = [];
-    }
-=======
     protected $guarded = [];
 
     /**
