@@ -9,17 +9,27 @@ class TugasPegawai extends Model
 {
     use HasFactory;
 
+    /**
+     * Nama tabel yang digunakan oleh model.
+     *
+     * @var string
+     */
     protected $table = 'tugas_pegawais';
 
+    /**
+     * Atribut yang tidak boleh diisi secara massal.
+     *
+     * @var array
+     */
     protected $guarded = [];
 
-    public function pegawai()
+    /**
+     * Relasi ke model Gtk untuk mengambil data pegawai.
+     */
+    public function gtk()
     {
-        return $this->belongsTo(Pegawai::class);
-    }
-
-   public function gtk()
-    {
-        return $this->belongsTo(Gtk::class, 'pegawai_id', 'ptk_id');
+        // Menghubungkan 'pegawai_id' (foreign key) 
+        // ke 'id' (primary key) di tabel gtks
+        return $this->belongsTo(Gtk::class, 'pegawai_id');
     }
 }

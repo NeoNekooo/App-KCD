@@ -94,6 +94,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
         // Route untuk detail multi-GTK
         Route::get('/gtk/show-multiple', [GtkController::class, 'showMultiple'])->name('gtk.show-multiple');
         Route::get('gtk/cetak-pdf/{id}', [GtkController::class, 'cetakPdf'])->name('gtk.cetak_pdf');
+        Route::get('gtk/cetak-pdf-multiple', [GtkController::class, 'cetakPdfMultiple'])
+            ->name('gtk.cetak_pdf_multiple');
+
+        // --- RUTE BARU UNTUK UPLOAD FOTO & TTD ---
+        Route::post('gtk/{id}/upload-media', [GtkController::class, 'uploadMedia'])->name('gtk.upload_media');
+
         // Route untuk Tugas Pegawai
 
         Route::resource('tugas-pegawai', TugasPegawaiController::class)->except(['create', 'edit', 'show']);

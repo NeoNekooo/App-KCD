@@ -9,14 +9,26 @@
 </div>
 @endif
 
+{{-- Tampilkan Error Validasi --}}
+@if ($errors->any())
+    <div class="alert alert-danger">
+        <h5 class="alert-heading mb-1">Update Gagal!</h5>
+        <p class="mb-2">Pastikan semua data yang dimasukkan sudah benar.</p>
+        <ul class="mb-0">
+            @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+@endif
+
 <div class="row">
-    <!-- Kolom Kiri: Info Utama & Peta -->
     <div class="col-md-5 col-lg-4">
         <div class="card mb-4">
             <div class="card-body text-center">
                 {{-- Tampilkan Logo jika ada, jika tidak, tampilkan ikon default --}}
                 @if($sekolah->logo)
-                    <img src="{{ asset('storage/' . $sekolah->logo) }}" alt="Logo Sekolah" class="img-fluid rounded-circle mb-3" style="width: 100px; height: 100px; object-fit: cover;">
+                    <img src="{{ asset('storage/' . $sekolah->logo) }}" alt="Logo Sekolah" class="img-fluid rounded mb-3" style="max-width: 100px; height: auto; border: 0px solid #ddd;">
                 @else
                     <i class="bx bxs-school bx-lg text-primary mb-3"></i>
                 @endif
@@ -48,7 +60,6 @@
         </div>
     </div>
 
-    <!-- Kolom Kanan: Detail Informasi dengan Tab -->
     <div class="col-md-7 col-lg-8">
         <div class="card">
             <div class="card-header">
@@ -68,6 +79,12 @@
                            <i class="bx bx-map-pin me-1"></i> Peta
                         </button>
                     </li>
+                    {{-- TOMBOL TAB BARU --}}
+                    <li class="nav-item">
+                        <button type="button" class="nav-link" role="tab" data-bs-toggle="tab" data-bs-target="#tab-sosmed" aria-controls="tab-sosmed" aria-selected="false">
+                           <i class="bx bx-share-alt me-1"></i> Media Sosial
+                        </button>
+                    </li>
                 </ul>
             </div>
             <div class="card-body">
@@ -76,7 +93,6 @@
                     @method('PUT')
                     
                     <div class="tab-content">
-                        <!-- Tab Detail Informasi (Display Only) -->
                         <div class="tab-pane fade show active" id="tab-detail" role="tabpanel">
                             <h5 class="card-title mb-4">Detail Informasi Sekolah</h5>
                             
@@ -139,27 +155,86 @@
                             </dl>
                         </div>
 
-                        <!-- Tab Logo -->
                         <div class="tab-pane fade" id="tab-logo" role="tabpanel">
                             <h5 class="mb-4">Upload Logo Sekolah</h5>
                             <div class="mb-3">
                                 <label for="logo" class="form-label">Pilih File Logo</label>
-                                <input class="form-control" type="file" id="logo" name="logo">
-                                <div class="form-text">Tipe file: jpeg, jpg, png. Maksimal ukuran 2MB.</div>
+                                <input class="form-control @error('logo') is-invalid @enderror" type="file" id="logo" name="logo">
+                                @error('logo')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @else
+                                    <div class="form-text">Tipe file: jpeg, jpg, png. Maksimal ukuran 2MB.</div>
+                                @enderror
                             </div>
                         </div>
 
-                        <!-- Tab Peta -->
                         <div class="tab-pane fade" id="tab-peta" role="tabpanel">
                              <h5 class="mb-4">Sematkan Peta Lokasi</h5>
                             <div class="mb-3">
                                 <label for="peta" class="form-label">Kode Semat (Embed) Google Maps</label>
-                                <textarea class="form-control" id="peta" name="peta" rows="5">{{ $sekolah->peta }}</textarea>
-                                <div class="form-text">
-                                    Salin kode iframe dari Google Maps dan tempel di sini. Contoh: <code>&lt;iframe src="..."&gt;&lt;/iframe&gt;</code>
-                                </div>
+                                <textarea class="form-control @error('peta') is-invalid @enderror" id="peta" name="peta" rows="5">{{ old('peta', $sekolah->peta) }}</textarea>
+                                @error('peta')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @else
+                                    <div class="form-text">
+                                        Salin kode iframe dari Google Maps dan tempel di sini. Contoh: <code>&lt;iframe src="..."&gt;&lt;/iframe&gt;</code>
+                                    </div>
+                                @enderror
                             </div>
                         </div>
+
+                        <div class="tab-pane fade" id="tab-sosmed" role="tabpanel">
+                            <h5 class="mb-4">Pengaturan Media Sosial</h5>
+                            
+                            {{-- Facebook --}}
+                            <div class="mb-3">
+                                <label for="facebook_url" class="form-label">Facebook</label>
+                                <div class="input-group input-group-merge">
+                                    <span class="input-group-text"><i class='bx bxl-facebook-circle'></i></span>
+                                    <input type="url" class="form-control @error('facebook_url') is-invalid @enderror" id="facebook_url" name="facebook_url" value="{{ old('facebook_url', $sekolah->facebook_url) }}" placeholder="https://www.facebook.com/sekolah">
+                                </div>
+                                @error('facebook_url')
+                                    <div class="form-text text-danger">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            
+                            {{-- Instagram --}}
+                            <div class="mb-3">
+                                <label for="instagram_url" class="form-label">Instagram</label>
+                                <div class="input-group input-group-merge">
+                                    <span class="input-group-text"><i class='bx bxl-instagram-alt'></i></span>
+                                    <input type="url" class="form-control @error('instagram_url') is-invalid @enderror" id="instagram_url" name="instagram_url" value="{{ old('instagram_url', $sekolah->instagram_url) }}" placeholder="https://www.instagram.com/sekolah">
+                                </div>
+                                @error('instagram_url')
+                                    <div class="form-text text-danger">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            
+                            {{-- YouTube --}}
+                            <div class="mb-3">
+                                <label for="youtube_url" class="form-label">YouTube</label>
+                                <div class="input-group input-group-merge">
+                                    <span class="input-group-text"><i class='bx bxl-youtube'></i></span>
+                                    <input type="url" class="form-control @error('youtube_url') is-invalid @enderror" id="youtube_url" name="youtube_url" value="{{ old('youtube_url', $sekolah->youtube_url) }}" placeholder="https://www.youtube.com/c/sekolah">
+                                </div>
+                                @error('youtube_url')
+                                    <div class="form-text text-danger">{{ $message }}</div>
+                                @enderror
+                            </div>
+            
+                            {{-- TikTok --}}
+                            <div class="mb-3">
+                                <label for="tiktok_url" class="form-label">TikTok</label>
+                                <div class="input-group input-group-merge">
+                                    <span class="input-group-text"><i class='bx bxl-tiktok'></i></span>
+                                    <input type="url" class="form-control @error('tiktok_url') is-invalid @enderror" id="tiktok_url" name="tiktok_url" value="{{ old('tiktok_url', $sekolah->tiktok_url) }}" placeholder="https://www.tiktok.com/@sekolah">
+                                </div>
+                                @error('tiktok_url')
+                                    <div class="form-text text-danger">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+
                     </div>
                     
                     <div class="pt-4">
@@ -188,4 +263,3 @@
     }
 </style>
 @endsection
-
