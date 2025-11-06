@@ -57,16 +57,34 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     // --- GRUP PENGATURAN ---
     Route::prefix('pengaturan')->name('pengaturan.')->group(function() {
-        Route::get('/sekolah', [SekolahController::class, 'index'])->name('sekolah.index');
+       Route::get('sekolah', [SekolahController::class, 'index'])->name('sekolah.index');
+    Route::put('sekolah', [SekolahController::class, 'update'])->name('sekolah.update');
         Route::get('/webservice', [ApiSettingsController::class, 'index'])->name('webservice.index');
     });
 
     // --- GRUP KEPEGAWAIAN ---
-    Route::prefix('kepegawaian')->name('kepegawaian.')->group(function() {
-        Route::get('/gtk/export/excel', [GtkController::class, 'exportExcel'])->name('gtk.export.excel');
-        Route::resource('gtk', GtkController::class);
+     Route::prefix('kepegawaian')->name('kepegawaian.')->group(function() {
+        // Route untuk Guru
+        Route::prefix('guru')->name('guru.')->controller(GtkController::class)->group(function () {
+            Route::get('/', 'indexGuru')->name('index');
+            Route::get('/export/excel', 'exportGuruExcel')->name('export.excel');
+        });
+
+        // Route untuk Tenaga Kependidikan
+        Route::prefix('tenaga-kependidikan')->name('tendik.')->controller(GtkController::class)->group(function () {
+            Route::get('/', 'indexTendik')->name('index');
+            Route::get('/export/excel', 'exportTendikExcel')->name('export.excel');
+        });
+
+        // Route untuk detail multi-GTK
+        Route::get('/gtk/show-multiple', [GtkController::class, 'showMultiple'])->name('gtk.show-multiple');
+        Route::get('gtk/cetak-pdf/{id}', [GtkController::class, 'cetakPdf'])->name('gtk.cetak_pdf');
+        Route::get('gtk/cetak-pdf-multiple', [GtkController::class, 'cetakPdfMultiple'])
+     ->name('gtk.cetak_pdf_multiple');
+        // Route untuk Tugas Pegawai
         Route::resource('tugas-pegawai', TugasPegawaiController::class)->except(['create', 'edit', 'show']);
     });
+
 
     // --- GRUP AKADEMIK ---
     Route::prefix('akademik')->name('akademik.')->group(function () {
@@ -107,7 +125,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         });
     });
 
-}); // Akhir dari grup 'admin'
+}); // Akhir dari grup 'admin'  
 
 // Anda bisa menambahkan route untuk auth di sini jika perlu
 // require __DIR__.'/auth.php';

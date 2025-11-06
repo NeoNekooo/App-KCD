@@ -1,4 +1,4 @@
-<div class="row">
+{{-- <div class="row">
     <!-- Kolom Kiri: Foto & ID Utama Siswa -->
     <div class="col-lg-4">
         <div class="card mb-4">
@@ -199,4 +199,4 @@
         </div>
     </div>
 </div>
-
+ --}}

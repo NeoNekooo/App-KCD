@@ -1,14 +1,14 @@
 @extends('layouts.admin')
 
 @section('content')
-<h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Kepegawaian /</span> Data Guru & Tenaga Kependidikan</h4>
+<h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Kepegawaian /</span> Data Guru</h4>
 
 <div class="card">
     <div class="card-header">
         <div class="d-flex align-items-center justify-content-between">
-            <h5 class="card-title m-0 me-2">Daftar GTK</h5>
+            <h5 class="card-title m-0 me-2">Daftar Guru</h5>
             <div class="d-flex gap-2">
-                {{-- Tombol Lihat Data, awalnya tersembunyi --}}
+                {{-- Tombol Lihat Data --}}
                 <a href="#" id="viewSelectedBtn" class="btn btn-info btn-sm" style="display: none;">
                     <i class="bx bx-show-alt me-1"></i> Lihat Data
                 </a>
@@ -19,7 +19,7 @@
                         <i class="bx bx-export me-1"></i> Opsi Export
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end">
-                        <li><a class="dropdown-item" href="{{ route('admin.kepegawaian.gtk.export.excel', request()->query()) }}">Export Semua</a></li>
+                        <li><a class="dropdown-item" href="{{ route('admin.kepegawaian.guru.export.excel', request()->query()) }}">Export Semua</a></li>
                         <li><a class="dropdown-item disabled" href="javascript:void(0);" id="exportSelectedLink">Export yang Dipilih</a></li>
                     </ul>
                 </div>
@@ -27,7 +27,7 @@
         </div>
     </div>
     <div class="card-body">
-        <form action="{{ route('admin.kepegawaian.gtk.index') }}" method="GET">
+        <form action="{{ route('admin.kepegawaian.guru.index') }}" method="GET">
             <div class="input-group input-group-merge">
                 <span class="input-group-text"><i class="bx bx-search"></i></span>
                 <input type="text" name="search" class="form-control" placeholder="Cari berdasarkan Nama, NIP, atau NIK..." value="{{ request('search') }}">
@@ -35,7 +35,6 @@
         </form>
     </div>
     
-    {{-- Wrapper ini penting untuk membuat tabel bisa di-scroll ke samping --}}
     <div class="table-responsive text-nowrap">
         <table class="table table-hover">
             <thead>
@@ -54,7 +53,7 @@
                 </tr>
             </thead>
             <tbody class="table-border-bottom-0">
-                @forelse ($gtks as $gtk)
+                @forelse ($gurus as $gtk)
                 <tr>
                     <td><input class="form-check-input row-checkbox" type="checkbox" value="{{ $gtk->id }}"></td>
                     <td><span class="badge bg-label-secondary">{{ $gtk->ptk_induk == 1 ? 'Induk' : 'Non-Induk' }}</span></td>
@@ -80,9 +79,9 @@
         </table>
     </div>
 
-    @if ($gtks->hasPages())
+    @if ($gurus->hasPages())
         <div class="card-footer d-flex justify-content-center">
-            {{ $gtks->links() }}
+            {{ $gurus->appends(request()->query())->links() }}
         </div>
     @endif
 </div>
@@ -99,21 +98,11 @@
         function handleCheckboxChange() {
             const checkedCheckboxes = document.querySelectorAll('.row-checkbox:checked');
             
-            // Logika untuk tombol "Lihat Data"
-            if (checkedCheckboxes.length === 1) {
-                const selectedId = checkedCheckboxes[0].value;
-                let url = "{{ route('admin.kepegawaian.gtk.show', ':id') }}";
-                url = url.replace(':id', selectedId);
-                viewSelectedBtn.href = url;
-                viewSelectedBtn.style.display = 'inline-block';
-            } else {
-                viewSelectedBtn.style.display = 'none';
-            }
-
-            // Logika untuk link "Export yang Dipilih"
             if (checkedCheckboxes.length > 0) {
+                viewSelectedBtn.style.display = 'inline-block';
                 exportSelectedLink.classList.remove('disabled');
             } else {
+                viewSelectedBtn.style.display = 'none';
                 exportSelectedLink.classList.add('disabled');
             }
         }
@@ -129,6 +118,21 @@
             checkbox.addEventListener('change', handleCheckboxChange);
         });
 
+        viewSelectedBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            const checkedCheckboxes = document.querySelectorAll('.row-checkbox:checked');
+            
+            // LOGIKA BARU: Selalu arahkan ke halaman 'show-multiple' jika ada data terpilih
+            if (checkedCheckboxes.length > 0) {
+                const selectedIds = Array.from(checkedCheckboxes)
+                                          .map(cb => cb.value)
+                                          .join(',');
+                
+                let url = `{{ route('admin.kepegawaian.gtk.show-multiple') }}?ids=${selectedIds}`;
+                window.location.href = url;
+            }
+        });
+
         exportSelectedLink.addEventListener('click', function(e) {
             if (this.classList.contains('disabled')) {
                 e.preventDefault();
@@ -136,15 +140,18 @@
             }
             e.preventDefault();
             const selectedIds = Array.from(document.querySelectorAll('.row-checkbox:checked'))
-                                   .map(cb => cb.value)
-                                   .join(',');
+                                      .map(cb => cb.value)
+                                      .join(',');
 
             if (selectedIds) {
-                let url = `{{ route('admin.kepegawaian.gtk.export.excel') }}?ids=${selectedIds}`;
-                const searchParam = new URLSearchParams(window.location.search).get('search');
-                if (searchParam) {
-                    url += `&search=${searchParam}`;
+                let url = `{{ route('admin.kepegawaian.guru.export.excel') }}?ids=${selectedIds}`;
+                const otherParams = new URLSearchParams(window.location.search);
+                otherParams.delete('ids'); // Hapus parameter ids lama jika ada
+                
+                if (otherParams.toString()) {
+                    url += `&${otherParams.toString()}`;
                 }
+                
                 window.location.href = url;
             }
         });

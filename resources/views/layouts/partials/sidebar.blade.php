@@ -64,14 +64,12 @@
         </li>
 
         <!-- Pengaturan Dasar (Profil Sekolah) -->
-        {{-- <li class="menu-header small text-uppercase"><span class="menu-header-text">Pengaturan</span></li> --}}
-    <li class="menu-item {{ request()->is('admin/pengaturan*') ? 'active' : '' }}">
-        {{-- UBAH BAGIAN INI --}}
-        <a href="{{ route('admin.pengaturan.sekolah.index') }}" class="menu-link">
-            <i class="menu-icon tf-icons bx bxs-school"></i>
-            <div data-i18n="Data Sekolah">Data Sekolah</div>
-        </a>
-    </li>
+        <li class="menu-item {{ request()->is('admin/pengaturan/sekolah*') ? 'active' : '' }}">
+            <a href="{{ route('admin.pengaturan.sekolah.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bxs-school"></i>
+                <div data-i18n="Data Sekolah">Data Sekolah</div>
+            </a>
+        </li>
 
         <!-- Kepegawaian -->
         <li class="menu-item {{ request()->is('admin/kepegawaian*') ? 'open' : '' }}">
@@ -80,13 +78,19 @@
                 <div data-i18n="Kepegawaian">Kepegawaian</div>
             </a>
             <ul class="menu-sub">
-                <li class="menu-item {{ request()->is('admin/kepegawaian*') ? 'active' : '' }}">
-        {{-- UBAH BAGIAN INI --}}
-        <a href="{{ route('admin.kepegawaian.gtk.index') }}" class="menu-link">
-            <i class="menu-icon tf-icons bx bxs-user-badge"></i>
-            <div data-i18n="Data GTK">Data GTK</div>
-        </a>
-    </li>
+                {{-- MENU BARU UNTUK GURU --}}
+                <li class="menu-item {{ request()->routeIs('admin.kepegawaian.guru.*') ? 'active' : '' }}">
+                    <a href="{{ route('admin.kepegawaian.guru.index') }}" class="menu-link">
+                        <div data-i18n="Data Guru">Data Guru</div>
+                    </a>
+                </li>
+                {{-- MENU BARU UNTUK TENAGA KEPENDIDIKAN --}}
+                <li class="menu-item {{ request()->routeIs('admin.kepegawaian.tendik.*') ? 'active' : '' }}">
+                    <a href="{{ route('admin.kepegawaian.tendik.index') }}" class="menu-link">
+                        <div data-i18n="Tenaga Kependidikan">Tenaga Kependidikan</div>
+                    </a>
+                </li>
+                {{-- Menu Tugas Pegawai Anda --}}
                 <li class="menu-item {{ request()->is('admin/kepegawaian/tugas-pegawai*') ? 'active' : '' }}">
                     <a href="{{ route('admin.kepegawaian.tugas-pegawai.index') }}" class="menu-link">
                         <div data-i18n="Tugas Pegawai">Tugas Pegawai</div>
@@ -107,11 +111,6 @@
                         <div data-i18n="Tahun Pelajaran">Tahun Pelajaran</div>
                     </a>
                 </li>
-                {{-- <li class="menu-item {{ request()->is('admin/akademik/semester*') ? 'active' : '' }}">
-                    <a href="{{ route('admin.akademik.semester.index') }}" class="menu-link">
-                        <div data-i18n="Semester">Semester</div>
-                    </a>
-                </li> --}}
                 <li class="menu-item {{ request()->is('admin/akademik/jurusan*') ? 'active' : '' }}">
                     <a href="{{ route('admin.akademik.jurusan.index') }}" class="menu-link">
                         <div data-i18n="Jurusan">Konsentrasi Keahlian</div>
