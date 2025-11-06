@@ -1,0 +1,119 @@
+
+            html {
+              scroll-behavior: smooth;
+            }
+
+            body {
+                font-family: 'Inter', sans-serif;
+                background-color: #f7f9fc;
+                /* Lighter background */
+            }
+
+            /* Style untuk Landing Page Sections */
+            .shadow-custom {
+                box-shadow: 0 10px 15px -3px rgba(30, 64, 175, 0.2), 0 4px 6px -2px rgba(30, 64, 175, 0.1);
+            }
+
+            /* Style Form Progresif (Progress Bar & Circles) */
+            #progressBar {
+                transition: width 0.5s ease-in-out;
+            }
+
+            .step-circle {
+                transition: all 0.3s ease;
+                box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.7);
+                /* Efek cincin putih */
+            }
+
+            /* Style untuk notifikasi kustom */
+            #notification {
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                z-index: 1000;
+                transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+                transform: translateY(-100px);
+                opacity: 0;
+            }
+
+            #notification.show {
+                transform: translateY(0);
+                opacity: 1;
+            }
+
+            /* Style untuk Input Error (Validasi Form) */
+            .border-red-500 {
+                border-color: #ef4444 !important;
+            }
+
+            .ring-red-500\/50 {
+                box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.5);
+            }
+
+            /* Style untuk Map Container agar iframe mengisi penuh */
+            .map-iframe-container {
+                /* Pastikan container peta di CSS tidak mengganggu elemen lain */
+                border-radius: 0.75rem;
+                /* rounded-xl */
+            }
+
+            /* --- Custom CSS untuk Efek Hover Sosial Media di Footer --- */
+            .social-link {
+                transition: color 0.3s ease-in-out, transform 0.2s ease;
+            }
+
+            .social-link:hover {
+                transform: translateY(-2px);
+                /* Efek angkat sedikit */
+            }
+
+            .social-link.facebook:hover {
+                color: #1877F2;
+                /* Warna Facebook */
+            }
+
+            .social-link.instagram:hover {
+                /* Warna khas gradien Instagram */
+                color: #E1306C;
+            }
+
+            .social-link.youtube:hover {
+                color: #FF0000;
+                /* Warna YouTube */
+            }
+
+            /* CUSTOM CSS untuk Active Link */
+            /* Link container di desktop agar bisa menampung border bawah */
+            .nav-link-container {
+                position: relative;
+                height: 100%;
+                /* Penting agar border tidak terpotong */
+                display: flex;
+                align-items: center;
+            }
+
+            /* Class untuk tautan aktif di desktop */
+            .nav-link-desktop-active {
+                color: #10b981 !important;
+                /* secondary-green */
+                font-weight: 700 !important;
+                /* font-bold */
+                border-bottom-width: 2px !important;
+                border-color: #10b981 !important;
+                padding-bottom: 12px;
+                /* Sesuaikan dengan padding header */
+            }
+
+            /* Class untuk tautan aktif di mobile (menggunakan border-l) */
+            .nav-link-mobile-active {
+                color: #1e3a8a !important;
+                /* primary-blue */
+                font-weight: 700 !important;
+                /* font-bold */
+                border-left-width: 4px !important;
+                border-color: #10b981 !important;
+                /* secondary-green */
+                background-color: #f0fdf4;
+                /* bg-green-50 */
+            }
+        

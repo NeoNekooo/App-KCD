@@ -2,26 +2,26 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
-use Database\Seeders\SemesterSeeder;
-
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB; // <-- 1. Jangan lupa import DB
 
 class DatabaseSeeder extends Seeder
 {
-    /**
-     * Seed the application's database.
-     */
     public function run(): void
     {
+        // 2. Nonaktifkan pengecekan foreign key
+        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+
         $this->call([
-            SemesterSeeder::class,       
+            UserSeeder::class,
+            PtkSeeder::class,
+            JurusanSeeder::class,
+            KurikulumSeeder::class,
+            EkstrakurikulerSeeder::class,
+            TingkatSeeder::class,
         ]);
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
-        
+        // 3. Aktifkan kembali pengecekan foreign key
+        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
     }
 }

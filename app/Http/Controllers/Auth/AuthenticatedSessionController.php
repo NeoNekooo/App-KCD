@@ -12,27 +12,32 @@ use Illuminate\View\View;
 class AuthenticatedSessionController extends Controller
 {
     /**
-     * Display the login view.
+     * Menampilkan halaman form login.
+     * INI BAGIAN YANG HILANG DAN SUDAH DITAMBAHKAN KEMBALI
      */
     public function create(): View
     {
-        return view('auth.login');
+        // Arahkan ke view login kustom Anda
+        return view('auth.login-custom');
     }
 
     /**
-     * Handle an incoming authentication request.
+     * Menangani permintaan otentikasi yang masuk.
      */
     public function store(LoginRequest $request): RedirectResponse
     {
+        // Cukup panggil authenticate(), ini akan menangani pengecekan email & password.
         $request->authenticate();
 
+        // Jika berhasil, lanjutkan sesi.
         $request->session()->regenerate();
 
-        return redirect()->intended(route('dashboard', absolute: false));
+        // Arahkan ke dashboard admin.
+        return redirect()->intended(route('admin.dashboard', absolute: false));
     }
 
     /**
-     * Destroy an authenticated session.
+     * Hancurkan sesi otentikasi (logout).
      */
     public function destroy(Request $request): RedirectResponse
     {

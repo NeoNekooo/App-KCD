@@ -44,10 +44,10 @@
                     <form action="{{ route('admin.kesiswaan.ppdb.jalur-ppdb.toggleActive', $jalur->id) }}" method="POST" class="me-1">
                       @csrf
                       <button type="submit" 
-                        class="btn btn-icon btn-sm @if($jalur->is_active) text-success @else text-info @endif"
+                        class="btn btn-icon btn-sm @if($jalur->is_active) text-danger @else text-info @endif"
                         data-bs-toggle="tooltip" data-bs-placement="top" 
                         title="@if($jalur->is_active) Non Aktifkan @else Aktifkan Jalur @endif">
-                        <i class='bx @if($jalur->is_active) bx-check-square @else bx-power-off @endif'></i>
+                        <i class='bx @if($jalur->is_active) bx-block @else bx-power-off @endif'></i>
                       </button>
                     </form>
 
@@ -111,7 +111,7 @@
                 class="form-control"
                 value="{{ $tahunPpdb ? $tahunPpdb->tahun_pelajaran : 'Tahun Pendaftaran Tidak ada yang aktif' }}"
                 readonly />
-              <input type="hidden" name="tahun_id" value="{{ $tahunPpdb->id }}">
+              <input type="hidden" name="tahun_id" value="{{ $tahunPpdb ? $tahunPpdb->id : '' }}">
             </div>
             <div class="col">
               <label for="kode" class="form-label">KODE</label>

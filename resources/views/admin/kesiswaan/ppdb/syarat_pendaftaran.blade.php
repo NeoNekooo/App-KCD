@@ -7,20 +7,21 @@
     <div class="col-md-12">
         <div class="card mb-4">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <h5 class="">Syarat Pendaftaran</h5>
+                <h5 class="mb-0">Syarat Pendaftaran</h5>
                 <button type="button" class="btn btn-primary d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#modalTambah">
                     <i class='bx bx-plus me-1'></i> Tambah Syarat
                 </button>
             </div>
+
             <div class="table-responsive text-nowrap">
-                <table class="table table-hover">
+                <table class="table table-hover align-middle">
                     <thead>
                         <tr>
                             <th>No</th>
                             <th>Tahun Pelajaran</th>
                             <th>Jalur</th>
                             <th>Syarat</th>
-                            <th>Actions</th>
+                            <th>Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -31,22 +32,21 @@
                             <td>{{ $syarat->jalurPendaftaran->jalur ?? '-' }}</td>
                             <td>{{ $syarat->syarat }}</td>
                             <td>
-                                <div class="d-flex align-items-center">
+                                <div class="d-flex align-items-center gap-1">
                                     {{-- Toggle Active --}}
-                                    <form action="{{ route('admin.kesiswaan.ppdb.syarat-ppdb.toggleActive', $syarat->id) }}" method="POST" class="me-1">
-                                      @csrf
-                                      <button type="submit" 
-                                        class="btn btn-icon btn-sm @if($syarat->is_active) text-success @else text-info @endif"
-                                        data-bs-toggle="tooltip" data-bs-placement="top" 
-                                        title="@if($syarat->is_active) Non Aktifkan @else Aktifkan Jalur @endif">
-                                        <i class='bx @if($syarat->is_active) bx-check-square @else bx-power-off @endif'></i>
-                                      </button>
+                                    <form action="{{ route('admin.kesiswaan.ppdb.syarat-ppdb.toggleActive', $syarat->id) }}" method="POST">
+                                        @csrf
+                                        <button type="submit" 
+                                            class="btn btn-icon btn-sm @if($syarat->is_active) text-danger @else text-success @endif"
+                                            data-bs-toggle="tooltip" 
+                                            title="{{ $syarat->is_active ? 'Nonaktifkan' : 'Aktifkan' }}">
+                                            <i class='bx {{ $syarat->is_active ? "bx-block" : "bx-power-off" }}'></i>
+                                        </button>
                                     </form>
 
                                     {{-- Edit --}}
-                                    {{-- Edit --}}
                                     <button type="button" 
-                                        class="btn btn-icon btn-sm btn-outline-primary me-1 btn-edit"
+                                        class="btn btn-icon btn-sm btn-outline-primary btn-edit"
                                         data-id="{{ $syarat->id }}"
                                         data-tahun="{{ $syarat->tahunPpdb->tahun_pelajaran ?? '-' }}"
                                         data-tahunid="{{ $syarat->tahunPpdb->id ?? '' }}"
@@ -56,12 +56,11 @@
                                         <i class="bx bx-edit-alt"></i>
                                     </button>
 
-
                                     {{-- Hapus --}}
                                     <form action="{{ route('admin.kesiswaan.ppdb.syarat-ppdb.destroy', $syarat->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini?');">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="btn btn-icon btn-sm btn-outline-danger" data-bs-toggle="tooltip" data-bs-placement="top" title="Hapus">
+                                        <button type="submit" class="btn btn-icon btn-sm btn-outline-danger" title="Hapus">
                                             <i class="bx bx-trash"></i>
                                         </button>
                                     </form>
@@ -82,13 +81,13 @@
 
 <!-- Modal Tambah -->
 <div class="modal fade" id="modalTambah" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <form action="{{ route('admin.kesiswaan.ppdb.syarat-ppdb.store') }}" method="POST">
                 @csrf
                 <div class="modal-header">
                     <h5 class="modal-title">Tambah Syarat Pendaftaran</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
                     <div class="mb-3">
@@ -111,7 +110,7 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">Batal</button>
                     <button type="submit" class="btn btn-primary">Simpan</button>
                 </div>
             </form>
@@ -121,14 +120,14 @@
 
 <!-- Modal Edit -->
 <div class="modal fade" id="editModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <form id="formEdit" method="POST">
                 @csrf
                 @method('PUT')
                 <div class="modal-header">
                     <h5 class="modal-title">Edit Syarat Pendaftaran</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
                     <div class="mb-3">
@@ -151,12 +150,8 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">
-                        Batal
-                    </button>
-                    <button type="submit" class="btn btn-primary">
-                        Simpan
-                    </button>
+                    <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-primary">Simpan</button>
                 </div>
             </form>
         </div>
@@ -164,30 +159,24 @@
 </div>
 
 <script>
-document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener("DOMContentLoaded", () => {
     const editButtons = document.querySelectorAll(".btn-edit");
-    const modal = new bootstrap.Modal(document.getElementById("editModal"));
     const formEdit = document.getElementById("formEdit");
+    const editModal = new bootstrap.Modal(document.getElementById("editModal"));
 
     editButtons.forEach(btn => {
-        btn.addEventListener("click", function() {
-            const id = this.dataset.id;
-            const tahun = this.dataset.tahun;
-            const tahunId = this.dataset.tahunid;
-            const jalur = this.dataset.jalur;
-            const syarat = this.dataset.syarat;
+        btn.addEventListener("click", () => {
+            const { id, tahun, tahunid, jalur, syarat } = btn.dataset;
 
             formEdit.action = `/admin/kesiswaan/ppdb/syarat-ppdb/${id}`;
-
             document.getElementById("editTahun").value = tahun;
-            document.getElementById("editTahunId").value = tahunId;
+            document.getElementById("editTahunId").value = tahunid;
             document.getElementById("editJalur").value = jalur;
             document.getElementById("editSyarat").value = syarat;
 
-            modal.show();
+            editModal.show();
         });
     });
 });
-
 </script>
 @endsection

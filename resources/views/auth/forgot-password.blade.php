@@ -1,9 +1,5 @@
 <x-guest-layout>
-<<<<<<< HEAD
     <div class="mb-4 text-sm text-gray-600">
-=======
-    <div class="mb-4 text-sm text-gray-600 dark:text-gray-400">
->>>>>>> 7a2424f8a67bc4281ef5e9a434b27e005fb8a7ed
         {{ __('Forgot your password? No problem. Just let us know your email address and we will email you a password reset link that will allow you to choose a new one.') }}
     </div>
 
