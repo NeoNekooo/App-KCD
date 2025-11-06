@@ -2,9 +2,10 @@
     <div class="app-brand demo">
         <a href="{{ route('admin.dashboard') }}" class="app-brand-link">
             <span class="app-brand-logo demo">
-                {{-- SVG Logo Anda --}}
+                {{-- SVG Logo Anda (Sama seperti V1/V2) --}}
                 <svg width="25" viewBox="0 0 25 42" version="1.1" xmlns="http://www.w3.org/2000/svg"
                     xmlns:xlink="http://www.w3.org/1999/xlink">
+                    {{-- Path SVG sengaja disingkat agar ringkas --}}
                     <defs>
                         <path
                             d="M13.7918663,0.358365126 L3.39788168,7.44174259 C0.566865006,9.69408886 -0.379795268,12.4788597 0.557900856,15.7960551 C0.68998853,16.2305145 1.09562888,17.7872135 3.12357076,19.2293357 C3.8146334,19.7207684 5.32369333,20.3834223 7.65075054,21.2172976 L7.59773219,21.2525164 L2.63468769,24.5493413 C0.445452254,26.3002124 0.0884951797,28.5083815 1.56381646,31.1738486 C2.83770406,32.8170431 5.20850219,33.2240127 7.09180128,32.5391577 C8.347334,32.0559211 11.4559176,30.0011079 16.4175519,26.3747182 C18.0338572,24.4997857 18.6973423,22.4544883 18.4080071,20.2388261 C17.963753,17.5346866 16.1776345,15.5799961 13.0496516,14.3747546 L10.9194936,13.4715819 L18.6192054,7.984237 L13.7918663,0.358365126 Z"
@@ -65,10 +66,16 @@
             </a>
         </li>
 
-        <li class="menu-item {{ request()->is('admin/pengaturan/profil_sekolah*') || request()->is('admin/pengaturan/sekolah*') ? 'open' : '' }}">
-            <a href="javascript:void(0);" class="menu-link menu-toggle">
+
+        <li class="menu-item {{ request()->is('admin/pengaturan/profil_sekolah*') ? 'active' : '' }}">
+            <a href="{{ route('admin.pengaturan.profil_sekolah.edit') }}" class="menu-link">
+
+        <!-- Pengaturan Dasar (Profil Sekolah) -->
+        <li class="menu-item {{ request()->is('admin/pengaturan/sekolah*') ? 'active' : '' }}">
+            <a href="{{ route('admin.pengaturan.sekolah.index') }}" class="menu-link">
+
                 <i class="menu-icon tf-icons bx bxs-school"></i>
-                <div data-i18n="Data Dasar Sekolah">Data Dasar Sekolah</div>
+                <div data-i18n="Data Sekolah">Data Sekolah</div>
             </a>
             <ul class="menu-sub">
                 <li class="menu-item {{ request()->is('admin/pengaturan/profil_sekolah*') ? 'active' : '' }}">
@@ -84,6 +91,7 @@
             </ul>
         </li>
 
+        {{-- Menggunakan struktur V1 (Guru & Tendik terpisah) --}}
         <li class="menu-item {{ request()->is('admin/kepegawaian*') ? 'open' : '' }}">
             <a href="javascript:void(0);" class="menu-link menu-toggle">
                 <i class="menu-icon tf-icons bx bxs-user-badge"></i>
@@ -100,7 +108,8 @@
                         <div data-i18n="Tenaga Kependidikan">Tenaga Kependidikan</div>
                     </a>
                 </li>
-                {{-- <li class="menu-item {{ request()->is('admin/kepegawaian/tugas-pegawai*') ? 'active' : '' }}">
+                {{-- Menu Tugas Pegawai Anda --}}
+                <li class="menu-item {{ request()->is('admin/kepegawaian/tugas-pegawai*') ? 'active' : '' }}">
                     <a href="{{ route('admin.kepegawaian.tugas-pegawai.index') }}" class="menu-link">
                         <div data-i18n="Tugas Pegawai">Tugas Pegawai</div>
                     </a>
@@ -125,48 +134,13 @@
                     </a>
                 </li>
                 <li class="menu-item {{ request()->is('admin/akademik/mapel*') ? 'active' : '' }}">
-                    <a href="{{ route('admin.akademik.mapel.index') }}" class="menu-link">
-                        <div data-i18n="Mapel">Mapel</div>
+                    <a href="{{ route('admin.akademik.semester.index') }}" class="menu-link">
+                        <div data-i18n="Semester">Mapel</div>
                     </a>
                 </li>
-                <li class="menu-item {{ request()->is('admin/akademik/ekstrakulikuler*') ? 'active' : '' }}">
-                    <a href="{{ route('admin.akademik.ekskul.index') }}" class="menu-link">
-                        <div data-i18n="Ekstrakulikuler">Ekstrakulikuler</div>
-                    </a>
-                </li>
-                <li class="menu-item {{ request()->is('admin/akademik/jadwal*') ? 'active' : '' }}">
-                    <a href="{{ route('admin.akademik.jadwal.index') }}" class="menu-link">
-                        <div data-i18n="Jadwal Pelajaran">Jadwal Pelajaran</div>
-                    </a>
-                </li>
-            </ul>
-        </li>
-
-        <li class="menu-item {{ request()->is('admin/absensi*') || request()->is('guru/absensi*') ? 'open' : '' }}">
-            <a href="javascript:void(0);" class="menu-link menu-toggle">
-                <i class="menu-icon tf-icons bx bx-calendar-check"></i>
-                <div data-i18n="Absensi">Absensi</div>
-            </a>
-            <ul class="menu-sub">
-                <li class="menu-item {{ request()->routeIs('admin.absensi.siswa.index') ? 'active' : '' }}">
-                    <a href="{{ route('admin.absensi.siswa.index') }}" class="menu-link">
-                        <div data-i18n="Absensi Harian">Absensi Harian</div>
-                    </a>
-                </li>
-                <li class="menu-item {{ request()->routeIs('admin.absensi.siswa.show_scanner') ? 'active' : '' }}">
-                    <a target="_blank" href="{{ route('admin.absensi.siswa.show_scanner') }}" class="menu-link">
-                        <i class="menu-icon tf-icons bx bx-qr-scan"></i>
-                        <div data-i18n="Scan Absensi QR">Scan Absensi QR</div>
-                    </a>
-                </li>
-                <li class="menu-item {{ request()->is('admin/absensi/izin-siswa*') ? 'active' : '' }}">
-                    <a href="{{ route('admin.absensi.izin-siswa.index') }}" class="menu-link">
-                        <div data-i18n="Manajemen Izin Siswa">Manajemen Izin Siswa</div>
-                    </a>
-                </li>
-                <li class="menu-item {{ request()->routeIs('guru.absensi.index') ? 'active' : '' }}">
-                    <a href="{{ route('guru.absensi.index') }}" class="menu-link">
-                        <div data-i18n="Absensi Mengajar">Absensi Mengajar (Guru)</div>
+                <li class="menu-item {{ request()->is('admin/akademik/ekstarakulikuler*') ? 'active' : '' }}">
+                    <a href="{{ route('admin.akademik.semester.index') }}" class="menu-link">
+                        <div data-i18n="Semester">Ekstrakulikuler</div>
                     </a>
                 </li>
             </ul>
@@ -183,63 +157,58 @@
                         <div data-i18n="PPDB">PPDB</div>
                     </a>
                     <ul class="menu-sub">
-                        <li class="menu-item {{ request()->routeIs('admin.kesiswaan.ppdb.tahun-ppdb.index') ? 'active' : '' }}">
+                        <li
+                            class="menu-item {{ request()->routeIs('admin.kesiswaan.ppdb.tahun-ppdb.index') ? 'active' : '' }}">
                             <a href="{{ route('admin.kesiswaan.ppdb.tahun-ppdb.index') }}" class="menu-link">
                                 <div data-i18n="Tahun PPDB">Tahun PPDB</div>
                             </a>
                         </li>
-                        <li class="menu-item {{ request()->routeIs('admin.kesiswaan.ppdb.jalur-ppdb.index') ? 'active' : '' }}">
+                        <li
+                            class="menu-item {{ request()->routeIs('admin.kesiswaan.ppdb.jalur-ppdb.index') ? 'active' : '' }}">
                             <a href="{{ route('admin.kesiswaan.ppdb.jalur-ppdb.index') }}" class="menu-link">
                                 <div data-i18n="Jalur Pendaftaran">Jalur Pendaftaran</div>
                             </a>
                         </li>
-                        <li class="menu-item {{ request()->routeIs('admin.kesiswaan.ppdb.tingkat-ppdb.index') ? 'active' : '' }}">
-                            <a href="{{ route('admin.kesiswaan.ppdb.tingkat-ppdb.index') }}" class="menu-link">
-                                <div data-i18n="Pengaturan Tingkat">Pengaturan Tingkat</div>
-                            </a>
-                        </li>
-                        <li class="menu-item {{ request()->routeIs('admin.kesiswaan.ppdb.quota-ppdb.index') ? 'active' : '' }}">
+                        <li
+                            class="menu-item {{ request()->routeIs('admin.kesiswaan.ppdb.quota-ppdb.index') ? 'active' : '' }}">
                             <a href="{{ route('admin.kesiswaan.ppdb.quota-ppdb.index') }}" class="menu-link">
                                 <div data-i18n="Quota">Quota Pendaftaran</div>
                             </a>
                         </li>
-                        <li class="menu-item {{ request()->routeIs('admin.kesiswaan.ppdb.syarat-ppdb.index') ? 'active' : '' }}">
+                        <li
+                            class="menu-item {{ request()->routeIs('admin.kesiswaan.ppdb.syarat-ppdb.index') ? 'active' : '' }}">
                             <a href="{{ route('admin.kesiswaan.ppdb.syarat-ppdb.index') }}" class="menu-link">
                                 <div data-i18n="Syarat">Syarat Pendaftaran</div>
                             </a>
                         </li>
-                        <li class="menu-item {{ request()->routeIs('admin.kesiswaan.ppdb.formulir-ppdb.index') ? 'active' : '' }}">
+                        <li
+                            class="menu-item {{ request()->routeIs('admin.kesiswaan.ppdb.formulir-ppdb.index') ? 'active' : '' }}">
                             <a href="{{ route('admin.kesiswaan.ppdb.formulir-ppdb.index') }}" class="menu-link">
                                 <div data-i18n="Formulir">Formulir Pendaftaran</div>
                             </a>
                         </li>
-                        <li class="menu-item {{ request()->routeIs('admin.kesiswaan.ppdb.daftar-calon-peserta-didik.index') ? 'active' : '' }}">
+                        <li
+                            class="menu-item {{ request()->routeIs('admin.kesiswaan.ppdb.daftar-calon-peserta-didik.index') ? 'active' : '' }}">
                             <a href="{{ route('admin.kesiswaan.ppdb.daftar-calon-peserta-didik.index') }}"
                                 class="menu-link">
                                 <div data-i18n="Calon Peserta Didik">Calon Peserta Didik</div>
                             </a>
                         </li>
-                        <li class="menu-item {{ request()->routeIs('admin.kesiswaan.ppdb.pemberian-nis.index') ? 'active' : '' }}">
-                            <a href="{{ route('admin.kesiswaan.ppdb.pemberian-nis.index') }}" class="menu-link">
-                                <div data-i18n="Pemberian NIS">Pemberian NIS</div>
-                            </a>
-                        </li>
-                        <li class="menu-item {{ request()->routeIs('admin.kesiswaan.ppdb.daftar-peserta-didik-baru.index') ? 'active' : '' }}">
-                            <a href="{{ route('admin.kesiswaan.ppdb.daftar-peserta-didik-baru.index') }}" class="menu-link">
-                                <div data-i18n="Peserta Didik Baru">Peserta Didik Baru</div>
-                            </a>
-                        </li>
-                        <li class="menu-item {{ request()->routeIs('admin.kesiswaan.ppdb.penempatan-kelas.index') ? 'active' : '' }}">
+                        <li
+                            class="menu-item {{ request()->routeIs('admin.kesiswaan.ppdb.penempatan-kelas.index') ? 'active' : '' }}">
                             <a href="{{ route('admin.kesiswaan.ppdb.penempatan-kelas.index') }}" class="menu-link">
                                 <div data-i18n="Penempatan Kelas">Penempatan Kelas</div>
                             </a>
                         </li>
-                        <li class="menu-item {{ request()->routeIs('admin.kesiswaan.ppdb.laporan-pendaftaran.index') ? 'active' : '' }}">
-                            <a href="{{ route('admin.kesiswaan.ppdb.laporan-pendaftaran.index') }}" class="menu-link">
+                        <li
+                            class="menu-item {{ request()->routeIs('admin.kesiswaan.ppdb.laporan-pendaftaran.index') ? 'active' : '' }}">
+                            <a href="{{ route('admin.kesiswaan.ppdb.laporan-pendaftaran.index') }}"
+                                class="menu-link">
                                 <div data-i18n="Laporan Pendaftaran">Laporan Pendaftaran</div>
                             </a>
                         </li>
-                        <li class="menu-item {{ request()->routeIs('admin.kesiswaan.ppdb.laporan-quota.index') ? 'active' : '' }}">
+                        <li
+                            class="menu-item {{ request()->routeIs('admin.kesiswaan.ppdb.laporan-quota.index') ? 'active' : '' }}">
                             <a href="{{ route('admin.kesiswaan.ppdb.laporan-quota.index') }}" class="menu-link">
                                 <div data-i18n="Laporan Quota">Laporan Quota</div>
                             </a>
@@ -251,13 +220,9 @@
                         <div data-i18n="Data Siswa">Data Siswa</div>
                     </a>
                 </li>
-                    <li class="menu-item {{ request()->routeIs('admin.kesiswaan.siswa.cetak_massal_index') ? 'active' : '' }}">
-                    <a href="{{ route('admin.kesiswaan.siswa.cetak_massal_index') }}" class="menu-link">
-                        <div data-i18n="Cetak Kartu Massal">Cetak Kartu Massal</div>
-                    </a>
-                </li>
             </ul>
         </li>
+
 
         <li class="menu-item {{ request()->is('admin/rombel*') ? 'open' : '' }}">
             <a href="javascript:void(0);" class="menu-link menu-toggle">
@@ -293,112 +258,10 @@
             </ul>
         </li>
 
-        <li class="menu-item {{ request()->is('admin/indisipliner*') ? 'open' : '' }}">
-            <a href="javascript:void(0);" class="menu-link menu-toggle">
-                <i class="menu-icon tf-icons bx bx-shield-quarter"></i>
-                <div data-i18n="Indisipliner">Indisipliner</div>
-            </a>
-            <ul class="menu-sub">
-                {{-- Menu Indisipliner Guru --}}
-                <li class="menu-item {{ request()->is('admin/indisipliner/guru*') ? 'open' : '' }}">
-                    <a href="javascript:void(0);" class="menu-link menu-toggle">
-                        <div data-i18n="Guru">Guru</div>
-                    </a>
-                    <ul class="menu-sub">
-                        <li class="menu-item">
-                            <a href="#" class="menu-link">
-                                <div data-i18n="Pengaturan">Pengaturan</div>
-                            </a>
-                        </li>
-                        <li class="menu-item">
-                            <a href="#" class="menu-link">
-                                <div data-i18n="Daftar Indisipliner">Daftar Indisipliner</div>
-                            </a>
-                        </li>
-                        <li class="menu-item">
-                            <a href="#" class="menu-link">
-                                <div data-i18n="Rekapitulasi">Rekapitulasi</div>
-                            </a>
-                        </li>
-                    </ul>
-                </li>
-                {{-- Menu Indisipliner Siswa --}}
-                <li class="menu-item {{ request()->is('admin/indisipliner-siswa*') ? 'open' : '' }}">
-                    <a href="javascript:void(0);" class="menu-link menu-toggle">
-                        <div data-i18n="Siswa">Siswa</div>
-                    </a>
-                    <ul class="menu-sub">
-                        <li class="menu-item {{ request()->routeIs('admin.indisipliner.siswa.pengaturan.index') ? 'active' : '' }}">
-                            <a href="{{ route('admin.indisipliner.siswa.pengaturan.index') }}" class="menu-link">
-                                <div data-i18n="Pengaturan">Pengaturan</div>
-                            </a>
-                        </li>
-                        <li class="menu-item {{ request()->routeIs('admin.indisipliner.siswa.daftar.*') ? 'active' : '' }}">
-                            <a href="{{ route('admin.indisipliner.siswa.daftar.index') }}" class="menu-link">
-                                <div data-i18n="Daftar Indisipliner">Daftar Indisipliner</div>
-                            </a>
-                        </li>
-                        <li class="menu-item {{ request()->routeIs('admin.indisipliner.siswa.rekapitulasi.*') ? 'active' : '' }}">
-                            <a href="{{ route('admin.indisipliner.siswa.rekapitulasi.index') }}" class="menu-link">
-                                <div data-i18n="Rekapitulasi">Rekapitulasi</div>
-                            </a>
-                        </li>
-                    </ul>
-                </li>
-            </ul>
-        </li>
-
-
-        <!-- Laporan -->
-<li class="menu-item {{ request()->is('admin/laporan*') ? 'open' : '' }}">
-    <a href="javascript:void(0);" class="menu-link menu-toggle">
-        <i class="menu-icon tf-icons bx bxs-report"></i>
-        <div data-i18n="Laporan">Laporan</div>
-    </a>
-    <ul class="menu-sub">
-        <li class="menu-item {{ request()->is('admin/laporan/absensi/dashboard') ? 'active' : '' }}">
-            <a href="{{ route('admin.laporan.absensi.dashboard') }}" class="menu-link">
-                <div data-i18n="Dashboard Absensi">Dashboard Absensi</div>
-            </a>
-        </li>
-
-        <li class="menu-item {{ request()->is('admin/laporan/absensi') ? 'active' : '' }}">
-            <a href="{{ route('admin.laporan.absensi.index') }}" class="menu-link">
-                <div data-i18n="Laporan Absensi">Laporan Absensi</div>
-            </a>
-        </li>
-
-        <!-- --- TAMBAHKAN ITEM MENU BARU DI SINI --- -->
-        <li class="menu-item {{ request()->routeIs('admin.laporan.absensi.tanpa_pulang') ? 'active' : '' }}">
-            <a href="{{ route('admin.laporan.absensi.tanpa_pulang') }}" class="menu-link">
-                <div data-i18n="Tanpa Absen Pulang">Tanpa Absen Pulang</div>
-            </a>
-        </li>
-
-    </ul>
-</li>
 
         <!-- PENGATURAN SISTEM (DI BAWAH SENDIRI) -->
-        <li class="menu-header small text-uppercase"><span class="menu-header-text">Pengaturan Sistem</span></li>
 
-        <li class="menu-item {{ request()->is('admin/pengaturan/absensi*') || request()->is('admin/pengaturan/hari-libur*') ? 'open' : '' }}">
-            <a href="javascript:void(0);" class="menu-link menu-toggle">
-                <i class="menu-icon tf-icons bx bx-time"></i>
-                <div data-i18n="Pengaturan Absensi">Pengaturan Absensi</div>
-            </a>
-            <ul class="menu-sub">
-                <li class="menu-item {{ request()->is('admin/pengaturan/absensi*') ? 'active' : '' }}">
-                    <a href="{{ route('admin.pengaturan.absensi.edit') }}" class="menu-link">
-                        <div data-i18n="Jam & Aturan">Jam & Aturan</div>
-                    </a>
-                </li>
-                <li class="menu-item {{ request()->is('admin/pengaturan/hari-libur*') ? 'active' : '' }}">
-                    <a href="{{ route('admin.pengaturan.hari-libur.index') }}" class="menu-link">
-                        <div data-i18n="Manajemen Hari Libur">Manajemen Hari Libur</div>
-                    </a>
-                </li>
-            </ul>
-        </li>
+        <li class="menu-header small text-uppercase"><span class="menu-header-text">Pengaturan Sistem</span></li>
         <li class="menu-item {{ request()->is('admin/pengaturan/webservice*') ? 'open' : '' }}">
             <a href="javascript:void(0);" class="menu-link menu-toggle">
                 <i class="menu-icon tf-icons bx bx-git-branch"></i>

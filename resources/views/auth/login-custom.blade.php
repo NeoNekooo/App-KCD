@@ -20,29 +20,25 @@
             background-repeat: no-repeat;
             background-position: center;
         }
-
         .login-header {
             position: absolute;
             top: 2rem;
             left: 2rem;
             right: 2rem;
             display: flex;
-            justify-content: space-between; /* Membuat jarak maksimal antar elemen */
+            justify-content: space-between;
             align-items: center;
         }
-
         .login-header .header-icon i {
-            font-size: 2.5rem; /* 40px */
+            font-size: 2.5rem;
             color: #566a7f;
         }
-        
         .login-header .app-name {
             font-size: 1.25rem;
             font-weight: 600;
             color: #566a7f;
             text-align: center;
         }
-        
         .btn-masuk {
             background-color: #008493 !important;
             border-color: #008493 !important;
@@ -56,24 +52,14 @@
 
 <body>
     <header class="login-header">
-        <div class="header-icon">
-            {{-- Ikon Kiri (Sekolah) --}}
-            <i class='bx bxs-school'></i>
-        </div>
-        <div class="app-name">
-            {{-- Teks di Tengah --}}
-            {{-- Sistem Informasi Akademik --}}
-        </div>
-        <div class="header-icon">
-            {{-- Ikon Kanan (Aplikasi/Widget) --}}
-            <i class='bx bxs-widget'></i>
-        </div>
+        <div class="header-icon"><i class='bx bxs-school'></i></div>
+        <div class="app-name"></div>
+        <div class="header-icon"><i class='bx bxs-widget'></i></div>
     </header>
 
     <div class="container-xxl">
         <div class="authentication-wrapper authentication-basic container-p-y">
             <div class="authentication-inner py-4">
-
                 <div class="card">
                     <div class="card-body">
                         <h4 class="mb-2 text-center">Masuk</h4>
@@ -87,11 +73,11 @@
 
                         <form id="formAuthentication" class="mb-3" action="{{ route('login') }}" method="POST">
                             @csrf
+                            
                             <div class="mb-3">
-                                <label for="email" class="form-label">Email</label>
-                                <input type="text" class="form-control" id="email" name="email" placeholder="Masukkan email" value="{{ old('email') }}" required autofocus />
+                                <label for="username" class="form-label">Username</label>
+                                <input type="text" class="form-control" id="username" name="username" placeholder="Masukkan username Anda" value="{{ old('username') }}" required autofocus />
                             </div>
-
                             <div class="mb-3 form-password-toggle">
                                 <label class="form-label" for="password">Password</label>
                                 <div class="input-group input-group-merge">
@@ -123,7 +109,7 @@
                         </form>
                     </div>
                 </div>
-                </div>
+            </div>
         </div>
     </div>
 
@@ -136,7 +122,6 @@
                 const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
                 passwordInput.setAttribute('type', type);
                 
-                // Toggle ikon antara hide dan show
                 if (type === 'text') {
                     icon.classList.remove('bx-hide');
                     icon.classList.add('bx-show');

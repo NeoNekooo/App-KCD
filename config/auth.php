@@ -62,8 +62,12 @@ return [
     'providers' => [
         'users' => [
             'driver' => 'eloquent',
+<<<<<<< HEAD
             // 'model' => env('AUTH_MODEL', App\Models\User::class),
             'model' => App\Models\Pengguna::class,
+=======
+            'model' => env('AUTH_MODEL', App\Models\Pengguna::class),
+>>>>>>> origin/modul/kepegawaian
         ],
 
         // 'users' => [

@@ -6,14 +6,21 @@
 </h4>
 
 <div class="d-flex justify-content-end mb-3 gap-2">
-    {{-- Tombol Cetak PDF --}}
     @if($gtks->isNotEmpty())
-    <a href="{{ route('admin.kepegawaian.gtk.cetak_pdf', ['id' => $gtks->first()->id]) }}" 
-       class="btn btn-primary" 
-       id="cetak-pdf-btn"
-       target="_blank">
-        <i class="bx bx-printer me-1"></i> Cetak PDF
-    </a>
+        {{-- TOMBOL BARU: Cetak Semua --}}
+        <a href="{{ route('admin.kepegawaian.gtk.cetak_pdf_multiple', ['ids' => $gtks->pluck('id')->implode(',')]) }}" 
+           class="btn btn-primary" 
+           target="_blank">
+            <i class="bx bxs-file-pdf me-1"></i> Cetak Semua
+        </a>
+
+        {{-- TOMBOL LAMA: Ganti Teksnya --}}
+        <a href="{{ route('admin.kepegawaian.gtk.cetak_pdf', ['id' => $gtks->first()->id]) }}" 
+           class="btn btn-outline-primary" {{-- Saya ganti jadi outline agar beda --}}
+           id="cetak-pdf-btn"
+           target="_blank">
+            <i class="bx bx-printer me-1"></i> Cetak (1 Tampil)
+        </a>
     @endif
 
     {{-- Tombol Kembali --}}

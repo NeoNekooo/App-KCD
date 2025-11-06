@@ -9,6 +9,7 @@ class Rombel extends Model
 {
     use HasFactory;
 
+<<<<<<< HEAD
     /**
      * The table associated with the model.
      *
@@ -59,4 +60,17 @@ class Rombel extends Model
     {
         return $this->belongsTo(Gtk::class, 'ptk_id_str', 'nama');
     }
+=======
+    protected $table = 'rombels';
+
+    protected $casts = [
+        'anggota_rombel' => 'array',
+        'pembelajaran'   => 'array',
+    ];
+
+    public function waliKelas()
+{
+    return $this->belongsTo(Gtk::class, 'ptk_id', 'ptk_id');
+>>>>>>> origin/modul/kepegawaian
+}
 }

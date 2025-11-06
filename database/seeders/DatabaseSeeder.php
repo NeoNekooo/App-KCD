@@ -3,10 +3,10 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB; // <-- 1. Jangan lupa import DB
 
 class DatabaseSeeder extends Seeder
 {
+<<<<<<< HEAD
     public function run(): void
     {
         // 2. Nonaktifkan pengecekan foreign key
@@ -25,3 +25,7 @@ class DatabaseSeeder extends Seeder
         DB::statement('SET FOREIGN_KEY_CHECKS=1;');
     }
 }
+=======
+    
+}
+>>>>>>> origin/modul/kepegawaian
