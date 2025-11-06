@@ -8,9 +8,6 @@ use App\Http\Controllers\Admin\Settings\SekolahController;
 use App\Http\Controllers\Admin\Kepegawaian\GtkController;
 use App\Http\Controllers\Admin\Kepegawaian\TugasPegawaiController;
 
-
-
-
 /*
 |--------------------------------------------------------------------------
 | Rute Web Utama
@@ -63,6 +60,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('gtk/cetak-pdf/{id}', [GtkController::class, 'cetakPdf'])->name('gtk.cetak_pdf');
         Route::get('gtk/cetak-pdf-multiple', [GtkController::class, 'cetakPdfMultiple'])
             ->name('gtk.cetak_pdf_multiple');
+
+        // --- RUTE BARU UNTUK UPLOAD FOTO & TTD ---
+        Route::post('gtk/{id}/upload-media', [GtkController::class, 'uploadMedia'])->name('gtk.upload_media');
+
         // Route untuk Tugas Pegawai
         Route::resource('tugas-pegawai', TugasPegawaiController::class)->except(['create', 'edit', 'show']);
     });

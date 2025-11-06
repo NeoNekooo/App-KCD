@@ -9,7 +9,7 @@
     <div class="card mb-4">
         <div class="card-header d-flex justify-content-between align-items-center">
             <h5 class="mb-0">Daftar Tugas Pokok</h5>
-            <small class="text-muted">{{ $tahunAktif }} / Semester {{ $semesterAktif }}</small>
+            <small class="text-muted">{{ $tahunAktifTampil }} / Semester {{ $semesterAktifTampil }}</small>
         </div>
         <div class="card-body">
             <div class="table-responsive text-nowrap">
@@ -72,28 +72,37 @@
                         </button>
                     </li>
                     
-                    {{-- TOMBOL TAB PEMBINA ESKUL (DIKOMENTARI) --}}
-                    {{-- 
                     <li class="nav-item">
                         <button type="button" class="nav-link" role="tab" data-bs-toggle="tab"
-                            data-bs-target="#pembina-ekskul" aria-controls="pembina-ekskul" aria-selected="false">
-                            <i class="tf-icons bx bx-run me-1"></i> Pembina Ekstrakurikuler
-                            <span class="badge rounded-pill badge-center h-px-20 w-px-20 bg-label-info ms-1">
-                                {{ $pembinaEkskul->count() }}
-                            </span>
-                        </button>
-                    </li>
-                    --}}
-                    
-                    <li class="nav-item">
-                        <button type="button" class="nav-link" role="tab" data-bs-toggle="tab"
-                            data-bs-target="#tugas-tambahan" aria-controls="tugas-tambahan" aria-selected="false">
+                            data-bs-target="#jabatan-struktural" aria-controls="jabatan-struktural" aria-selected="false">
                             <i class="tf-icons bx bxs-briefcase me-1"></i> Jabatan Struktural
                             <span class="badge rounded-pill badge-center h-px-20 w-px-20 bg-label-success ms-1">
                                 {{ $jabatanStruktural->count() }}
                             </span>
                         </button>
                     </li>
+                    
+                    <li class="nav-item">
+                        <button type="button" class="nav-link" role="tab" data-bs-toggle="tab"
+                            data-bs-target="#tendik" aria-controls="tendik" aria-selected="false">
+                            <i class="tf-icons bx bxs-user-pin me-1"></i> Tenaga Kependidikan
+                            <span class="badge rounded-pill badge-center h-px-20 w-px-20 bg-label-info ms-1">
+                                {{ $tendik->count() }}
+                            </span>
+                        </button>
+                    </li>
+
+                    {{-- TOMBOL TAB PEMBINA ESKUL (Datanya belum ada) --}}
+                    {{-- 
+                    <li class="nav-item">
+                        <button type="button" class="nav-link" role="tab" data-bs-toggle="tab"
+                            data-bs-target="#pembina-ekskul" aria-controls="pembina-ekskul" aria-selected="false">
+                            <i class="tf-icons bx bx-run me-1"></i> Pembina Ekstrakurikuler
+                            <span class="badge rounded-pill badge-center h-px-20 w-px-20 bg-label-warning ms-1">0</span>
+                        </button>
+                    </li>
+                    --}}
+                    
                 </ul>
                 <div class="tab-content">
                     
@@ -129,38 +138,8 @@
                         </div>
                     </div>
 
-                    {{-- TAB PEMBINA ESKUL (DIKOMENTARI) --}}
-                    {{-- 
-                    <div class="tab-pane fade" id="pembina-ekskul" role="tabpanel">
-                        <div class="table-responsive text-nowrap">
-                            <table class="table table-hover">
-                                <thead>
-                                    <tr>
-                                        <th>No</th>
-                                        <th>Nama Ekstrakurikuler</th>
-                                        <th>Nama Pembina</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="table-border-bottom-0">
-                                    @forelse ($pembinaEkskul as $eskul)
-                                        <tr>
-                                            <td>{{ $loop->iteration }}</td>
-                                            <td><strong>{{ $eskul->nama_ekskul ?? $eskul->nama }}</strong></td>
-                                            <td>{{ $eskul->pembina->nama ?? 'BELUM DIATUR' }}</td>
-                                        </tr>
-                                    @empty
-                                        <tr>
-                                            <td colspan="3" class="text-center">Belum ada data Pembina.</td>
-                                        </tr>
-                                    @endforelse
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                    --}}
-
                     {{-- TAB JABATAN STRUKTURAL --}}
-                    <div class="tab-pane fade" id="tugas-tambahan" role="tabpanel">
+                    <div class="tab-pane fade" id="jabatan-struktural" role="tabpanel">
                         <div class="table-responsive text-nowrap">
                             <table class="table table-hover">
                                 <thead>
@@ -186,6 +165,41 @@
                             </table>
                         </div>
                     </div>
+
+                    {{-- TAB BARU UNTUK TENDIK --}}
+                    <div class="tab-pane fade" id="tendik" role="tabpanel">
+                        <div class="table-responsive text-nowrap">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>No</th>
+                                        <th>Nama Pegawai</th>
+                                        <th>Jabatan / Tugas</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="table-border-bottom-0">
+                                    @forelse ($tendik as $tugas)
+                                        <tr>
+                                            <td>{{ $loop->iteration }}</td>
+                                            <td><strong>{{ $tugas->nama }}</strong></td>
+                                            <td>{{ $tugas->jabatan_ptk_id_str }}</td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="3" class="text-center">Belum ada data Tenaga Kependidikan.</td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    {{-- TAB PEMBINA ESKUL (Datanya belum ada) --}}
+                    {{-- 
+                    <div class="tab-pane fade" id="pembina-ekskul" role="tabpanel">
+                        <p class="text-center">Belum ada data Pembina Ekstrakurikuler.</p>
+                    </div>
+                    --}}
 
                 </div>
             </div>

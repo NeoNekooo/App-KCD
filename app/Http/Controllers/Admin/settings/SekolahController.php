@@ -20,19 +20,24 @@ class SekolahController extends Controller
     }
 
     /**
-     * Update data sekolah (hanya logo dan peta).
+     * Update data sekolah (Logo, Peta, dan Media Sosial).
      */
     public function update(Request $request)
     {
         $request->validate([
             'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', // Validasi file logo
             'peta' => 'nullable|string', // Validasi untuk iframe peta
+            // Validasi untuk URL media sosial
+            'facebook_url' => 'nullable|url|max:255',
+            'instagram_url' => 'nullable|url|max:255',
+            'youtube_url' => 'nullable|url|max:255',
+            'tiktok_url' => 'nullable|url|max:255',
         ]);
 
-        // Cari sekolah dengan ID 1. Diasumsikan data sudah ada dari method index.
+        // Cari sekolah dengan ID 1.
         $sekolah = Sekolah::firstOrCreate(['id' => 1]);
         
-        // Update Peta. 'peta' bisa jadi null jika user menghapus isinya.
+        // Update Peta.
         $sekolah->peta = $request->peta;
 
         // Handle upload logo
@@ -46,9 +51,15 @@ class SekolahController extends Controller
             $sekolah->logo = $path;
         }
 
+        // Handle update media sosial
+        // Karena Model Sekolah pakai $guarded = [], kita bisa langsung isi
+        $sekolah->facebook_url = $request->facebook_url;
+        $sekolah->instagram_url = $request->instagram_url;
+        $sekolah->youtube_url = $request->youtube_url;
+        $sekolah->tiktok_url = $request->tiktok_url;
+
         $sekolah->save();
 
-        return redirect()->back()->with('success', 'Logo & Peta sekolah berhasil diperbarui.');
+        return redirect()->back()->with('success', 'Profil sekolah berhasil diperbarui.');
     }
 }
-

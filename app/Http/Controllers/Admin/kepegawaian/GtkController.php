@@ -11,11 +11,13 @@ use App\Http\Controllers\Controller;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\GtkExport;
+use Illuminate\Support\Facades\Storage; // <-- TAMBAHKAN INI
 
 class GtkController extends Controller
 {
     public function cetakPdfMultiple(Request $request)
     {
+        // ... (fungsi lama, biarkan saja) ...
         $request->validate(['ids' => 'required|string']);
         
         $ids = explode(',', $request->input('ids'));
@@ -33,6 +35,7 @@ class GtkController extends Controller
     
     public function indexGuru(Request $request)
     {
+        // ... (fungsi lama, biarkan saja) ...
         $query = Gtk::query()->where('jenis_ptk_id_str', 'Guru');
 
         $query->when($request->search, function ($q, $search) {
@@ -50,6 +53,7 @@ class GtkController extends Controller
 
     public function indexTendik(Request $request)
     {
+        // ... (fungsi lama, biarkan saja) ...
         $query = Gtk::query()->where('jenis_ptk_id_str', 'Tenaga Kependidikan');
         
         $query->when($request->search, function ($q, $search) {
@@ -66,6 +70,7 @@ class GtkController extends Controller
 
     public function showMultiple(Request $request)
     {
+        // ... (fungsi lama, biarkan saja) ...
         $request->validate(['ids' => 'required|string']);
         
         $ids = explode(',', $request->input('ids'));
@@ -77,6 +82,7 @@ class GtkController extends Controller
 
     public function cetakPdf($id)
     {
+        // ... (fungsi lama, biarkan saja) ...
         $gtk = Gtk::findOrFail($id);
         
         $sekolah = Sekolah::first();
@@ -105,6 +111,7 @@ class GtkController extends Controller
 
     public function exportGuruExcel(Request $request)
     {
+        // ... (fungsi lama, biarkan saja) ...
         $query = Gtk::query()->where('jenis_ptk_id_str', 'Guru');
 
         if ($request->has('ids')) {
@@ -129,6 +136,7 @@ class GtkController extends Controller
 
     public function exportTendikExcel(Request $request)
     {
+        // ... (fungsi lama, biarkan saja) ...
         $query = Gtk::query()->where('jenis_ptk_id_str', 'Tenaga Kependidikan');
 
         if ($request->has('ids')) {
@@ -151,4 +159,44 @@ class GtkController extends Controller
         return Excel::download(new GtkExport($query), $fileName);
     }
 
+    // --- TAMBAHAN FUNGSI UNTUK UPLOAD MEDIA ---
+    public function uploadMedia(Request $request, $id)
+    {
+        // 1. Validasi input
+        $request->validate([
+            'foto' => 'nullable|image|mimes:jpeg,png,jpg|max:2048', // Maks 2MB
+            'tandatangan' => 'nullable|image|mimes:png|max:1024', // Maks 1MB, disarankan PNG
+        ]);
+
+        // 2. Cari GTK
+        $gtk = Gtk::findOrFail($id);
+
+        // 3. Proses upload foto
+        if ($request->hasFile('foto')) {
+            // Hapus foto lama jika ada
+            if ($gtk->foto && Storage::disk('public')->exists($gtk->foto)) {
+                Storage::disk('public')->delete($gtk->foto);
+            }
+            // Simpan foto baru
+            $path = $request->file('foto')->store('gtk_media/foto', 'public');
+            $gtk->foto = $path;
+        }
+
+        // 4. Proses upload tanda tangan
+        if ($request->hasFile('tandatangan')) {
+            // Hapus ttd lama jika ada
+            if ($gtk->tandatangan && Storage::disk('public')->exists($gtk->tandatangan)) {
+                Storage::disk('public')->delete($gtk->tandatangan);
+            }
+            // Simpan ttd baru
+            $path = $request->file('tandatangan')->store('gtk_media/tandatangan', 'public');
+            $gtk->tandatangan = $path;
+        }
+
+        // 5. Simpan perubahan ke database
+        $gtk->save();
+
+        // 6. Kembali ke halaman sebelumnya dengan pesan sukses
+        return back()->with('success', 'Media GTK berhasil diperbarui!');
+    }
 }
