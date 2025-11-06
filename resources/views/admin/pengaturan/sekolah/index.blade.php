@@ -28,7 +28,7 @@
             <div class="card-body text-center">
                 {{-- Tampilkan Logo jika ada, jika tidak, tampilkan ikon default --}}
                 @if($sekolah->logo)
-                    <img src="{{ asset('storage/' . $sekolah->logo) }}" alt="Logo Sekolah" class="img-fluid rounded mb-3" style="max-width: 100px; height: auto; border: 0px solid #ddd;">
+                    <img src="{{ asset('storage/' . $sekolah->logo) }}" alt="Logo Sekolah" class="img-fluid rounded mb-3 d-block mx-auto" style="max-width: 100px; height: auto; border: 0px solid #ddd;">
                 @else
                     <i class="bx bxs-school bx-lg text-primary mb-3"></i>
                 @endif

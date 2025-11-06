@@ -66,29 +66,12 @@
             </a>
         </li>
 
-
-        <li class="menu-item {{ request()->is('admin/pengaturan/profil_sekolah*') ? 'active' : '' }}">
-            <a href="{{ route('admin.pengaturan.profil_sekolah.edit') }}" class="menu-link">
-
-        <!-- Pengaturan Dasar (Profil Sekolah) -->
+            {{-- PENYESUAIAN: Menggunakan nama 'Profil Sekolah' dari V2 --}}
         <li class="menu-item {{ request()->is('admin/pengaturan/sekolah*') ? 'active' : '' }}">
             <a href="{{ route('admin.pengaturan.sekolah.index') }}" class="menu-link">
-
                 <i class="menu-icon tf-icons bx bxs-school"></i>
-                <div data-i18n="Data Sekolah">Data Sekolah</div>
+                <div data-i18n="Profil Sekolah">Profil Sekolah</div>
             </a>
-            <ul class="menu-sub">
-                <li class="menu-item {{ request()->is('admin/pengaturan/profil_sekolah*') ? 'active' : '' }}">
-                    <a href="{{ route('admin.pengaturan.profil_sekolah.edit') }}" class="menu-link">
-                        <div data-i18n="Profil Sekolah">Profil Sekolah</div>
-                    </a>
-                </li>
-                <li class="menu-item {{ request()->is('admin/pengaturan/sekolah*') ? 'active' : '' }}">
-                    <a href="{{ route('admin.pengaturan.sekolah.index') }}" class="menu-link">
-                        <div data-i18n="Data Sekolah">Data Sekolah</div>
-                    </a>
-                </li>
-            </ul>
         </li>
 
         {{-- Menggunakan struktur V1 (Guru & Tendik terpisah) --}}
@@ -108,12 +91,11 @@
                         <div data-i18n="Tenaga Kependidikan">Tenaga Kependidikan</div>
                     </a>
                 </li>
-                {{-- Menu Tugas Pegawai Anda --}}
                 <li class="menu-item {{ request()->is('admin/kepegawaian/tugas-pegawai*') ? 'active' : '' }}">
                     <a href="{{ route('admin.kepegawaian.tugas-pegawai.index') }}" class="menu-link">
                         <div data-i18n="Tugas Pegawai">Tugas Pegawai</div>
                     </a>
-                </li> --}}
+                </li>
             </ul>
         </li>
 
@@ -250,11 +232,11 @@
                         <div data-i18n="Mapel Pilihan">Mapel Pilihan</div>
                     </a>
                 </li>
-                <li class="menu-item {{ request()->is('admin/rombel/wali*') ? 'active' : '' }}">
+                {{-- <li class="menu-item {{ request()->is('admin/rombel/wali*') ? 'active' : '' }}">
                     <a href="{{ route('admin.rombel.wali.index') }}" class="menu-link">
                         <div data-i18n="Wali">Wali</div>
                     </a>
-                </li>
+                </li> --}}
             </ul>
         </li>
 

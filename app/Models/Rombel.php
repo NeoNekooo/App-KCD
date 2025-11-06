@@ -9,25 +9,18 @@ class Rombel extends Model
 {
     use HasFactory;
 
-<<<<<<< HEAD
     /**
-     * The table associated with the model.
-     *
-     * @var string
+     * Table name.
      */
     protected $table = 'rombels';
 
     /**
-     * The primary key associated with the table.
-     *
-     * @var string
+     * Primary key.
      */
     protected $primaryKey = 'id';
 
     /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
+     * Mass assignable attributes.
      */
     protected $fillable = [
         'rombongan_belajar_id',
@@ -35,42 +28,54 @@ class Rombel extends Model
         'tingkat_pendidikan_id',
         'ptk_id', // Wali Kelas
         'jurusan_id',
-        // Tambahkan kolom lain yang relevan
+        // Tambahkan kolom lain jika ada
     ];
 
     /**
-     * Mendapatkan semua siswa yang ada di dalam rombel ini.
+     * Cast JSON columns.
+     */
+    protected $casts = [
+        'anggota_rombel' => 'array',
+        'pembelajaran'   => 'array',
+    ];
+
+    /**
+     * Relasi: semua siswa di rombel ini.
      */
     public function siswa()
     {
         return $this->hasMany(Siswa::class, 'rombongan_belajar_id', 'rombongan_belajar_id');
     }
 
-    public function wali() {
+    /**
+     * Relasi ke PTK (wali kelas) jika memang ada kolom wali_id.
+     */
+    public function wali()
+    {
         return $this->belongsTo(Ptk::class, 'wali_id');
     }
-    public function jurusan() {
+
+    /**
+     * Relasi ke jurusan.
+     */
+    public function jurusan()
+    {
         return $this->belongsTo(Jurusan::class);
     }
-    public function kurikulum() {
+
+    /**
+     * Relasi ke kurikulum.
+     */
+    public function kurikulum()
+    {
         return $this->belongsTo(Kurikulum::class);
     }
 
+    /**
+     * Relasi wali kelas versi modul kepegawaian (lebih realistis).
+     */
     public function waliKelas()
     {
-        return $this->belongsTo(Gtk::class, 'ptk_id_str', 'nama');
+        return $this->belongsTo(Gtk::class, 'ptk_id', 'ptk_id');
     }
-=======
-    protected $table = 'rombels';
-
-    protected $casts = [
-        'anggota_rombel' => 'array',
-        'pembelajaran'   => 'array',
-    ];
-
-    public function waliKelas()
-{
-    return $this->belongsTo(Gtk::class, 'ptk_id', 'ptk_id');
->>>>>>> origin/modul/kepegawaian
-}
 }

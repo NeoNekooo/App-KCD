@@ -3,17 +3,11 @@
     "private": true,
     "type": "module",
     "scripts": {
-<<<<<<< HEAD
         "build": "vite build",
         "dev": "concurrently \"php artisan serve\" \"vite\""
     },
-=======
-  "build": "vite build",
-  "dev": "concurrently \"php artisan serve\" \"vite\""
-},
->>>>>>> origin/modul/kepegawaian
     "devDependencies": {
-        "@tailwindcss/postcss": "^4.1.15",
+        "@tailwindcss/postcss": "^4.1.16",
         "@tailwindcss/vite": "^4.0.0",
         "alpinejs": "^3.4.2",
         "autoprefixer": "^10.4.21",
@@ -21,7 +15,7 @@
         "concurrently": "^9.0.1",
         "laravel-vite-plugin": "^2.0.0",
         "postcss": "^8.5.6",
-        "tailwindcss": "^4.0.0",
+        "tailwindcss": "^4.1.16",
         "vite": "^7.0.4"
     },
     "dependencies": {
