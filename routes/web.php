@@ -84,6 +84,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('/export/excel', 'exportGuruExcel')->name('export.excel');
         });
 
+<<<<<<< HEAD
         // Route untuk Tenaga Kependidikan
         Route::prefix('tenaga-kependidikan')->name('tendik.')->controller(GtkController::class)->group(function () {
             Route::get('/', 'indexTendik')->name('index');
@@ -96,6 +97,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
         // Route untuk Tugas Pegawai
 
         Route::resource('tugas-pegawai', TugasPegawaiController::class)->except(['create', 'edit', 'show']);
+=======
+Route::get('/gtk/multiple-show', [GtkController::class, 'showMultiple'])
+    ->name('gtk.show-multiple')
+    ;
+>>>>>>> 5b50e3a60be24540c43a4d2e8a8321f0958fbbae
     });
 
 
@@ -155,7 +161,42 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         // Wali (ROUTE BARU DITAMBAHKAN)
         Route::get('/wali/create', [RombelWaliController::class, 'create'])->name('wali.create');
+<<<<<<< HEAD
         Route::get('/wali', [RombelWaliController::class, 'index'])->name('wali.index');
+=======
+    });
+
+    // --- GRUP INDISIPLINER SISWA ---
+    Route::prefix('indisipliner-siswa')->name('indisipliner.siswa.')->group(function () {
+        // Pengaturan
+        Route::get('pengaturan', [IndisiplinerSiswaController::class, 'pengaturanIndex'])->name('pengaturan.index');
+        Route::post('pengaturan/kategori', [IndisiplinerSiswaController::class, 'storeKategori'])->name('pengaturan.kategori.store');
+        Route::put('pengaturan/kategori/{pelanggaranKategori}', [IndisiplinerSiswaController::class, 'updateKategori'])->name('pengaturan.kategori.update');
+        Route::delete('pengaturan/kategori/{pelanggaranKategori}', [IndisiplinerSiswaController::class, 'destroyKategori'])->name('pengaturan.kategori.destroy');
+        Route::post('pengaturan/poin', [IndisiplinerSiswaController::class, 'storePoin'])->name('pengaturan.poin.store');
+        Route::put('pengaturan/poin/{pelanggaranPoin}', [IndisiplinerSiswaController::class, 'updatePoin'])->name('pengaturan.poin.update');
+        Route::delete('pengaturan/poin/{pelanggaranPoin}', [IndisiplinerSiswaController::class, 'destroyPoin'])->name('pengaturan.poin.destroy');
+        Route::post('pengaturan/sanksi', [IndisiplinerSiswaController::class, 'storeSanksi'])->name('pengaturan.sanksi.store');
+        Route::put('pengaturan/sanksi/{pelanggaranSanksi}', [IndisiplinerSiswaController::class, 'updateSanksi'])->name('pengaturan.sanksi.update');
+        Route::delete('pengaturan/sanksi/{pelanggaranSanksi}', [IndisiplinerSiswaController::class, 'destroySanksi'])->name('pengaturan.sanksi.destroy');
+
+        // Daftar Pelanggaran
+        Route::get('daftar', [IndisiplinerSiswaController::class, 'daftarIndex'])->name('daftar.index');
+        Route::get('daftar/input', [IndisiplinerSiswaController::class, 'createPelanggaran'])->name('daftar.create');
+        Route::post('daftar', [IndisiplinerSiswaController::class, 'storePelanggaran'])->name('daftar.store');
+        Route::delete('daftar/{pelanggaranNilai}', [IndisiplinerSiswaController::class, 'destroyPelanggaran'])->name('daftar.destroy');
+
+        // Rekapitulasi & Utilities
+        Route::get('get-siswa-by-rombel/{rombel}', [IndisiplinerSiswaController::class, 'getSiswaByRombel'])->name('getSiswaByRombel');
+        Route::get('rekapitulasi', [IndisiplinerSiswaController::class, 'rekapitulasiIndex'])->name('rekapitulasi.index');
+    });
+
+    Route::prefix('ppdb')->name('ppdb.')->group(function () {
+
+        Route::resource('landing', PpdbController::class);
+
+        Route::post('submit', [PpdbController::class, 'submitForm'])->name('submit');
+>>>>>>> 5b50e3a60be24540c43a4d2e8a8321f0958fbbae
     });
 });
 

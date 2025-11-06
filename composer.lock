@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "b89fbf8b89d52bfd6cc0bc7e9887faab",
+    "content-hash": "e7f9eb9e1a52f0db863af4848ce94540",
     "packages": [
         {
             "name": "bacon/bacon-qr-code",
@@ -3596,6 +3596,7 @@
         },
         {
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
             "name": "phiki/phiki",
             "version": "v2.0.4",
@@ -3775,6 +3776,8 @@
         },
         {
 >>>>>>> origin/modul/kepegawaian
+=======
+>>>>>>> 5b50e3a60be24540c43a4d2e8a8321f0958fbbae
             "name": "phpoption/phpoption",
             "version": "1.9.4",
             "source": {
