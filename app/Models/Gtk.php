@@ -9,21 +9,23 @@ class Gtk extends Model
 {
     use HasFactory;
 
-    protected $guarded = [];
-
     /**
-     * Relasi ke banyak tugas pegawai (riwayat tugas).
+     * The table associated with the model.
+     *
+     * @var string
      */
-    public function riwayatTugas()
+    protected $table = 'gtks';
+
+
+    public function jadwalPelajaran()
     {
-       return $this->hasMany(TugasPegawai::class, 'pegawai_id', 'ptk_id');
+        // GANTI 'gtk_id' jika nama kolomnya beda (misal: 'ptk_id')
+        return $this->hasMany(JadwalPelajaran::class, 'gtk_id'); 
     }
 
-    /**
-     * Relasi ke rombel jika GTK ini adalah wali kelas.
-     */
-    public function rombelWali()
+    // Relasi ke absensi GTK
+    public function absensi()
     {
-        return $this->hasOne(Rombel::class, 'ptk_id', 'ptk_id');
+        return $this->hasMany(AbsensiGtk::class, 'gtk_id');
     }
 }

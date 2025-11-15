@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB; // <--- ini harus ditambahkan
 
 class DatabaseSeeder extends Seeder
 {
@@ -12,11 +13,7 @@ class DatabaseSeeder extends Seeder
         DB::statement('SET FOREIGN_KEY_CHECKS=0;');
 
         $this->call([
-            UserSeeder::class,
-            PtkSeeder::class,
-            JurusanSeeder::class,
-            KurikulumSeeder::class,
-            EkstrakurikulerSeeder::class,
+            PengaturanAbsensiSeeder::class,
             TingkatSeeder::class,
         ]);
 

@@ -13,7 +13,21 @@ class TahunPelajaran extends Model
         'tahun_pelajaran',
         'keterangan',
         'is_active',
+        'active',
     ];
+
+    /**
+     * Method untuk memastikan hanya satu Tahun Pelajaran yang aktif.
+     * @param int $id ID Tahun Pelajaran yang akan diaktifkan
+     */
+    public static function setActive($id)
+    {
+        // 1. Non-aktifkan semua Tahun Pelajaran
+        self::where('is_active', true)->update(['is_active' => false]);
+
+        // 2. Aktifkan Tahun Pelajaran yang dipilih
+        self::where('id', $id)->update(['is_active' => true]);
+    }
 
     public function jalurs()
     {
@@ -30,13 +44,4 @@ class TahunPelajaran extends Model
         return $this->hasMany(SyaratPendaftaran::class, 'tahunPelajaran_id');
     }
     
-    public function kompetensis()
-    {
-        return $this->hasMany(KompetensiPendaftaran::class, 'tahunPelajaran_id');
-    }
-
-    public function kelass()
-    {
-        return $this->hasMany(KelasPendaftaran::class, 'tahunPelajaran_id');
-    }
 }

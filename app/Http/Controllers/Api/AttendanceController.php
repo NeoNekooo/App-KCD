@@ -15,9 +15,6 @@ class AttendanceController extends Controller
     /**
      * Menyimpan catatan absensi baru dari hasil scan QR Code.
      */
-    /**
-     * Menyimpan catatan absensi baru dari hasil scan QR Code.
-     */
     public function store(Request $request)
     {
         // 1. Validasi request, pastikan ada 'nis' yang dikirim

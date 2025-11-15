@@ -26,12 +26,10 @@ class SyaratPendaftaran extends Model
         return $this->belongsTo(JalurPendaftaran::class, 'jalurPendaftaran_id');
     }
 
-    public function calonSiswas()
+    public function formulir()
     {
-        return $this->belongsToMany(CalonSiswa::class, 'calon_siswa_syarat', 'syarat_id', 'calon_siswa_id')
+        return $this->belongsToMany(FormulirPendaftaran::class, 'formulir_syarat', 'syarat_id', 'formulir_id')
                     ->withPivot('is_checked')
                     ->withTimestamps();
     }
-
-
 }

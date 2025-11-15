@@ -14,18 +14,12 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0"
     />
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    
     <title>Dashboard Admin Sekolah</title>
     {{-- ... --}}
-    @vite([
-        'resources/sneat/assets/vendor/fonts/boxicons.css',
-        'resources/sneat/assets/vendor/css/core.css',
-        'resources/sneat/assets/vendor/css/theme-default.css',
-        'resources/sneat/assets/css/demo.css',
-        'resources/sneat/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css',
-        'resources/sneat/assets/vendor/libs/apex-charts/apex-charts.css',
-        'resources/sneat/assets/vendor/js/helpers.js',
-        'resources/sneat/assets/js/config.js'
-    ])
+    @vite(['resources/css/app.css'])
+    @stack('styles')
   </head>
   <body>
 
@@ -49,22 +43,7 @@
         </div>
         <div class="layout-overlay layout-menu-toggle"></div>
     </div>
-
-    @vite([
-        'resources/sneat/assets/vendor/libs/jquery/jquery.js',
-        'resources/sneat/assets/vendor/libs/popper/popper.js',
-        'resources/sneat/assets/vendor/js/bootstrap.js',
-        'resources/sneat/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js',
-        'resources/sneat/assets/vendor/js/menu.js',
-        'resources/sneat/assets/vendor/libs/apex-charts/apexcharts.js',
-        'resources/sneat/assets/js/main.js',
-        'resources/sneat/assets/js/dashboards-analytics.js',
-        'resources/sneat/assets/js/ui-modals.js',
-        'resources/sneat/assets/js/ui-toasts.js'
-    ])
-    
     <script async defer src="https://buttons.github.io/buttons.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             @if(session('success'))
@@ -91,9 +70,11 @@
                 const toast = new bootstrap.Toast(infoToast);
                 toast.show();
             @endif
-        });
-    </script>
+          });
+          </script>
+          
     @stack('scripts')
+    @vite(['resources/js/app.js'])
   </body>
 </html>
 

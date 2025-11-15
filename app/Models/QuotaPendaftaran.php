@@ -13,7 +13,6 @@ class QuotaPendaftaran extends Model
 
     protected $fillable = [
         'tahunPelajaran_id',
-        'tingkat',
         'keahlian',
         'jumlah_kelas',
         'quota'

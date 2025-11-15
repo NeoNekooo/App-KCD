@@ -24,9 +24,6 @@ class JalurPendaftaran extends Model
 
     public function syaratPendaftaran()
     {
-        // relasi ke syarat berdasarkan kolom jalurPendaftaran_id
-        return $this->hasMany(SyaratPendaftaran::class, 'jalurPendaftaran_id');
+        return $this->hasMany(SyaratPendaftaran::class, 'tahunPelajaran_id');
     }
-
-    
 }

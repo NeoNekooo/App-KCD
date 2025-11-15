@@ -9,15 +9,27 @@ class Rombel extends Model
 {
     use HasFactory;
 
+    /**
+     * The table associated with the model.
+     *
+     * @var string
+     */
     protected $table = 'rombels';
 
-    protected $casts = [
-        'anggota_rombel' => 'array',
-        'pembelajaran'   => 'array',
-    ];
-
+    /**
+     * Mendefinisikan relasi ke model Gtk (wali kelas).
+     *
+     * Catatan: Berdasarkan struktur database Anda, relasi ini menghubungkan
+     * kolom `ptk_id_str` (yang berisi nama guru) di tabel `rombels`
+     * dengan kolom `nama` di tabel `gtks`.
+     */
     public function waliKelas()
+    {
+        return $this->belongsTo(Gtk::class, 'ptk_id_str', 'nama');
+    }
+
+public function siswa()
 {
-    return $this->belongsTo(Gtk::class, 'ptk_id', 'ptk_id');
+ return $this->hasMany(Siswa::class, 'rombongan_belajar_id', 'rombongan_belajar_id');
 }
-}
+}   
