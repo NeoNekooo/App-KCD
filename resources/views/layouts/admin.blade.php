@@ -17,8 +17,17 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     
     <title>Dashboard Admin Sekolah</title>
-    {{-- ... --}}
-    @vite(['resources/css/app.css'])
+
+    {{-- Sneat Vendor CSS --}}
+    <link rel="stylesheet" href="{{ asset('sneat/assets/vendor/fonts/boxicons.css') }}">
+    <link rel="stylesheet" href="{{ asset('sneat/assets/vendor/css/core.css') }}">
+    <link rel="stylesheet" href="{{ asset('sneat/assets/vendor/css/theme-default.css') }}">
+    <link rel="stylesheet" href="{{ asset('sneat/assets/css/demo.css') }}">
+    <link rel="stylesheet" href="{{ asset('sneat/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css') }}">
+    <link rel="stylesheet" href="{{ asset('sneat/assets/vendor/libs/apex-charts/apex-charts.css') }}">
+
+    {{-- Tailwind + Vite --}}
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
     @stack('styles')
   </head>
   <body>
