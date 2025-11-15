@@ -98,6 +98,41 @@
                 </li>
             </ul>
         </li>
+
+        <!-- Akademik -->
+        <li class="menu-item {{ request()->is('admin/akademik*') ? 'open' : '' }}">
+            <a href="javascript:void(0);" class="menu-link menu-toggle">
+                <i class="menu-icon tf-icons bx bxs-book-content"></i>
+                <div data-i18n="Akademik">Akademik</div>
+            </a>
+            <ul class="menu-sub">
+                <li class="menu-item {{ request()->is('admin/akademik/tapel*') ? 'active' : '' }}">
+                    <a href="{{ route('admin.akademik.tapel.index') }}" class="menu-link">
+                        <div data-i18n="Tahun Pelajaran">Tahun Pelajaran</div>
+                    </a>
+                </li>
+                {{-- <li class="menu-item {{ request()->is('admin/akademik/semester*') ? 'active' : '' }}">
+                    <a href="{{ route('admin.akademik.semester.index') }}" class="menu-link">
+                        <div data-i18n="Semester">Semester</div>
+                    </a>
+                </li> --}}
+                <li class="menu-item {{ request()->is('admin/akademik/jurusan*') ? 'active' : '' }}">
+                    <a href="{{ route('admin.akademik.jurusan.index') }}" class="menu-link">
+                        <div data-i18n="Jurusan">Konsentrasi Keahlian</div>
+                    </a>
+                </li>
+                <li class="menu-item {{ request()->is('admin/akademik/mapel*') ? 'active' : '' }}">
+                    <a href="{{ route('admin.akademik.mapel.index') }}" class="menu-link">
+                        <div data-i18n="Semester">Mapel</div>
+                    </a>
+                </li>
+                <li class="menu-item {{ request()->is('admin/akademik/ekstrakurikuler*') ? 'active' : '' }}">
+                    <a href="{{ route('admin.akademik.ekskul.index') }}" class="menu-link">
+                        <div data-i18n="Semester">Ekstrakulikuler</div>
+                    </a>
+                </li>
+            </ul>
+        </li>
         
     </ul>
 

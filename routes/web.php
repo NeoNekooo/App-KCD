@@ -8,6 +8,12 @@ use App\Http\Controllers\Admin\Settings\SekolahController;
 use App\Http\Controllers\Admin\Kepegawaian\GtkController;
 use App\Http\Controllers\Admin\Kepegawaian\TugasPegawaiController;
 
+// Controller Akademik
+use App\Http\Controllers\Admin\Akademik\TapelController;
+use App\Http\Controllers\Admin\Akademik\JurusanController;
+use App\Http\Controllers\Admin\Akademik\MapelController; 
+use App\Http\Controllers\Admin\Akademik\EkstrakurikulerController;
+
 /*
 |--------------------------------------------------------------------------
 | Rute Web Utama
@@ -66,6 +72,16 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         // Route untuk Tugas Pegawai
         Route::resource('tugas-pegawai', TugasPegawaiController::class)->except(['create', 'edit', 'show']);
+    });
+
+    // --- GRUP AKADEMIK ---
+    Route::prefix('akademik')->name('akademik.')->group(function () {
+        Route::get('tapel', [TapelController::class, 'index'])->name('tapel.index');
+        Route::get('tapel/sinkron', [TapelController::class, 'sinkron'])->name('tapel.sinkron');
+        Route::post('tapel/aktif/{id}', [TapelController::class, 'setAktif'])->name('tapel.aktif');
+        Route::resource('jurusan', JurusanController::class)->only(['index']);
+        Route::get('mapel', [MapelController::class, 'index'])->name('mapel.index'); 
+        Route::get('/ekstrakurikuler', [EkstrakurikulerController::class, 'index'])->name('ekskul.index');
     });
 
 }); // Akhir dari grup 'admin'
