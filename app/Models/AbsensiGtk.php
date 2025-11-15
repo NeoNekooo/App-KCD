@@ -4,27 +4,32 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class AbsensiGtk extends Model
 {
     use HasFactory;
 
+    /**
+     * Nama tabel yang terhubung dengan model.
+     *
+     * @var string
+     */
     protected $table = 'absensi_gtk';
 
-    // Izinkan kolom ini diisi
-    protected $fillable = [
-        'gtk_id',
-        'tanggal',
-        'jam_masuk',
-        'jam_pulang',
-        'status',
-        'keterangan',
-        'status_kehadiran', // Kita akan gunakan ini untuk 'Terlambat'
-    ];
+    /**
+     * The attributes that aren't mass assignable.
+     *
+     * @var array
+     */
+    protected $guarded = ['id'];
 
-    // Relasi ke model Gtk
-    public function gtk()
+    /**
+     * Mendefinisikan relasi "belongsTo" ke model Gtk.
+     * Setiap record absensi dimiliki oleh satu GTK.
+     */
+    public function gtk(): BelongsTo
     {
-        return $this->belongsTo(Gtk::class, 'gtk_id');
+        return $this->belongsTo(Gtk::class);
     }
 }

@@ -377,6 +377,79 @@
             </ul>
         </li>
 
+        <li class="menu-item {{ request()->is('admin/indisipliner*') ? 'open' : '' }}">
+            <a href="javascript:void(0);" class="menu-link menu-toggle">
+                <i class="menu-icon tf-icons bx bx-shield-quarter"></i>
+                <div data-i18n="Indisipliner">Indisipliner</div>
+            </a>
+            <ul class="menu-sub">
+                <li class="menu-item {{ request()->is('admin/indisipliner/guru*') ? 'open' : '' }}">
+                    <a href="javascript:void(0);" class="menu-link menu-toggle">
+                        <div data-i18n="Guru">Guru</div>
+                    </a>
+                    <ul class="menu-sub">
+                        {{-- 🧩 Pengaturan Indisipliner Guru --}}
+                        <li
+                            class="menu-item {{ request()->is('admin/indisipliner-guru/pengaturan*') ? 'active' : '' }}">
+                            <a href="{{ route('admin.indisipliner.guru.pengaturan.index') }}" class="menu-link">
+                                <div data-i18n="Pengaturan">Pengaturan</div>
+                            </a>
+                        </li>
+                        <li class="menu-item {{ request()->is('admin/indisipliner-guru/daftar*') ? 'active' : '' }}">
+                            <a href="{{ route('admin.indisipliner.guru.daftar.index') }}" class="menu-link">
+                                <div data-i18n="Daftar Indisipliner">Daftar Indisipliner</div>
+                            </a>
+                        </li>
+
+
+                        <li
+                            class="menu-item {{ request()->is('admin/indisipliner-guru/rekapitulasi*') ? 'active' : '' }}">
+                            <a href="{{ route('admin.indisipliner.guru.rekapitulasi.index') }}" class="menu-link">
+                                <div data-i18n="Rekapitulasi">Rekapitulasi</div>
+                            </a>
+                        </li>
+                    </ul>
+
+
+                </li>
+                {{-- Menu Indisipliner Siswa --}}
+                <li class="menu-item {{ request()->is('admin/indisipliner-siswa*') ? 'open' : '' }}">
+                    <a href="javascript:void(0);" class="menu-link menu-toggle">
+                        <div data-i18n="Siswa">Siswa</div>
+                    </a>
+                    <ul class="menu-sub">
+                        <li
+                            class="menu-item {{ request()->routeIs('admin.indisipliner.siswa.pengaturan.index') ? 'active' : '' }}">
+                            <a href="{{ route('admin.indisipliner.siswa.pengaturan.index') }}" class="menu-link">
+                                <div data-i18n="Pengaturan">Pengaturan</div>
+                            </a>
+                        </li>
+                        <li
+                            class="menu-item {{ request()->routeIs('admin.indisipliner.siswa.kiosk.*') ? 'active' : '' }}">
+                            <a href="{{ route('admin.indisipliner.siswa.kiosk.index') }}"
+                                class="menu-link">
+                                {{-- Anda bisa tambahkan ikon jika mau, contoh: --}}
+                                {{-- <i class="menu-icon tf-icons bx bx-qr-scan"></i> --}}
+                                <div data-i18n="Kios Pelanggaran">Kios Pelanggaran</div>
+                                </a>
+                            </li>
+                        <li
+                            class="menu-item {{ request()->routeIs('admin.indisipliner.siswa.daftar.*') ? 'active' : '' }}">
+                            <a href="{{ route('admin.indisipliner.siswa.daftar.index') }}" class="menu-link">
+                                <div data-i18n="Daftar Indisipliner">Daftar Indisipliner</div>
+                            </a>
+                        </li>
+                        <li
+                            class="menu-item {{ request()->routeIs('admin.indisipliner.siswa.rekapitulasi.*') ? 'active' : '' }}">
+                            <a href="{{ route('admin.indisipliner.siswa.rekapitulasi.index') }}" class="menu-link">
+                                <div data-i18n="Rekapitulasi">Rekapitulasi</div>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </li>
+
         {{-- Pengaturan Landing --}}
         <li class="menu-header small text-uppercase"><span class="menu-header-text">Manajemen Landing</span></li>
         <li class="menu-item {{ request()->is('admin/akademik*') ? 'open' : '' }}">

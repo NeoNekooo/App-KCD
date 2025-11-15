@@ -10,22 +10,35 @@ class Gtk extends Model
     use HasFactory;
 
     /**
-     * The table associated with the model.
+     * Tabel terkait dengan model.
+     * Diasumsikan menggunakan tabel 'gtks' seperti pada dump database.
      *
      * @var string
      */
     protected $table = 'gtks';
 
+    /**
+     * Kunci utama tabel.
+     *
+     * @var string
+     */
+    protected $primaryKey = 'id'; // Menggunakan 'id' sesuai struktur tabel 'gtks'
 
-    public function jadwalPelajaran()
-    {
-        // GANTI 'gtk_id' jika nama kolomnya beda (misal: 'ptk_id')
-        return $this->hasMany(JadwalPelajaran::class, 'gtk_id'); 
-    }
-
-    // Relasi ke absensi GTK
-    public function absensi()
-    {
-        return $this->hasMany(AbsensiGtk::class, 'gtk_id');
-    }
+    /**
+     * Menonaktifkan timestamps karena tabel gtks biasanya tidak menggunakannya.
+     *
+     * @var bool
+     */
+    public $timestamps = false;
+    
+    /**
+     * Atribut yang dapat diisi secara massal.
+     * Hanya memasukkan 'nama' dan 'ptk_id' untuk tujuan tampilan.
+     *
+     * @var array<int, string>
+     */
+    protected $fillable = [
+        'nama', 
+        'ptk_id', // Jika diperlukan NIP/PTK ID
+    ];
 }

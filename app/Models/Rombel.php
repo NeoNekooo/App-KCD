@@ -4,32 +4,41 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Rombel extends Model
 {
     use HasFactory;
 
     /**
-     * The table associated with the model.
+     * Nama tabel yang terhubung.
      *
      * @var string
      */
     protected $table = 'rombels';
 
     /**
-     * Mendefinisikan relasi ke model Gtk (wali kelas).
+     * Primary key untuk model ini.
      *
-     * Catatan: Berdasarkan struktur database Anda, relasi ini menghubungkan
-     * kolom `ptk_id_str` (yang berisi nama guru) di tabel `rombels`
-     * dengan kolom `nama` di tabel `gtks`.
+     * @var string
      */
-    public function waliKelas()
+    protected $primaryKey = 'id'; // Sesuai screenshot Anda
+
+    /**
+     * Relasi ke semua Siswa di Rombel ini.
+     * Menghubungkan rombels.rombongan_belajar_id (Varchar) -> siswas.rombongan_belajar_id (Varchar)
+     */
+    public function siswa(): HasMany
     {
-        return $this->belongsTo(Gtk::class, 'ptk_id_str', 'nama');
+        return $this->hasMany(Siswa::class, 'rombongan_belajar_id', 'rombongan_belajar_id');
     }
 
-public function siswa()
-{
- return $this->hasMany(Siswa::class, 'rombongan_belajar_id', 'rombongan_belajar_id');
+    /**
+     * Relasi ke semua data pelanggaran yang terjadi di rombel ini.
+     * Menghubungkan rombels.id (PK) -> pelanggaran_nilai.rombongan_belajar_id (FK)
+     */
+    public function pelanggaran(): HasMany
+    {
+        return $this->hasMany(PelanggaranNilai::class, 'rombongan_belajar_id', 'id');
+    }
 }
-}   
