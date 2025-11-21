@@ -52,7 +52,7 @@
                     </a>
 
                     {{-- Hapus --}}
-                    <form action="{{ route('admin.kesiswaan.ppdb.kompetensi-ppdb.destroy', $item->id) }}" method="POST" 
+                    <form action="{{ route('admin.ppdb.kompetensi-ppdb.destroy', $item->id) }}" method="POST" 
                           onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini?');">
                       @csrf
                       @method('DELETE')
@@ -85,7 +85,7 @@
         <h5 class="modal-title">Tambah Kompetensi</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
-      <form action="{{ route('admin.kesiswaan.ppdb.kompetensi-ppdb.store') }}" method="POST">
+      <form action="{{ route('admin.ppdb.kompetensi-ppdb.store') }}" method="POST">
         @csrf
         <div class="modal-body">
           <div class="row g-6 mb-3">

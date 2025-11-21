@@ -20,40 +20,40 @@ use App\Http\Controllers\Admin\Akademik\MapelController;
 use App\Http\Controllers\Admin\Akademik\EkstrakurikulerController;
 
 // Controller Kesiswaan
-    // Controller PPDB
-        use App\Http\Controllers\Admin\Kesiswaan\ppdb\DaftarPesertaDidikBaruController;
-        use App\Http\Controllers\Admin\Kesiswaan\ppdb\DaftarCalonPesertaDidikController;
-        use App\Http\Controllers\Admin\Kesiswaan\ppdb\PemberianNisController;
-        use App\Http\Controllers\Admin\Kesiswaan\ppdb\FormulirPendaftaranController;
-        use App\Http\Controllers\Admin\Kesiswaan\ppdb\JalurController;
-        use App\Http\Controllers\Admin\Kesiswaan\ppdb\TingkatPendaftaranController;
-        use App\Http\Controllers\Admin\Kesiswaan\ppdb\KompetensiPendaftaranController;
-        use App\Http\Controllers\Admin\Kesiswaan\ppdb\KelasPendaftaranController;
-        use App\Http\Controllers\Admin\Kesiswaan\ppdb\LaporanPendaftaranController;
-        use App\Http\Controllers\Admin\Kesiswaan\ppdb\LaporanQuotaController;
-        use App\Http\Controllers\Admin\Kesiswaan\ppdb\PenempatanKelasController;
-        use App\Http\Controllers\Admin\Kesiswaan\ppdb\QuotaController;
-        use App\Http\Controllers\Admin\Kesiswaan\ppdb\SyaratController;
-        use App\Http\Controllers\Admin\Kesiswaan\ppdb\TahunPpdbController;
+use App\Http\Controllers\Admin\Kesiswaan\SiswaController;
 
-    // Controller Siswa  
-        use App\Http\Controllers\Admin\Kesiswaan\SiswaController;
+// Controller ppdb
 
+// Controller Ppdb
+use App\Http\Controllers\Admin\ppdb\DaftarPesertaDidikBaruController;
+use App\Http\Controllers\Admin\ppdb\DaftarCalonPesertaDidikController;
+use App\Http\Controllers\Admin\ppdb\PemberianNisController;
+use App\Http\Controllers\Admin\ppdb\FormulirPendaftaranController;
+use App\Http\Controllers\Admin\ppdb\JalurController;
+use App\Http\Controllers\Admin\ppdb\TingkatPendaftaranController;
+use App\Http\Controllers\Admin\ppdb\KompetensiPendaftaranController;
+use App\Http\Controllers\Admin\ppdb\KelasPendaftaranController;
+use App\Http\Controllers\Admin\ppdb\LaporanPendaftaranController;
+use App\Http\Controllers\Admin\ppdb\LaporanQuotaController;
+use App\Http\Controllers\Admin\ppdb\PenempatanKelasController;
+use App\Http\Controllers\Admin\ppdb\QuotaController;
+use App\Http\Controllers\Admin\ppdb\SyaratController;
+use App\Http\Controllers\Admin\ppdb\TahunPpdbController;
+
+// Controller Indisipliner
+use App\Http\Controllers\Admin\Indisipliner\IndisiplinerGtkController;
+use App\Http\Controllers\Admin\Indisipliner\IndisiplinerSiswaController;
     
-    // Controller Indisipliner
-    use App\Http\Controllers\Admin\Indisipliner\IndisiplinerGtkController;
-    use App\Http\Controllers\Admin\Indisipliner\IndisiplinerSiswaController;
-        
-    // Controller Absensi
-    use App\Http\Controllers\Admin\Absensi\AbsensiSiswaController;
-    use App\Http\Controllers\Admin\Absensi\AbsensiGtkController;
-    use App\Http\Controllers\Admin\Absensi\AbsensiMapelController;
-    use App\Http\Controllers\Admin\Pengaturan\HariLiburController;
-    use App\Http\Controllers\Admin\Pengaturan\PengaturanAbsensiController;
-    use App\Http\Controllers\Admin\Laporan\LaporanAbsensiController;
-    
-    // Controller Landing
-    use App\Http\Controllers\Admin\Landing\PpdbController;
+// Controller Absensi
+use App\Http\Controllers\Admin\Absensi\AbsensiSiswaController;
+use App\Http\Controllers\Admin\Absensi\AbsensiGtkController;
+use App\Http\Controllers\Admin\Absensi\AbsensiMapelController;
+use App\Http\Controllers\Admin\Pengaturan\HariLiburController;
+use App\Http\Controllers\Admin\Pengaturan\PengaturanAbsensiController;
+use App\Http\Controllers\Admin\Laporan\LaporanAbsensiController;
+
+// Controller Landing
+use App\Http\Controllers\Admin\Landing\PpdbController;
         
 /*
 |--------------------------------------------------------------------------
@@ -161,68 +161,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
     */
     Route::prefix('kesiswaan')->name('kesiswaan.')->group(function() {
         Route::resource('siswa', SiswaController::class);
-        
-        /*
-        |--------------------------------------------------------------------------
-        | Kesiswaan (PPDB)
-        |--------------------------------------------------------------------------
-        */
-        Route::prefix('ppdb')->name('ppdb.')->group(function () {
-            // Tahun Pelajaran PPDB
-            Route::resource('tahun-ppdb', TahunPpdbController::class);
-            Route::post('/tahun-ppdb/{id}/toggle-active', [TahunPpdbController::class, 'toggleActive'])->name('tahun-ppdb.toggleActive');
-
-            // Jalur Pendaftaran
-            Route::resource('jalur-ppdb', JalurController::class);
-            Route::post('/jalur-ppdb/{id}/toggle-active', [JalurController::class, 'toggleActive'])->name('jalur-ppdb.toggleActive');
-
-            // Tingkat Pendaftaran
-            Route::resource('tingkat-ppdb', TingkatPendaftaranController::class);
-            Route::post('/tingkat-ppdb/{id}/toggle-active', [TingkatPendaftaranController::class, 'toggleActive'])->name('tingkat-ppdb.toggleActive');
-
-            // Kompetensi Pendaftaran
-            Route::resource('kompetensi-ppdb', KompetensiPendaftaranController::class);
-
-            // Kelas Pendaftaran
-            Route::resource('kelas-ppdb', KelasPendaftaranController::class);
-
-            // Quota Pendaftaran
-            Route::resource('quota-ppdb', QuotaController::class);
-
-            // Syarat Pendaftaran
-            Route::resource('syarat-ppdb', SyaratController::class);
-            Route::post('/syarat-ppdb/{id}/toggle-active', [SyaratController::class, 'toggleActive'])->name('syarat-ppdb.toggleActive');
-
-            // Formulir Pendaftaran
-            Route::resource('formulir-ppdb', FormulirPendaftaranController::class);
-            Route::get('/get-syarat/{jalurId}', [SyaratController::class, 'getByJalur'])->name('ppdb.get-syarat');
-            Route::patch('update-status/{id}', [FormulirPendaftaranController::class, 'updateStatus'])->name('updateStatus');
-
-            // Pemberian NIS
-            Route::get('pemberian-nis/generate', 
-                [PemberianNisController::class, 'generate']
-            )->name('pemberian-nis.generate');
-            Route::resource('pemberian-nis', PemberianNisController::class);
-
-            Route::get('daftar-calon/resi/{id}', [DaftarCalonPesertaDidikController::class, 'resi'])->name('daftar_calon.resi');
-
-            // Data Peserta Didik
-            Route::resource('daftar-calon-peserta-didik', DaftarCalonPesertaDidikController::class);
-            Route::resource('daftar-peserta-didik-baru', DaftarPesertaDidikBaruController::class);
-
-            // Penempatan Kelas
-            Route::resource('penempatan-kelas', PenempatanKelasController::class);
-            Route::post('penempatan-kelas/update-kelas', 
-                [PenempatanKelasController::class, 'updateKelas']
-            )->name('penempatan-kelas.update-kelas');
-
-
-            // Laporan
-            Route::resource('laporan-pendaftaran', LaporanPendaftaranController::class);
-            Route::resource('laporan-quota', LaporanQuotaController::class);
-
-
-        });
 
         /*
         |--------------------------------------------------------------------------
@@ -236,6 +174,58 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/cetak-kartu-massal/{rombel}', [SiswaController::class, 'cetakKartuMassal'])->name('siswa.cetak_massal_show');
         Route::resource('siswa', SiswaController::class);
 
+    });
+
+    /*
+    |--------------------------------------------------------------------------
+    | (PPDB)
+    |--------------------------------------------------------------------------
+    */
+    Route::prefix('ppdb')->name('ppdb.')->group(function () {
+        // Tahun Pelajaran PPDB
+        Route::resource('tahun-ppdb', TahunPpdbController::class);
+        Route::post('/tahun-ppdb/{id}/toggle-active', [TahunPpdbController::class, 'toggleActive'])->name('tahun-ppdb.toggleActive');
+        // Jalur Pendaftaran
+        Route::resource('jalur-ppdb', JalurController::class);
+        Route::post('/jalur-ppdb/{id}/toggle-active', [JalurController::class, 'toggleActive'])->name('jalur-ppdb.toggleActive');
+        // Tingkat Pendaftaran
+        Route::resource('tingkat-ppdb', TingkatPendaftaranController::class);
+        Route::post('/tingkat-ppdb/{id}/toggle-active', [TingkatPendaftaranController::class, 'toggleActive'])->name('tingkat-ppdb.toggleActive');
+        // Kompetensi Pendaftaran
+        Route::resource('kompetensi-ppdb', KompetensiPendaftaranController::class);
+        // Kelas Pendaftaran
+        Route::resource('kelas-ppdb', KelasPendaftaranController::class);
+        // Quota Pendaftaran
+        Route::resource('quota-ppdb', QuotaController::class);
+        // Syarat Pendaftaran
+        Route::resource('syarat-ppdb', SyaratController::class);
+        Route::post('/syarat-ppdb/{id}/toggle-active', [SyaratController::class, 'toggleActive'])->name('syarat-ppdb.toggleActive');
+        // Formulir Pendaftaran
+        Route::resource('formulir-ppdb', FormulirPendaftaranController::class);
+        Route::get('/get-syarat/{jalurId}', [SyaratController::class, 'getByJalur'])->name('ppdb.get-syarat');
+        Route::patch('update-status/{id}', [FormulirPendaftaranController::class, 'updateStatus'])->name('updateStatus');
+        // Pemberian NIS
+        Route::get('pemberian-nis/generate', 
+            [PemberianNisController::class, 'generate']
+        )->name('pemberian-nis.generate');
+        Route::resource('pemberian-nis', PemberianNisController::class);
+        Route::get('daftar-calon/resi/{id}', [DaftarCalonPesertaDidikController::class, 'resi'])->name('daftar_calon.resi');
+        // Data Peserta Didik
+        Route::resource('daftar-calon-peserta-didik', DaftarCalonPesertaDidikController::class);
+        Route::resource('daftar-peserta-didik-baru', DaftarPesertaDidikBaruController::class);
+        // Penempatan Kelas
+        Route::resource('penempatan-kelas', PenempatanKelasController::class);
+        Route::post('penempatan-kelas/update-kelas', 
+            [PenempatanKelasController::class, 'updateKelas']
+        )->name('penempatan-kelas.update-kelas');
+        // Laporan
+        Route::resource('laporan-pendaftaran', LaporanPendaftaranController::class);
+        Route::resource('laporan-quota', LaporanQuotaController::class);
+
+        // Landing Ppdb
+        Route::resource('landing', PpdbController::class);
+
+        Route::post('submit', [PpdbController::class, 'submitForm'])->name('submit');
     });
 
     // --- GRUP INDISIPLINER ---
@@ -307,18 +297,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
             // REKAPITULASI
             Route::get('rekapitulasi', [IndisiplinerSiswaController::class, 'rekapitulasiIndex'])->name('rekapitulasi.index');
         });
-    });
-
-    /*
-    |--------------------------------------------------------------------------
-    | Landing (PPDB)
-    |--------------------------------------------------------------------------
-    */
-    Route::prefix('ppdb')->name('ppdb.')->group(function () {
-
-        Route::resource('landing', PpdbController::class);
-
-        Route::post('submit', [PpdbController::class, 'submitForm'])->name('submit');
     });
 
     /*

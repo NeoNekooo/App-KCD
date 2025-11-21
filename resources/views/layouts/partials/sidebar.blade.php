@@ -138,106 +138,10 @@
         <li class="menu-item {{ request()->is('admin/kesiswaan*') ? 'open' : '' }}">
             <a href="javascript:void(0);" class="menu-link menu-toggle">
                 <i class="menu-icon tf-icons bx bx-user-check"></i>
-                <div data-i18n="Kesiswaan">Kesiswaan</div>
+                <div data-i18n="Kesiswaan">Peserta Didik</div>
             </a>
             
             <ul class="menu-sub">
-                <!-- Kesiswaan (PPDB)-->
-                <li class="menu-item {{ request()->is('admin/kesiswaan/ppdb*') ? 'open' : '' }}">
-                    <a href="javascript:void(0);" class="menu-link menu-toggle">
-                        <div data-i18n="PPDB">PPDB</div>
-                    </a>
-                    <ul class="menu-sub">
-                        <li
-                            class="menu-item {{ request()->routeIs('admin.kesiswaan.ppdb.tahun-ppdb.index') ? 'active' : '' }}">
-                            <a href="{{ route('admin.kesiswaan.ppdb.tahun-ppdb.index') }}" class="menu-link">
-                                <div data-i18n="Tahun PPDB">Tahun PPDB</div>
-                            </a>
-                        </li>
-                        <li
-                            class="menu-item {{ request()->routeIs('admin.kesiswaan.ppdb.tingkat-ppdb.index') ? 'active' : '' }}">
-                            <a href="{{ route('admin.kesiswaan.ppdb.tingkat-ppdb.index') }}" class="menu-link">
-                                <div data-i18n="Pengaturan Tingkat">Pengaturan Tingkat</div>
-                            </a>
-                        </li>
-                        <li
-                            class="menu-item {{ request()->routeIs('admin.kesiswaan.ppdb.kompetensi-ppdb.index') ? 'active' : '' }}">
-                            <a href="{{ route('admin.kesiswaan.ppdb.kompetensi-ppdb.index') }}" class="menu-link">
-                                <div data-i18n="Kompetensi Pendaftaran">Kompetensi</div>
-                            </a>
-                        </li>
-                        <li
-                            class="menu-item {{ request()->routeIs('admin.kesiswaan.ppdb.kelas-ppdb.index') ? 'active' : '' }}">
-                            <a href="{{ route('admin.kesiswaan.ppdb.kelas-ppdb.index') }}" class="menu-link">
-                                <div data-i18n="Kelas Pendaftaran">Kelas</div>
-                            </a>
-                        </li>
-                        <li
-                            class="menu-item {{ request()->routeIs('admin.kesiswaan.ppdb.quota-ppdb.index') ? 'active' : '' }}">
-                            <a href="{{ route('admin.kesiswaan.ppdb.quota-ppdb.index') }}" class="menu-link">
-                                <div data-i18n="Quota">Quota Pendaftaran</div>
-                            </a>
-                        </li>
-                        <li
-                            class="menu-item {{ request()->routeIs('admin.kesiswaan.ppdb.jalur-ppdb.index') ? 'active' : '' }}">
-                            <a href="{{ route('admin.kesiswaan.ppdb.jalur-ppdb.index') }}" class="menu-link">
-                                <div data-i18n="Jalur Pendaftaran">Jalur Pendaftaran</div>
-                            </a>
-                        </li>
-                        <li
-                            class="menu-item {{ request()->routeIs('admin.kesiswaan.ppdb.syarat-ppdb.index') ? 'active' : '' }}">
-                            <a href="{{ route('admin.kesiswaan.ppdb.syarat-ppdb.index') }}" class="menu-link">
-                                <div data-i18n="Syarat">Syarat Pendaftaran</div>
-                            </a>
-                        </li>
-                        <li
-                            class="menu-item {{ request()->routeIs('admin.kesiswaan.ppdb.formulir-ppdb.index') ? 'active' : '' }}">
-                            <a href="{{ route('admin.kesiswaan.ppdb.formulir-ppdb.index') }}" class="menu-link">
-                                <div data-i18n="Formulir">Formulir Pendaftaran</div>
-                            </a>
-                        </li>
-                        <li
-                            class="menu-item {{ request()->routeIs('admin.kesiswaan.ppdb.daftar-calon-peserta-didik.index') ? 'active' : '' }}">
-                            <a href="{{ route('admin.kesiswaan.ppdb.daftar-calon-peserta-didik.index') }}"
-                                class="menu-link">
-                                <div data-i18n="Calon Peserta Didik">Calon Peserta Didik</div>
-                            </a>
-                        </li>
-                        <li
-                            class="menu-item {{ request()->routeIs('admin.kesiswaan.ppdb.pemberian-nis.index') ? 'active' : '' }}">
-                            <a href="{{ route('admin.kesiswaan.ppdb.pemberian-nis.index') }}"
-                                class="menu-link">
-                                <div data-i18n="Calon Peserta Didik">Pemberian NIS</div>
-                            </a>
-                        </li>
-                        <li
-                            class="menu-item {{ request()->routeIs('admin.kesiswaan.ppdb.daftar-peserta-didik-baru.index') ? 'active' : '' }}">
-                            <a href="{{ route('admin.kesiswaan.ppdb.daftar-peserta-didik-baru.index') }}"
-                                class="menu-link">
-                                <div data-i18n="Calon Peserta Didik">Peserta Didik Baru</div>
-                            </a>
-                        </li>
-                        <li
-                            class="menu-item {{ request()->routeIs('admin.kesiswaan.ppdb.penempatan-kelas.index') ? 'active' : '' }}">
-                            <a href="{{ route('admin.kesiswaan.ppdb.penempatan-kelas.index') }}" class="menu-link">
-                                <div data-i18n="Penempatan Kelas">Penempatan Kelas</div>
-                            </a>
-                        </li>
-                        <li
-                            class="menu-item {{ request()->routeIs('admin.kesiswaan.ppdb.laporan-pendaftaran.index') ? 'active' : '' }}">
-                            <a href="{{ route('admin.kesiswaan.ppdb.laporan-pendaftaran.index') }}"
-                                class="menu-link">
-                                <div data-i18n="Laporan Pendaftaran">Laporan Pendaftaran</div>
-                            </a>
-                        </li>
-                        <li
-                            class="menu-item {{ request()->routeIs('admin.kesiswaan.ppdb.laporan-quota.index') ? 'active' : '' }}">
-                            <a href="{{ route('admin.kesiswaan.ppdb.laporan-quota.index') }}" class="menu-link">
-                                <div data-i18n="Laporan Quota">Laporan Quota</div>
-                            </a>
-                        </li>
-                    </ul>
-                </li>
 
                 <!-- Kesiswaan (Siswa)-->
                 <li class="menu-item {{ request()->is('admin/kesiswaan/siswa*') ? 'active' : '' }}">
@@ -248,6 +152,113 @@
                 <li class="menu-item {{ request()->routeIs('admin.kesiswaan.siswa.cetak_massal_index') ? 'active' : '' }}">
                     <a href="{{ route('admin.kesiswaan.siswa.cetak_massal_index') }}" class="menu-link">
                         <div data-i18n="Cetak Kartu Massal">Cetak Kartu Massal</div>
+                    </a>
+                </li>
+            </ul>
+        </li>
+
+        <!-- PPDB -->
+        <li class="menu-item {{ request()->is('admin/ppdb*') ? 'open' : '' }}">
+            <a href="javascript:void(0);" class="menu-link menu-toggle">
+                <i class="menu-icon tf-icons bx bxs-graduation"></i>
+                <div data-i18n="PPDB">PPDB</div>
+            </a>
+            <ul class="menu-sub">
+                <li
+                    class="menu-item {{ request()->routeIs('admin.ppdb.tahun-ppdb.index') ? 'active' : '' }}">
+                    <a href="{{ route('admin.ppdb.tahun-ppdb.index') }}" class="menu-link">
+                        <div data-i18n="Tahun PPDB">Tahun PPDB</div>
+                    </a>
+                </li>
+                <li
+                    class="menu-item {{ request()->routeIs('admin.ppdb.tingkat-ppdb.index') ? 'active' : '' }}">
+                    <a href="{{ route('admin.ppdb.tingkat-ppdb.index') }}" class="menu-link">
+                        <div data-i18n="Pengaturan Tingkat">Pengaturan Tingkat</div>
+                    </a>
+                </li>
+
+                @php
+                    use App\Models\TingkatPendaftaran;
+
+                    $tingkat = TingkatPendaftaran::where('is_active', 1)->first(); // Hanya 1 tingkat aktif
+
+                @endphp
+                @if($tingkat->tingkat == 10)
+                <li
+                    class="menu-item {{ request()->routeIs('admin.ppdb.kompetensi-ppdb.index') ? 'active' : '' }}">
+                    <a href="{{ route('admin.ppdb.kompetensi-ppdb.index') }}" class="menu-link">
+                        <div data-i18n="Kompetensi Pendaftaran">Kompetensi</div>
+                    </a>
+                </li>
+                @endif
+                <li
+                    class="menu-item {{ request()->routeIs('admin.ppdb.kelas-ppdb.index') ? 'active' : '' }}">
+                    <a href="{{ route('admin.ppdb.kelas-ppdb.index') }}" class="menu-link">
+                        <div data-i18n="Kelas Pendaftaran">Kelas</div>
+                    </a>
+                </li>
+                <li
+                    class="menu-item {{ request()->routeIs('admin.ppdb.quota-ppdb.index') ? 'active' : '' }}">
+                    <a href="{{ route('admin.ppdb.quota-ppdb.index') }}" class="menu-link">
+                        <div data-i18n="Quota">Quota Pendaftaran</div>
+                    </a>
+                </li>
+                <li
+                    class="menu-item {{ request()->routeIs('admin.ppdb.jalur-ppdb.index') ? 'active' : '' }}">
+                    <a href="{{ route('admin.ppdb.jalur-ppdb.index') }}" class="menu-link">
+                        <div data-i18n="Jalur Pendaftaran">Jalur Pendaftaran</div>
+                    </a>
+                </li>
+                <li
+                    class="menu-item {{ request()->routeIs('admin.ppdb.syarat-ppdb.index') ? 'active' : '' }}">
+                    <a href="{{ route('admin.ppdb.syarat-ppdb.index') }}" class="menu-link">
+                        <div data-i18n="Syarat">Syarat Pendaftaran</div>
+                    </a>
+                </li>
+                <li
+                    class="menu-item {{ request()->routeIs('admin.ppdb.formulir-ppdb.index') ? 'active' : '' }}">
+                    <a href="{{ route('admin.ppdb.formulir-ppdb.index') }}" class="menu-link">
+                        <div data-i18n="Formulir">Formulir Pendaftaran</div>
+                    </a>
+                </li>
+                <li
+                    class="menu-item {{ request()->routeIs('admin.ppdb.daftar-calon-peserta-didik.index') ? 'active' : '' }}">
+                    <a href="{{ route('admin.ppdb.daftar-calon-peserta-didik.index') }}"
+                        class="menu-link">
+                        <div data-i18n="Calon Peserta Didik">Calon Peserta Didik</div>
+                    </a>
+                </li>
+                <li
+                    class="menu-item {{ request()->routeIs('admin.ppdb.pemberian-nis.index') ? 'active' : '' }}">
+                    <a href="{{ route('admin.ppdb.pemberian-nis.index') }}"
+                        class="menu-link">
+                        <div data-i18n="Calon Peserta Didik">Pemberian NIS</div>
+                    </a>
+                </li>
+                <li
+                    class="menu-item {{ request()->routeIs('admin.ppdb.daftar-peserta-didik-baru.index') ? 'active' : '' }}">
+                    <a href="{{ route('admin.ppdb.daftar-peserta-didik-baru.index') }}"
+                        class="menu-link">
+                        <div data-i18n="Calon Peserta Didik">Peserta Didik Baru</div>
+                    </a>
+                </li>
+                <li
+                    class="menu-item {{ request()->routeIs('admin.ppdb.penempatan-kelas.index') ? 'active' : '' }}">
+                    <a href="{{ route('admin.ppdb.penempatan-kelas.index') }}" class="menu-link">
+                        <div data-i18n="Penempatan Kelas">Penempatan Kelas</div>
+                    </a>
+                </li>
+                <li
+                    class="menu-item {{ request()->routeIs('admin.ppdb.laporan-pendaftaran.index') ? 'active' : '' }}">
+                    <a href="{{ route('admin.ppdb.laporan-pendaftaran.index') }}"
+                        class="menu-link">
+                        <div data-i18n="Laporan Pendaftaran">Laporan Pendaftaran</div>
+                    </a>
+                </li>
+                <li
+                    class="menu-item {{ request()->routeIs('admin.ppdb.laporan-quota.index') ? 'active' : '' }}">
+                    <a href="{{ route('admin.ppdb.laporan-quota.index') }}" class="menu-link">
+                        <div data-i18n="Laporan Quota">Laporan Quota</div>
                     </a>
                 </li>
             </ul>

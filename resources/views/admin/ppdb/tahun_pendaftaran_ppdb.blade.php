@@ -40,7 +40,7 @@
                   <div class="d-flex align-items-center">
                     
                     {{-- Toggle Active --}}
-                    <form action="{{ route('admin.kesiswaan.ppdb.tahun-ppdb.toggleActive', $tahun->id) }}" method="POST" class="me-1">
+                    <form action="{{ route('admin.ppdb.tahun-ppdb.toggleActive', $tahun->id) }}" method="POST" class="me-1">
                       @csrf
                       <button type="submit" 
                         class="btn btn-icon btn-sm @if($tahun->is_active) text-danger @else text-info @endif"
@@ -61,7 +61,7 @@
                     </button>
 
                     {{-- Hapus --}}
-                    <form action="{{ route('admin.kesiswaan.ppdb.tahun-ppdb.destroy', $tahun->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini?');">
+                    <form action="{{ route('admin.ppdb.tahun-ppdb.destroy', $tahun->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini?');">
                       @csrf
                       @method('DELETE')
                       <button type="submit" class="btn btn-icon btn-sm btn-outline-danger" data-bs-toggle="tooltip" data-bs-placement="top" title="Hapus">
@@ -87,7 +87,7 @@
 <div class="modal fade" id="modalTambah" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered" role="document">
     <div class="modal-content">
-      <form action="{{ route('admin.kesiswaan.ppdb.tahun-ppdb.store') }}" method="POST">
+      <form action="{{ route('admin.ppdb.tahun-ppdb.store') }}" method="POST">
         @csrf
         <div class="modal-header">
           <h5 class="modal-title">Tambah Tahun PPDB</h5>

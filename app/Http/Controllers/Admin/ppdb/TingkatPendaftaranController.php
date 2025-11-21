@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Admin\Kesiswaan\ppdb;
+namespace App\Http\Controllers\Admin\ppdb;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -14,7 +14,7 @@ class TingkatPendaftaranController extends Controller
     public function index()
     {
         $tingkats = TingkatPendaftaran::all();
-        return view('admin.kesiswaan.ppdb.pengaturan_tingkat',compact('tingkats'));
+        return view('admin.ppdb.pengaturan_tingkat',compact('tingkats'));
     }
 
     public function toggleActive($id)

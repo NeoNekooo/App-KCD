@@ -62,7 +62,7 @@
                      data-rombel="{{ $item->rombel }}">
                     <i class="bx bx-edit-alt"></i>
                   </a>
-                  <form action="{{ route('admin.kesiswaan.ppdb.kelas-ppdb.destroy', $item->id) }}"
+                  <form action="{{ route('admin.ppdb.kelas-ppdb.destroy', $item->id) }}"
                         method="POST"
                         onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini?');">
                     @csrf
@@ -92,7 +92,7 @@
 <div class="modal fade" id="modalTambah" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
-      <form action="{{ route('admin.kesiswaan.ppdb.kelas-ppdb.store') }}" method="POST">
+      <form action="{{ route('admin.ppdb.kelas-ppdb.store') }}" method="POST">
         @csrf
         <div class="modal-header">
           <h5 class="modal-title">Tambah Kelas</h5>

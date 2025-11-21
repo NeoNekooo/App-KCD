@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Admin\Kesiswaan\Ppdb;
+namespace App\Http\Controllers\Admin\Ppdb;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -20,7 +20,7 @@ class TahunPpdbController extends Controller
     
         $tahunPpdb = TahunPelajaran::orderBy('tahun_pelajaran', 'asc')->get();
     
-        return view('admin.kesiswaan.ppdb.tahun_pendaftaran_ppdb', compact('tahunPpdb'));
+        return view('admin.ppdb.tahun_pendaftaran_ppdb', compact('tahunPpdb'));
     }
 
 

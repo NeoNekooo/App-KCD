@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Admin\Kesiswaan\Ppdb;
+namespace App\Http\Controllers\Admin\Ppdb;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -19,7 +19,7 @@ class JalurController extends Controller
             ? JalurPendaftaran::where('tahunPelajaran_id', $tahunPpdb->id)->get()
             : collect();
 
-        return view('admin.kesiswaan.ppdb.jalur_pendaftaran', compact('jalurPendaftaran', 'tahunPpdb'));
+        return view('admin.ppdb.jalur_pendaftaran', compact('jalurPendaftaran', 'tahunPpdb'));
     }
 
     public function store(Request $request)
@@ -45,12 +45,12 @@ class JalurController extends Controller
                 'is_active'         => 0,
             ]);
 
-            return redirect()->route('admin.kesiswaan.ppdb.jalur-ppdb.index')
+            return redirect()->route('admin.ppdb.jalur-ppdb.index')
                              ->with('success', 'Jalur berhasil ditambahkan.');
         } catch (ValidationException $e) {
             return redirect()->back()->with('danger', 'Kode ' . $request->kode . ' sudah ada')->withInput();
         } catch (\Throwable $e) {
-            return redirect()->route('admin.kesiswaan.ppdb.jalur-ppdb.index')
+            return redirect()->route('admin.ppdb.jalur-ppdb.index')
                              ->with('error', 'Gagal menambahkan jalur: ' . $e->getMessage());
         }
     }
@@ -79,12 +79,12 @@ class JalurController extends Controller
                 'keterangan' => $request->keterangan,
             ]);
 
-            return redirect()->route('admin.kesiswaan.ppdb.jalur-ppdb.index')
+            return redirect()->route('admin.ppdb.jalur-ppdb.index')
                              ->with('success', 'Jalur berhasil diperbarui.');
         } catch (ValidationException $e) {
             return redirect()->back()->with('danger', 'Kode ' . $request->kode . ' sudah ada')->withInput();
         } catch (\Throwable $e) {
-            return redirect()->route('admin.kesiswaan.ppdb.jalur-ppdb.index')
+            return redirect()->route('admin.ppdb.jalur-ppdb.index')
                              ->with('error', 'Gagal memperbarui jalur: ' . $e->getMessage());
         }
     }
@@ -95,16 +95,16 @@ class JalurController extends Controller
             $jalur = JalurPendaftaran::with('syarats')->findOrFail($id);
 
             if ($jalur->syarats->count() > 0) {
-                return redirect()->route('admin.kesiswaan.ppdb.jalur-ppdb.index')
+                return redirect()->route('admin.ppdb.jalur-ppdb.index')
                                  ->with('error', "Tidak bisa menghapus {$jalur->jalur}, masih ada syarat terkait.");
             }
 
             $jalur->delete();
 
-            return redirect()->route('admin.kesiswaan.ppdb.jalur-ppdb.index')
+            return redirect()->route('admin.ppdb.jalur-ppdb.index')
                              ->with('success', "{$jalur->jalur} berhasil dihapus.");
         } catch (\Throwable $e) {
-            return redirect()->route('admin.kesiswaan.ppdb.jalur-ppdb.index')
+            return redirect()->route('admin.ppdb.jalur-ppdb.index')
                              ->with('error', "Terjadi kesalahan: " . $e->getMessage());
         }
     }

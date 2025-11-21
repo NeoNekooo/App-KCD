@@ -41,7 +41,7 @@
                 <td>
                   <div class="d-flex align-items-center">
                     {{-- Toggle Active --}}
-                    <form action="{{ route('admin.kesiswaan.ppdb.jalur-ppdb.toggleActive', $jalur->id) }}" method="POST" class="me-1">
+                    <form action="{{ route('admin.ppdb.jalur-ppdb.toggleActive', $jalur->id) }}" method="POST" class="me-1">
                       @csrf
                       <button type="submit" 
                         class="btn btn-icon btn-sm @if($jalur->is_active) text-danger @else text-info @endif"
@@ -66,7 +66,7 @@
 
 
                     {{-- Hapus --}}
-                    <form action="{{ route('admin.kesiswaan.ppdb.jalur-ppdb.destroy', $jalur->id) }}" method="POST" 
+                    <form action="{{ route('admin.ppdb.jalur-ppdb.destroy', $jalur->id) }}" method="POST" 
                           onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini?');">
                       @csrf
                       @method('DELETE')
@@ -99,7 +99,7 @@
         <h5 class="modal-title">Tambah Jalur Pendaftaran</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
-      <form action="{{ route('admin.kesiswaan.ppdb.jalur-ppdb.store') }}" method="POST">
+      <form action="{{ route('admin.ppdb.jalur-ppdb.store') }}" method="POST">
         @csrf
         <div class="modal-body">
           <div class="row g-6 mb-3">

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Admin\Kesiswaan\Ppdb;
+namespace App\Http\Controllers\Admin\Ppdb;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -23,7 +23,7 @@ class PemberianNisController extends Controller
                 ->get();
         }
 
-        return view('admin.kesiswaan.ppdb.pemberian_nis', compact('calons', 'tingkatAktif'));
+        return view('admin.ppdb.pemberian_nis', compact('calons', 'tingkatAktif'));
     }
 
     public function generate()

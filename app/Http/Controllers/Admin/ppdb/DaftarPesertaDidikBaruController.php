@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Admin\Kesiswaan\Ppdb;
+namespace App\Http\Controllers\Admin\Ppdb;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -30,6 +30,6 @@ class DaftarPesertaDidikBaruController extends Controller
                 ->get();
         }
 
-        return view('admin.kesiswaan.ppdb.daftar_peserta_didik_baru', compact('pesertaDidik', 'tahunAktif', 'tingkatAktif'));
+        return view('admin.ppdb.daftar_peserta_didik_baru', compact('pesertaDidik', 'tahunAktif', 'tingkatAktif'));
     }
 }

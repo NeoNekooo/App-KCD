@@ -25,8 +25,8 @@
             <div class="card-body">
                 <form id="calonSiswaForm" method="POST" 
                       action="{{ isset($formulir) 
-                                  ? route('admin.kesiswaan.ppdb.formulir-ppdb.update', $formulir->id) 
-                                  : route('admin.kesiswaan.ppdb.formulir-ppdb.store') }}">
+                                  ? route('admin.ppdb.formulir-ppdb.update', $formulir->id) 
+                                  : route('admin.ppdb.formulir-ppdb.store') }}">
                     @csrf
                     @if(isset($formulir))
                         @method('PUT')

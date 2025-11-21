@@ -31,7 +31,7 @@
         <td>
           <div class="d-flex align-items-center">
             {{-- Toggle Active --}}
-            <form action="{{ route('admin.kesiswaan.ppdb.tingkat-ppdb.toggleActive', $tingkat->id) }}" method="POST" class="me-1">
+            <form action="{{ route('admin.ppdb.tingkat-ppdb.toggleActive', $tingkat->id) }}" method="POST" class="me-1">
               @csrf
               <button type="submit"
                 class="btn btn-icon btn-sm @if($tingkat->is_active) text-danger @else text-info @endif"

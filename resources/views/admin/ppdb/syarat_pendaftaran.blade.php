@@ -34,7 +34,7 @@
                             <td>
                                 <div class="d-flex align-items-center gap-1">
                                     {{-- Toggle Active --}}
-                                    <form action="{{ route('admin.kesiswaan.ppdb.syarat-ppdb.toggleActive', $syarat->id) }}" method="POST">
+                                    <form action="{{ route('admin.ppdb.syarat-ppdb.toggleActive', $syarat->id) }}" method="POST">
                                         @csrf
                                         <button type="submit" 
                                             class="btn btn-icon btn-sm @if($syarat->is_active) text-danger @else text-success @endif"
@@ -57,7 +57,7 @@
                                     </button>
 
                                     {{-- Hapus --}}
-                                    <form action="{{ route('admin.kesiswaan.ppdb.syarat-ppdb.destroy', $syarat->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini?');">
+                                    <form action="{{ route('admin.ppdb.syarat-ppdb.destroy', $syarat->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini?');">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="btn btn-icon btn-sm btn-outline-danger" title="Hapus">
@@ -83,7 +83,7 @@
 <div class="modal fade" id="modalTambah" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered" role="document">
     <div class="modal-content">
-      <form action="{{ route('admin.kesiswaan.ppdb.syarat-ppdb.store') }}" method="POST">
+      <form action="{{ route('admin.ppdb.syarat-ppdb.store') }}" method="POST">
         @csrf
         <div class="modal-header">
           <h5 class="modal-title">Tambah Syarat Pendaftaran</h5>

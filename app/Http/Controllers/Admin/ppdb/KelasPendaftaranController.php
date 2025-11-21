@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Admin\Kesiswaan\Ppdb;
+namespace App\Http\Controllers\Admin\Ppdb;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -73,7 +73,7 @@ class KelasPendaftaranController extends Controller
             return $item;
         });
 
-        return view('admin.kesiswaan.ppdb.kelas_pendaftaran', compact('kelas', 'tahunPpdb', 'kompetensi', 'tingkat'));
+        return view('admin.ppdb.kelas_pendaftaran', compact('kelas', 'tahunPpdb', 'kompetensi', 'tingkat'));
     }
 
 
@@ -98,7 +98,7 @@ class KelasPendaftaranController extends Controller
 
         KelasPendaftaran::create($data);
 
-        return redirect()->route('admin.kesiswaan.ppdb.kelas-ppdb.index')
+        return redirect()->route('admin.ppdb.kelas-ppdb.index')
                          ->with('success', 'Kelas berhasil ditambahkan.');
     }
 
@@ -123,7 +123,7 @@ class KelasPendaftaranController extends Controller
 
         $kelas->update($data);
 
-        return redirect()->route('admin.kesiswaan.ppdb.kelas-ppdb.index')
+        return redirect()->route('admin.ppdb.kelas-ppdb.index')
                          ->with('success', 'Kelas berhasil diperbarui.');
     }
 
@@ -133,7 +133,7 @@ class KelasPendaftaranController extends Controller
         $kode = $kelas->kompetensiPpdb->kode ?? $kelas->tingkat; // fallback jika non-SMA
         $kelas->delete();
 
-        return redirect()->route('admin.kesiswaan.ppdb.kelas-ppdb.index')
+        return redirect()->route('admin.ppdb.kelas-ppdb.index')
                          ->with('success', "Kelas {$kode} berhasil dihapus.");
     }
 }

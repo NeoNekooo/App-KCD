@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Admin\Kesiswaan\Ppdb;
+namespace App\Http\Controllers\Admin\Ppdb;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -51,7 +51,7 @@ class PenempatanKelasController extends Controller
         $belumDitempatkan = (clone $baseQuery)->whereNull('kelas_tujuan')->get();
         $sudahDitempatkan = (clone $baseQuery)->whereNotNull('kelas_tujuan')->get();
     
-        return view('admin.kesiswaan.ppdb.penempatan_kelas', compact(
+        return view('admin.ppdb.penempatan_kelas', compact(
             'belumDitempatkan',
             'sudahDitempatkan',
             'jurusans',

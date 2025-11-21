@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Admin\Kesiswaan\Ppdb;
+namespace App\Http\Controllers\Admin\Ppdb;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -24,7 +24,7 @@ class SyaratController extends Controller
         $syaratPendaftaran = $tahunPpdb ? $tahunPpdb->syarats : collect();
         $jalursAktif = $tahunPpdb ? $tahunPpdb->jalurs : collect();
             
-        return view('admin.kesiswaan.ppdb.syarat_pendaftaran', compact(
+        return view('admin.ppdb.syarat_pendaftaran', compact(
             'tahunPpdb',
             'syaratPendaftaran',
             'jalursAktif'
@@ -48,7 +48,7 @@ class SyaratController extends Controller
                 'is_active'           => 0,
             ]);
 
-            return redirect()->route('admin.kesiswaan.ppdb.syarat-ppdb.index')
+            return redirect()->route('admin.ppdb.syarat-ppdb.index')
                              ->with('success', 'Syarat berhasil ditambahkan.');
         } catch (\Throwable $th) {
             return redirect()->back()->with('error', 'Terjadi kesalahan saat menambahkan syarat.');
@@ -69,7 +69,7 @@ class SyaratController extends Controller
                 'syarat'              => $request->syarat,
             ]);
 
-            return redirect()->route('admin.kesiswaan.ppdb.syarat-ppdb.index')
+            return redirect()->route('admin.ppdb.syarat-ppdb.index')
                              ->with('success', 'Syarat berhasil diperbarui.');
         } catch (\Throwable $th) {
             return redirect()->back()->with('error', 'Terjadi kesalahan saat memperbarui syarat.');
@@ -82,7 +82,7 @@ class SyaratController extends Controller
             $syarat = SyaratPendaftaran::findOrFail($id);
             $syarat->delete();
 
-            return redirect()->route('admin.kesiswaan.ppdb.syarat-ppdb.index')
+            return redirect()->route('admin.ppdb.syarat-ppdb.index')
                              ->with('success', 'Syarat berhasil dihapus.');
         } catch (\Throwable $th) {
             return redirect()->back()->with('error', 'Terjadi kesalahan saat menghapus syarat.');

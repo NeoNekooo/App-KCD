@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Admin\Kesiswaan\Ppdb;
+namespace App\Http\Controllers\Admin\Ppdb;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -46,7 +46,7 @@ class FormulirPendaftaranController extends Controller
                 break;
         }
 
-        return view('admin.kesiswaan.ppdb.formulir_pendaftaran', compact(
+        return view('admin.ppdb.formulir_pendaftaran', compact(
             'formulirs', 'jurusans', 'jalurs', 'tahunAktif', 'syarats', 'tingkatAktif', 'kelasAsal'
         ));
     }
@@ -143,7 +143,7 @@ class FormulirPendaftaranController extends Controller
                 break;
         }
 
-        return view('admin.kesiswaan.ppdb.formulir_pendaftaran', compact(
+        return view('admin.ppdb.formulir_pendaftaran', compact(
             'formulir', 'jurusans', 'jalurs', 'tahunAktif', 'syarats', 'tingkatAktif', 'kelasAsal'
         ));
     }
@@ -197,7 +197,7 @@ class FormulirPendaftaranController extends Controller
         $calon->status = $syaratTerpenuhi >= $syaratWajib ? 1 : 0;
         $calon->save();
 
-        return redirect()->route('admin.kesiswaan.ppdb.daftar-calon-peserta-didik.index')
+        return redirect()->route('admin.ppdb.daftar-calon-peserta-didik.index')
             ->with('success', 'Data Calon Peserta didik berhasil diperbarui.');
     }
 
@@ -206,7 +206,7 @@ class FormulirPendaftaranController extends Controller
         $calon = CalonSiswa::findOrFail($id);
         $calon->delete();
 
-        return redirect()->route('admin.kesiswaan.ppdb.formulir.index')
+        return redirect()->route('admin.ppdb.formulir.index')
             ->with('success', 'Formulir pendaftaran berhasil dihapus.');
     }
 

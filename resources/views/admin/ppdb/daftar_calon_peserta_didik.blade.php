@@ -74,14 +74,14 @@
                 <td class="text-center">
                     @if($calon->status == 0)
                         {{-- Status 0: syarat belum lengkap --}}
-                        <a href="{{ route('admin.kesiswaan.ppdb.formulir-ppdb.edit', $calon->id) }}"
+                        <a href="{{ route('admin.ppdb.formulir-ppdb.edit', $calon->id) }}"
                            class="badge bg-warning text-dark text-decoration-none  px-2 py-2" title="klik untuk melengkapi persyaratan">
                             Syarat Belum Lengkap
                         </a>
                       
                     @elseif($calon->status == 1)
                         {{-- Status 1: unregistered --}}
-                        <form action="{{ route('admin.kesiswaan.ppdb.updateStatus', $calon->id) }}" method="POST" class="d-inline">
+                        <form action="{{ route('admin.ppdb.updateStatus', $calon->id) }}" method="POST" class="d-inline">
                             @csrf
                             @method('PATCH')
                             <input type="hidden" name="status" value="2">
@@ -90,7 +90,7 @@
                       
                     @elseif($calon->status == 2)
                         {{-- Status 2: registered --}}
-                        <form action="{{ route('admin.kesiswaan.ppdb.updateStatus', $calon->id) }}" method="POST" class="d-inline">
+                        <form action="{{ route('admin.ppdb.updateStatus', $calon->id) }}" method="POST" class="d-inline">
                             @csrf
                             @method('PATCH')
                             <input type="hidden" name="status" value="1">
@@ -108,19 +108,19 @@
                 <td class="text-center">
                     @if($calon->status != 3)
                         <div class="d-flex justify-content-center gap-2">
-                            <a href="{{ route('admin.kesiswaan.ppdb.formulir-ppdb.edit', $calon->id) }}" 
+                            <a href="{{ route('admin.ppdb.formulir-ppdb.edit', $calon->id) }}" 
                                class="btn btn-sm btn-icon btn-outline-primary" title="Edit">
                               <i class="bx bx-edit"></i>
                             </a>
                           
                             {{-- Tombol Cetak Resi --}}
-                            <a href="{{ route('admin.kesiswaan.ppdb.daftar_calon.resi', $calon->id) }}" 
+                            <a href="{{ route('admin.ppdb.daftar_calon.resi', $calon->id) }}" 
                                target="_blank" 
                                class="btn btn-sm btn-icon btn-outline-secondary" title="Cetak Resi">
                               <i class="bx bx-printer"></i>
                             </a>
 
-                            <form action="{{ route('admin.kesiswaan.ppdb.daftar-calon-peserta-didik.destroy', $calon->id) }} " method="POST" onsubmit="return confirm('Yakin hapus?')">
+                            <form action="{{ route('admin.ppdb.daftar-calon-peserta-didik.destroy', $calon->id) }} " method="POST" onsubmit="return confirm('Yakin hapus?')">
                               @csrf
                               @method('DELETE')
                               <button type="submit" class="btn btn-sm btn-icon btn-outline-danger" title="Hapus">

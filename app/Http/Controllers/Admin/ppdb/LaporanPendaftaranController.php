@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Admin\Kesiswaan\Ppdb;
+namespace App\Http\Controllers\Admin\Ppdb;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -74,7 +74,7 @@ class LaporanPendaftaranController extends Controller
             });
         }
 
-        return view('admin.kesiswaan.ppdb.laporan_pendaftaran', compact(
+        return view('admin.ppdb.laporan_pendaftaran', compact(
             'tp', 'p', 'l',
             'laporanJalur', 'laporanJurusan', 'laporanJurusanRegistrasi',
             'tahunAktif', 'tingkatAktif'

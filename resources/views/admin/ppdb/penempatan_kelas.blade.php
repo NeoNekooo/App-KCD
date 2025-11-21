@@ -14,7 +14,7 @@
                     {{-- Form filter jurusan (hanya tampil jika tingkat aktif = 10) --}}
                     @if($tingkatAktif && $tingkatAktif->tingkat == 10)
                     <div class="col-md-6">
-                        <form method="GET" action="{{ route('admin.kesiswaan.ppdb.penempatan-kelas.index') }}">
+                        <form method="GET" action="{{ route('admin.ppdb.penempatan-kelas.index') }}">
                             <label class="form-label">Filter Jurusan</label>
                             <select name="jurusan" class="form-select" onchange="this.form.submit()">
                                 <option value="">-- Semua Jurusan --</option>
@@ -51,7 +51,7 @@
                 </div>
 
                 {{-- Form penempatan kelas --}}
-                <form method="POST" action="{{ route('admin.kesiswaan.ppdb.penempatan-kelas.update-kelas') }}">
+                <form method="POST" action="{{ route('admin.ppdb.penempatan-kelas.update-kelas') }}">
                     @csrf
                     <input type="hidden" name="kelas_tujuan" id="kelas_tujuan_hidden">
 

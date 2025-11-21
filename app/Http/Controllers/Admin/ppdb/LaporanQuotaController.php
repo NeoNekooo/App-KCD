@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Admin\Kesiswaan\Ppdb;
+namespace App\Http\Controllers\Admin\Ppdb;
 
 use App\Http\Controllers\Controller;
 use App\Models\TahunPelajaran;
@@ -18,7 +18,7 @@ class LaporanQuotaController extends Controller
         $tingkatAktif = TingkatPendaftaran::where('is_active', true)->first();
 
         if (!$tahunAktif || !$tingkatAktif) {
-            return view('admin.kesiswaan.ppdb.laporan_quota', [
+            return view('admin.ppdb.laporan_quota', [
                 'laporan' => collect(),
                 'tahunAktif' => $tahunAktif,
                 'tingkatAktif' => $tingkatAktif,
@@ -88,6 +88,6 @@ class LaporanQuotaController extends Controller
             ]);
         }
 
-        return view('admin.kesiswaan.ppdb.laporan_quota', compact('laporan', 'tahunAktif', 'tingkatAktif'));
+        return view('admin.ppdb.laporan_quota', compact('laporan', 'tahunAktif', 'tingkatAktif'));
     }
 }

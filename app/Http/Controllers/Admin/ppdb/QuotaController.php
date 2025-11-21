@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Admin\Kesiswaan\Ppdb;
+namespace App\Http\Controllers\Admin\Ppdb;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -33,7 +33,7 @@ class QuotaController extends Controller
             ? $quotas->count() > 0
             : false;
 
-        return view('admin.kesiswaan.ppdb.quota_pendaftaran', compact(
+        return view('admin.ppdb.quota_pendaftaran', compact(
             'quotas',
             'tahunPpdb',
             'jurusans',

@@ -9,7 +9,7 @@
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h5 class="">Pemberian NIS</h5>
 
-                <a href="{{ route('admin.kesiswaan.ppdb.pemberian-nis.generate') }}" class="btn btn-primary d-flex align-items-center">
+                <a href="{{ route('admin.ppdb.pemberian-nis.generate') }}" class="btn btn-primary d-flex align-items-center">
                     Generate NIS
                 </a>
             </div>

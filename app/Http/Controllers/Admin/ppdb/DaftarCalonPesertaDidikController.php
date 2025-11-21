@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Admin\Kesiswaan\Ppdb;
+namespace App\Http\Controllers\Admin\Ppdb;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -29,7 +29,7 @@ class DaftarCalonPesertaDidikController extends Controller
                 ->get();
         }
 
-        return view('admin.kesiswaan.ppdb.daftar_calon_peserta_didik', compact('formulirs', 'tahunAktif', 'tingkatAktif'));
+        return view('admin.ppdb.daftar_calon_peserta_didik', compact('formulirs', 'tahunAktif', 'tingkatAktif'));
     }
 
     /**
@@ -44,7 +44,7 @@ class DaftarCalonPesertaDidikController extends Controller
         $profilSekolah = ProfilSekolah::first(); // ambil data profil
 
         // Kirim ke view khusus resi
-        return view('admin.kesiswaan.ppdb.resi_calon', compact('calon', 'profilSekolah'));
+        return view('admin.ppdb.resi_calon', compact('calon', 'profilSekolah'));
     }
 
     /**
