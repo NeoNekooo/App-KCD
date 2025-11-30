@@ -214,7 +214,7 @@ document.addEventListener('DOMContentLoaded', function () {
     function loadSyarat(jalurId, selected=[]) {
         if (!jalurId) return syaratContainer.innerHTML = "Silahkan pilih jalur terlebih dahulu";
 
-        fetch(`/admin/kesiswaan/ppdb/get-syarat/${jalurId}`)
+        fetch(`/admin/ppdb/get-syarat/${jalurId}`)
             .then(res => res.json())
             .then(data => {
                 if (!data.length) return syaratContainer.innerHTML = "<p class='text-muted'>Tidak ada syarat untuk jalur ini</p>";

@@ -25,20 +25,20 @@ use App\Http\Controllers\Admin\Kesiswaan\SiswaController;
 // Controller ppdb
 
 // Controller Ppdb
-use App\Http\Controllers\Admin\ppdb\DaftarPesertaDidikBaruController;
-use App\Http\Controllers\Admin\ppdb\DaftarCalonPesertaDidikController;
-use App\Http\Controllers\Admin\ppdb\PemberianNisController;
-use App\Http\Controllers\Admin\ppdb\FormulirPendaftaranController;
-use App\Http\Controllers\Admin\ppdb\JalurController;
-use App\Http\Controllers\Admin\ppdb\TingkatPendaftaranController;
-use App\Http\Controllers\Admin\ppdb\KompetensiPendaftaranController;
-use App\Http\Controllers\Admin\ppdb\KelasPendaftaranController;
-use App\Http\Controllers\Admin\ppdb\LaporanPendaftaranController;
-use App\Http\Controllers\Admin\ppdb\LaporanQuotaController;
-use App\Http\Controllers\Admin\ppdb\PenempatanKelasController;
-use App\Http\Controllers\Admin\ppdb\QuotaController;
-use App\Http\Controllers\Admin\ppdb\SyaratController;
-use App\Http\Controllers\Admin\ppdb\TahunPpdbController;
+use App\Http\Controllers\Admin\Ppdb\DaftarPesertaDidikBaruController;
+use App\Http\Controllers\Admin\Ppdb\DaftarCalonPesertaDidikController;
+use App\Http\Controllers\Admin\Ppdb\PemberianNisController;
+use App\Http\Controllers\Admin\Ppdb\FormulirPendaftaranController;
+use App\Http\Controllers\Admin\Ppdb\JalurController;
+use App\Http\Controllers\Admin\Ppdb\TingkatPendaftaranController;
+use App\Http\Controllers\Admin\Ppdb\KompetensiPendaftaranController;
+use App\Http\Controllers\Admin\Ppdb\KelasPendaftaranController;
+use App\Http\Controllers\Admin\Ppdb\LaporanPendaftaranController;
+use App\Http\Controllers\Admin\Ppdb\LaporanQuotaController;
+use App\Http\Controllers\Admin\Ppdb\PenempatanKelasController;
+use App\Http\Controllers\Admin\Ppdb\QuotaController;
+use App\Http\Controllers\Admin\Ppdb\SyaratController;
+use App\Http\Controllers\Admin\Ppdb\TahunPpdbController;
 
 // Controller Indisipliner
 use App\Http\Controllers\Admin\Indisipliner\IndisiplinerGtkController;

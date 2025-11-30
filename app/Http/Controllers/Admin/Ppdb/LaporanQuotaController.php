@@ -70,7 +70,10 @@ class LaporanQuotaController extends Controller
                 ->count();
 
             // Ambil total quota dari tabel quota_pendaftarans (semua keahlian dijumlahkan)
-            $quotaData = QuotaPendaftaran::where('tahunPelajaran_id', $tahunAktif->id)->get();
+            $quotaData = QuotaPendaftaran::where('tahunPelajaran_id', $tahunAktif->id)
+    ->where('tingkat', $tingkatAktif->tingkat)
+    ->get();
+
 
             $jumlahKelas = $quotaData->sum('jumlah_kelas');
             $quota = $quotaData->sum('quota');
