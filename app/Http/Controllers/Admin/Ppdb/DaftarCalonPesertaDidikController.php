@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\CalonSiswa;
 use App\Models\TahunPelajaran;
-use App\Models\ProfilSekolah;
+use App\Models\Sekolah;
 use App\Models\TingkatPendaftaran;
 
 class DaftarCalonPesertaDidikController extends Controller
@@ -41,7 +41,7 @@ class DaftarCalonPesertaDidikController extends Controller
         $calon = CalonSiswa::with(['jalurPendaftaran', 'syarat'])
             ->findOrFail($id);
 
-        $profilSekolah = ProfilSekolah::first(); // ambil data profil
+        $profilSekolah = Sekolah::first(); // ambil data profil
 
         // Kirim ke view khusus resi
         return view('admin.ppdb.resi_calon', compact('calon', 'profilSekolah'));
