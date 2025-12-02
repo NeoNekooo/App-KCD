@@ -97,17 +97,34 @@
                             <h5 class="card-title mb-4">Detail Informasi Sekolah</h5>
                             
                             <h6 class="fw-semibold mb-3 text-primary">INFORMASI UMUM</h6>
-                            <dl class="row mb-4">
-                                <dt class="col-sm-4">Nama Sekolah</dt>
-                                <dd class="col-sm-8">: {{ $sekolah->nama ?? '-' }}</dd>
+<dl class="row mb-4">
+    <dt class="col-sm-4">Nama Sekolah</dt>
+    <dd class="col-sm-8">: {{ $sekolah->nama ?? '-' }}</dd>
 
-                                <dt class="col-sm-4">NPSN / NSS</dt>
-                                <dd class="col-sm-8">: {{ $sekolah->npsn ?? '-' }} / {{ $sekolah->nss ?? '-' }}</dd>
+    <dt class="col-sm-4">NPSN / NSS</dt>
+    <dd class="col-sm-8">: {{ $sekolah->npsn ?? '-' }} / {{ $sekolah->nss ?? '-' }}</dd>
 
-                                <dt class="col-sm-4">Status</dt>
-                                <dd class="col-sm-8">: {{ $sekolah->status_sekolah_str ?? '-' }}</dd>
-                            </dl>
+    <dt class="col-sm-4">Status</dt>
+    <dd class="col-sm-8">: {{ $sekolah->status_sekolah_str ?? '-' }}</dd>
 
+    {{-- KODE SEKOLAH (Tampilan Invisible Input) --}}
+    <dt class="col-sm-4">Kode Sekolah</dt>
+    <dd class="col-sm-8">
+        <div class="d-flex align-items-center">
+            <span class="me-1">:</span>
+            <input type="text" 
+                   name="kode_sekolah" 
+                   id="kode_sekolah" 
+                   value="{{ old('kode_sekolah', $sekolah->kode_sekolah ?? '') }}" 
+                   class="form-control-plaintext" 
+                   style="padding: 0; outline: none; border: none; background: transparent; color: inherit; width: 100%;"
+                   placeholder="Klik untuk isi...">
+        </div>
+        @error('kode_sekolah')
+            <div class="text-danger small mt-1">{{ $message }}</div>
+        @enderror
+    </dd>
+</dl>
                             <hr class="my-4">
 
                             <h6 class="fw-semibold mb-3 text-primary">DETAIL ALAMAT</h6>

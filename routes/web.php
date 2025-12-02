@@ -18,6 +18,7 @@ use App\Http\Controllers\Admin\Akademik\TapelController;
 use App\Http\Controllers\Admin\Akademik\JurusanController;
 use App\Http\Controllers\Admin\Akademik\MapelController; 
 use App\Http\Controllers\Admin\Akademik\EkstrakurikulerController;
+use App\Http\Controllers\Admin\Akademik\JadwalPelajaranController;
 
 // Controller Kesiswaan
 use App\Http\Controllers\Admin\Kesiswaan\SiswaController;
@@ -166,6 +167,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('mapel', [MapelController::class, 'index'])->name('mapel.index'); 
         Route::resource('ekstrakurikuler', EkstrakurikulerController::class)->except(['show', 'create', 'edit']); 
         Route::resource('ekstrakurikuler', EkstrakurikulerController::class);
+        Route::resource('jadwal-pelajaran', JadwalPelajaranController::class);
+        Route::get('jadwal-pelajaran/{id}/json', [JadwalPelajaranController::class, 'getJadwalJson'])->name('jadwal-pelajaran.json');
 
     });
 

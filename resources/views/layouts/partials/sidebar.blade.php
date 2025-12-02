@@ -106,6 +106,11 @@
                         <div data-i18n="Semester">Ekstrakulikuler</div>
                     </a>
                 </li>
+                <li class="menu-item {{ request()->is('admin/akademik/jadwal-pelajaran*') ? 'active' : '' }}">
+                    <a href="{{ route('admin.akademik.jadwal-pelajaran.index') }}" class="menu-link">
+                        <div data-i18n="Jadwal Pelajaran">Jadwal Pelajaran</div>
+                    </a>
+                </li>
             </ul>
         </li>
 
