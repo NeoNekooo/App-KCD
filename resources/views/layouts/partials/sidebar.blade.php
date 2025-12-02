@@ -358,6 +358,42 @@
           </ul>
         </li>
 
+
+
+        <li class="menu-item {{ request()->is('admin/rombel*') ? 'open' : '' }}">
+            <a href="javascript:void(0);" class="menu-link menu-toggle">
+                <i class="menu-icon tf-icons bx bx-group"></i>
+                <div data-i18n="Rombel">Rombongan Belajar</div>
+            </a>
+            <ul class="menu-sub">
+                <li class="menu-item {{ request()->is('admin/rombel/reguler*') ? 'active' : '' }}">
+                    <a href="{{ route('admin.rombel.reguler.index') }}" class="menu-link">
+                        <div data-i18n="Reguler">Reguler</div>
+                    </a>
+                </li>
+                <li class="menu-item {{ request()->is('admin/rombel/praktik*') ? 'active' : '' }}">
+                    <a href="{{ route('admin.rombel.praktik.index') }}" class="menu-link">
+                        <div data-i18n="Praktik">Praktik</div>
+                    </a>
+                </li>
+                <li class="menu-item {{ request()->is('admin/rombel/ekstrakurikuler*') ? 'active' : '' }}">
+                    <a href="{{ route('admin.rombel.ekstrakurikuler.index') }}" class="menu-link">
+                        <div data-i18n="Ekstrakurikuler">Ekstrakurikuler</div>
+                    </a>
+                </li>
+                <li class="menu-item {{ request()->is('admin/rombel/mapel-pilihan*') ? 'active' : '' }}">
+                    <a href="{{ route('admin.rombel.mapel-pilihan.index') }}" class="menu-link">
+                        <div data-i18n="Mapel Pilihan">Mapel Pilihan</div>
+                    </a>
+                </li>
+                <li class="menu-item {{ request()->is('admin/rombel/wali*') ? 'active' : '' }}">
+                    <a href="{{ route('admin.rombel.wali.index') }}" class="menu-link">
+                        <div data-i18n="Wali">Wali</div>
+                    </a>
+                </li>
+            </ul>
+        </li>
+
         {{-- Pengaturan Laporan --}}
         <li class="menu-item {{ request()->is('admin/laporan*') ? 'open' : '' }}">
             <a href="javascript:void(0);" class="menu-link menu-toggle">

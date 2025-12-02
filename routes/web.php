@@ -52,6 +52,13 @@ use App\Http\Controllers\Admin\Pengaturan\HariLiburController;
 use App\Http\Controllers\Admin\Pengaturan\PengaturanAbsensiController;
 use App\Http\Controllers\Admin\Laporan\LaporanAbsensiController;
 
+// Controller Rombongan Belajar
+use App\Http\Controllers\Admin\Rombel\RombelRegulerController;
+use App\Http\Controllers\Admin\Rombel\RombelPraktikController;
+use App\Http\Controllers\Admin\Rombel\RombelEkstrakurikulerController;
+use App\Http\Controllers\Admin\Rombel\RombelMapelPilihanController;
+use App\Http\Controllers\Admin\Rombel\RombelWaliController;
+
 // Controller Landing
 use App\Http\Controllers\Admin\Landing\PpdbController;
         
@@ -373,6 +380,37 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('mapel/show', [AbsensiMapelController::class, 'show'])->name('mapel.show'); // Pakai GET agar bisa di-bookmark
         Route::post('mapel/store', [AbsensiMapelController::class, 'store'])->name('mapel.store');
     });
+
+
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Rombel
+    |--------------------------------------------------------------------------
+    */
+    Route::prefix('rombel')->name('rombel.')->group(function () {
+        // Reguler
+        Route::get('/reguler/create', [RombelRegulerController::class, 'create'])->name('reguler.create');
+        Route::get('/reguler', [RombelRegulerController::class, 'index'])->name('reguler.index');
+
+        // Praktik
+        Route::get('/praktik/create', [RombelPraktikController::class, 'create'])->name('praktik.create');
+        Route::get('/praktik', [RombelPraktikController::class, 'index'])->name('praktik.index');
+
+        // Ekstrakurikuler
+        Route::get('/ekstrakurikuler/create', [RombelEkstrakurikulerController::class, 'create'])->name('ekstrakurikuler.create');
+        Route::get('/ekstrakurikuler', [RombelEkstrakurikulerController::class, 'index'])->name('ekstrakurikuler.index');
+
+        // Mapel Pilihan
+        Route::get('/mapel-pilihan/create', [RombelMapelPilihanController::class, 'create'])->name('mapel-pilihan.create');
+        Route::get('/mapel-pilihan', [RombelMapelPilihanController::class, 'index'])->name('mapel-pilihan.index');
+
+        // Wali
+        Route::get('/wali/create', [RombelWaliController::class, 'create'])->name('wali.create');
+        Route::get('/wali', [RombelWaliController::class, 'index'])->name('wali.index');
+    });
+
 
     /*
     |--------------------------------------------------------------------------

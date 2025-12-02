@@ -24,6 +24,20 @@ class Rombel extends Model
      */
     protected $primaryKey = 'id'; // Sesuai screenshot Anda
 
+
+    protected $fillable = [
+        'nama_rombel',
+        'jenis_rombel',
+        'kurikulum_id',
+        'jurusan_id',
+        'wali_id', // Ini untuk Wali Kelas (dari tabel ptk)
+        'tingkat',
+        'ruang',
+        'is_moving_class',
+        'melayani_kebutuhan_khusus',
+        'tahun_ajaran',
+    ];
+
     /**
      * Relasi ke semua Siswa di Rombel ini.
      * Menghubungkan rombels.rombongan_belajar_id (Varchar) -> siswas.rombongan_belajar_id (Varchar)
@@ -40,5 +54,35 @@ class Rombel extends Model
     public function pelanggaran(): HasMany
     {
         return $this->hasMany(PelanggaranNilai::class, 'rombongan_belajar_id', 'id');
+    }
+
+    /**
+     * Relasi ke Ptk (Wali Kelas)
+     * Satu Rombel punya SATU Wali Kelas
+     */
+    public function wali() 
+    {
+        // 'wali_id' adalah foreign key di tabel 'rombels'
+        return $this->belongsTo(Ptk::class, 'wali_id');
+    }
+
+    /**
+     * Relasi ke Jurusan
+     * Satu Rombel punya SATU Jurusan
+     */
+    public function jurusan() 
+    {
+        // 'jurusan_id' adalah foreign key
+        return $this->belongsTo(Jurusan::class, 'jurusan_id');
+    }
+
+    /**
+     * Relasi ke Kurikulum
+     * Satu Rombel punya SATU Kurikulum
+     */
+    public function kurikulum() 
+    {
+        // 'kurikulum_id' adalah foreign key
+        return $this->belongsTo(Kurikulum::class, 'kurikulum_id');
     }
 }
