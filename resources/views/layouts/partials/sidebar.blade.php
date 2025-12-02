@@ -131,6 +131,11 @@
                         <div data-i18n="Tugas Pegawai">Tugas Pegawai</div>
                     </a>
                 </li>
+                <li class="menu-item {{ request()->routeIs('gtk.index-cetak-kartu') ? 'active' : '' }}">
+                    <a href="{{ route('admin.kepegawaian.gtk.index-cetak-kartu') }}" class="menu-link">
+                        <div data-i18n="Cetak Kartu ID">Cetak Kartu ID</div>
+                    </a>
+                </li>
             </ul>
         </li>
         
