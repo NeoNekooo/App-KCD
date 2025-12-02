@@ -13,45 +13,46 @@
                     Generate NIS
                 </a>
             </div>
-            
-            <div class="table-responsive text-nowrap">
-                <table class="table table-hover">
-                  @if($calons->isEmpty())
-                    <tr>
-                      <td colspan="7">
-                        <div class="alert alert-warning alert-dismissible" role="alert">
-                          Tidak ada calon siswa dengan status <strong>Registered (2)</strong>.
-                          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                        </div>
-                      </td>
-                    </tr>
-                  @else
-                    <thead>
+            <div class="card-body">
+              <div class="table-responsive text-nowrap">
+                  <table class="table table-hover">
+                    @if($calons->isEmpty())
                       <tr>
-                        <th>Nomor RESI</th>
-                        <th>Tanggal Daftar</th>
-                        <th>Nama Lengkap</th>
-                        <th>Tempat Tanggal Lahir</th>
-                        <th>L/P</th>
-                        <th>jurusan</th>
-                        <th>Asal Sekolah</th>
+                        <td colspan="7">
+                          <div class="alert alert-warning alert-dismissible" role="alert">
+                            Tidak ada calon siswa dengan status <strong>Registered (2)</strong>.
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                          </div>
+                        </td>
                       </tr>
-                    </thead>
-                    <tbody class="table-border-bottom-0">
-                            @foreach($calons as $calon)
-                                <tr>
-                                    <td><strong>{{ $calon->nomor_resi }}</strong></td>
-                                    <td>{{ $calon->created_at->translatedFormat('d F Y') }}</td>
-                                    <td>{{ $calon->nama_lengkap }}</td>
-                                    <td>{{ $calon->tempat_lahir }}, {{ \Carbon\Carbon::parse($calon->tgl_lahir)->translatedFormat('d F Y') }}</td>
-                                    <td>{{ $calon->jenis_kelamin }}</td>
-                                    <td>{{ $calon->jurusan ?? '-' }}</td>
-                                    <td>{{ $calon->asal_sekolah ?? '-' }}</td>
-                                </tr>
-                            @endforeach
-                    </tbody>
-                   @endif
-                </table>
+                    @else
+                      <thead>
+                        <tr>
+                          <th>Nomor RESI</th>
+                          <th>Tanggal Daftar</th>
+                          <th>Nama Lengkap</th>
+                          <th>Tempat Tanggal Lahir</th>
+                          <th>L/P</th>
+                          <th>jurusan</th>
+                          <th>Asal Sekolah</th>
+                        </tr>
+                      </thead>
+                      <tbody class="table-border-bottom-0">
+                              @foreach($calons as $calon)
+                                  <tr>
+                                      <td><strong>{{ $calon->nomor_resi }}</strong></td>
+                                      <td>{{ $calon->created_at->translatedFormat('d F Y') }}</td>
+                                      <td>{{ $calon->nama_lengkap }}</td>
+                                      <td>{{ $calon->tempat_lahir }}, {{ \Carbon\Carbon::parse($calon->tgl_lahir)->translatedFormat('d F Y') }}</td>
+                                      <td>{{ $calon->jenis_kelamin }}</td>
+                                      <td>{{ $calon->jurusan ?? '-' }}</td>
+                                      <td>{{ $calon->asal_sekolah ?? '-' }}</td>
+                                  </tr>
+                              @endforeach
+                      </tbody>
+                     @endif
+                  </table>
+              </div>
             </div>
         </div>
     </div>

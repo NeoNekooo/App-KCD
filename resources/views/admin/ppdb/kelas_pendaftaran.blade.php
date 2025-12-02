@@ -15,9 +15,10 @@
           <i class='bx bx-plus me-1'></i> Tambah Kelas
         </button>
       </div>
-
-      <div class="table-responsive text-nowrap">
-        <table class="table table-hover">
+      <div class="card-body">
+        
+        <div class="table-responsive text-nowrap">
+          <table class="table table-hover">
           <thead>
           <tr>
               <th>No</th>
@@ -73,16 +74,15 @@
                   </form>
                 </div>
               </td>
-          </tr>
-          @empty
-          <tr>
-              <td colspan="{{ $tingkat->tingkat == 10 ? 6 : 4 }}" class="text-center">Belum ada data kelas</td>
-          </tr>
-          @endforelse
-          </tbody>
-          
-
-        </table>
+            </tr>
+            @empty
+            <tr>
+                <td colspan="{{ $tingkat->tingkat == 10 ? 6 : 5 }}" class="text-center">Belum ada data kelas</td>
+            </tr>
+            @endforelse
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>

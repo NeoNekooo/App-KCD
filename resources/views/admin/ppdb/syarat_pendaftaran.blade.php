@@ -13,67 +13,69 @@
                 </button>
             </div>
 
-            <div class="table-responsive text-nowrap">
-                <table class="table table-hover align-middle">
-                    <thead>
-                        <tr>
-                            <th>No</th>
-                            <th>Tahun Pelajaran</th>
-                            <th>Jalur</th>
-                            <th>Syarat</th>
-                            <th>Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse($syaratPendaftaran as $syarat)
-                        <tr>
-                            <td>{{ $loop->iteration }}</td>
-                            <td>{{ $syarat->tahunPpdb->tahun_pelajaran ?? '-' }}</td>
-                            <td>{{ $syarat->jalurPendaftaran->jalur ?? '-' }}</td>
-                            <td>{{ $syarat->syarat }}</td>
-                            <td>
-                                <div class="d-flex align-items-center gap-1">
-                                    {{-- Toggle Active --}}
-                                    <form action="{{ route('admin.ppdb.syarat-ppdb.toggleActive', $syarat->id) }}" method="POST">
-                                        @csrf
-                                        <button type="submit" 
-                                            class="btn btn-icon btn-sm @if($syarat->is_active) text-danger @else text-success @endif"
-                                            data-bs-toggle="tooltip" 
-                                            title="{{ $syarat->is_active ? 'Nonaktifkan' : 'Aktifkan' }}">
-                                            <i class='bx {{ $syarat->is_active ? "bx-block" : "bx-power-off" }}'></i>
-                                        </button>
-                                    </form>
-
-                                    {{-- Edit --}}
-                                    <button type="button" 
-                                        class="btn btn-icon btn-sm btn-outline-primary btn-edit"
-                                        data-id="{{ $syarat->id }}"
-                                        data-tahun="{{ $syarat->tahunPpdb->tahun_pelajaran ?? '-' }}"
-                                        data-tahunid="{{ $syarat->tahunPpdb->id ?? '' }}"
-                                        data-jalur="{{ $syarat->jalurPendaftaran->id ?? '' }}"
-                                        data-syarat="{{ $syarat->syarat }}"
-                                        title="Edit">
-                                        <i class="bx bx-edit-alt"></i>
-                                    </button>
-
-                                    {{-- Hapus --}}
-                                    <form action="{{ route('admin.ppdb.syarat-ppdb.destroy', $syarat->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini?');">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-icon btn-sm btn-outline-danger" title="Hapus">
-                                            <i class="bx bx-trash"></i>
-                                        </button>
-                                    </form>
-                                </div>
-                            </td>
-                        </tr>
-                        @empty
-                        <tr>
-                          <td colspan="5" class="text-center">Belum ada data syarat pendaftaran</td>
-                        </tr>
-                        @endforelse
-                    </tbody>
-                </table>
+            <div class="card-body">
+              <div class="table-responsive text-nowrap">
+                  <table class="table table-hover align-middle">
+                      <thead>
+                          <tr>
+                              <th>No</th>
+                              <th>Tahun Pelajaran</th>
+                              <th>Jalur</th>
+                              <th>Syarat</th>
+                              <th>Aksi</th>
+                          </tr>
+                      </thead>
+                      <tbody>
+                          @forelse($syaratPendaftaran as $syarat)
+                          <tr>
+                              <td>{{ $loop->iteration }}</td>
+                              <td>{{ $syarat->tahunPpdb->tahun_pelajaran ?? '-' }}</td>
+                              <td>{{ $syarat->jalurPendaftaran->jalur ?? '-' }}</td>
+                              <td>{{ $syarat->syarat }}</td>
+                              <td>
+                                  <div class="d-flex align-items-center gap-1">
+                                      {{-- Toggle Active --}}
+                                      <form action="{{ route('admin.ppdb.syarat-ppdb.toggleActive', $syarat->id) }}" method="POST">
+                                          @csrf
+                                          <button type="submit" 
+                                              class="btn btn-icon btn-sm @if($syarat->is_active) text-danger @else text-success @endif"
+                                              data-bs-toggle="tooltip" 
+                                              title="{{ $syarat->is_active ? 'Nonaktifkan' : 'Aktifkan' }}">
+                                              <i class='bx {{ $syarat->is_active ? "bx-block" : "bx-power-off" }}'></i>
+                                          </button>
+                                      </form>
+                                    
+                                      {{-- Edit --}}
+                                      <button type="button" 
+                                          class="btn btn-icon btn-sm btn-outline-primary btn-edit"
+                                          data-id="{{ $syarat->id }}"
+                                          data-tahun="{{ $syarat->tahunPpdb->tahun_pelajaran ?? '-' }}"
+                                          data-tahunid="{{ $syarat->tahunPpdb->id ?? '' }}"
+                                          data-jalur="{{ $syarat->jalurPendaftaran->id ?? '' }}"
+                                          data-syarat="{{ $syarat->syarat }}"
+                                          title="Edit">
+                                          <i class="bx bx-edit-alt"></i>
+                                      </button>
+                                    
+                                      {{-- Hapus --}}
+                                      <form action="{{ route('admin.ppdb.syarat-ppdb.destroy', $syarat->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini?');">
+                                          @csrf
+                                          @method('DELETE')
+                                          <button type="submit" class="btn btn-icon btn-sm btn-outline-danger" title="Hapus">
+                                              <i class="bx bx-trash"></i>
+                                          </button>
+                                      </form>
+                                  </div>
+                              </td>
+                          </tr>
+                          @empty
+                          <tr>
+                            <td colspan="5" class="text-center">Belum ada data syarat pendaftaran</td>
+                          </tr>
+                          @endforelse
+                      </tbody>
+                  </table>
+              </div>
             </div>
         </div>
     </div>

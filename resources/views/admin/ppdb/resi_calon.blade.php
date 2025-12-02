@@ -88,7 +88,7 @@
     <table class="header" style="width:100%;">
       <tr>
         <td class="header-logo">
-            <img src="{{ $profilSekolah->logo ? asset('storage/' . $profilSekolah->logo) : asset('profil/default.png') }}" alt="Logo Sekolah" width="70">
+            <img src="{{ $profilSekolah->logo ?  asset('storage/' . $profilSekolah->logo) : asset('profil/default.png') }}" alt="Logo Sekolah" width="70">
         </td>
         <td class="header-title">
           <strong>PANITIA PENERIMAAN PESERTA DIDIK BARU (PPDB)</strong><br>

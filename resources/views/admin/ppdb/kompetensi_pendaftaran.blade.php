@@ -20,57 +20,59 @@
           <i class='bx bx-plus me-1'></i> Tambah Kompetensi
         </button>
       </div>
-      <div class="table-responsive text-nowrap">
-        <table class="table table-hover">
-          <thead>
-            <tr>
-              <th>No</th>
-              <th>KODE</th>
-              <th>Kompetensi</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody class="table-border-bottom-0">
-            @forelse ($kompetensiPendaftaran as $item)
+      <div class="card-body"> 
+        <div class="table-responsive text-nowrap">
+          <table class="table table-hover">
+            <thead>
               <tr>
-                <td>{{ $loop->iteration }}</td>
-                <td>{{ $item->kode }}</td>
-                <td>{{ $item->kompetensi }}</td>
-                <td>
-                  <div class="d-flex align-items-center">
-
-                    {{-- Edit --}}
-                    <a href="javascript:void(0);" 
-                       class="btn btn-icon btn-sm btn-outline-primary me-1 btn-edit"
-                       data-id="{{ $item->id }}"
-                       data-kode="{{ $item->kode }}"
-                       data-kompetensi="{{ $item->kompetensi }}"
-                       data-bs-toggle="tooltip"
-                       data-bs-placement="top"
-                       title="Edit">
-                       <i class="bx bx-edit-alt"></i>
-                    </a>
-
-                    {{-- Hapus --}}
-                    <form action="{{ route('admin.ppdb.kompetensi-ppdb.destroy', $item->id) }}" method="POST" 
-                          onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini?');">
-                      @csrf
-                      @method('DELETE')
-                      <button type="submit" class="btn btn-icon btn-sm btn-outline-danger" 
-                              data-bs-toggle="tooltip" data-bs-placement="top" title="Hapus">
-                        <i class="bx bx-trash"></i>
-                      </button>
-                    </form>
-                  </div>
-                </td>
+                <th>No</th>
+                <th>KODE</th>
+                <th>Kompetensi</th>
+                <th>Actions</th>
               </tr>
-            @empty
-              <tr>
-                <td colspan="4" class="text-center">Belum ada data kompetensi</td>
-              </tr>
-            @endforelse
-          </tbody>
-        </table>
+            </thead>
+            <tbody class="table-border-bottom-0">
+              @forelse ($kompetensiPendaftaran as $item)
+                <tr>
+                  <td>{{ $loop->iteration }}</td>
+                  <td>{{ $item->kode }}</td>
+                  <td>{{ $item->kompetensi }}</td>
+                  <td>
+                    <div class="d-flex align-items-center">
+
+                      {{-- Edit --}}
+                      <a href="javascript:void(0);" 
+                         class="btn btn-icon btn-sm btn-outline-primary me-1 btn-edit"
+                         data-id="{{ $item->id }}"
+                         data-kode="{{ $item->kode }}"
+                         data-kompetensi="{{ $item->kompetensi }}"
+                         data-bs-toggle="tooltip"
+                         data-bs-placement="top"
+                         title="Edit">
+                         <i class="bx bx-edit-alt"></i>
+                      </a>
+
+                      {{-- Hapus --}}
+                      <form action="{{ route('admin.ppdb.kompetensi-ppdb.destroy', $item->id) }}" method="POST" 
+                            onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini?');">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="btn btn-icon btn-sm btn-outline-danger" 
+                                data-bs-toggle="tooltip" data-bs-placement="top" title="Hapus">
+                          <i class="bx bx-trash"></i>
+                        </button>
+                      </form>
+                    </div>
+                  </td>
+                </tr>
+              @empty
+                <tr>
+                  <td colspan="4" class="text-center">Belum ada data kompetensi</td>
+                </tr>
+              @endforelse
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
     <!-- Bootstrap Table with Header - Light -->

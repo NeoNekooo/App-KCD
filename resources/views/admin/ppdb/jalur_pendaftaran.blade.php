@@ -20,9 +20,11 @@
           <i class='bx bx-plus me-1'></i> Tambah Jalur
         </button>
       </div>
-      <div class="table-responsive text-nowrap">
-        <table class="table table-hover">
-          <thead>
+      <div class="card-body">
+
+        <div class="table-responsive text-nowrap">
+          <table class="table table-hover">
+            <thead>
             <tr>
               <th>No</th>
               <th>KODE</th>
@@ -62,11 +64,11 @@
                        data-bs-placement="top"
                        title="Edit">
                        <i class="bx bx-edit-alt"></i>
-                    </a>
-
-
-                    {{-- Hapus --}}
-                    <form action="{{ route('admin.ppdb.jalur-ppdb.destroy', $jalur->id) }}" method="POST" 
+                      </a>
+                      
+                      
+                      {{-- Hapus --}}
+                      <form action="{{ route('admin.ppdb.jalur-ppdb.destroy', $jalur->id) }}" method="POST" 
                           onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini?');">
                       @csrf
                       @method('DELETE')
@@ -78,13 +80,14 @@
                   </div>
                 </td>
               </tr>
-            @empty
-              <tr>
-                <td colspan="5" class="text-center">Belum ada data jalur pendaftaran</td>
-              </tr>
-            @endforelse
-          </tbody>
-        </table>
+              @empty
+                <tr>
+                  <td colspan="5" class="text-center">Belum ada data jalur pendaftaran</td>
+                </tr>
+              @endforelse
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
     <!-- Bootstrap Table with Header - Light -->

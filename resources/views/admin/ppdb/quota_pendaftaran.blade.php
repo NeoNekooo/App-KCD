@@ -18,61 +18,63 @@
 
   </div>
 
-  <div class="table-responsive">
-    <table class="table table-hover">
-      <thead>
-        <tr>
-          <th>No</th>
-          <th>Tahun Pelajaran</th>
-          @if($tingkat && $tingkat->tingkat == 10)
-            <th>Keahlian</th>
-          @endif
-          <th>Jumlah Kelas</th>
-          <th>Quota</th>
-          <th>Aksi</th>
-        </tr>
-      </thead>
-      <tbody>
-        @forelse($quotas as $quota)
-        <tr>
-          <td>{{ $loop->iteration }}</td>
-          <td>{{ $quota->tahunPpdb?->tahun_pelajaran ?? '-' }}</td>
-          @if($tingkat && $tingkat->tingkat == 10)
-            <td>{{ $quota->keahlian }}</td>
-          @endif
-          <td>{{ $quota->jumlah_kelas }}</td>
-          <td>{{ $quota->quota }}</td>
-          <td>
-            <div class="d-flex align-items-center">
-              <a href="javascript:void(0);" 
-                 class="btn btn-icon btn-sm btn-outline-primary me-1 btn-edit"
-                 data-id="{{ $quota->id }}"
-                 data-tahunid="{{ $quota->tahunPpdb?->id ?? '' }}"
-                 data-tahun="{{ $quota->tahunPpdb->tahun_pelajaran ?? '-' }}"
-                 data-keahlian="{{ $quota->keahlian }}"
-                 data-jumlah="{{ $quota->jumlah_kelas }}"
-                 data-quota="{{ $quota->quota }}"
-                 title="Edit">
-                 <i class="bx bx-edit-alt"></i>
-              </a>
-              <form action="{{ route('admin.ppdb.quota-ppdb.destroy', $quota->id) }}" method="POST" 
-                    onsubmit="return confirm('Yakin hapus data ini?');">
-                @csrf
-                @method('DELETE')
-                <button type="submit" class="btn btn-icon btn-sm btn-outline-danger">
-                  <i class="bx bx-trash"></i>
-                </button>
-              </form>
-            </div>
-          </td>
-        </tr>
-        @empty
-        <tr>
-          <td colspan="6" class="text-center">Belum ada data quota pendaftaran</td>
-        </tr>
-        @endforelse
-      </tbody>
-    </table>
+  <div class="card-body">
+    <div class="table-responsive">
+      <table class="table table-hover">
+        <thead>
+          <tr>
+            <th>No</th>
+            <th>Tahun Pelajaran</th>
+            @if($tingkat && $tingkat->tingkat == 10)
+              <th>Keahlian</th>
+            @endif
+            <th>Jumlah Kelas</th>
+            <th>Quota</th>
+            <th>Aksi</th>
+          </tr>
+        </thead>
+        <tbody>
+          @forelse($quotas as $quota)
+          <tr>
+            <td>{{ $loop->iteration }}</td>
+            <td>{{ $quota->tahunPpdb?->tahun_pelajaran ?? '-' }}</td>
+            @if($tingkat && $tingkat->tingkat == 10)
+              <td>{{ $quota->keahlian }}</td>
+            @endif
+            <td>{{ $quota->jumlah_kelas }}</td>
+            <td>{{ $quota->quota }}</td>
+            <td>
+              <div class="d-flex align-items-center">
+                <a href="javascript:void(0);" 
+                   class="btn btn-icon btn-sm btn-outline-primary me-1 btn-edit"
+                   data-id="{{ $quota->id }}"
+                   data-tahunid="{{ $quota->tahunPpdb?->id ?? '' }}"
+                   data-tahun="{{ $quota->tahunPpdb->tahun_pelajaran ?? '-' }}"
+                   data-keahlian="{{ $quota->keahlian }}"
+                   data-jumlah="{{ $quota->jumlah_kelas }}"
+                   data-quota="{{ $quota->quota }}"
+                   title="Edit">
+                   <i class="bx bx-edit-alt"></i>
+                </a>
+                <form action="{{ route('admin.ppdb.quota-ppdb.destroy', $quota->id) }}" method="POST" 
+                      onsubmit="return confirm('Yakin hapus data ini?');">
+                  @csrf
+                  @method('DELETE')
+                  <button type="submit" class="btn btn-icon btn-sm btn-outline-danger">
+                    <i class="bx bx-trash"></i>
+                  </button>
+                </form>
+              </div>
+            </td>
+          </tr>
+          @empty
+          <tr>
+            <td colspan="6" class="text-center">Belum ada data quota pendaftaran</td>
+          </tr>
+          @endforelse
+        </tbody>
+      </table>
+    </div>
   </div>
 </div>
 

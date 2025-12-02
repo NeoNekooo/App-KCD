@@ -12,72 +12,74 @@
           <i class='bx bx-plus me-1'></i> Tambah Tahun
         </button>
       </div>
-      <div class="table-responsive text-nowrap">
-        <table class="table table-hover">
-          <thead>
-            <tr>
-              <th>No</th>
-              <th>Tahun</th>
-              <th>Keterangan</th>
-              <th>Status</th>
-              <th>Aksi</th>
-            </tr>
-          </thead>
-          <tbody>
-            @forelse($tahunPpdb as $tahun)
+      <div class="card-body">
+        <div class="table-responsive text-nowrap">
+          <table class="table table-hover">
+            <thead>
               <tr>
-                <td>{{ $loop->iteration }}</td>
-                <td>{{ $tahun->tahun_pelajaran }}</td>
-                <td>{{ $tahun->keterangan ?? '-' }}</td>
-                <td>
-                  @if($tahun->is_active)
-                    <span class="badge bg-success">Aktif</span>
-                  @else
-                    <span class="badge bg-secondary">Non Aktif</span>
-                  @endif
-                </td>
-                <td>
-                  <div class="d-flex align-items-center">
+                <th>No</th>
+                <th>Tahun</th>
+                <th>Keterangan</th>
+                <th>Status</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody>
+              @forelse($tahunPpdb as $tahun)
+                <tr>
+                  <td>{{ $loop->iteration }}</td>
+                  <td>{{ $tahun->tahun_pelajaran }}</td>
+                  <td>{{ $tahun->keterangan ?? '-' }}</td>
+                  <td>
+                    @if($tahun->is_active)
+                      <span class="badge bg-success">Aktif</span>
+                    @else
+                      <span class="badge bg-secondary">Non Aktif</span>
+                    @endif
+                  </td>
+                  <td>
+                    <div class="d-flex align-items-center">
+                      
+                      {{-- Toggle Active --}}
+                      <form action="{{ route('admin.ppdb.tahun-ppdb.toggleActive', $tahun->id) }}" method="POST" class="me-1">
+                        @csrf
+                        <button type="submit" 
+                          class="btn btn-icon btn-sm @if($tahun->is_active) text-danger @else text-info @endif"
+                          data-bs-toggle="tooltip" data-bs-placement="top" 
+                          title="@if($tahun->is_active) Non Aktifkan @else Aktifkan Jalur @endif">
+                          <i class='bx @if($tahun->is_active) bx-block @else bx-power-off @endif'></i>
+                        </button>
+                      </form>
                     
-                    {{-- Toggle Active --}}
-                    <form action="{{ route('admin.ppdb.tahun-ppdb.toggleActive', $tahun->id) }}" method="POST" class="me-1">
-                      @csrf
-                      <button type="submit" 
-                        class="btn btn-icon btn-sm @if($tahun->is_active) text-danger @else text-info @endif"
-                        data-bs-toggle="tooltip" data-bs-placement="top" 
-                        title="@if($tahun->is_active) Non Aktifkan @else Aktifkan Jalur @endif">
-                        <i class='bx @if($tahun->is_active) bx-block @else bx-power-off @endif'></i>
+                      {{-- Edit --}}
+                      <button type="button" 
+                        class="btn btn-icon btn-sm btn-outline-primary me-1 btn-edit"
+                        data-id="{{ $tahun->id }}"
+                        data-tahun="{{ $tahun->tahun_pelajaran }}"
+                        data-keterangan="{{ $tahun->keterangan }}"
+                        title="Edit">
+                        <i class="bx bx-edit-alt"></i>
                       </button>
-                    </form>
-
-                    {{-- Edit --}}
-                    <button type="button" 
-                      class="btn btn-icon btn-sm btn-outline-primary me-1 btn-edit"
-                      data-id="{{ $tahun->id }}"
-                      data-tahun="{{ $tahun->tahun_pelajaran }}"
-                      data-keterangan="{{ $tahun->keterangan }}"
-                      title="Edit">
-                      <i class="bx bx-edit-alt"></i>
-                    </button>
-
-                    {{-- Hapus --}}
-                    <form action="{{ route('admin.ppdb.tahun-ppdb.destroy', $tahun->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini?');">
-                      @csrf
-                      @method('DELETE')
-                      <button type="submit" class="btn btn-icon btn-sm btn-outline-danger" data-bs-toggle="tooltip" data-bs-placement="top" title="Hapus">
-                        <i class="bx bx-trash"></i>
-                      </button>
-                    </form>
-                  </div>
-                </td>
-              </tr>
-            @empty
-              <tr>
-                <td colspan="5" class="text-center">Belum ada data tahun PPDB</td>
-              </tr>
-            @endforelse
-          </tbody>
-        </table>
+                    
+                      {{-- Hapus --}}
+                      <form action="{{ route('admin.ppdb.tahun-ppdb.destroy', $tahun->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini?');">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="btn btn-icon btn-sm btn-outline-danger" data-bs-toggle="tooltip" data-bs-placement="top" title="Hapus">
+                          <i class="bx bx-trash"></i>
+                        </button>
+                      </form>
+                    </div>
+                  </td>
+                </tr>
+              @empty
+                <tr>
+                  <td colspan="5" class="text-center">Belum ada data tahun PPDB</td>
+                </tr>
+              @endforelse
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>
