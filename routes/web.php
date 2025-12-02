@@ -157,9 +157,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('tapel/aktif/{id}', [TapelController::class, 'setAktif'])->name('tapel.aktif');
         Route::resource('jurusan', JurusanController::class)->only(['index']);
         Route::get('mapel', [MapelController::class, 'index'])->name('mapel.index'); 
-        Route::get('/ekstrakurikuler', [EkstrakurikulerController::class, 'index'])->name('ekskul.index');
-        Route::resource('jadwal-pelajaran', JadwalPelajaranController::class);
-        Route::get('jadwal-pelajaran/{id}/json', [JadwalPelajaranController::class, 'getJadwalJson'])->name('jadwal-pelajaran.json');
+        Route::resource('ekstrakurikuler', EkstrakurikulerController::class)->except(['show', 'create', 'edit']); 
+        Route::resource('ekstrakurikuler', EkstrakurikulerController::class);
+
     });
 
     /*
