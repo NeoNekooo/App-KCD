@@ -114,9 +114,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::put('sekolah', [SekolahController::class, 'update'])->name('sekolah.update');
         Route::get('/webservice', [ApiSettingsController::class, 'index'])->name('webservice.index');
     });
-
+    
     // --- GRUP KEPEGAWAIAN --- (Struktur dari V1)
     Route::prefix('kepegawaian')->name('kepegawaian.')->group(function () {
+        
         // Route untuk Guru
         Route::prefix('guru')->name('guru.')->controller(GtkController::class)->group(function () {
             Route::get('/', 'indexGuru')->name('index');
@@ -138,6 +139,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
         // --- RUTE BARU UNTUK UPLOAD FOTO & TTD ---
         Route::post('gtk/{id}/upload-media', [GtkController::class, 'uploadMedia'])->name('gtk.upload_media');
 
+        // --- RUTE BARU: CETAK KARTU ID ---
+        // Note: Nama route otomatis menjadi 'admin.kepegawaian.gtk.index-cetak-kartu' karena berada dalam grup.
+        Route::get('gtk/cetak-kartu', [GtkController::class, 'indexCetakKartu'])->name('gtk.index-cetak-kartu');
+        Route::get('gtk/cetak-kartu/{id}/print', [GtkController::class, 'cetakKartu'])->name('gtk.print-kartu');
+        Route::post('gtk/cetak-kartu/massal', [GtkController::class, 'cetakKartuMassal'])->name('gtk.print-kartu-massal');
+        Route::get('gtk/cetak-kartu/print-all', [GtkController::class, 'cetakSemua'])->name('gtk.print-all');
+        Route::post('gtk/cetak-kartu/upload-background', [GtkController::class, 'uploadBackgroundKartu'])->name('gtk.upload-background-kartu');
         // Route untuk Tugas Pegawai
         Route::resource('tugas-pegawai', TugasPegawaiController::class)->except(['create', 'edit', 'show']);
     });
