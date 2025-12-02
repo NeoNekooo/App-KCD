@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 
 @section('content')
-    <div class="container-xxl flex-grow-1 container-p-y">
+    <div class="flex-grow-1 container-p-y ">
 
         {{-- Header Dashboard --}}
         <div class="row mb-4">

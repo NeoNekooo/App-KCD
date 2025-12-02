@@ -6,6 +6,8 @@
   data-theme="theme-default"
   data-assets-path="{{ asset('sneat/assets/') }}" 
   data-template="vertical-menu-template-free"
+  data-layout="wide"
+
 >
   <head>
     {{-- ... (Isi <head> tidak ada perubahan) ... --}}
@@ -37,12 +39,12 @@
      @include('layouts.partials.toast')
 
     <div class="layout-wrapper layout-content-navbar">
-        <div class="layout-container">
+        <div class="layout-container ">
             @include('layouts.partials.sidebar')
-            <div class="layout-page">
+            <div class="layout-page ">
                 @include('layouts.partials.topbar')
                 <div class="content-wrapper">
-                    <div class="container-xxl flex-grow-1 container-p-y">
+                    <div class="container-fluid flex-grow-1 container-p-y">
                         @yield('content')
                     </div>
                     @include('layouts.partials.footer')
