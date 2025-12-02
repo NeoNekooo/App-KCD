@@ -85,4 +85,10 @@ class Rombel extends Model
         // 'kurikulum_id' adalah foreign key
         return $this->belongsTo(Kurikulum::class, 'kurikulum_id');
     }
+
+    
+    public function waliKelas()
+    {
+        return $this->belongsTo(Gtk::class, 'ptk_id', 'ptk_id');
+    }
 }
