@@ -275,7 +275,7 @@
         </li>
 
         <!-- Keuangan -->
-        <li class="menu-item {{ request()->routeIs('abendahara.keuangan.*') ? 'open' : '' }}">
+        <li class="menu-item {{ request()->routeIs('bendahara.keuangan*') ? 'open' : '' }}">
             <a href="javascript:void(0);" class="menu-link menu-toggle">
                 <i class="menu-icon tf-icons bx bx-money"></i>
                 <div data-i18n="Keuangan">Keuangan</div>
@@ -301,7 +301,7 @@
                         <div data-i18n="Pengaturan Iuran">Pengaturan Iuran</div>
                     </a>
                 </li>
-                 <li class="menu-item {{ request()->routeIs('bendahara.keuangan.tagihan.index') ? 'active' : '' }}">
+                 <li class="menu-item {{ request()->routeIs('bendahara.keuangan.tagihan.create') ? 'active' : '' }}">
                     <a href="{{ route('bendahara.keuangan.tagihan.create') }}" class="menu-link">
                         <div data-i18n="Manajemen tagihan">Tagihan</div>
                     </a>

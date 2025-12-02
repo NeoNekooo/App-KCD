@@ -9,8 +9,10 @@
   <div class="col-md-12">
     <div class="card mb-4">
       <h5 class="card-header">Daftar Calon Peserta Didik</h5>
-      <div class="table-responsive text-nowrap">
-        <table class="table table-bordered">
+      <div class="card-body">
+
+        <div class="table-responsive text-nowrap">
+          <table class="table table-bordered">
           <thead class="table-light">
             <tr>
               <th>No</th>
@@ -24,8 +26,8 @@
           </thead>
           <tbody>
             @forelse($formulirs as $i => $calon)
-              <tr>
-                <td>{{ $i+1 }}</td>
+            <tr>
+              <td>{{ $i+1 }}</td>
                 <td>
                   <strong class="text-primary">{{ $calon->nomor_resi }}</strong><br>
                   <small class="text-muted">{{ $calon->jurusan ?? '-' }}</small>
@@ -136,9 +138,10 @@
               <tr>
                 <td colspan="7" class="text-center text-muted">Belum ada data pendaftar</td>
               </tr>
-            @endforelse
-          </tbody>
-        </table>
+              @endforelse
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>
