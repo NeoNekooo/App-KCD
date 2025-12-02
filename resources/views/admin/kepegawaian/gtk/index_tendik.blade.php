@@ -58,7 +58,7 @@
                     <td><input class="form-check-input row-checkbox" type="checkbox" value="{{ $gtk->id }}"></td>
                     <td><span class="badge bg-label-secondary">{{ $gtk->ptk_induk == 1 ? 'Induk' : 'Non-Induk' }}</span></td>
                     
-                    {{-- KOLOM NAMA DENGAN FOTO & INISIAL --}}
+                    {{-- KOLOM NAMA (LOGIKA DIPERBAIKI SAMAKAN DENGAN GURU) --}}
                     <td style="min-width: 250px;">
                         <div class="d-flex justify-content-start align-items-center">
                             {{-- Container Avatar --}}
@@ -83,14 +83,26 @@
                             {{-- Container Teks --}}
                             <div class="d-flex flex-column">
                                 <span class="fw-semibold text-truncate text-body">{{ $gtk->nama }}</span>
-                                <small class="text-muted">{{ $gtk->nip ? 'NIP: ' . $gtk->nip : ($gtk->nuptk ?? 'Tendik') }}</small>
+                                <small class="text-muted">
+                                    {{-- LOGIKA SUBTITLE CERDAS (Ignore Strip) --}}
+                                    @if(!empty($gtk->nip) && trim($gtk->nip) != '-')
+                                        NIP: {{ $gtk->nip }}
+                                    @elseif(!empty($gtk->nuptk) && trim($gtk->nuptk) != '-')
+                                        NUPTK: {{ $gtk->nuptk }}
+                                    @else
+                                        -
+                                    @endif
+                                </small>
                             </div>
                         </div>
                     </td>
                     {{-- END KOLOM NAMA --}}
 
                     <td>{{ $gtk->nik ?? '-' }}</td>
-                    <td>{{ $gtk->jenis_kelamin == 'Laki-laki' ? 'L' : 'P' }}</td>
+                    
+                    {{-- PERBAIKAN LOGIKA JENIS KELAMIN --}}
+                    <td>{{ ($gtk->jenis_kelamin == 'L' || $gtk->jenis_kelamin == 'Laki-laki') ? 'L' : 'P' }}</td>
+
                     <td>{{ $gtk->tanggal_lahir ? \Carbon\Carbon::parse($gtk->tanggal_lahir)->format('d-m-Y') : '-' }}</td>
                     <td><span class="badge bg-label-primary">{{ $gtk->status_kepegawaian_id_str ?? '-' }}</span></td>
                     <td>{{ $gtk->jenis_ptk_id_str ?? '-' }}</td>

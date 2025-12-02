@@ -58,39 +58,57 @@
                     <td><input class="form-check-input row-checkbox" type="checkbox" value="{{ $gtk->id }}"></td>
                     <td><span class="badge bg-label-secondary">{{ $gtk->ptk_induk == 1 ? 'Induk' : 'Non-Induk' }}</span></td>
                     
-                    {{-- KOLOM NAMA (DIPERBAIKI AGAR RAPI) --}}
+                    {{-- KOLOM NAMA (LOGIKA DIPERBAIKI) --}}
                     <td style="min-width: 250px;">
                         <div class="d-flex justify-content-start align-items-center">
                             {{-- Container Avatar --}}
                             <div class="avatar-wrapper me-3">
                                 <div class="avatar avatar-sm">
-    @if(!empty($gtk->foto) && \Illuminate\Support\Facades\Storage::disk('public')->exists($gtk->foto))
-        {{-- Jika ada foto profil --}}
-        <img src="{{ asset('storage/' . $gtk->foto) }}" 
-             alt="Avatar" 
-             class="rounded-circle" 
-             style="width: 100%; height: 100%; object-fit: cover;">
-    @else
-        {{-- Jika tidak ada foto, pakai UI Avatars (Inisial Nama) --}}
-        <img src="https://ui-avatars.com/api/?name={{ urlencode($gtk->nama) }}&background=random&color=ffffff&size=100" 
-             alt="Avatar Default" 
-             class="rounded-circle" 
-             style="width: 100%; height: 100%; object-fit: cover;">
-    @endif
-</div>
+                                    @if(!empty($gtk->foto) && \Illuminate\Support\Facades\Storage::disk('public')->exists($gtk->foto))
+                                        {{-- Jika ada foto profil --}}
+                                        <img src="{{ asset('storage/' . $gtk->foto) }}" 
+                                             alt="Avatar" 
+                                             class="rounded-circle" 
+                                             style="width: 100%; height: 100%; object-fit: cover;">
+                                    @else
+                                        {{-- Jika tidak ada foto, pakai UI Avatars (Inisial Nama) --}}
+                                        <img src="https://ui-avatars.com/api/?name={{ urlencode($gtk->nama) }}&background=random&color=ffffff&size=100" 
+                                             alt="Avatar Default" 
+                                             class="rounded-circle" 
+                                             style="width: 100%; height: 100%; object-fit: cover;">
+                                    @endif
+                                </div>
                             </div>
                             
                             {{-- Container Teks --}}
                             <div class="d-flex flex-column">
                                 <span class="fw-semibold text-truncate text-body">{{ $gtk->nama }}</span>
-                                <small class="text-muted">{{ $gtk->nip ? 'NIP: ' . $gtk->nip : ($gtk->nuptk ?? 'Guru') }}</small>
+                                <small class="text-muted">
+                                    {{-- LOGIKA SUBTITLE YANG LEBIH CERDAS --}}
+                                    {{-- Cek apakah NIP ada isinya DAN isinya bukan sekedar strip (-) --}}
+                                    @if(!empty($gtk->nip) && trim($gtk->nip) != '-')
+                                        NIP: {{ $gtk->nip }}
+                                    
+                                    {{-- Jika NIP kosong/strip, cek NUPTK --}}
+                                    @elseif(!empty($gtk->nuptk) && trim($gtk->nuptk) != '-')
+                                        NUPTK: {{ $gtk->nuptk }}
+                                    
+                                    {{-- Jika keduanya kosong/strip, tampilkan strip saja --}}
+                                    @else
+                                        -
+                                    @endif
+                                </small>
                             </div>
                         </div>
                     </td>
                     {{-- END KOLOM NAMA --}}
 
                     <td>{{ $gtk->nik ?? '-' }}</td>
-                    <td>{{ $gtk->jenis_kelamin == 'Laki-laki' ? 'L' : 'P' }}</td>
+                    
+                    {{-- PERBAIKAN LOGIKA JENIS KELAMIN --}}
+                    {{-- Mengecek apakah datanya 'L' ATAU 'Laki-laki' --}}
+                    <td>{{ ($gtk->jenis_kelamin == 'L' || $gtk->jenis_kelamin == 'Laki-laki') ? 'L' : 'P' }}</td>
+
                     <td>{{ $gtk->tanggal_lahir ? \Carbon\Carbon::parse($gtk->tanggal_lahir)->format('d-m-Y') : '-' }}</td>
                     <td><span class="badge bg-label-primary">{{ $gtk->status_kepegawaian_id_str ?? '-' }}</span></td>
                     <td>{{ $gtk->jenis_ptk_id_str ?? '-' }}</td>
