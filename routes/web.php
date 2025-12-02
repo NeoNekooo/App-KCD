@@ -62,6 +62,15 @@ use App\Http\Controllers\Admin\Rombel\RombelWaliController;
 
 // Controller Landing
 use App\Http\Controllers\Admin\Landing\PpdbController;
+
+// Controller Keuangan
+use App\Http\Controllers\Bendahara\Keuangan\IuranController;
+use App\Http\Controllers\Bendahara\Keuangan\KasController;
+use App\Http\Controllers\Bendahara\Keuangan\PembayaranController;
+use App\Http\Controllers\Bendahara\Keuangan\PengeluaranController;
+use App\Http\Controllers\Bendahara\Keuangan\VoucherController;
+use App\Http\Controllers\Bendahara\Keuangan\TagihanController;
+use App\Http\Controllers\Bendahara\Keuangan\MasterKasController;
         
 /*
 |--------------------------------------------------------------------------
@@ -431,6 +440,20 @@ Route::prefix('admin')->name('admin.')->group(function () {
     });
 
 }); // Akhir dari grup 'admin'
+
+Route::prefix('bendahara')->name('bendahara.')->group(function () {
+    Route::prefix('keuangan')->name('keuangan.')->group(function () {
+        Route::get('/penerimaan', [PembayaranController::class, 'index'])->name('penerimaan.index');
+        Route::post('/penerimaan', [PembayaranController::class, 'store'])->name('penerimaan.store');
+        Route::get('/kas', [KasController::class, 'index'])->name('kas.index');
+        Route::resource('/iuran', IuranController::class)->except(['create', 'edit', 'show']);
+        Route::resource('/voucher', VoucherController::class)->only(['index', 'store', 'destroy']);
+        Route::resource('/pengeluaran', PengeluaranController::class)->except(['create', 'edit', 'show']);
+        Route::resource('/kas-master', MasterKasController::class);
+        Route::get('tagihan/generate', [TagihanController::class, 'create'])->name('tagihan.create');
+        Route::post('tagihan/generate', [TagihanController::class, 'store'])->name('tagihan.store');
+    });
+});
 
 
 // Menggunakan file auth standar dari V2

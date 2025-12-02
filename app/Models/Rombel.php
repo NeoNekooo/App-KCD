@@ -42,7 +42,8 @@ class Rombel extends Model
      * Relasi ke semua Siswa di Rombel ini.
      * Menghubungkan rombels.rombongan_belajar_id (Varchar) -> siswas.rombongan_belajar_id (Varchar)
      */
-    public function siswa(): HasMany
+    
+    public function siswas()
     {
         return $this->hasMany(Siswa::class, 'rombongan_belajar_id', 'rombongan_belajar_id');
     }

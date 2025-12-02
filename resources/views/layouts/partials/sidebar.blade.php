@@ -274,6 +274,52 @@
             </ul>
         </li>
 
+        <!-- Keuangan -->
+        <li class="menu-item {{ request()->routeIs('abendahara.keuangan.*') ? 'open' : '' }}">
+            <a href="javascript:void(0);" class="menu-link menu-toggle">
+                <i class="menu-icon tf-icons bx bx-money"></i>
+                <div data-i18n="Keuangan">Keuangan</div>
+            </a>
+            <ul class="menu-sub">
+                <li class="menu-item {{ request()->routeIs('bendahara.keuangan.penerimaan.index') ? 'active' : '' }}">
+                    <a href="{{ route('bendahara.keuangan.penerimaan.index') }}" class="menu-link">
+                        <div data-i18n="Penerimaan">Penerimaan</div>
+                    </a>
+                </li>
+                <li class="menu-item {{ request()->routeIs('bendahara.keuangan.pengeluaran.index') ? 'active' : '' }}">
+                    <a href="{{ route('bendahara.keuangan.pengeluaran.index') }}" class="menu-link">
+                        <div data-i18n="Pengeluaran">Pengeluaran</div>
+                    </a>
+                </li>
+                <li class="menu-item {{ request()->routeIs('bendahara.keuangan.kas.index') ? 'active' : '' }}">
+                    <a href="{{ route('bendahara.keuangan.kas.index') }}" class="menu-link">
+                        <div data-i18n="Buku Kas">Buku Kas</div>
+                    </a>
+                </li>
+                <li class="menu-item {{ request()->routeIs('bendahara.keuangan.iuran.index') ? 'active' : '' }}">
+                    <a href="{{ route('bendahara.keuangan.iuran.index') }}" class="menu-link">
+                        <div data-i18n="Pengaturan Iuran">Pengaturan Iuran</div>
+                    </a>
+                </li>
+                 <li class="menu-item {{ request()->routeIs('bendahara.keuangan.tagihan.index') ? 'active' : '' }}">
+                    <a href="{{ route('bendahara.keuangan.tagihan.create') }}" class="menu-link">
+                        <div data-i18n="Manajemen tagihan">Tagihan</div>
+                    </a>
+                </li>
+                     <li class="menu-item {{ request()->routeIs('bendahara.keuangan.kas-master.index') ? 'active' : '' }}">
+                    <a href="{{ route('bendahara.keuangan.kas-master.index') }}" class="menu-link">
+                        <div data-i18n="Manajemen tagihan">Master kas </div>
+                    </a>
+                </li>
+
+                 <li class="menu-item {{ request()->routeIs('bendahara.keuangan.voucher.index') ? 'active' : '' }}">
+                    <a href="{{ route('bendahara.keuangan.voucher.index') }}" class="menu-link">
+                        <div data-i18n="Manajemen Voucher">Manajemen Beasiswa</div>
+                    </a>
+                </li>
+            </ul>
+        </li>
+
         <!-- Absensi -->
         <li class="menu-item {{ request()->routeIs('admin.absensi.*') ? 'active open' : '' }}">
   
