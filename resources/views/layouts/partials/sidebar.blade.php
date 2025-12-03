@@ -75,7 +75,7 @@
         </li>
 
         <!-- Akademik -->
-        <li class="menu-item {{ request()->is('admin/akademik*') ? 'open' : '' }}">
+        <li class="menu-item {{ request()->is('admin/akademik*') && !request()->is('admin/akademik/jadwal-pelajaran*') ? 'open' : '' }}">
             <a href="javascript:void(0);" class="menu-link menu-toggle">
                 <i class="menu-icon tf-icons bx bxs-book-content"></i>
                 <div data-i18n="Akademik">Akademik</div>
@@ -98,17 +98,12 @@
                 </li>
                 <li class="menu-item {{ request()->is('admin/akademik/mapel*') ? 'active' : '' }}">
                     <a href="{{ route('admin.akademik.mapel.index') }}" class="menu-link">
-                        <div data-i18n="Semester">Mapel</div>
+                        <div data-i18n="Semester">Mata Pelajaran</div>
                     </a>
                 </li>
-                <li class="menu-item {{ request()->is('admin/akademik/ekstrakurikuler*') ? 'active' : '' }}">
-                    <a href="{{ route('admin.akademik.ekstrakurikuler.index') }}" class="menu-link">
-                        <div data-i18n="Semester">Ekstrakulikuler</div>
-                    </a>
-                </li>
-                <li class="menu-item {{ request()->is('admin/akademik/jadwal-pelajaran*') ? 'active' : '' }}">
-                    <a href="{{ route('admin.akademik.jadwal-pelajaran.index') }}" class="menu-link">
-                        <div data-i18n="Jadwal Pelajaran">Jadwal Pelajaran</div>
+                <li class="menu-item {{ request()->is('admin/akademik/daftar-ekstrakurikuler*') ? 'active' : '' }}">
+                    <a href="{{ route('admin.akademik.daftar-ekstrakurikuler.index') }}" class="menu-link">
+                        <div data-i18n="Semester">Daftar Ekstrakulikuler</div>
                     </a>
                 </li>
             </ul>
@@ -274,6 +269,75 @@
             </ul>
         </li>
 
+        <!-- Alumni -->
+        <li class="menu-item {{ request()->is('admin/alumni*') ? 'open' : '' }}">
+            <a href="javascript:void(0);" class="menu-link menu-toggle">
+                <i class="menu-icon tf-icons bx bx-user-pin"></i>
+                <div data-i18n="Alumni">Alumni</div>
+            </a>
+            <ul class="menu-sub">
+                <li class="menu-item {{-- {{ request()->is('admin/alumni/dataAlumni') ? 'active' : '' }} --}}">
+                    <a href="{{-- {{ route('admin.alumni.dataAlumni') }} --}}" class="menu-link">
+                        <div data-i18n="Data Alumni">Data Alumni</div>
+                    </a>
+                </li>
+                <li class="menu-item {{-- {{ request()->is('admin/alumni/rekapDataAlumni') ? 'active' : '' }} --}}">
+                    <a href="{{-- {{ route('admin.alumni.rekapDataAlumni') }} --}}" class="menu-link">
+                        <div data-i18n="Rekap Data Alumni">Rekap Data Alumni</div>
+                    </a>
+                </li>
+            
+            </ul>
+        </li>
+
+        <!-- Kurikulum -->
+        <li class="menu-item {{ request()->is('admin/rombel*') || request()->is('admin/akademik/jadwal-pelajaran*') ? 'open' : '' }}">
+            <a href="javascript:void(0);" class="menu-link menu-toggle">
+                <i class="menu-icon tf-icons bx bx-book-open"></i>
+                <div data-i18n="Kurikulum">Kurikulum</div>
+            </a>
+            <ul class="menu-sub">
+                <li class="menu-item {{ request()->is('admin/rombel*') ? 'open' : '' }}">
+                    <a href="javascript:void(0);" class="menu-link menu-toggle">
+                        <i class="menu-icon tf-icons bx bx-group"></i>
+                        <div data-i18n="Rombel">Rombongan Belajar</div>
+                    </a>
+                    <ul class="menu-sub">
+                        <li class="menu-item {{ request()->is('admin/rombel/reguler*') ? 'active' : '' }}">
+                            <a href="{{ route('admin.rombel.reguler.index') }}" class="menu-link">
+                                <div data-i18n="Reguler">Reguler</div>
+                            </a>
+                        </li>
+                        <li class="menu-item {{ request()->is('admin/rombel/praktik*') ? 'active' : '' }}">
+                            <a href="{{ route('admin.rombel.praktik.index') }}" class="menu-link">
+                                <div data-i18n="Praktik">Praktik</div>
+                            </a>
+                        </li>
+                        <li class="menu-item {{ request()->is('admin/rombel/ekstrakurikuler*') ? 'active' : '' }}">
+                            <a href="{{ route('admin.rombel.ekstrakurikuler.index') }}" class="menu-link">
+                                <div data-i18n="Ekstrakurikuler">Ekstrakurikuler</div>
+                            </a>
+                        </li>
+                        <li class="menu-item {{ request()->is('admin/rombel/mapel-pilihan*') ? 'active' : '' }}">
+                            <a href="{{ route('admin.rombel.mapel-pilihan.index') }}" class="menu-link">
+                                <div data-i18n="Mapel Pilihan">Mapel Pilihan</div>
+                            </a>
+                        </li>
+                        <li class="menu-item {{ request()->is('admin/rombel/wali*') ? 'active' : '' }}">
+                            <a href="{{ route('admin.rombel.wali.index') }}" class="menu-link">
+                                <div data-i18n="Wali">Wali</div>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                <li class="menu-item {{ request()->is('admin/akademik/jadwal-pelajaran*') ? 'active' : '' }}">
+                    <a href="{{ route('admin.akademik.jadwal-pelajaran.index') }}" class="menu-link">
+                        <div data-i18n="Jadwal Pelajaran">Jadwal Pelajaran</div>
+                    </a>
+                </li>
+            </ul>
+        </li>
+
         <!-- Keuangan -->
         <li class="menu-item {{ request()->routeIs('bendahara.keuangan*') ? 'open' : '' }}">
             <a href="javascript:void(0);" class="menu-link menu-toggle">
@@ -320,14 +384,13 @@
             </ul>
         </li>
 
-        <!-- Absensi -->
-        <li class="menu-item {{ request()->routeIs('admin.absensi.*') ? 'active open' : '' }}">
-  
-          {{-- Tombol dropdown utama "Absensi" --}}
-          <a href="javascript:void(0);" class="menu-link menu-toggle">
-            <i class="menu-icon tf-icons bx bxs-calendar-check"></i>
-            <div data-i18n="Absensi">Absensi</div>
-          </a>
+        <!-- Kehadiran -->
+        <li class="menu-item {{ request()->is('admin/absensi*') ? 'active open' : '' }}">
+            <a href="javascript:void(0);" class="menu-link menu-toggle">
+                <i class="menu-icon tf-icons bx bx-calendar-check"></i>
+                <div data-i18n="Kehadiran">Kehadiran</div>
+            </a>
+
       
           {{-- Ini adalah sub-menu di bawah "Absensi" --}}
           <ul class="menu-sub">
@@ -409,42 +472,6 @@
           </ul>
         </li>
 
-
-
-        <li class="menu-item {{ request()->is('admin/rombel*') ? 'open' : '' }}">
-            <a href="javascript:void(0);" class="menu-link menu-toggle">
-                <i class="menu-icon tf-icons bx bx-group"></i>
-                <div data-i18n="Rombel">Rombongan Belajar</div>
-            </a>
-            <ul class="menu-sub">
-                <li class="menu-item {{ request()->is('admin/rombel/reguler*') ? 'active' : '' }}">
-                    <a href="{{ route('admin.rombel.reguler.index') }}" class="menu-link">
-                        <div data-i18n="Reguler">Reguler</div>
-                    </a>
-                </li>
-                <li class="menu-item {{ request()->is('admin/rombel/praktik*') ? 'active' : '' }}">
-                    <a href="{{ route('admin.rombel.praktik.index') }}" class="menu-link">
-                        <div data-i18n="Praktik">Praktik</div>
-                    </a>
-                </li>
-                <li class="menu-item {{ request()->is('admin/rombel/ekstrakurikuler*') ? 'active' : '' }}">
-                    <a href="{{ route('admin.rombel.ekstrakurikuler.index') }}" class="menu-link">
-                        <div data-i18n="Ekstrakurikuler">Ekstrakurikuler</div>
-                    </a>
-                </li>
-                <li class="menu-item {{ request()->is('admin/rombel/mapel-pilihan*') ? 'active' : '' }}">
-                    <a href="{{ route('admin.rombel.mapel-pilihan.index') }}" class="menu-link">
-                        <div data-i18n="Mapel Pilihan">Mapel Pilihan</div>
-                    </a>
-                </li>
-                <li class="menu-item {{ request()->is('admin/rombel/wali*') ? 'active' : '' }}">
-                    <a href="{{ route('admin.rombel.wali.index') }}" class="menu-link">
-                        <div data-i18n="Wali">Wali</div>
-                    </a>
-                </li>
-            </ul>
-        </li>
-
         {{-- Pengaturan Laporan --}}
         <li class="menu-item {{ request()->is('admin/laporan*') ? 'open' : '' }}">
             <a href="javascript:void(0);" class="menu-link menu-toggle">
@@ -480,6 +507,7 @@
             </ul>
         </li>
 
+        <!-- Indisipliner -->
         <li class="menu-item {{ request()->is('admin/indisipliner*') ? 'open' : '' }}">
             <a href="javascript:void(0);" class="menu-link menu-toggle">
                 <i class="menu-icon tf-icons bx bx-shield-quarter"></i>
@@ -553,6 +581,72 @@
             </ul>
         </li>
 
+        <!-- Administrasi Surat -->
+        <li class="menu-item {{ request()->is('admin/administrasi*') ? 'open' : '' }}">
+            <a href="javascript:void(0);" class="menu-link menu-toggle">
+                <i class="menu-icon tf-icons bx bx-envelope"></i>
+                <div data-i18n="Administrasi Surat">Administrasi Surat</div>
+            </a>
+            <ul class="menu-sub">
+                <li class="menu-item {{-- {{ request()->is('admin/administrasi/suratMasuk') ? 'active' : '' }} --}}">
+                    <a href="{{-- {{ route('admin.administrasi.suratMasuk') }} --}}" class="menu-link">
+                        <div data-i18n="Surat Masuk">Surat Masuk</div>
+                    </a>
+                </li>
+                <li class="menu-item {{-- {{ request()->is('admin/administrasi/suratKeluar') ? 'active' : '' }} --}}">
+                    <a href="{{-- {{ route('admin.administrasi.suratKeluar') }} --}}" class="menu-link">
+                        <div data-i18n="Surat Keluar">Surat Keluar</div>
+                    </a>
+                </li>
+            
+            </ul>
+        </li>
+
+        <!-- Sarpras -->
+        <li class="menu-item {{ request()->is('admin/sarpras*') ? 'open' : '' }}">
+            <a href="javascript:void(0);" class="menu-link menu-toggle">
+                <i class="menu-icon tf-icons bx bx-buildings"></i>
+                <div data-i18n="Sarpras">Sarpras</div>
+            </a>
+            <ul class="menu-sub">
+                <li class="menu-item {{-- {{ request()->is('admin/sarpras/tanah') ? 'active' : '' }} --}}">
+                    <a href="{{-- {{ route('admin.sarpras.tanah') }} --}}" class="menu-link">
+                        <div data-i18n="Tanah">Tanah</div>
+                    </a>
+                </li>
+                <li class="menu-item {{-- {{ request()->is('admin/sarpras/ruang') ? 'active' : '' }} --}}">
+                    <a href="{{-- {{ route('admin.sarpras.ruang') }} --}}" class="menu-link">
+                        <div data-i18n="Ruang">Ruang</div>
+                    </a>
+                </li>
+                <li class="menu-item {{-- {{ request()->is('admin/sarpras/alat') ? 'active' : '' }} --}}">
+                    <a href="{{-- {{ route('admin.sarpras.alat') }} --}}" class="menu-link">
+                        <div data-i18n="Alat">Alat</div>
+                    </a>
+                </li>
+            </ul>
+        </li>
+
+        <!-- Humas -->
+        <li class="menu-item {{ request()->is('admin/humas*') ? 'open' : '' }}">
+            <a href="javascript:void(0);" class="menu-link menu-toggle">
+                <i class="menu-icon tf-icons bx bx-message-dots"></i>
+                <div data-i18n="Humas">Humas</div>
+            </a>
+            <ul class="menu-sub">
+                <li class="menu-item {{-- {{ request()->is('admin/humas/pkl') ? 'active' : '' }} --}}">
+                    <a href="{{-- {{ route('admin.humas.pkl') }} --}}" class="menu-link">
+                        <div data-i18n="PKL">PKL</div>
+                    </a>
+                </li>
+                <li class="menu-item {{-- {{ request()->is('admin/humas/daftarTamu') ? 'active' : '' }} --}}">
+                    <a href="{{-- {{ route('admin.humas.daftarTamu') }} --}}" class="menu-link">
+                        <div data-i18n="Daftar Tamu">Daftar Tamu</div>
+                    </a>
+                </li>
+            </ul>
+        </li>
+
         {{-- Pengaturan Landing --}}
         <li class="menu-header small text-uppercase"><span class="menu-header-text">Manajemen Landing</span></li>
         <li class="menu-item {{ request()->is('admin/akademik*') ? 'open' : '' }}">
@@ -573,6 +667,33 @@
         
         <!-- PENGATURAN SISTEM (DI BAWAH SENDIRI) -->
         <li class="menu-header small text-uppercase"><span class="menu-header-text">Pengaturan Sistem</span></li>
+
+
+        <!-- Pengaturan Sistem -->
+        <li class="menu-item {{ request()->is('admin/pengaturan*') ? 'open' : '' }}">
+            <a href="javascript:void(0);" class="menu-link menu-toggle">
+                <i class="menu-icon tf-icons bx bx-cog"></i>
+                <div data-i18n="Pengaturan Sistem">Pengaturan Sistem</div>
+            </a>
+            <ul class="menu-sub">
+                <li class="menu-item {{-- {{ request()->is('admin/pengaturan/pengguna') ? 'active' : '' }} --}}">
+                    <a href="{{-- {{ route('admin.pengaturan.pengguna') }} --}}" class="menu-link">
+                        <div data-i18n="Pengguna">Pengguna</div>
+                    </a>
+                </li>
+                <li class="menu-item {{-- {{ request()->is('admin/pengaturan/backupData') ? 'active' : '' }} --}}">
+                    <a href="{{-- {{ route('admin.pengaturan.backupData') }} --}}" class="menu-link">
+                        <div data-i18n="Backup Data">Backup Data</div>
+                    </a>
+                </li>
+                <li class="menu-item {{-- {{ request()->is('admin/pengaturan/umum') ? 'active' : '' }} --}}">
+                    <a href="{{-- {{ route('admin.pengaturan.umum') }} --}}" class="menu-link">
+                        <div data-i18n="Umum">Umum</div>
+                    </a>
+                </li>
+            </ul>
+        </li>
+
         <!-- Pengaturan Absensi (Submenu Baru) -->
         <li class="menu-item {{ request()->is('admin/pengaturan/absensi*') || request()->is('admin/pengaturan/hari-libur*') ? 'open' : '' }}">
             <a href="javascript:void(0);" class="menu-link menu-toggle">
@@ -593,6 +714,15 @@
             </ul>
         </li>
         {{-- END PENGATURAN SISTEM --}}
+
+        <!-- Keluar -->
+        <li class="menu-item">
+            <a href="{{ route('logout') }}" class="menu-link text-danger">
+                <i class="menu-icon tf-icons bx bx-log-out"></i>
+                <div>Keluar</div>
+            </a>
+        </li>
+
     </ul>
 
 </aside>

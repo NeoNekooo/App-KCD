@@ -17,7 +17,7 @@ use App\Http\Controllers\Admin\Kepegawaian\TugasPegawaiController;
 use App\Http\Controllers\Admin\Akademik\TapelController;
 use App\Http\Controllers\Admin\Akademik\JurusanController;
 use App\Http\Controllers\Admin\Akademik\MapelController; 
-use App\Http\Controllers\Admin\Akademik\EkstrakurikulerController;
+use App\Http\Controllers\Admin\Akademik\DaftarEkstrakurikulerController;
 use App\Http\Controllers\Admin\Akademik\JadwalPelajaranController;
 
 // Controller Kesiswaan
@@ -173,9 +173,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('tapel/sinkron', [TapelController::class, 'sinkron'])->name('tapel.sinkron');
         Route::post('tapel/aktif/{id}', [TapelController::class, 'setAktif'])->name('tapel.aktif');
         Route::resource('jurusan', JurusanController::class)->only(['index']);
-        Route::get('mapel', [MapelController::class, 'index'])->name('mapel.index'); 
-        Route::resource('ekstrakurikuler', EkstrakurikulerController::class)->except(['show', 'create', 'edit']); 
-        Route::resource('ekstrakurikuler', EkstrakurikulerController::class);
+        Route::get('mapel', [MapelController::class, 'index'])->name('mapel.index');
+        Route::resource('daftar-ekstrakurikuler', DaftarEkstrakurikulerController::class)->except(['show', 'create', 'edit']); 
+        Route::resource('daftar-ekstrakurikuler', DaftarEkstrakurikulerController::class);
         Route::resource('jadwal-pelajaran', JadwalPelajaranController::class);
         Route::get('jadwal-pelajaran/{id}/json', [JadwalPelajaranController::class, 'getJadwalJson'])->name('jadwal-pelajaran.json');
 

@@ -3,7 +3,7 @@
 @section('title', 'Data Mata Pelajaran')
 
 @section('content')
-    <div class="">
+    <div class="container-xxl flex-grow-1 container-p-y">
 
         {{-- 🔹 Breadcrumb --}}
         <div class="mb-3">

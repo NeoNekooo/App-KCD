@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 
 @section('content')
-<div class="">
+<div class="container-xxl flex-grow-1 container-p-y">
 
     {{-- 🔹 Header --}}
     <div class="d-flex justify-content-between align-items-center mb-4">
@@ -12,6 +12,18 @@
             <i class="bx bx-sync me-1"></i> Sinkron Tapel
         </a>
     </div>
+
+    {{-- 🔹 (BARU) Alert Informasi sesuai Gambar --}}
+    <div class="alert alert-info d-flex align-items-start mb-4" role="alert">
+        <i class="bx bx-info-circle bx-sm me-2 mt-1"></i> {{-- Icon Info Opsional --}}
+        <div>
+            <ul class="mb-0 ps-3">
+                <li>Klik tombol <strong>Singkron Tapel</strong> untuk tarik data Tahun Pelajaran dari dapodik</li>
+                <li>Klik icon untuk mengaktifkan Tahun Pelajaran</li>
+            </ul>
+        </div>
+    </div>
+    {{-- 🔹 Batas Alert --}}
 
     {{-- 🔹 Card Utama --}}
     <div class="card shadow-sm border-0">
