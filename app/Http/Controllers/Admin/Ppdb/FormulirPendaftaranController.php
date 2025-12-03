@@ -10,6 +10,7 @@ use App\Models\SyaratPendaftaran;
 use App\Models\TahunPelajaran;
 use App\Models\KompetensiPendaftaran;
 use App\Models\TingkatPendaftaran;
+use App\Models\Sekolah;
 
 class FormulirPendaftaranController extends Controller
 {
@@ -54,6 +55,8 @@ class FormulirPendaftaranController extends Controller
     public function store(Request $request)
     {
         $tingkatAktif = TingkatPendaftaran::where('is_active', 1)->first();
+        $sekolah = Sekolah::first();
+        $tahunAktif = TahunPelajaran::where('is_active', 1)->first();
 
         $validated = $request->validate([
             'tahun_id'      => 'required|exists:tahun_pelajarans,id',
@@ -83,13 +86,47 @@ class FormulirPendaftaranController extends Controller
         // isi otomatis kolom tingkat
         $validated['tingkat'] = $tingkatAktif->tingkat ?? null;
 
-        // generate nomor resi otomatis
-        $prefix = "137";
-        $tanggal = now()->format('ymd');
-        $last = CalonSiswa::whereDate('created_at', now()->toDateString())
-            ->orderByDesc('id')->first();
-        $urutan = $last ? str_pad((int)substr($last->nomor_resi, -3)+1, 3, '0', STR_PAD_LEFT) : "001";
-        $validated['nomor_resi'] = "{$prefix}-{$tanggal}.{$urutan}";
+        // ambil kode sekolah dan pastikan 3 digit
+        $kodeSekolah = $sekolah ? str_pad($sekolah->kode_sekolah, 3, '0', STR_PAD_LEFT) : 'XXX';
+        
+        // ambil angka terahir tahun
+        $tahunString = $tahunAktif->tahun_pelajaran; // misal '2025 - 2026' atau '20252026'
+
+        // hapus spasi dulu biar aman
+        $tahunString = str_replace(' ', '', $tahunString);
+
+        // cek kalau ada '-' atau '/' pakai explode, kalau nggak ambil 4 digit pertama dan terakhir
+        if (strpos($tahunString, '-') !== false) {
+            $tahunParts = explode('-', $tahunString);
+            $tahunAwal = substr($tahunParts[0], 2, 2);
+            $tahunAkhir = substr($tahunParts[1], 2, 2);
+        } elseif (strpos($tahunString, '/') !== false) {
+            $tahunParts = explode('/', $tahunString);
+            $tahunAwal = substr($tahunParts[0], 2, 2);
+            $tahunAkhir = substr($tahunParts[1], 2, 2);
+        } else {
+            // asumsikan format 8 digit '20252026'
+            $tahunAwal = substr($tahunString, 2, 2);
+            $tahunAkhir = substr($tahunString, 6, 2);
+        }
+
+        $kodeTahun = $tahunAwal . $tahunAkhir;
+
+        // nomor urut per tahun pelajaran
+        $last = CalonSiswa::where('tahun_id', $tahunAktif->id)
+            ->orderByDesc('id')
+            ->first();
+        $urutan = $last ? str_pad((int)substr($last->nomor_resi, -3)+1, 3, '0', STR_PAD_LEFT) : '001';
+
+        // gabungkan jadi nomor resi
+        $validated['nomor_resi'] = "{$kodeSekolah}-{$kodeTahun}-{$urutan}";
+
+        // Cek NISN duplikat (hanya kalau ada isinya)
+        if (!empty($request->nisn) && CalonSiswa::where('nisn', $request->nisn)->exists()) {
+            return redirect()->back()
+                ->with('danger', 'NISN sudah terdaftar.')
+                ->withInput();
+        }
 
         $calon = CalonSiswa::create($validated);
 
@@ -111,7 +148,8 @@ class FormulirPendaftaranController extends Controller
         $calon->save();
 
         return redirect()->back()->with('success', 'Formulir calon peserta didik berhasil disimpan.');
-    }
+
+    } 
 
     public function edit($id)
     {

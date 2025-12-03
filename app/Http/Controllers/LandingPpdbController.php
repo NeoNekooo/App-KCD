@@ -11,8 +11,8 @@ use Illuminate\Http\Request;
 use App\Models\BerandaPpdb;
 use App\Models\KeunggulanPpdb;
 use App\Models\KompetensiPpdb;
-use App\Models\ProfilSekolah;
 use App\Models\TingkatPendaftaran;
+use App\Models\Sekolah;
 
 class LandingPpdbController extends Controller
 {
@@ -120,6 +120,7 @@ class LandingPpdbController extends Controller
     {
         $tahunAktif = TahunPelajaran::where('is_active', 1)->first();
         $tingkatAktif = TingkatPendaftaran::where('is_active', 1)->first();
+        $sekolah = Sekolah::first();
 
         if (!$tahunAktif || !$tingkatAktif) {
             return redirect()->back()->with('error', 'Tahun pelajaran atau tingkat aktif belum diset.');
@@ -144,19 +145,52 @@ class LandingPpdbController extends Controller
             'syarat_file_*' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:1024',
         ]);
 
+        // gunakan $request->filled agar hanya cek saat ada input NISN
+        if ($request->filled('nisn') && CalonSiswa::where('nisn', $request->nisn)->exists()) {
+            // pakai 'error' supaya toast/layout lo nangkep
+            return redirect()->back()
+                ->with('error', 'NISN sudah terdaftar.')
+                ->withInput();
+        }
+
         // isi otomatis kolom tingkat dari tingkat aktif
         $validated['tingkat'] = $tingkatAktif->tingkat;
         $validated['tahun_id'] = $tahunAktif->id;
 
-        // generate nomor resi otomatis
-        $prefix = "137";
-        $tanggal = now()->format('ymd');
-        $last = CalonSiswa::whereDate('created_at', now()->toDateString())
+        // ambil kode sekolah dan pastikan 3 digit
+        $kodeSekolah = $sekolah ? str_pad($sekolah->kode_sekolah, 3, '0', STR_PAD_LEFT) : 'XXX';
+        
+        // ambil angka terahir tahun
+        $tahunString = $tahunAktif->tahun_pelajaran; // misal '2025 - 2026' atau '20252026'
+
+        // hapus spasi dulu biar aman
+        $tahunString = str_replace(' ', '', $tahunString);
+
+        // cek kalau ada '-' atau '/' pakai explode, kalau nggak ambil 4 digit pertama dan terakhir
+        if (strpos($tahunString, '-') !== false) {
+            $tahunParts = explode('-', $tahunString);
+            $tahunAwal = substr($tahunParts[0], 2, 2);
+            $tahunAkhir = substr($tahunParts[1], 2, 2);
+        } elseif (strpos($tahunString, '/') !== false) {
+            $tahunParts = explode('/', $tahunString);
+            $tahunAwal = substr($tahunParts[0], 2, 2);
+            $tahunAkhir = substr($tahunParts[1], 2, 2);
+        } else {
+            // asumsikan format 8 digit '20252026'
+            $tahunAwal = substr($tahunString, 2, 2);
+            $tahunAkhir = substr($tahunString, 6, 2);
+        }
+
+        $kodeTahun = $tahunAwal . $tahunAkhir;
+
+        // nomor urut per tahun pelajaran
+        $last = CalonSiswa::where('tahun_id', $tahunAktif->id)
             ->orderByDesc('id')
             ->first();
+        $urutan = $last ? str_pad((int)substr($last->nomor_resi, -3)+1, 3, '0', STR_PAD_LEFT) : '001';
 
-        $urutan = $last ? str_pad((int)substr($last->nomor_resi, -3) + 1, 3, '0', STR_PAD_LEFT) : "001";
-        $validated['nomor_resi'] = "{$prefix}-{$tanggal}.{$urutan}";
+        // gabungkan jadi nomor resi
+        $validated['nomor_resi'] = "{$kodeSekolah}-{$kodeTahun}-{$urutan}";
 
         $calon = CalonSiswa::create($validated);
 
