@@ -14,23 +14,32 @@ class DaftarCalonPesertaDidikController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
-    {
-        // Ambil tahun pelajaran & tingkat yang aktif
-        $tahunAktif = TahunPelajaran::where('is_active', true)->first();
-        $tingkatAktif = TingkatPendaftaran::where('is_active', true)->first();
+    public function index(Request $request)
+{
+    $tahunAktif = TahunPelajaran::where('is_active', true)->first();
+    $tingkatAktif = TingkatPendaftaran::where('is_active', true)->first();
 
-        // Jika ada tahun aktif, ambil calon siswa sesuai tahun & tingkat aktif
-        $formulirs = collect(); // default kosong
-        if ($tahunAktif && $tingkatAktif) {
-            $formulirs = CalonSiswa::with(['jalurPendaftaran', 'syarat'])
-                ->where('tahun_id', $tahunAktif->id)
-                ->where('tingkat', $tingkatAktif->tingkat)
-                ->get();
-        }
+    $perPage = $request->input('per_page', 10); // default 10
+    $search = $request->input('search');
 
-        return view('admin.ppdb.daftar_calon_peserta_didik', compact('formulirs', 'tahunAktif', 'tingkatAktif'));
-    }
+    $query = CalonSiswa::with(['jalurPendaftaran', 'syarat'])
+        ->when($tahunAktif, fn($q) => $q->where('tahun_id', $tahunAktif->id))
+        ->when($tingkatAktif, fn($q) => $q->where('tingkat', $tingkatAktif->tingkat))
+        ->when($search, function($q) use ($search) {
+            $q->where(function($qq) use ($search){
+                $qq->where('nama_lengkap', 'like', "%$search%")
+                   ->orWhere('nomor_resi', 'like', "%$search%")
+                   ->orWhere('asal_sekolah', 'like', "%$search%");
+            });
+        });
+
+    $formulirs = $query->paginate($perPage)->appends($request->all());
+
+    return view('admin.ppdb.daftar_calon_peserta_didik', compact(
+        'formulirs','tahunAktif','tingkatAktif','search','perPage'
+    ));
+}
+
 
     /**
      * Tampilkan resi calon siswa

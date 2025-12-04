@@ -10,6 +10,36 @@
     <div class="card mb-4">
       <h5 class="card-header">Daftar Calon Peserta Didik</h5>
       <div class="card-body">
+        <form method="GET" class="row g-3 align-items-center mb-3">
+
+          <!-- Search -->
+          <div class="col-md-4">
+            <div class="input-group input-group-merge">
+              <span class="input-group-text">
+                <i class="bx bx-search"></i>
+              </span>
+              <input type="text" name="search" class="form-control"
+                     placeholder="Cari nama / resi / sekolah..."
+                     value="{{ request('search') }}">
+            </div>
+          </div>
+        
+          <!-- Per Page -->
+          <div class="col-md-1">
+            <select name="per_page" class="form-select" onchange="this.form.submit()">
+              <option value="10" {{ request('per_page') == 10 ? 'selected' : '' }}>10</option>
+              <option value="25" {{ request('per_page') == 25 ? 'selected' : '' }}>25</option>
+              <option value="50" {{ request('per_page') == 50 ? 'selected' : '' }}>50</option>
+              <option value="100" {{ request('per_page') == 100 ? 'selected' : '' }}>100</option>
+            </select>
+          </div>
+        
+          <div class="col-md-2">
+            <button class="btn btn-primary w-100">Cari</button>
+          </div>
+        
+        </form>
+
         <div class="table-responsive text-nowrap">
           <table class="table table-bordered">
             <thead class="table-light">
@@ -140,6 +170,9 @@
               @endforelse
             </tbody>
           </table>
+          <div class="mt-3">
+            {{ $formulirs->links() }}
+          </div>
         </div>
       </div>
     </div>
