@@ -143,7 +143,7 @@
         <li class="menu-item {{ request()->is('admin/kesiswaan*') ? 'open' : '' }}">
             <a href="javascript:void(0);" class="menu-link menu-toggle">
                 <i class="menu-icon tf-icons bx bx-user-check"></i>
-                <div data-i18n="Kesiswaan">Peserta Didik</div>
+                <div data-i18n="Kesiswaan">Kesiswaan</div>
             </a>
             
             <ul class="menu-sub">

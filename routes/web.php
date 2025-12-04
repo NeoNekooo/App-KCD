@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Models\SyaratPendaftaran; // <---- tambahkan baris ini
+use Illuminate\Http\Request;
 
 // Controller Utama
 use App\Http\Controllers\LandingPpdbController;
@@ -106,6 +107,11 @@ Route::prefix('ppdb')->name('ppdb.')->group(function() {
             ->where('jalurPendaftaran_id', $jalurId)
             ->select('id', 'syarat', 'is_active')
             ->get();
+    });
+
+    Route::get('/check-nisn', function (Request $request) {
+        $exists = \App\Models\CalonSiswa::where('nisn', $request->nisn)->exists();
+        return response()->json(['exists' => $exists]);
     });
 
 

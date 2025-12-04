@@ -34,6 +34,11 @@ const nextBtn = document.getElementById('nextBtn');
 const submitBtn = document.getElementById('submitBtn');
 const notification = document.getElementById('notification');
 
+function markInvalid(input) {
+    if (!input) return;
+    input.classList.add('border-red-500', 'ring-2', 'ring-red-500/50');
+}
+
 // ======================= Fungsi Utilitas =======================
 function showNotification(message, isError = false) {
     notification.classList.remove('bg-secondary-green', 'bg-red-500');
@@ -53,12 +58,6 @@ function validateStep(stepId) {
     if (!currentStepEl) return true;
     const requiredInputs = currentStepEl.querySelectorAll('[required]');
     let valid = true;
-    let errorMessages = [];
-
-    const markInvalid = (input) => {
-        valid = false;
-        input.classList.add('border-red-500', 'ring-2', 'ring-red-500/50');
-    };
 
     currentStepEl.querySelectorAll('input, select, textarea').forEach(input => {
         input.classList.remove('border-red-500', 'ring-2', 'ring-red-500/50');
@@ -164,14 +163,42 @@ function updateProgress() {
 }
 
 // ======================= Navigasi Step =======================
-window.nextStep = function () {
+window.nextStep = async function () {
+
     if (currentStep < totalSteps) {
+
         if (!validateStep(currentStep)) return;
+
+        // ===== CEK NISN DULU kalau masih di step 1 =====
+        if (currentStep === 1) {
+            const nisInput = document.getElementById('nisn');
+            if (nisInput) {
+                const nisn = nisInput.value.trim();
+
+                try {
+                    const res = await fetch(`/ppdb/check-nisn?nisn=${nisn}`);
+                    const data = await res.json();
+
+                    if (data.exists) {
+                        const nisInput = document.getElementById('nisn');
+                        markInvalid(nisInput);
+                        showNotification('NISN sudah terdaftar. Silakan gunakan yang lain.', true);
+                        return;
+                    }
+                } catch (err) {
+                    showNotification('Gagal memeriksa NISN.', true);
+                    return;
+                }
+            }
+        }
+
+        // ===== lanjut kalau aman =====
         currentStep++;
         updateProgress();
         document.getElementById('daftar').scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 };
+
 
 window.prevStep = function () {
     if (currentStep > 1) {

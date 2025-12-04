@@ -2,7 +2,13 @@
 
 @section('content-ppdb')
     
- 
+ @if (session('error'))
+    <div class="w-full bg-red-500 text-white font-semibold p-3 rounded-lg flex items-center gap-2 mb-4">
+        <i data-lucide="x-octagon"></i>
+        {{ session('error') }}
+    </div>
+@endif
+
 <div id="notification" 
      class="fixed top-5 right-5 hidden z-50 px-4 py-3 rounded-lg shadow-lg text-white transition-all duration-300">
 </div>
