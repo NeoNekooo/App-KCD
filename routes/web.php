@@ -445,6 +445,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::resource('hari-libur', HariLiburController::class)->except(['show', 'edit', 'update']);
     });
 
+    Route::get('/underConstructions', function () {
+        return view('admin.underConstruction');
+    })->name('underConstructions');
+
 }); // Akhir dari grup 'admin'
 
 Route::prefix('bendahara')->name('bendahara.')->group(function () {

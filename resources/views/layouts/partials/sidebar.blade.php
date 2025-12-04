@@ -325,12 +325,12 @@
             </a>
             <ul class="menu-sub">
                 <li class="menu-item {{-- {{ request()->is('admin/alumni/dataAlumni') ? 'active' : '' }} --}}">
-                    <a href="{{-- {{ route('admin.alumni.dataAlumni') }} --}}" class="menu-link">
+                    <a href="{{-- {{ route('admin.alumni.dataAlumni') }} --}}  {{ route('admin.underConstructions') }}" class="menu-link">
                         <div data-i18n="Data Alumni">Data Alumni</div>
                     </a>
                 </li>
                 <li class="menu-item {{-- {{ request()->is('admin/alumni/rekapDataAlumni') ? 'active' : '' }} --}}">
-                    <a href="{{-- {{ route('admin.alumni.rekapDataAlumni') }} --}}" class="menu-link">
+                    <a href="{{-- {{ route('admin.alumni.rekapDataAlumni') }} --}}  {{ route('admin.underConstructions') }}" class="menu-link">
                         <div data-i18n="Rekap Data Alumni">Rekap Data Alumni</div>
                     </a>
                 </li>
@@ -589,12 +589,12 @@
             </a>
             <ul class="menu-sub">
                 <li class="menu-item {{-- {{ request()->is('admin/administrasi/suratMasuk') ? 'active' : '' }} --}}">
-                    <a href="{{-- {{ route('admin.administrasi.suratMasuk') }} --}}" class="menu-link">
+                    <a href="{{-- {{ route('admin.administrasi.suratMasuk') }} --}}  {{ route('admin.underConstructions') }}" class="menu-link">
                         <div data-i18n="Surat Masuk">Surat Masuk</div>
                     </a>
                 </li>
                 <li class="menu-item {{-- {{ request()->is('admin/administrasi/suratKeluar') ? 'active' : '' }} --}}">
-                    <a href="{{-- {{ route('admin.administrasi.suratKeluar') }} --}}" class="menu-link">
+                    <a href="{{-- {{ route('admin.administrasi.suratKeluar') }} --}}  {{ route('admin.underConstructions') }}" class="menu-link">
                         <div data-i18n="Surat Keluar">Surat Keluar</div>
                     </a>
                 </li>
@@ -610,17 +610,17 @@
             </a>
             <ul class="menu-sub">
                 <li class="menu-item {{-- {{ request()->is('admin/sarpras/tanah') ? 'active' : '' }} --}}">
-                    <a href="{{-- {{ route('admin.sarpras.tanah') }} --}}" class="menu-link">
+                    <a href="{{-- {{ route('admin.sarpras.tanah') }} --}}  {{ route('admin.underConstructions') }}" class="menu-link">
                         <div data-i18n="Tanah">Tanah</div>
                     </a>
                 </li>
                 <li class="menu-item {{-- {{ request()->is('admin/sarpras/ruang') ? 'active' : '' }} --}}">
-                    <a href="{{-- {{ route('admin.sarpras.ruang') }} --}}" class="menu-link">
+                    <a href="{{-- {{ route('admin.sarpras.ruang') }} --}}  {{ route('admin.underConstructions') }}" class="menu-link">
                         <div data-i18n="Ruang">Ruang</div>
                     </a>
                 </li>
                 <li class="menu-item {{-- {{ request()->is('admin/sarpras/alat') ? 'active' : '' }} --}}">
-                    <a href="{{-- {{ route('admin.sarpras.alat') }} --}}" class="menu-link">
+                    <a href="{{-- {{ route('admin.sarpras.alat') }} --}}  {{ route('admin.underConstructions') }}" class="menu-link">
                         <div data-i18n="Alat">Alat</div>
                     </a>
                 </li>
@@ -635,12 +635,12 @@
             </a>
             <ul class="menu-sub">
                 <li class="menu-item {{-- {{ request()->is('admin/humas/pkl') ? 'active' : '' }} --}}">
-                    <a href="{{-- {{ route('admin.humas.pkl') }} --}}" class="menu-link">
+                    <a href="{{-- {{ route('admin.humas.pkl') }} --}}  {{ route('admin.underConstructions') }}" class="menu-link">
                         <div data-i18n="PKL">PKL</div>
                     </a>
                 </li>
                 <li class="menu-item {{-- {{ request()->is('admin/humas/daftarTamu') ? 'active' : '' }} --}}">
-                    <a href="{{-- {{ route('admin.humas.daftarTamu') }} --}}" class="menu-link">
+                    <a href="{{-- {{ route('admin.humas.daftarTamu') }} --}}  {{ route('admin.underConstructions') }}" class="menu-link">
                         <div data-i18n="Daftar Tamu">Daftar Tamu</div>
                     </a>
                 </li>
@@ -649,7 +649,8 @@
 
         {{-- Pengaturan Landing --}}
         <li class="menu-header small text-uppercase"><span class="menu-header-text">Manajemen Landing</span></li>
-        <li class="menu-item {{ request()->is('admin/akademik*') ? 'open' : '' }}">
+
+        <li class="menu-item {{ request()->is('admin/akademik*') ? 'open' : '' }}"> 
             <a href="javascript:void(0);" class="menu-link menu-toggle">
                 <i class="menu-icon tf-icons bx bxs-book-content"></i>
                 <div data-i18n="Akademik">Landing Page</div>
@@ -677,17 +678,17 @@
             </a>
             <ul class="menu-sub">
                 <li class="menu-item {{-- {{ request()->is('admin/pengaturan/pengguna') ? 'active' : '' }} --}}">
-                    <a href="{{-- {{ route('admin.pengaturan.pengguna') }} --}}" class="menu-link">
+                    <a href="{{-- {{ route('admin.pengaturan.pengguna') }} --}}   {{ route('admin.underConstructions') }}" class="menu-link">
                         <div data-i18n="Pengguna">Pengguna</div>
                     </a>
                 </li>
                 <li class="menu-item {{-- {{ request()->is('admin/pengaturan/backupData') ? 'active' : '' }} --}}">
-                    <a href="{{-- {{ route('admin.pengaturan.backupData') }} --}}" class="menu-link">
+                    <a href="{{-- {{ route('admin.pengaturan.backupData') }} --}}  {{ route('admin.underConstructions') }}" class="menu-link">
                         <div data-i18n="Backup Data">Backup Data</div>
                     </a>
                 </li>
                 <li class="menu-item {{-- {{ request()->is('admin/pengaturan/umum') ? 'active' : '' }} --}}">
-                    <a href="{{-- {{ route('admin.pengaturan.umum') }} --}}" class="menu-link">
+                    <a href="{{-- {{ route('admin.pengaturan.umum') }} --}}  {{ route('admin.underConstructions') }}" class="menu-link">
                         <div data-i18n="Umum">Umum</div>
                     </a>
                 </li>
