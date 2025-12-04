@@ -2,25 +2,44 @@
 
 {{-- 
 ======================================================================
- BAGIAN STYLE KHUSUS (Avatar Inisial)
+ BAGIAN STYLE KHUSUS (Avatar Inisial & Tombol Pulse)
 ======================================================================
 --}}
 @push('styles')
 <style>
-    /* STYLE BARU: Avatar Inisial Nama (Pengganti Placehold.co)
-       Ini akan membuat avatar "A" yang jauh lebih bersih dan profesional.
-     */
+    /* Avatar Inisial Nama */
     .avatar-initials {
         display: flex;
         align-items: center;
         justify-content: center;
         width: 100px;
         height: 100px;
-        border-radius: 50%; /* Membuatnya bulat */
-        background-color: #f0f0f8; /* Warna background (sesuaikan) */
-        color: #696cff; /* Warna teks (sesuaikan) */
-        font-size: 2.5rem; /* Ukuran font inisial */
+        border-radius: 50%;
+        background-color: #f0f0f8;
+        color: #696cff;
+        font-size: 2.5rem;
         font-weight: 600;
+    }
+
+    /* Animasi Pulse Merah untuk Tombol SP */
+    .pulse-button {
+        animation: pulse-red 2s infinite;
+        box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.7);
+    }
+
+    @keyframes pulse-red {
+        0% {
+            transform: scale(0.95);
+            box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.7);
+        }
+        70% {
+            transform: scale(1);
+            box-shadow: 0 0 0 10px rgba(255, 0, 0, 0);
+        }
+        100% {
+            transform: scale(0.95);
+            box-shadow: 0 0 0 0 rgba(255, 0, 0, 0);
+        }
     }
 </style>
 @endpush
@@ -108,15 +127,35 @@
 --}}
 @if($siswa)
 <div class="card">
+    {{-- 
+       UPDATE DI SINI: MENAMBAHKAN TOMBOL CETAK SP 
+    --}}
     <div class="card-header d-flex justify-content-between align-items-center">
         <h5 class="card-title mb-0">
             <i class="bx bx-user-circle me-2"></i>Rapor Pelanggaran: <strong>{{ $siswa->nama }}</strong>
         </h5>
-        <a href="#" class="btn btn-icon btn-secondary" 
-           data-bs-toggle="tooltip" data-bs-placement="top" title="Cetak Laporan">
-            <i class="bx bx-printer"></i>
-        </a>
+        
+        <div class="d-flex gap-2">
+            <!-- 1. Tombol Cetak Laporan Biasa (Selalu Ada) -->
+            <a href="{{ route('admin.indisipliner.siswa.rekapitulasi.cetak', $siswa->nipd) }}" 
+               target="_blank" 
+               class="btn btn-secondary" 
+               data-bs-toggle="tooltip" title="Cetak Rekapitulasi Lengkap">
+                <i class="bx bx-printer me-1"></i> Rekap
+            </a>
+
+            <!-- 2. Tombol Cetak SP/Sanksi (HANYA JIKA ADA SANKSI AKTIF) -->
+            @if($sanksiAktif)
+                <a href="{{ route('admin.indisipliner.siswa.rekapitulasi.cetak-sp', ['nipd' => $siswa->nipd, 'sanksiId' => $sanksiAktif->ID]) }}" 
+                   target="_blank" 
+                   class="btn btn-danger pulse-button" 
+                   data-bs-toggle="tooltip" title="Cetak Surat Peringatan: {{ $sanksiAktif->nama }}">
+                    <i class="bx bx-envelope me-1"></i> Cetak {{ $sanksiAktif->nama }}
+                </a>
+            @endif
+        </div>
     </div>
+
     <div class="card-body">
         <div class="row">
             {{-- Kolom Kiri: Informasi Siswa --}}
@@ -215,14 +254,19 @@
 
 {{-- 
 ======================================================================
- BAGIAN JAVASCRIPT (PERBAIKAN: Versi JS Vanilla Murni)
+ BAGIAN JAVASCRIPT
 ======================================================================
 --}}
 @push('scripts')
 <script>
-    // Menunggu sampai semua HTML selesai dimuat (Pengganti $(document).ready)
     document.addEventListener('DOMContentLoaded', function () {
         
+        // Inisialisasi Tooltip Bootstrap (Penting agar tooltip di tombol cetak muncul)
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        });
+
         // Ambil elemen-elemen form
         const form = document.getElementById('form-filter-rekap');
         const filterTingkat = document.getElementById('filter_tingkat');

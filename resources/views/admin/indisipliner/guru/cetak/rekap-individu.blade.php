@@ -1,85 +1,193 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <title>Laporan Pelanggaran Guru</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-  <style>
-    body { 
-      font-family: 'Times New Roman', serif; 
-      margin: 40px;
-    }
-    .kop {
-      text-align: center;
-      border-bottom: 3px solid #000;
-      padding-bottom: 10px;
-      margin-bottom: 20px;
-    }
-    .kop h4, .kop h5 { margin: 0; }
-    .table th, .table td { vertical-align: middle; }
-    .ttd {
-      width: 250px;
-      text-align: center;
-      float: right;
-      margin-top: 50px;
-    }
+    <meta charset="UTF-8">
+    <title>Laporan Pelanggaran Guru - {{ $guru->nama }}</title>
 
-    /* Agar pas di-print rapi */
-    @media print {
-      .no-print { display: none !important; }
-      body { margin: 20px; }
-      .table th, .table td { border: 1px solid #000 !important; }
-    }
-  </style>
+    <style>
+        body {
+            font-family: "Times New Roman", serif;
+            font-size: 11pt;
+            margin: 0;
+            padding: 0;
+            background: #fff;
+        }
+
+        /* MARGIN CETAK DIPERKECIL AGAR TIDAK TERPOTONG */
+        @page {
+            size: A4;
+            margin: 1cm 1.5cm;
+        }
+
+        .container-print {
+            width: 100%;
+            margin: 0 auto;
+            padding: 0;
+        }
+
+        /* KOP SURAT */
+        .kop-surat {
+            border-bottom: 3px double black;
+            padding-bottom: 4px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            text-align: center;
+            padding-top: 5px !important;
+        }
+
+        .kop-logo {
+            width: 70px;
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .kop-teks h3 {
+            margin: 0;
+            font-size: 11pt;
+            font-weight: bold;
+        }
+
+        .kop-teks h2 {
+            margin: 0;
+            font-size: 15pt;
+            font-weight: bold;
+        }
+
+        .kop-teks p {
+            margin-top: 2px;
+            font-size: 9pt;
+            font-style: italic;
+        }
+
+        .judul-laporan {
+            text-align: center;
+            font-size: 13pt;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        .table-data-guru td {
+            padding: 2px 0;
+        }
+
+        .table-pelanggaran {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 5px;
+            font-size: 10pt;
+        }
+
+        .table-pelanggaran th, .table-pelanggaran td {
+            border: 1px solid #000;
+            padding: 4px;
+        }
+
+        .table-pelanggaran th {
+            background: #f5f5f5;
+            text-align: center;
+        }
+
+        /* FIX: TANPA FLOAT, biar tidak dorong halaman */
+        .ttd {
+            width: 100%;
+            text-align: right;
+            margin-top: 40px;
+            display: block;
+        }
+
+        @media print {
+            .no-print { display: none !important; }
+            body { margin: 0; }
+            .container-print { padding: 0; }
+        }
+    </style>
 </head>
-<body onload="window.print()"> {{-- langsung buka dialog print --}}
-  <div class="kop">
-    <h4><strong>SMK NURUL ISLAM</strong></h4>
-    <h5>Data Rekapitulasi Pelanggaran Guru</h5>
-    <small>Jl. Pendidikan No. 123, Jakarta | Telp: (021) 1234567</small>
-  </div>
 
-  <h6><strong>Nama Guru:</strong> {{ $guru->nama }}</h6>
-  <h6><strong>NIP:</strong> {{ $guru->nip }}</h6>
-  <h6><strong>Status:</strong> {{ $guru->status_kepegawaian ?? '-' }}</h6>
-  <hr>
+<body onload="window.print()">
 
-  <table class="table table-bordered">
-    <thead class="table-light">
-      <tr>
-        <th>No</th>
-        <th>Tanggal</th>
-        <th>Pelanggaran</th>
-        <th>Poin</th>
-      </tr>
-    </thead>
-    <tbody>
-      @forelse ($pelanggaranGuru as $key => $p)
+<div class="container-print">
+
+    <!-- KOP -->
+    <div class="kop-surat">
+        <img src="{{ asset('assets/img/logo-sekolah.png') }}" class="kop-logo">
+        <div class="kop-teks">
+            <h3>PEMERINTAH {{ strtoupper($sekolah->provinsi ?? 'DAERAH') }}</h3>
+            <h3>DINAS PENDIDIKAN</h3>
+            <h2>{{ strtoupper($sekolah->nama) }}</h2>
+            <p>{{ $sekolah->alamat_jalan }}, {{ $sekolah->kecamatan }}, {{ $sekolah->kabupaten_kota }} - {{ $sekolah->kode_pos }}
+                <br>Telp: {{ $sekolah->nomor_telepon }} | Email: {{ $sekolah->email }}
+            </p>
+        </div>
+    </div>
+
+    <div class="judul-laporan">DATA REKAPITULASI INDISIPLINER GURU</div>
+
+    <table class="table-data-guru">
         <tr>
-          <td>{{ $key + 1 }}</td>
-          <td>{{ \Carbon\Carbon::parse($p->tanggal)->format('d/m/Y') }}</td>
-          <td>{{ $p->detailPoinGtk->nama ?? '-' }}</td>
-          <td class="text-center">{{ $p->poin }}</td>
+            <td style="width:150px;">Nama Guru</td>
+            <td style="width:10px;">:</td>
+            <td><strong>{{ $guru->nama }}</strong></td>
         </tr>
-      @empty
         <tr>
-          <td colspan="4" class="text-center text-muted py-3">Tidak ada data pelanggaran.</td>
+            <td>NIP</td>
+            <td>:</td>
+            <td><strong>{{ $guru->nip ?? '-' }}</strong></td>
         </tr>
-      @endforelse
-    </tbody>
-  </table>
+        <tr>
+            <td>Status Kepegawaian</td>
+            <td>:</td>
+            <td>{{ $guru->status_kepegawaian ?? '-' }}</td>
+        </tr>
+    </table>
 
-  <div class="mt-3">
-    <strong>Total Poin: </strong> {{ $totalPoin }}
-    <br>
-    <strong>Sanksi Aktif: </strong> {{ $sanksiAktif->nama ?? 'Tidak ada sanksi' }}
-  </div>
+    <hr>
 
-  <div class="ttd">
-    <p>Jakarta, {{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}</p>
-    <p>Kepala Sekolah</p>
-    <br><br><br>
-    <p><strong><u>RIRI</u></strong></p>
-  </div>
+    <table class="table-pelanggaran">
+        <thead>
+        <tr>
+            <th style="width:5%;">No</th>
+            <th style="width:15%;">Tanggal</th>
+            <th>Pelanggaran</th>
+            <th style="width:10%;">Poin</th>
+        </tr>
+        </thead>
+        <tbody>
+        @forelse ($pelanggaranGuru as $key => $p)
+            <tr>
+                <td class="text-center">{{ $key+1 }}</td>
+                <td>{{ \Carbon\Carbon::parse($p->tanggal)->translatedFormat('d F Y') }}</td>
+                <td>{{ $p->detailPoinGtk->nama ?? '-' }}</td>
+                <td class="text-center">{{ $p->poin }}</td>
+            </tr>
+        @empty
+            <tr>
+                <td colspan="4" style="text-align:center; padding:8px;">Tidak ada data pelanggaran.</td>
+            </tr>
+        @endforelse
+        </tbody>
+    </table>
+
+    <div style="margin-top:10px; font-size:11pt;">
+        <strong>Total Poin Akumulasi:</strong>
+        <span style="color:red;">{{ $totalPoin }} Poin</span><br>
+        <strong>Sanksi Aktif:</strong>
+        <strong>{{ $sanksiAktif->nama ?? 'TIDAK ADA SANKSI' }}</strong>
+    </div>
+
+    <div class="ttd">
+        <p>{{ $sekolah->kabupaten_kota ?? 'Tempat' }}, {{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}</p>
+        <p>Kepala Sekolah</p>
+        <br><br><br>
+        <p><strong><u>RIRI</u></strong></p>
+        <p>NIP. ............................................</p>
+    </div>
+
+</div>
+
 </body>
 </html>

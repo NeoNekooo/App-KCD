@@ -63,6 +63,15 @@
 
                 <div class="d-flex gap-2">
 
+                    {{-- 🔹 Tombol Cetak Surat Otomatis --}}
+                    @if ($sanksiAktif)
+                        <a href="{{ route('admin.indisipliner.guru.rekapitulasi.cetak.surat', ['namaGuru' => $namaGuru]) }}"
+                            target="_blank" class="btn btn-danger btn-sm">
+                            <i class="bx bx-file me-1"></i>
+                            Cetak {{ strtoupper($sanksiAktif->nama) }}
+                        </a>
+                    @endif
+
                     {{-- 🔹 Tombol Cetak Individu --}}
                     <a href="{{ route('admin.indisipliner.guru.rekapitulasi.cetak.individu', ['namaGuru' => $namaGuru]) }}"
                         target="_blank" class="btn btn-secondary btn-sm">
