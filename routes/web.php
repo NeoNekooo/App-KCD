@@ -417,9 +417,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/praktik/create', [RombelPraktikController::class, 'create'])->name('praktik.create');
         Route::get('/praktik', [RombelPraktikController::class, 'index'])->name('praktik.index');
 
-        // Ekstrakurikuler
-        Route::get('/ekstrakurikuler/create', [RombelEkstrakurikulerController::class, 'create'])->name('ekstrakurikuler.create');
-        Route::get('/ekstrakurikuler', [RombelEkstrakurikulerController::class, 'index'])->name('ekstrakurikuler.index');
+        // Ekstrakurikuler - Full Resource (index, create, store, edit, update, destroy)
+        Route::resource('ekstrakurikuler', RombelEkstrakurikulerController::class)->except(['show']);
 
         // Mapel Pilihan
         Route::get('/mapel-pilihan/create', [RombelMapelPilihanController::class, 'create'])->name('mapel-pilihan.create');
