@@ -36,7 +36,6 @@ class IndisiplinerSiswaController extends Controller
     public function pengaturanIndex()
     {
         // Ambil data untuk Tab 1 & 2
-        // Asumsi relasi di Model PelanggaranKategori: pelanggaranPoinSiswa()
         $kategoriList = PelanggaranKategori::with('pelanggaranPoin')
                         ->orderBy('nama')
                         ->get();
@@ -190,11 +189,11 @@ class IndisiplinerSiswaController extends Controller
 
         // (C) Ambil daftar KELAS (hanya dari semester yang dipilih)
         $kelasList = Rombel::select('tingkat_pendidikan_id_str as nama')
-                         ->where('semester_id', $semesterUntukFilterDropdown) // <-- PERBAIKAN 1
-                         ->whereNotNull('tingkat_pendidikan_id_str')
-                         ->distinct()
-                         ->orderBy('nama')
-                         ->get(); 
+                          ->where('semester_id', $semesterUntukFilterDropdown) // <-- PERBAIKAN 1
+                          ->whereNotNull('tingkat_pendidikan_id_str')
+                          ->distinct()
+                          ->orderBy('nama')
+                          ->get(); 
 
         // (D) Ambil daftar ROMBEL (hanya dari semester yang dipilih)
         $rombelQuery = Rombel::query();
@@ -215,7 +214,7 @@ class IndisiplinerSiswaController extends Controller
 
         // (E) Ambil data KATEGORI (untuk modal)
         $kategoriPelanggaranSiswaList = PelanggaranKategori::with('pelanggaranPoin')
-                                         ->orderBy('nama')->get();
+                                                             ->orderBy('nama')->get();
 
         // --- 5. Return View ---
         return view('admin.indisipliner.siswa.daftar.index', compact(
@@ -235,19 +234,19 @@ class IndisiplinerSiswaController extends Controller
         // --- 1. Validasi (Sesuai MIGRAsI BARU) ---
         $validator = Validator::make($request->all(), [
             'rombongan_belajar_id' => 'required|integer|exists:rombels,id',
-            'nipd'                   => 'required|string|exists:siswas,nipd',
-            'semester_id'            => 'required|string|max:10', // cth: "20251"
-            'IDpelanggaran_poin'     => 'required|integer|exists:pelanggaran_poin,ID',
-            'tanggal'                => 'required|date',
-            'jam'                    => 'required|date_format:H:i',
-            'poin'                   => 'required|integer',
-            'pembelajaran'           => 'nullable|string|max:191',
+            'nipd'                 => 'required|string|exists:siswas,nipd',
+            'semester_id'          => 'required|string|max:10', // cth: "20251"
+            'IDpelanggaran_poin'   => 'required|integer|exists:pelanggaran_poin,ID',
+            'tanggal'              => 'required|date',
+            'jam'                  => 'required|date_format:H:i',
+            'poin'                 => 'required|integer',
+            'pembelajaran'         => 'nullable|string|max:191',
         ]);
 
         if ($validator->fails()) {
             return redirect()->back()
-                     ->withErrors($validator)
-                     ->withInput();
+                      ->withErrors($validator)
+                      ->withInput();
         }
         
         // --- 2. Simpan ke Database (Sangat Sederhana) ---
@@ -258,7 +257,7 @@ class IndisiplinerSiswaController extends Controller
         }
 
         return redirect()->route('admin.indisipliner.siswa.daftar.index')
-                     ->with('success', 'Data pelanggaran siswa berhasil disimpan.');
+                      ->with('success', 'Data pelanggaran siswa berhasil disimpan.');
     }
 
     /**
@@ -269,10 +268,10 @@ class IndisiplinerSiswaController extends Controller
         try {
             $pelanggaran->delete();
             return redirect()->route('admin.indisipliner.siswa.daftar.index')
-                         ->with('success', 'Data pelanggaran berhasil dihapus.');
+                             ->with('success', 'Data pelanggaran berhasil dihapus.');
         } catch (Exception $e) {
             return redirect()->route('admin.indisipliner.siswa.daftar.index')
-                         ->withErrors(['msg' => 'Gagal menghapus data. ' . $e->getMessage()]);
+                             ->withErrors(['msg' => 'Gagal menghapus data. ' . $e->getMessage()]);
         }
     }
 
@@ -367,8 +366,8 @@ class IndisiplinerSiswaController extends Controller
         // Query ini SAMA PERSIS dengan yang ada di 'daftarIndex' kamu
         // untuk mengambil Rombel berdasarkan 'tingkat_pendidikan_id_str'
         $rombels = Rombel::where('tingkat_pendidikan_id_str', $tingkat) 
-                       ->orderBy('nama', 'asc')
-                       ->get(['id', 'nama']); // Hanya ambil id dan nama
+                        ->orderBy('nama', 'asc')
+                        ->get(['id', 'nama']); // Hanya ambil id dan nama
 
         // Kembalikan sebagai JSON
         return response()->json($rombels);
@@ -430,9 +429,9 @@ class IndisiplinerSiswaController extends Controller
             if ($siswa) {
                 // Jika siswa ditemukan, ambil semua datanya
                 $pelanggaranSiswa = PelanggaranNilai::where('nipd', $siswa->nipd)
-                                        ->with('detailPoinSiswa') // Eager load relasi
-                                        ->orderBy('tanggal', 'desc')
-                                        ->get();
+                                    ->with('detailPoinSiswa') // Eager load relasi
+                                    ->orderBy('tanggal', 'desc')
+                                    ->get();
                 
                 // Hitung total poin
                 $totalPoin = $pelanggaranSiswa->sum('poin');
@@ -461,6 +460,73 @@ class IndisiplinerSiswaController extends Controller
             'totalPoin',       // Untuk hasil
             'sanksiAktif',     // Untuk hasil
             'pelanggaranSiswa' // Untuk hasil
+        ));
+    }
+
+    /**
+     * Menampilkan halaman cetak/PDF untuk rekapitulasi satu siswa.
+     */
+    public function rekapitulasiCetak($nipd)
+    {
+        // 1. Cari Siswa
+        $siswa = Siswa::where('nipd', $nipd)->with('rombel')->firstOrFail();
+
+        // 2. Ambil Data Sekolah (Ambil data pertama dari tabel sekolahs)
+        $sekolah = DB::table('sekolahs')->first();
+
+        // 3. Ambil Pelanggaran
+        $pelanggaranSiswa = PelanggaranNilai::where('nipd', $siswa->nipd)
+            ->with('detailPoinSiswa')
+            ->orderBy('tanggal', 'asc') 
+            ->get();
+
+        // 4. Hitung Poin & Sanksi
+        $totalPoin = $pelanggaranSiswa->sum('poin');
+        
+        $sanksiAktif = PelanggaranSanksi::where('poin_min', '<=', $totalPoin)
+            ->where('poin_max', '>=', $totalPoin)
+            ->first();
+
+        // 5. Return View Cetak dengan data Sekolah
+        return view('admin.indisipliner.siswa.rekapitulasi.cetak', compact(
+            'siswa',
+            'sekolah', // <-- Kirim variabel sekolah ke view
+            'pelanggaranSiswa',
+            'totalPoin',
+            'sanksiAktif'
+        ));
+    }
+
+    /**
+     * CETAK SURAT PERINGATAN (SP) / SANKSI
+     * Menampilkan halaman cetak surat resmi pemanggilan orang tua (SP).
+     */
+    public function cetakSp($nipd, $sanksiId)
+    {
+        // 1. Ambil Data Siswa
+        $siswa = Siswa::where('nipd', $nipd)->with('rombel')->firstOrFail();
+        
+        // 2. Ambil Data Sekolah (untuk Kop Surat)
+        $sekolah = DB::table('sekolahs')->first();
+        
+        // 3. Ambil Data Sanksi (SP 1, SP 2, dll)
+        $sanksi = PelanggaranSanksi::findOrFail($sanksiId);
+        
+        // 4. Ambil Total Poin Siswa
+        $totalPoin = PelanggaranNilai::where('nipd', $nipd)->sum('poin');
+
+        // Validasi sederhana (Opsional): Pastikan poin siswa memang masuk range sanksi ini
+        // Jika poin kurang dari batas bawah sanksi, tolak.
+        if ($totalPoin < $sanksi->poin_min) {
+             return redirect()->back()->withErrors(['msg' => 'Poin siswa belum mencukupi untuk cetak ' . $sanksi->nama]);
+        }
+
+        // 5. Tampilkan View Cetak SP
+        return view('admin.indisipliner.siswa.rekapitulasi.cetak-sp', compact(
+            'siswa', 
+            'sekolah', 
+            'sanksi', 
+            'totalPoin'
         ));
     }
 
@@ -581,7 +647,7 @@ class IndisiplinerSiswaController extends Controller
     {
         // Ambil semua kategori dan poin pelanggaran untuk 'chip'
         $kategoriList = PelanggaranKategori::with('pelanggaranPoin')
-                                         ->orderBy('nama')->get();
+                                             ->orderBy('nama')->get();
         
         // Kita akan pakai layout yang berbeda (misal 'layouts.kiosk')
         // Jika Anda ingin tetap pakai layout admin, ganti jadi 'admin.indisipliner.siswa.kiosk'

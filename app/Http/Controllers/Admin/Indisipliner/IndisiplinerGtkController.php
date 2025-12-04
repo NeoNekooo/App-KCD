@@ -11,6 +11,7 @@ use App\Models\PelanggaranPoinGtk;
 use App\Models\PelanggaranSanksiGtk; // Pastikan model ini ada
 use App\Models\PelanggaranNilaiGtk;
 use App\Models\Rombel;
+use App\Models\SekolahForIndisipliner; // DIGUNAKAN UNTUK KOP SURAT
 
 class IndisiplinerGtkController extends Controller
 {
@@ -317,8 +318,15 @@ class IndisiplinerGtkController extends Controller
             ->orderBy('nama_guru')
             ->orderBy('tanggal', 'desc')
             ->get();
+        
+        // --- TAMBAHAN UNTUK SEKOLAH ---
+        $sekolah = SekolahForIndisipliner::first();
+        if (!$sekolah) {
+            return back()->withErrors('Data sekolah tidak ditemukan untuk mencetak semua guru.');
+        }
+        // --- AKHIR TAMBAHAN ---
 
-        return view('admin.indisipliner.guru.cetak.rekap-semua', compact('pelanggaranList'));
+        return view('admin.indisipliner.guru.cetak.rekap-semua', compact('pelanggaranList', 'sekolah')); // <--- MENGIRIM $sekolah
     }
 
     // ============================================================
@@ -338,12 +346,64 @@ class IndisiplinerGtkController extends Controller
         $sanksiAktif = PelanggaranSanksiGtk::where('poin_min', '<=', $totalPoin)
             ->where('poin_max', '>=', $totalPoin)
             ->first();
+        
+        // --- TAMBAHAN UNTUK SEKOLAH ---
+        $sekolah = SekolahForIndisipliner::first();
+        if (!$sekolah) {
+            return back()->withErrors('Data sekolah tidak ditemukan untuk mencetak individu.');
+        }
+        // --- AKHIR TAMBAHAN ---
 
         return view('admin.indisipliner.guru.cetak.rekap-individu', compact(
             'guru',
             'pelanggaranGuru',
             'totalPoin',
-            'sanksiAktif'
+            'sanksiAktif',
+            'sekolah' // <--- MENGIRIM $sekolah
         ));
     }
-}
+
+    public function cetakSurat($namaGuru)
+    {
+        // 1. Ambil data guru
+        $guru = Gtk::where('nama', $namaGuru)->first();
+
+        if (!$guru) {
+            return back()->withErrors('Data guru tidak ditemukan.');
+        }
+        
+        // Ambil semua data pelanggaran guru
+        $pelanggaran = PelanggaranNilaiGtk::where('nama_guru', $namaGuru)->get();
+
+        if ($pelanggaran->isEmpty()) {
+             // Jika tidak ada pelanggaran, poin 0, sanksi null
+            $totalPoin = 0;
+            $sanksi = null;
+        } else {
+            $totalPoin = $pelanggaran->sum('poin');
+
+            // Ambil sanksi sesuai poin
+            $sanksi = PelanggaranSanksiGtk::where('poin_min', '<=', $totalPoin)
+                ->where('poin_max', '>=', $totalPoin)
+                ->first();
+        }
+
+        // 2. Ambil data sekolah (MEMPERBAIKI Undefined variable $sekolah)
+        $sekolah = SekolahForIndisipliner::first(); 
+        
+        if (!$sekolah) {
+            return back()->withErrors('Data sekolah tidak ditemukan. Pastikan model SekolahForIndisipliner sudah dibuat dan tabel `sekolahs` sudah terisi.');
+        }
+
+        // 3. Render view surat dan kirim variabel $sekolah
+        return view('admin.indisipliner.guru.cetak.surat-sp', compact(
+            'guru',
+            'namaGuru',
+            'totalPoin',
+            'sanksi',
+            'pelanggaran',
+            'sekolah' // Variabel $sekolah dikirim ke view
+        ));
+    }
+
+} 
