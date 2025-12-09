@@ -4,7 +4,7 @@
   class="light-style layout-menu-fixed"
   dir="ltr"
   data-theme="theme-default"
-  data-assets-path="{{ asset('sneat/assets/') }}" 
+  data-assets-path="{{ asset('assets/') }}" 
   data-template="vertical-menu-template-free"
   data-layout="wide"
 
@@ -21,12 +21,12 @@
     <title>Dashboard Admin Sekolah</title>
 
     {{-- Sneat Vendor CSS --}}
-    <link rel="stylesheet" href="{{ asset('sneat/assets/vendor/fonts/boxicons.css') }}">
-    <link rel="stylesheet" href="{{ asset('sneat/assets/vendor/css/core.css') }}">
-    <link rel="stylesheet" href="{{ asset('sneat/assets/vendor/css/theme-default.css') }}">
-    <link rel="stylesheet" href="{{ asset('sneat/assets/css/demo.css') }}">
-    <link rel="stylesheet" href="{{ asset('sneat/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css') }}">
-    <link rel="stylesheet" href="{{ asset('sneat/assets/vendor/libs/apex-charts/apex-charts.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/vendor/fonts/boxicons.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/vendor/css/core.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/vendor/css/theme-default.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/demo.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/vendor/libs/apex-charts/apex-charts.css') }}">
 
     {{-- Tailwind + Vite --}}
     @vite(['resources/css/app.css', 'resources/js/app.js'])

@@ -9,7 +9,7 @@
                 <div class="card hero-header">
                     <div class="card-body d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
                         <div>
-                            <h4 class="hero-title mb-1">Selamat Datang di Dashboard Sekolah 🎓</h4>
+                            <h4 class="hero-title text-white mb-1">Selamat Datang di Dashboard Sekolah 🎓</h4>
                             <p class="hero-subtitle mb-0">Sistem Informasi Akademik - Tahun Pelajaran 2025/2026</p>
                         </div>
                         <div class="d-flex align-items-center">
