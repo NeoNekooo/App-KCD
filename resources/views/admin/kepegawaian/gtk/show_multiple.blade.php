@@ -1,429 +1,513 @@
 @extends('layouts.admin')
 
 @section('content')
-<h4 class="fw-bold py-3 mb-4">
-    <span class="text-muted fw-light">Kepegawaian /</span> Detail GTK yang Dipilih
-</h4>
 
-<div class="d-flex justify-content-end mb-3 gap-2">
-    @if($gtks->isNotEmpty())
-        {{-- Tombol Cetak Semua --}}
-        <a href="{{ route('admin.kepegawaian.gtk.cetak_pdf_multiple', ['ids' => $gtks->pluck('id')->implode(',')]) }}" 
-           class="btn btn-primary" 
-           target="_blank">
-            <i class="bx bxs-file-pdf me-1"></i> Cetak Semua
-        </a>
+{{-- HEADER --}}
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-4">
+    <h4 class="fw-bold py-3 mb-0">
+        <span class="text-muted fw-light">Kepegawaian /</span> Detail GTK
+    </h4>
 
-        {{-- Tombol Cetak 1 Tampil --}}
-        <a href="{{ route('admin.kepegawaian.gtk.cetak_pdf', ['id' => $gtks->first()->id]) }}" 
-           class="btn btn-outline-primary"
-           id="cetak-pdf-btn"
-           target="_blank">
-            <i class="bx bx-printer me-1"></i> Cetak (1 Tampil)
-        </a>
-    @endif
-
-    {{-- Tombol Kembali --}}
-    <a href="javascript:history.back()" class="btn btn-secondary">
-        <i class="bx bx-arrow-back me-1"></i> Kembali
-    </a>
-</div>
-
-{{-- --- BLOK UNTUK MENAMPILKAN PESAN SUKSES --- --}}
-@if(session('success'))
-<div class="alert alert-success">
-    {{ session('success') }}
-</div>
-@endif
-
-{{-- --- BLOK UNTUK MENAMPILKAN PESAN ERROR --- --}}
-@if ($errors->any())
-    <div class="alert alert-danger">
-        <h5 class="alert-heading mb-1">Validasi Gagal!</h5>
-        <p class="mb-2">Pastikan file yang diunggah sesuai dengan ketentuan.</p>
-        <ul class="mb-0">
-            @foreach ($errors->all() as $error)
-                <li>{{ $error }}</li>
-            @endforeach
-        </ul>
-    </div>
-@endif
-
-
-@if($gtks->isNotEmpty())
-    <div class="row">
-        {{-- KOLOM NAVIGASI NAMA GTK --}}
-        <div class="col-md-4 col-lg-3 mb-4 mb-md-0">
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="card-title m-0">GTK Terpilih</h5>
-                </div>
-                <div class="list-group list-group-flush" id="gtk-navigation">
-                    @foreach($gtks as $gtk)
-                        <a href="javascript:void(0);"
-                           class="list-group-item list-group-item-action gtk-nav-item {{ $loop->first ? 'active' : '' }}"
-                           data-target="gtk-detail-{{ $gtk->id }}">
-                            {{ $gtk->nama }}
-                            <small class="d-block text-muted">{{ $gtk->jabatan_ptk_id_str ?? 'Jabatan tidak tersedia' }}</small>
-                        </a>
+    <div class="d-flex gap-2 align-items-center">
+        @if($gtks->isNotEmpty())
+        <div class="dropdown">
+            <button class="btn btn-outline-primary dropdown-toggle btn-sm" type="button" id="gtkDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="bx bx-user me-1"></i> Pilih GTK Lain
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end p-2 shadow-lg" aria-labelledby="gtkDropdown" style="width: 300px; max-height: 400px; overflow-y: auto;">
+                <li class="mb-2 px-1">
+                    <div class="input-group input-group-sm input-group-merge">
+                        <span class="input-group-text"><i class="bx bx-search"></i></span>
+                        <input type="text" class="form-control" id="searchGtk" placeholder="Cari nama..." onkeyup="filterGtk()">
+                    </div>
+                </li>
+                <div id="gtkListContainer">
+                    @foreach($gtks as $listGtk)
+                        <li>
+                            <a class="dropdown-item rounded mb-1 {{ $loop->first ? 'active' : '' }}" 
+                               href="javascript:void(0);" 
+                               onclick="switchGtk('{{ $listGtk->id }}', this)"
+                               data-name="{{ strtolower($listGtk->nama) }}">
+                                <div class="d-flex align-items-center">
+                                    <div class="avatar avatar-xs me-2">
+                                        <span class="avatar-initial rounded-circle bg-label-primary">{{ substr($listGtk->nama, 0, 1) }}</span>
+                                    </div>
+                                    <div class="text-truncate small fw-medium">{{ $listGtk->nama }}</div>
+                                </div>
+                            </a>
+                        </li>
                     @endforeach
                 </div>
-            </div>
+            </ul>
         </div>
+        @endif
 
-        {{-- KOLOM DETAIL GTK --}}
-        <div class="col-md-8 col-lg-9">
-            @foreach ($gtks as $gtk)
-                {{-- Setiap GTK punya card dan form-nya sendiri --}}
-                <div class="card gtk-detail-content" id="gtk-detail-{{ $gtk->id }}" data-id="{{ $gtk->id }}" style="{{ !$loop->first ? 'display: none;' : '' }}">
-                    <div class="card-body">
+        <a href="javascript:history.back()" class="btn btn-secondary btn-sm">
+            <i class="bx bx-arrow-back me-1"></i> Kembali
+        </a>
+    </div>
+</div>
+
+@if(session('success'))
+    <div class="alert alert-success alert-dismissible fade show mb-3" role="alert">
+        {{ session('success') }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+@endif
+
+@if($gtks->isNotEmpty())
+    @foreach ($gtks as $gtk)
+    <div class="gtk-view-wrapper fade-in-animation" id="view-{{ $gtk->id }}" style="{{ !$loop->first ? 'display: none;' : '' }}">
+        
+        <div class="card shadow-sm overflow-hidden">
+            <div class="card-body p-0">
+                
+                {{-- LAYOUT FLEX: SIDEBAR & KONTEN --}}
+                <div class="row g-0">
+                    
+                    {{-- 1. SIDEBAR KIRI --}}
+                    <div class="col-lg-3 border-end d-flex flex-column align-items-center text-center py-4 px-3" style="background-color: #f5f5f9;">
                         
-                        {{-- PERBAIKAN NAMA ROUTE DAN @CSRF DI SINI --}}
-                        <form action="{{ route('admin.kepegawaian.gtk.upload_media', $gtk->id) }}" method="POST" enctype="multipart/form-data">
-@csrf
-                            
-                            <div class="row">
-                                {{-- KOLOM KIRI BARU: UNTUK FOTO & TTD --}}
-                                <div class="col-lg-4">
-                                    <h5 class="card-title text-primary mb-3">Media Pegawai</h5>
-                                    
-                                    {{-- Upload Foto --}}
-<div class="mb-3">
-    <label class="form-label">Foto Profil</label>
-    {{-- Kontainer baru dengan class untuk centering dan max-width --}}
-    <div style="text-align: center; max-width: 200px; margin: 0 auto;"> 
-        @if($gtk->foto)
-            {{-- Langsung set style pada img tag --}}
-            <img src="{{ asset('storage/' . $gtk->foto) }}" alt="Foto Profil" class="img-fluid rounded mb-2" style="max-width: 150px; height: auto;">
-        @else
-            <div class="mb-2 text-muted small" style="width: 150px; height: 150px; border: 2px dashed #ddd; border-radius: .5rem; display: flex; align-items: center; justify-content: center;">
-                <i class="bx bx-user bx-lg"></i>
-                <div>Belum ada foto</div>
-            </div>
-        @endif
-    </div>
-    <input class="form-control @error('foto') is-invalid @enderror" type="file" name="foto" id="foto-input-{{ $gtk->id }}" accept="image/*" 
-        data-preview-target="#foto-preview-{{ $gtk->id }}" 
-        data-placeholder-target="#foto-placeholder-{{ $gtk->id }}">
-
-    @error('foto')
-        <div class="form-text text-danger">{{ $message }}</div>
-    @else
-        <div class="form-text">Unggah foto (JPG/PNG). Maks 2MB.</div>
-    @enderror
-</div>
-                                    
-                                    {{-- Upload Tanda Tangan --}}
-<div class="mb-3">
-    <label class="form-label">Tanda Tangan</label>
-    {{-- Kontainer baru dengan class untuk centering dan max-width --}}
-    <div style="text-align: center; max-width: 250px; margin: 0 auto;"> 
-        @if($gtk->tandatangan)
-            {{-- Langsung set style pada img tag --}}
-            <img src="{{ asset('storage/' . $gtk->tandatangan) }}" alt="Tanda Tangan" class="img-fluid rounded mb-2" style="max-width: 200px; height: auto; object-fit: contain;">
-        @else
-            <div class="mb-2 text-muted small" style="width: 200px; height: 100px; border: 2px dashed #ddd; border-radius: .5rem; display: flex; align-items: center; justify-content: center;">
-                <i class="bx bx-pen bx-lg"></i>
-                <div>Belum ada TTD</div>
-            </div>
-        @endif
-    </div>
-    <input class="form-control @error('tandatangan') is-invalid @enderror" type="file" name="tandatangan" id="ttd-input-{{ $gtk->id }}" accept="image/png"
-        data-preview-target="#ttd-preview-{{ $gtk->id }}"
-        data-placeholder-target="#ttd-placeholder-{{ $gtk->id }}">
-
-    @error('tandatangan')
-        <div class="form-text text-danger">{{ $message }}</div>
-    @else
-        <div class="form-text">Unggah TTD (PNG). Maks 1MB.</div>
-    @enderror
-</div>
-                                    
-                                    {{-- Tombol Simpan --}}
-                                    <button type="submit" class="btn btn-primary w-100">
-                                        <i class="bx bx-save me-1"></i> Simpan Media
-                                    </button>
+                        <form action="{{ route('admin.kepegawaian.gtk.upload_media', $gtk->id) }}" method="POST" enctype="multipart/form-data" class="w-100">
+                            @csrf
+                            <div class="position-relative d-inline-block mb-3">
+                                <div class="avatar-wrapper">
+                                    @if($gtk->foto)
+                                        <img src="{{ asset('storage/' . $gtk->foto) }}" alt="Foto" class="d-block rounded shadow-sm object-fit-cover" style="width: 140px; height: 170px;">
+                                    @else
+                                        <div class="rounded bg-white d-flex align-items-center justify-content-center shadow-sm border" style="width: 140px; height: 170px;">
+                                            <i class="bx bx-user bx-lg text-muted"></i>
+                                        </div>
+                                    @endif
                                 </div>
+                                <label for="upload-foto-{{ $gtk->id }}" class="btn-upload-float shadow-sm" title="Ubah Foto">
+                                    <i class="bx bx-camera"></i>
+                                    <input type="file" id="upload-foto-{{ $gtk->id }}" name="foto" class="d-none" onchange="this.form.submit()">
+                                </label>
+                            </div>
 
-                                {{-- KOLOM KANAN: DATA DETAIL (KONTEN LAMA) --}}
-                                <div class="col-lg-8">
-                                    <h5 class="card-title text-primary mb-4">Detail Lengkap: {{ $gtk->nama }}</h5>
+                            <h6 class="fw-bold text-dark mb-2">{{ $gtk->nama }}</h6>
+                            
+                            {{-- PERBAIKAN BADGE: Menggunakan style inline !important untuk memaksa warna SOFT --}}
+                            @if($gtk->jabatan_ptk_id_str)
+                                <span class="badge mb-3 d-inline-block shadow-sm" 
+                                      style="background-color: #e7e7ff !important; color: #696cff !important; border: 1px solid rgba(105, 108, 255, 0.2);">
+                                    {{ $gtk->jabatan_ptk_id_str }}
+                                </span>
+                            @else
+                                <div class="mb-3 text-muted small">-</div>
+                            @endif
 
-                                    {{-- INFORMASI PRIBADI --}}
-                                    <p class="text-muted small text-uppercase">Informasi Pribadi</p>
-                                    <table class="table table-borderless table-sm mb-4">
-                                        <tbody>
-                                            <tr>
-                                                <td style="width: 35%;"><strong>Nama Lengkap</strong></td>
-                                                <td>: {{ $gtk->nama ?? '-' }}</td>
-                                            </tr>
-                                            <tr>
-                                                <td><strong>NIK</strong></td>
-                                                <td>: {{ $gtk->nik ?? '-' }}</td>
-                                            </tr>
-                                            <tr>
-                                                <td><strong>Jenis Kelamin</strong></td>
-                                                <td>: {{ $gtk->jenis_kelamin ?? '-' }}</td>
-                                            </tr>
-                                            <tr>
-                                                <td><strong>Tempat, Tanggal Lahir</strong></td>
-                                                <td>: {{ $gtk->tempat_lahir ?? '-' }}, {{ $gtk->tanggal_lahir ? \Carbon\Carbon::parse($gtk->tanggal_lahir)->format('d F Y') : '-' }}</td>
-                                            </tr>
-                                            <tr>
-                                                <td><strong>Agama</strong></td>
-                                                <td>: {{ $gtk->agama_id_str ?? '-' }}</td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                    <hr class="my-3">
+                            <div class="d-flex justify-content-center gap-2 mb-4">
+                                <span class="badge bg-label-{{ $gtk->ptk_induk == 1 ? 'success' : 'warning' }}" style="font-size: 0.7rem;">
+                                    {{ $gtk->ptk_induk == 1 ? 'INDUK' : 'NON-INDUK' }}
+                                </span>
+                                @if($gtk->jenis_ptk_id_str)
+                                    <span class="badge bg-label-info" style="font-size: 0.7rem;">{{ $gtk->jenis_ptk_id_str }}</span>
+                                @endif
+                            </div>
 
-                                    {{-- INFORMASI KEPEGAWAIAN --}}
-                                    <p class="text-muted small text-uppercase">Informasi Kepegawaian</p>
-                                    <table class="table table-borderless table-sm mb-4">
-                                        <tbody>
-                                            <tr>
-                                                <td style="width: 35%;"><strong>Status Kepegawaian</strong></td>
-                                                <td>: {{ $gtk->status_kepegawaian_id_str ?? '-' }}</td>
-                                            </tr>
-                                            <tr>
-                                                <td><strong>NIP</strong></td>
-                                                <td>: {{ $gtk->nip ?? '-' }}</td>
-                                            </tr>
-                                            <tr>
-                                                <td><strong>NUPTK</strong></td>
-                                                <td>: {{ $gtk->nuptk ?? '-' }}</td>
-                                            </tr>
-                                            <tr>
-                                                <td><strong>Jenis GTK</strong></td>
-                                                <td>: {{ $gtk->jenis_ptk_id_str ?? '-' }}</td>
-                                            </tr>
-                                            <tr>
-                                                <td><strong>Jabatan</strong></td>
-                                                <td>: {{ $gtk->jabatan_ptk_id_str ?? '-' }}</td>
-                                            </tr>
-                                            <tr>
-                                                <td><strong>Tanggal Surat Tugas</strong></td>
-                                                <td>: {{ $gtk->tanggal_surat_tugas ? \Carbon\Carbon::parse($gtk->tanggal_surat_tugas)->format('d F Y') : '-' }}</td>
-                                            </tr>
-                                            <tr>
-                                                <td><strong>Status Induk</strong></td>
-                                                <td>: {{ $gtk->ptk_induk == 1 ? 'Induk' : 'Non-Induk' }}</td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                    <hr class="my-3">
-
-                                    {{-- INFORMASI PENDIDIKAN & RIWAYAT --}}
-                                    <p class="text-muted small text-uppercase">Informasi Pendidikan & Riwayat</p>
-                                    <table class="table table-borderless table-sm">
-                                        <tbody>
-                                            <tr>
-                                                <td style="width: 35%;"><strong>Pendidikan Terakhir</strong></td>
-                                                <td>: {{ $gtk->pendidikan_terakhir ?? '-' }}</td>
-                                            </tr>
-                                            <tr>
-                                                <td><strong>Bidang Studi Terakhir</strong></td>
-                                                <td>: {{ $gtk->bidang_studi_terakhir ?? '-' }}</td>
-                                            </tr>
-                                            <tr>
-                                                <td><strong>Pangkat/Golongan Terakhir</strong></td>
-                                                <td>: {{ $gtk->pangkat_golongan_terakhir ?? '-' }}</td>
-                                            </tr>
-                                            
-                                            <tr>
-                                                <td class="align-top"><strong>Riwayat Pendidikan</strong></td>
-                                                <td>
-                                                    @php $pendidikan = json_decode($gtk->rwy_pend_formal); @endphp
-                                                    @if(!empty($pendidikan) && is_array($pendidikan))
-                                                        <table class="table table-bordered table-sm">
-                                                            <thead class="table-light">
-                                                                <tr>
-                                                                    <th>Jenjang</th>
-                                                                    <th>Institusi</th>
-                                                                    <th>Tahun Lulus</th>
-                                                                </tr>
-                                                            </thead>
-                                                            <tbody>
-                                                            @foreach($pendidikan as $riwayat)
-                                                                <tr>
-                                                                    <td>{{ $riwayat->jenjang_pendidikan_id_str ?? '-' }}</td>
-                                                                    <td>{{ $riwayat->satuan_pendidikan_formal ?? '-' }}</td>
-                                                                    <td>{{ $riwayat->tahun_lulus ?? '-' }}</td>
-                                                                </tr>
-                                                            @endforeach
-                                                            </tbody>
-                                                        </table>
-                                                    @else
-                                                        : -
-                                                    @endif
-                                                </td>
-                                            </tr>
-
-                                            <tr>
-                                                <td class="align-top"><strong>Riwayat Kepangkatan</strong></td>
-                                                <td>
-                                                    @php $kepangkatan = json_decode($gtk->rwy_kepangkatan); @endphp
-                                                    @if(!empty($kepangkatan) && is_array($kepangkatan))
-                                                        <table class="table table-bordered table-sm">
-                                                            <thead class="table-light">
-                                                                <tr>
-                                                                    <th>Pangkat/Gol</th>
-                                                                    <th>Nomor SK</th>
-                                                                    <th>TMT Pangkat</th>
-                                                                </tr>
-                                                            </thead>
-                                                            <tbody>
-                                                            @foreach($kepangkatan as $riwayat)
-                                                                <tr>
-                                                                    <td>{{ $riwayat->pangkat_golongan_id_str ?? '-' }}</td>
-                                                                    <td>{{ $riwayat->nomor_sk ?? '-' }}</td>
-                                                                    <td>{{ $riwayat->tmt_pangkat ? \Carbon\Carbon::parse($riwayat->tmt_pangkat)->format('d-m-Y') : '-' }}</td>
-                                                                </tr>
-                                                            @endforeach
-                                                            </tbody>
-                                                        </table>
-                                                    @else
-                                                        : -
-                                                    @endif
-                                                </td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
+                            <div class="text-start px-2 w-100">
+                                <label class="small text-muted text-uppercase fw-bold mb-1" style="font-size: 0.7rem;">Tanda Tangan</label>
+                                <div class="signature-box border rounded bg-white position-relative hover-lift">
+                                    @if($gtk->tandatangan)
+                                        <img src="{{ asset('storage/' . $gtk->tandatangan) }}" class="signature-img">
+                                    @else
+                                        <div class="text-muted small fst-italic py-3 text-center" style="font-size: 0.75rem;">Klik untuk upload</div>
+                                    @endif
+                                    <label for="upload-ttd-{{ $gtk->id }}" class="stretched-link cursor-pointer"></label>
+                                    <input type="file" id="upload-ttd-{{ $gtk->id }}" name="tandatangan" class="d-none" accept="image/png" onchange="this.form.submit()">
                                 </div>
                             </div>
-                        </form>
 
+                            <div class="d-grid mt-4 w-100">
+                                <a href="{{ route('admin.kepegawaian.gtk.cetak_pdf', ['id' => $gtk->id]) }}" class="btn btn-primary btn-sm shadow-sm" target="_blank">
+                                    <i class="bx bx-printer me-1"></i> Cetak Biodata
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+
+                    {{-- 2. KONTEN KANAN --}}
+                    <div class="col-lg-9 p-4 d-flex flex-column bg-white">
+                        <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+                            <h6 class="mb-0 text-primary fw-bold"><i class="bx bx-id-card me-2"></i>Informasi Lengkap</h6>
+                            
+                            {{-- CONTAINER TOMBOL AKSI --}}
+                            <div class="action-button-container">
+                                <button type="button" class="btn btn-sm btn-label-primary btn-edit-toggle" id="btn-edit-{{ $gtk->id }}" data-id="{{ $gtk->id }}">
+                                    <i class="bx bx-edit-alt me-1"></i> Edit Data
+                                </button>
+
+                                {{-- PERBAIKAN TOMBOL: Ukuran pas (btn-sm) dan class error diperbaiki --}}
+                                <div class="d-none align-items-center gap-2" id="action-buttons-{{ $gtk->id }}">
+                                    <button type="button" class="btn btn-sm btn-label-secondary btn-cancel-edit" data-id="{{ $gtk->id }}">Batal</button>
+                                    <button type="submit" form="form-data-{{ $gtk->id }}" class="btn btn-sm btn-primary shadow-sm">
+                                        <i class="bx bx-save me-1"></i> Simpan
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <form id="form-data-{{ $gtk->id }}" action="{{ route('admin.kepegawaian.gtk.update_data', $gtk->id) }}" method="POST">
+    @csrf
+    @method('PUT')
+
+    <ul class="nav nav-pills nav-fill mb-3 custom-pills" role="tablist">
+        <li class="nav-item"><button type="button" class="nav-link active btn-sm" data-bs-toggle="tab" data-bs-target="#tab-identitas-{{ $gtk->id }}">Identitas</button></li>
+        <li class="nav-item"><button type="button" class="nav-link btn-sm" data-bs-toggle="tab" data-bs-target="#tab-pribadi-{{ $gtk->id }}">Pribadi</button></li>
+        <li class="nav-item"><button type="button" class="nav-link btn-sm" data-bs-toggle="tab" data-bs-target="#tab-kepegawaian-{{ $gtk->id }}">Kepegawaian</button></li>
+        <li class="nav-item"><button type="button" class="nav-link btn-sm" data-bs-toggle="tab" data-bs-target="#tab-pendidikan-{{ $gtk->id }}">Pendidikan</button></li>
+        <li class="nav-item"><button type="button" class="nav-link btn-sm" data-bs-toggle="tab" data-bs-target="#tab-kompetensi-{{ $gtk->id }}">Kompetensi</button></li>
+        <li class="nav-item"><button type="button" class="nav-link btn-sm" data-bs-toggle="tab" data-bs-target="#tab-kontak-{{ $gtk->id }}">Kontak</button></li>
+    </ul>
+
+    <div class="tab-content p-0 mt-2">
+        
+        {{-- TAB 1: IDENTITAS (DIKUNCI DAPODIK) --}}
+        <div class="tab-pane fade show active" id="tab-identitas-{{ $gtk->id }}">
+            {{-- Nama --}}
+            <div class="row-clean">
+                <label>Nama Lengkap <i class="bx bx-lock-alt text-muted small ms-1" title="Data Dapodik"></i></label>
+                <div class="sep">:</div>
+                <div class="inp"><input type="text" name="nama" class="clean-input fw-bold text-dark locked-dapodik" value="{{ $gtk->nama ?: '-' }}" readonly></div>
+            </div>
+            {{-- NIK --}}
+            <div class="row-clean">
+                <label>NIK <i class="bx bx-lock-alt text-muted small ms-1" title="Data Dapodik"></i></label>
+                <div class="sep">:</div>
+                <div class="inp"><input type="text" name="nik" class="clean-input locked-dapodik" value="{{ $gtk->nik ?: '-' }}" readonly></div>
+            </div>
+            {{-- No KK (Bisa Diedit - Biasanya lokal) --}}
+            <div class="row-clean">
+                <label>No KK</label>
+                <div class="sep">:</div>
+                <div class="inp"><input type="text" name="no_kk" class="clean-input" value="{{ $gtk->no_kk ?: '-' }}" readonly></div>
+            </div>
+            {{-- Jenis Kelamin --}}
+            <div class="row-clean">
+                <label>Jenis Kelamin <i class="bx bx-lock-alt text-muted small ms-1" title="Data Dapodik"></i></label>
+                <div class="sep">:</div>
+                <div class="inp">
+                    <select name="jenis_kelamin" class="clean-input locked-dapodik" disabled>
+                        <option value="" {{ !$gtk->jenis_kelamin ? 'selected' : '' }}>-</option>
+                        <option value="L" {{ $gtk->jenis_kelamin == 'L' ? 'selected' : '' }}>Laki-laki</option>
+                        <option value="P" {{ $gtk->jenis_kelamin == 'P' ? 'selected' : '' }}>Perempuan</option>
+                    </select>
+                </div>
+            </div>
+            {{-- Tempat Lahir --}}
+            <div class="row-clean">
+                <label>Tempat Lahir <i class="bx bx-lock-alt text-muted small ms-1" title="Data Dapodik"></i></label>
+                <div class="sep">:</div>
+                <div class="inp"><input type="text" name="tempat_lahir" class="clean-input locked-dapodik" value="{{ $gtk->tempat_lahir ?: '-' }}" readonly></div>
+            </div>
+            {{-- Tanggal Lahir --}}
+            <div class="row-clean">
+                <label>Tanggal Lahir <i class="bx bx-lock-alt text-muted small ms-1" title="Data Dapodik"></i></label>
+                <div class="sep">:</div>
+                <div class="inp"><input type="date" name="tanggal_lahir" class="clean-input locked-dapodik" value="{{ $gtk->tanggal_lahir }}" readonly></div>
+            </div>
+            {{-- Ibu Kandung --}}
+            <div class="row-clean">
+                <label>Nama Ibu Kandung <i class="bx bx-lock-alt text-muted small ms-1" title="Data Dapodik"></i></label>
+                <div class="sep">:</div>
+                <div class="inp"><input type="text" name="nama_ibu_kandung" class="clean-input locked-dapodik" value="{{ $gtk->nama_ibu_kandung ?: '-' }}" readonly></div>
+            </div>
+            {{-- Agama --}}
+            <div class="row-clean">
+                <label>Agama <i class="bx bx-lock-alt text-muted small ms-1" title="Data Dapodik"></i></label>
+                <div class="sep">:</div>
+                <div class="inp">
+                    <select name="agama_id_str" class="clean-input locked-dapodik" disabled>
+                        <option value="" {{ !$gtk->agama_id_str ? 'selected' : '' }}>-</option>
+                        @foreach(['Islam','Kristen','Katolik','Hindu','Buddha'] as $ag)<option value="{{ $ag }}" {{ $gtk->agama_id_str == $ag ? 'selected' : '' }}>{{ $ag }}</option>@endforeach
+                    </select>
+                </div>
+            </div>
+            {{-- Kewarganegaraan (Bisa Edit) --}}
+            <div class="row-clean"><label>Kewarganegaraan</label><div class="sep">:</div><div class="inp"><input type="text" name="kewarganegaraan" class="clean-input" value="{{ $gtk->kewarganegaraan ?: '-' }}" readonly></div></div>
+        </div>
+
+        {{-- TAB 2: PRIBADI (SEMUA BISA DIEDIT) --}}
+        <div class="tab-pane fade" id="tab-pribadi-{{ $gtk->id }}">
+            <div class="row-clean"><label>Alamat Jalan</label><div class="sep">:</div><div class="inp"><input type="text" name="alamat_jalan" class="clean-input" value="{{ $gtk->alamat_jalan ?: '-' }}" readonly></div></div>
+            <div class="row-clean"><label>RT / RW</label><div class="sep">:</div><div class="inp d-flex"><input type="text" name="rt" class="clean-input w-25" value="{{ $gtk->rt ?: '-' }}" readonly> / <input type="text" name="rw" class="clean-input w-25" value="{{ $gtk->rw ?: '-' }}" readonly></div></div>
+            <div class="row-clean"><label>Dusun</label><div class="sep">:</div><div class="inp"><input type="text" name="dusun" class="clean-input" value="{{ $gtk->dusun ?: '-' }}" readonly></div></div>
+            <div class="row-clean"><label>Desa/Kelurahan</label><div class="sep">:</div><div class="inp"><input type="text" name="desa_kelurahan" class="clean-input" value="{{ $gtk->desa_kelurahan ?: '-' }}" readonly></div></div>
+            <div class="row-clean"><label>Kecamatan</label><div class="sep">:</div><div class="inp"><input type="text" name="kecamatan" class="clean-input" value="{{ $gtk->kecamatan ?: '-' }}" readonly></div></div>
+            <div class="row-clean"><label>Kode Pos</label><div class="sep">:</div><div class="inp"><input type="text" name="kode_pos" class="clean-input" value="{{ $gtk->kode_pos ?: '-' }}" readonly></div></div>
+            <div class="row-clean"><label>Lintang / Bujur</label><div class="sep">:</div><div class="inp d-flex gap-2"><input type="text" name="lintang" class="clean-input" value="{{ $gtk->lintang ?: '-' }}" readonly> <input type="text" name="bujur" class="clean-input" value="{{ $gtk->bujur ?: '-' }}" readonly></div></div>
+            <hr class="my-2 border-dashed">
+            <div class="row-clean"><label>Status Kawin</label><div class="sep">:</div><div class="inp">
+                <select name="status_perkawinan" class="clean-input" disabled>
+                    <option value="">-</option>
+                    <option value="Kawin" {{ $gtk->status_perkawinan == 'Kawin' ? 'selected' : '' }}>Kawin</option>
+                    <option value="Belum Kawin" {{ $gtk->status_perkawinan == 'Belum Kawin' ? 'selected' : '' }}>Belum Kawin</option>
+                    <option value="Janda/Duda" {{ $gtk->status_perkawinan == 'Janda/Duda' ? 'selected' : '' }}>Janda/Duda</option>
+                </select>
+            </div></div>
+            <div class="row-clean"><label>Nama Pasangan</label><div class="sep">:</div><div class="inp"><input type="text" name="nama_suami_istri" class="clean-input" value="{{ $gtk->nama_suami_istri ?: '-' }}" readonly></div></div>
+            <div class="row-clean"><label>Pekerjaan</label><div class="sep">:</div><div class="inp"><input type="text" name="pekerjaan_suami_istri" class="clean-input" value="{{ $gtk->pekerjaan_suami_istri ?: '-' }}" readonly></div></div>
+        </div>
+
+        {{-- TAB 3: KEPEGAWAIAN (SEBAGIAN BESAR DIKUNCI DAPODIK) --}}
+        <div class="tab-pane fade" id="tab-kepegawaian-{{ $gtk->id }}">
+            <div class="row-clean"><label>Status Pegawai <i class="bx bx-lock-alt text-muted small ms-1"></i></label><div class="sep">:</div><div class="inp">
+                <select name="status_kepegawaian_id_str" class="clean-input fw-bold text-primary locked-dapodik" disabled>
+                    <option value="">-</option>
+                    @foreach(['GTY/PTY', 'PNS', 'PPPK', 'Honor Sekolah'] as $st)<option value="{{ $st }}" {{ $gtk->status_kepegawaian_id_str == $st ? 'selected' : '' }}>{{ $st }}</option>@endforeach
+                </select>
+            </div></div>
+            <div class="row-clean"><label>NIP <i class="bx bx-lock-alt text-muted small ms-1"></i></label><div class="sep">:</div><div class="inp"><input type="text" name="nip" class="clean-input locked-dapodik" value="{{ $gtk->nip ?: '-' }}" readonly></div></div>
+            <div class="row-clean"><label>NIY / NIGK <i class="bx bx-lock-alt text-muted small ms-1"></i></label><div class="sep">:</div><div class="inp"><input type="text" name="niy_nigk" class="clean-input locked-dapodik" value="{{ $gtk->niy_nigk ?: '-' }}" readonly></div></div>
+            <div class="row-clean"><label>NUPTK <i class="bx bx-lock-alt text-muted small ms-1"></i></label><div class="sep">:</div><div class="inp"><input type="text" name="nuptk" class="clean-input locked-dapodik" value="{{ $gtk->nuptk ?: '-' }}" readonly></div></div>
+            <div class="row-clean"><label>NRG <i class="bx bx-lock-alt text-muted small ms-1"></i></label><div class="sep">:</div><div class="inp"><input type="text" name="nrg" class="clean-input locked-dapodik" value="{{ $gtk->nrg ?: '-' }}" readonly></div></div>
+            
+            <div class="row-clean"><label>SK Pengangkatan <i class="bx bx-lock-alt text-muted small ms-1"></i></label><div class="sep">:</div><div class="inp"><input type="text" name="sk_pengangkatan" class="clean-input locked-dapodik" value="{{ $gtk->sk_pengangkatan ?: '-' }}" readonly></div></div>
+            <div class="row-clean"><label>TMT Pengangkatan <i class="bx bx-lock-alt text-muted small ms-1"></i></label><div class="sep">:</div><div class="inp"><input type="date" name="tmt_pengangkatan" class="clean-input locked-dapodik" value="{{ $gtk->tmt_pengangkatan }}" readonly></div></div>
+            <div class="row-clean"><label>Lembaga <i class="bx bx-lock-alt text-muted small ms-1"></i></label><div class="sep">:</div><div class="inp"><input type="text" name="lembaga_pengangkat" class="clean-input locked-dapodik" value="{{ $gtk->lembaga_pengangkat ?: '-' }}" readonly></div></div>
+            
+            <div class="row-clean"><label>SK CPNS <i class="bx bx-lock-alt text-muted small ms-1"></i></label><div class="sep">:</div><div class="inp"><input type="text" name="sk_cpns" class="clean-input locked-dapodik" value="{{ $gtk->sk_cpns ?: '-' }}" readonly></div></div>
+            <div class="row-clean"><label>TMT CPNS <i class="bx bx-lock-alt text-muted small ms-1"></i></label><div class="sep">:</div><div class="inp"><input type="date" name="tmt_cpns" class="clean-input locked-dapodik" value="{{ $gtk->tmt_cpns }}" readonly></div></div>
+            <div class="row-clean"><label>TMT PNS <i class="bx bx-lock-alt text-muted small ms-1"></i></label><div class="sep">:</div><div class="inp"><input type="date" name="tmt_pns" class="clean-input locked-dapodik" value="{{ $gtk->tmt_pns }}" readonly></div></div>
+            
+            <div class="row-clean"><label>Pangkat Akhir <i class="bx bx-lock-alt text-muted small ms-1"></i></label><div class="sep">:</div><div class="inp"><input type="text" name="pangkat_golongan_terakhir" class="clean-input locked-dapodik" value="{{ $gtk->pangkat_golongan_terakhir ?: '-' }}" readonly></div></div>
+            <div class="row-clean"><label>Sumber Gaji</label><div class="sep">:</div><div class="inp"><input type="text" name="sumber_gaji" class="clean-input" value="{{ $gtk->sumber_gaji ?: '-' }}" readonly></div></div>
+
+            <div class="mt-3">
+                <div class="small fw-bold text-muted text-uppercase mb-2">Riwayat Kepangkatan (Dapodik)</div>
+                <div class="table-responsive border rounded-3">
+                    <table class="table table-sm table-striped mb-0" style="font-size: 0.85rem;">
+                        <thead class="bg-light"><tr><th>Gol</th><th>Nomor SK</th><th>TMT</th><th>Masa Kerja</th></tr></thead>
+                        <tbody>
+                            @php $pangkat = json_decode($gtk->rwy_kepangkatan) ?? []; @endphp
+                            @forelse($pangkat as $pkt)
+                                <tr>
+                                    <td class="fw-bold">{{ $pkt->pangkat_golongan_id_str ?? '-' }}</td>
+                                    <td>{{ $pkt->nomor_sk ?? '-' }}</td>
+                                    <td>{{ $pkt->tmt_pangkat ? \Carbon\Carbon::parse($pkt->tmt_pangkat)->format('d/m/Y') : '-' }}</td>
+                                    <td>{{ $pkt->masa_kerja_gol_tahun ?? 0 }} Thn</td>
+                                </tr>
+                            @empty
+                                <tr><td colspan="4" class="text-center text-muted small py-2">Data kosong.</td></tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        {{-- TAB 4: PENDIDIKAN (DATA UTAMA DIKUNCI) --}}
+        <div class="tab-pane fade" id="tab-pendidikan-{{ $gtk->id }}">
+            <div class="row-clean"><label>Pend. Terakhir <i class="bx bx-lock-alt text-muted small ms-1"></i></label><div class="sep">:</div><div class="inp"><input type="text" name="pendidikan_terakhir" class="clean-input locked-dapodik" value="{{ $gtk->pendidikan_terakhir ?: '-' }}" readonly></div></div>
+            <div class="row-clean"><label>Bidang Studi <i class="bx bx-lock-alt text-muted small ms-1"></i></label><div class="sep">:</div><div class="inp"><input type="text" name="bidang_studi_terakhir" class="clean-input locked-dapodik" value="{{ $gtk->bidang_studi_terakhir ?: '-' }}" readonly></div></div>
+            
+            <div class="mt-3">
+                <div class="small fw-bold text-muted text-uppercase mb-2">Riwayat Pendidikan Formal (Dapodik)</div>
+                <div class="table-responsive border rounded-3">
+                    <table class="table table-sm table-striped mb-0" style="font-size: 0.85rem;">
+                        <thead class="bg-light"><tr><th>Jenjang</th><th>Institusi</th><th>Thn Lulus</th><th>IPK</th></tr></thead>
+                        <tbody>
+                            @php $pend = json_decode($gtk->rwy_pend_formal) ?? []; @endphp
+                            @forelse($pend as $rw)
+                                <tr>
+                                    <td>{{ $rw->jenjang_pendidikan_id_str ?? '-' }}</td>
+                                    <td>{{ $rw->satuan_pendidikan_formal ?? '-' }}</td>
+                                    <td>{{ $rw->tahun_lulus ?? '-' }}</td>
+                                    <td>{{ $rw->ipk ?? '-' }}</td>
+                                </tr>
+                            @empty
+                                <tr><td colspan="4" class="text-center text-muted small py-2">Data kosong.</td></tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        {{-- TAB 5: KOMPETENSI (BISA DIEDIT) --}}
+        <div class="tab-pane fade" id="tab-kompetensi-{{ $gtk->id }}">
+            <div class="row-clean"><label>Lisensi Kepsek</label><div class="sep">:</div><div class="inp"><select name="lisensi_kepsek" class="clean-input" disabled><option value="0" {{ $gtk->lisensi_kepsek == 0 ? 'selected' : '' }}>Tidak</option><option value="1" {{ $gtk->lisensi_kepsek == 1 ? 'selected' : '' }}>Ya</option></select></div></div>
+            <div class="row-clean"><label>No Registrasi (NUKS)</label><div class="sep">:</div><div class="inp"><input type="text" name="nuks" class="clean-input" value="{{ $gtk->nuks ?: '-' }}" readonly></div></div>
+            <div class="row-clean"><label>Keahlian Lab</label><div class="sep">:</div><div class="inp"><input type="text" name="keahlian_laboratorium" class="clean-input" value="{{ $gtk->keahlian_laboratorium ?: '-' }}" readonly></div></div>
+            <div class="row-clean"><label>Menangani Keb. Khusus</label><div class="sep">:</div><div class="inp"><input type="text" name="mampu_menangani_kebutuhan_khusus" class="clean-input" value="{{ $gtk->mampu_menangani_kebutuhan_khusus ?: '-' }}" readonly></div></div>
+            <div class="row-clean"><label>Keahlian Braille</label><div class="sep">:</div><div class="inp"><select name="keahlian_braille" class="clean-input" disabled><option value="0" {{ $gtk->keahlian_braille == 0 ? 'selected' : '' }}>Tidak</option><option value="1" {{ $gtk->keahlian_braille == 1 ? 'selected' : '' }}>Ya</option></select></div></div>
+            <div class="row-clean"><label>Bahasa Isyarat</label><div class="sep">:</div><div class="inp"><select name="keahlian_bahasa_isyarat" class="clean-input" disabled><option value="0" {{ $gtk->keahlian_bahasa_isyarat == 0 ? 'selected' : '' }}>Tidak</option><option value="1" {{ $gtk->keahlian_bahasa_isyarat == 1 ? 'selected' : '' }}>Ya</option></select></div></div>
+        </div>
+
+        {{-- TAB 6: KONTAK (BISA DIEDIT) --}}
+        <div class="tab-pane fade" id="tab-kontak-{{ $gtk->id }}">
+            <div class="row-clean"><label>No. HP</label><div class="sep">:</div><div class="inp"><input type="text" name="no_hp" class="clean-input" value="{{ $gtk->no_hp ?: '-' }}" readonly></div></div>
+            <div class="row-clean"><label>Email</label><div class="sep">:</div><div class="inp"><input type="email" name="email" class="clean-input" value="{{ $gtk->email ?: '-' }}" readonly></div></div>
+            <div class="row-clean"><label>No. Telp Rumah</label><div class="sep">:</div><div class="inp"><input type="text" name="no_telepon_rumah" class="clean-input" value="{{ $gtk->no_telepon_rumah ?: '-' }}" readonly></div></div>
+        </div>
+
+    </div> {{-- End Tab Content --}}
+</form>
                     </div>
                 </div>
-            @endforeach
+            </div>
         </div>
     </div>
+    @endforeach
+
 @else
-    {{-- Tampilan jika tidak ada data yang dipilih --}}
-    <div class="card">
-        <div class="card-body">
-            <div class="text-center py-4">
-                <i class="bx bx-info-circle bx-lg text-muted d-block mx-auto mb-2"></i>
-                <span class="text-muted">Tidak ada data GTK yang dipilih untuk ditampilkan.</span>
-            </div>
+    <div class="card shadow-sm border-0">
+        <div class="card-body text-center py-5">
+            <div class="mb-3"><i class="bx bx-user-x bx-lg text-muted"></i></div>
+            <h5 class="fw-bold">Tidak ada data GTK dipilih</h5>
+            <a href="javascript:history.back()" class="btn btn-primary px-4">Kembali</a>
         </div>
     </div>
 @endif
+
+<style>
+    /* Styling Khusus untuk Input Terkunci */
+.clean-input.locked-dapodik {
+    cursor: not-allowed;
+    color: #697a8d; /* Warna tetap jelas tapi user tau ini mati */
+}
+
+/* Pastikan saat mode edit, input terkunci TIDAK berubah */
+.clean-input.locked-dapodik.editing {
+    border-bottom: none !important;
+    background-color: transparent !important;
+}
+    /* 1. ROW YANG LEBIH RAPAT */
+    .row-clean {
+        display: flex;
+        align-items: flex-start;
+        padding: 4px 0;
+        border-bottom: 1px solid transparent; 
+        line-height: 1.5;
+    }
+    .row-clean label {
+        width: 35%; font-weight: 600; color: #566a7f; margin: 0; font-size: 0.9375rem;
+    }
+    .row-clean .sep {
+        width: 3%; text-align: center; font-weight: 600; color: #566a7f;
+    }
+    .row-clean .inp {
+        width: 62%;
+    }
+
+    /* 2. INPUT TEXT BIASA (MODE LIHAT) */
+    .clean-input {
+        width: 100%;
+        background: transparent !important;
+        border: none !important;
+        padding: 0;
+        margin: 0;
+        outline: none !important;
+        box-shadow: none !important;
+        font-size: 0.9375rem;
+        font-family: inherit;
+        color: #697a8d;
+        pointer-events: none;
+        -webkit-appearance: none;
+        appearance: none;
+    }
+
+    /* 3. INPUT MODE EDIT (NO BORDER, ONLY CURSOR CHANGE) */
+    .clean-input.editing {
+        pointer-events: auto;
+        color: #333;
+        cursor: text;
+        border: none !important; /* Pastikan tidak ada border */
+    }
+    .clean-input.editing:focus {
+         border: none !important; /* Pastikan fokus juga aman */
+         outline: none !important;
+    }
+    
+    /* Placeholder Logic */
+    .clean-input::placeholder { color: #b4bdc6; font-style: italic; opacity: 0; }
+    .clean-input.editing::placeholder { opacity: 1; }
+
+    /* 4. TABS PILLS MODERN */
+    .custom-pills .nav-link {
+        border-radius: 50rem; padding: 0.4rem 1rem; color: #697a8d; font-weight: 500; font-size: 0.85rem; transition: all 0.2s; border: 1px solid transparent; margin-right: 4px; margin-bottom: 4px;
+    }
+    .custom-pills .nav-link:hover { background-color: rgba(67, 89, 113, 0.05); color: #696cff; }
+    .custom-pills .nav-link.active { background-color: #696cff; color: #fff; box-shadow: 0 2px 6px rgba(105, 108, 255, 0.4); }
+
+    /* 5. UTILS */
+    .object-fit-cover { object-fit: cover; }
+    .btn-upload-float { position: absolute; bottom: -10px; right: -10px; background: #fff; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #696cff; cursor: pointer; box-shadow: 0 0.25rem 0.5rem rgba(161, 172, 184, 0.45); transition: 0.2s; }
+    .btn-upload-float:hover { transform: scale(1.1); }
+    .signature-box { min-height: 70px; display: flex; align-items: center; justify-content: center; background-image: radial-gradient(#e2e2e2 1px, transparent 1px); background-size: 8px 8px; transition: 0.2s; }
+    .signature-box:hover { border-color: #696cff !important; }
+    .signature-img { max-height: 60px; max-width: 100%; }
+    .fade-in-animation { animation: fadeIn 0.3s ease-in-out; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+</style>
 
 @endsection
 
 @push('scripts')
 <script>
+    window.switchGtk = function(id, element) {
+        document.querySelectorAll('.gtk-view-wrapper').forEach(el => el.style.display = 'none');
+        const target = document.getElementById('view-' + id);
+        target.style.display = 'block';
+        target.classList.remove('fade-in-animation');
+        void target.offsetWidth; 
+        target.classList.add('fade-in-animation');
+
+        document.querySelectorAll('.dropdown-item').forEach(el => el.classList.remove('active'));
+        element.classList.add('active');
+    };
+
+    window.filterGtk = function() {
+        let input = document.getElementById("searchGtk");
+        let filter = input.value.toLowerCase();
+        let items = document.querySelectorAll("#gtkListContainer li");
+        items.forEach(function(item) {
+            let a = item.getElementsByTagName("a")[0];
+            let txtValue = a.getAttribute('data-name');
+            item.style.display = txtValue.indexOf(filter) > -1 ? "" : "none";
+        });
+    };
+
     document.addEventListener('DOMContentLoaded', function() {
-        // --- 1. SCRIPT UNTUK NAVIGASI (KODE LAMA ANDA, SUDAH BENAR) ---
-        const navItems = document.querySelectorAll('.gtk-nav-item');
-        if (navItems.length > 0) {
-            const detailContents = document.querySelectorAll('.gtk-detail-content');
-            const cetakBtn = document.getElementById('cetak-pdf-btn');
+    // Tombol Edit
+    document.querySelectorAll('.btn-edit-toggle').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const id = this.getAttribute('data-id');
+            const form = document.getElementById('form-data-' + id);
+            const actionBtns = document.getElementById('action-buttons-' + id);
+            const editBtn = document.getElementById('btn-edit-' + id);
+            
+            editBtn.classList.add('d-none'); 
+            actionBtns.classList.remove('d-none'); 
+            actionBtns.classList.add('d-flex'); 
 
-            navItems.forEach(item => {
-                item.addEventListener('click', function() {
-                    navItems.forEach(nav => nav.classList.remove('active'));
-                    this.classList.add('active');
-                    const targetId = this.getAttribute('data-target');
-
-                    detailContents.forEach(content => {
-                        content.style.display = 'none';
-                    });
-
-                    const targetContent = document.getElementById(targetId);
-                    if (targetContent) {
-                        targetContent.style.display = 'block';
-
-                        if(cetakBtn) {
-                            const gtkId = targetContent.getAttribute('data-id');
-                            let baseUrl = "{{ route('admin.kepegawaian.gtk.cetak_pdf', ['id' => ':id']) }}";
-                            let newUrl = baseUrl.replace(':id', gtkId);
-                            cetakBtn.setAttribute('href', newUrl);
-                        }
+            // LOGIKA PENTING: Hanya aktifkan yang BUKAN locked-dapodik
+            form.querySelectorAll('.clean-input').forEach(input => {
+                
+                // Cek apakah input ini dikunci (Dapodik)?
+                if (!input.classList.contains('locked-dapodik')) {
+                    input.removeAttribute('readonly');
+                    input.removeAttribute('disabled');
+                    input.classList.add('editing');
+                    
+                    // Munculkan placeholder hanya di kolom yang bisa diedit
+                    if(input.value.trim() === '-') {
+                        input.value = '';
+                        input.setAttribute('placeholder', 'klik untuk isi..');
                     }
-                });
+                }
             });
-        }
+        });
+    });
 
-        document.querySelectorAll('input[type="file"][name="foto"], input[type="file"][name="tandatangan"]').forEach(input => {
-    input.addEventListener('change', function(event) {
-        // Kita tidak lagi perlu previewTarget dan placeholderTarget jika ingin langsung mengganti div-nya
-        // Namun, jika ingin tetap menggunakan img tag dan placeholder icon, kita perlu logika sedikit berbeda.
-
-        const file = event.target.files[0];
-        const parentDiv = this.closest('.mb-3'); // Mencari div terdekat yang membungkus label, input, dan preview
-
-        // Menentukan apakah ini untuk foto atau tanda tangan
-        const isFoto = this.name === 'foto';
-        const defaultMaxWidth = isFoto ? '150px' : '200px'; // Sesuaikan ukuran default
-        const defaultHeight = isFoto ? '150px' : '100px'; // Sesuaikan ukuran default
-
-        // Cek elemen gambar yang ada
-        let currentImage = parentDiv.querySelector('img.img-fluid'); // Menggunakan class img-fluid dari Bootstrap
-        let currentPlaceholder = parentDiv.querySelector('.mb-2.text-muted.small'); // Placeholder yang kita buat
-
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                if (currentImage) {
-                    currentImage.src = e.target.result;
-                    currentImage.style.display = 'block';
-                    currentImage.style.maxWidth = defaultMaxWidth;
-                    currentImage.style.height = 'auto'; // Pastikan tinggi otomatis
-                } else {
-                    // Jika belum ada img tag, buat yang baru
-                    const newImage = document.createElement('img');
-                    newImage.src = e.target.result;
-                    newImage.alt = isFoto ? "Foto Profil" : "Tanda Tangan";
-                    newImage.className = "img-fluid rounded mb-2";
-                    newImage.style.maxWidth = defaultMaxWidth;
-                    newImage.style.height = 'auto';
-                    if (!isFoto) { // Untuk tanda tangan, set object-fit: contain
-                        newImage.style.objectFit = 'contain';
-                    }
-                    // Ganti placeholder dengan gambar baru
-                    if (currentPlaceholder) {
-                        currentPlaceholder.parentNode.replaceChild(newImage, currentPlaceholder);
-                    } else {
-                        // Jika tidak ada placeholder (mungkin sudah ada gambar sebelumnya),
-                        // cari div wrapper dan masukkan gambar baru
-                        let wrapper = parentDiv.querySelector('div[style*="max-width"]');
-                        if (wrapper) {
-                            wrapper.innerHTML = ''; // Kosongkan dulu
-                            wrapper.appendChild(newImage);
-                        }
-                    }
-                    currentImage = newImage; // Update currentImage
-                }
-                if (currentPlaceholder) {
-                    currentPlaceholder.style.display = 'none';
-                }
-            }
-            reader.readAsDataURL(file);
-        } else {
-            // Jika file dihapus atau tidak ada, kembalikan ke placeholder
-            if (currentImage) {
-                currentImage.style.display = 'none'; // Sembunyikan gambar
-            }
-            if (currentPlaceholder) {
-                currentPlaceholder.style.display = 'flex'; // Tampilkan placeholder
-            } else {
-                // Jika placeholder tidak ada, buat kembali
-                const newPlaceholder = document.createElement('div');
-                newPlaceholder.className = "mb-2 text-muted small";
-                newPlaceholder.style.cssText = `width: ${defaultMaxWidth}; height: ${defaultHeight}; border: 2px dashed #ddd; border-radius: .5rem; display: flex; align-items: center; justify-content: center;`;
-                newPlaceholder.innerHTML = `<i class="bx ${isFoto ? 'bx-user' : 'bx-pen'} bx-lg"></i><div>Belum ada ${isFoto ? 'foto' : 'TTD'}</div>`;
-
-                let wrapper = parentDiv.querySelector('div[style*="max-width"]');
-                if (wrapper) {
-                    wrapper.innerHTML = '';
-                    wrapper.appendChild(newPlaceholder);
-                }
-            }
-        }
+    // Tombol Batal
+    document.querySelectorAll('.btn-cancel-edit').forEach(btn => {
+        btn.addEventListener('click', function() {
+            location.reload(); 
+        });
     });
 });
-    });
 </script>
 @endpush
