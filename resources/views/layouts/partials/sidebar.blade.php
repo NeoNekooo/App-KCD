@@ -592,17 +592,28 @@
                 <div data-i18n="Administrasi Surat">Administrasi Surat</div>
             </a>
             <ul class="menu-sub">
-                <li class="menu-item {{-- {{ request()->is('admin/administrasi/suratMasuk') ? 'active' : '' }} --}}">
-                    <a href="{{-- {{ route('admin.administrasi.suratMasuk') }} --}}  {{ route('admin.underConstructions') }}" class="menu-link">
+                <li class="menu-item {{ request()->routeIs('admin.administrasi.surat-masuk.*') ? 'active' : '' }}">
+                    <a href="{{ route('admin.administrasi.surat-masuk.index') }}" class="menu-link">
                         <div data-i18n="Surat Masuk">Surat Masuk</div>
                     </a>
                 </li>
-                <li class="menu-item {{-- {{ request()->is('admin/administrasi/suratKeluar') ? 'active' : '' }} --}}">
-                    <a href="{{-- {{ route('admin.administrasi.suratKeluar') }} --}}  {{ route('admin.underConstructions') }}" class="menu-link">
-                        <div data-i18n="Surat Keluar">Surat Keluar</div>
+                <li class="menu-item {{ request()->routeIs('admin.administrasi.tipe-surat.*') ? 'active' : '' }}">
+                    <a href="{{ route('admin.administrasi.tipe-surat.index') }}" class="menu-link">
+                        <div data-i18n="Template Surat">Template Surat</div>
                     </a>
                 </li>
-            
+                <li
+                    class="menu-item {{ request()->routeIs('admin.administrasi.surat-keluar-siswa.*') ? 'active' : '' }}">
+                    <a href="{{ route('admin.administrasi.surat-keluar-siswa.index') }}" class="menu-link">
+                        <div data-i18n="Surat Keluar">Surat Keluar (Siswa)</div>
+                    </a>
+                </li>
+                <li
+                    class="menu-item {{ request()->routeIs('admin.administrasi.surat-keluar-guru.*') ? 'active' : '' }}">
+                    <a href="{{ route('admin.administrasi.surat-keluar-guru.index') }}" class="menu-link">
+                        <div data-i18n="Surat Keluar Guru">Surat Keluar (Guru)</div>
+                    </a>
+                </li>
             </ul>
         </li>
 

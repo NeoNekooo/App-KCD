@@ -72,6 +72,13 @@ use App\Http\Controllers\Bendahara\Keuangan\PengeluaranController;
 use App\Http\Controllers\Bendahara\Keuangan\VoucherController;
 use App\Http\Controllers\Bendahara\Keuangan\TagihanController;
 use App\Http\Controllers\Bendahara\Keuangan\MasterKasController;
+
+
+// --- Controller Administrasi (Surat) ---
+use App\Http\Controllers\Admin\Administrasi\TipeSuratController;
+use App\Http\Controllers\Admin\Administrasi\SuratKeluarSiswaController;
+use App\Http\Controllers\Admin\Administrasi\SuratKeluarGuruController; // Controller Baru
+use App\Http\Controllers\Admin\Administrasi\SuratMasukController;
         
 /*
 |--------------------------------------------------------------------------
@@ -427,6 +434,18 @@ Route::prefix('admin')->name('admin.')->group(function () {
         // Wali
         Route::get('/wali/create', [RombelWaliController::class, 'create'])->name('wali.create');
         Route::get('/wali', [RombelWaliController::class, 'index'])->name('wali.index');
+    });
+
+    // 3. --- GRUP ADMINISTRASI (FITUR SURAT BARU) ---
+    Route::prefix('administrasi')->name('administrasi.')->group(function () {
+        Route::resource('tipe-surat', TipeSuratController::class);
+        Route::resource('surat-keluar-siswa', SuratKeluarSiswaController::class);
+        Route::get('get-siswa-by-kelas/{nama_rombel}', [SuratKeluarSiswaController::class, 'getSiswaByKelas'])
+             ->name('get-siswa-by-kelas');
+        Route::get('surat-keluar-guru', [SuratKeluarGuruController::class, 'index'])->name('surat-keluar-guru.index');
+        Route::post('surat-keluar-guru/store', [SuratKeluarGuruController::class, 'store'])->name('surat-keluar-guru.store');
+        Route::resource('surat-masuk', SuratMasukController::class);
+
     });
 
 
