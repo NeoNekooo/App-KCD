@@ -96,7 +96,7 @@
     <div class="page-title">BIODATA PENDIDIK DAN TENAGA KEPENDIDIKAN</div>
     <div class="page-subtitle">Laporan data per tanggal: {{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}</div>
 
-    <div class="section-title">A. IDENTITAS DIRI</div>
+   <div class="section-title">A. IDENTITAS DIRI</div>
 <table class="data-table table-clean" style="width: 100%;">
     <tr>
         {{-- KOLOM DATA (KIRI) --}}
@@ -140,8 +140,24 @@
         <tr><td class="label">Email</td><td class="sep">:</td><td class="val">{{ $gtk->email ?? '-' }}</td></tr>
     </table>
 
-    {{-- C. KEPEGAWAIAN --}}
+    {{-- C. KEPEGAWAIAN (DENGAN LOGIKA SK OTOMATIS) --}}
     <div class="section-title">C. DATA KEPEGAWAIAN</div>
+    
+    @php
+        // --- LOGIKA PENGAMBILAN DATA SK (Priority: Utama -> Riwayat Pangkat) ---
+        $skPdf = $gtk->sk_pengangkatan;
+        $tmtPdf = $gtk->tmt_pengangkatan;
+        
+        // Jika data utama kosong, cek riwayat kepangkatan
+        if (empty($skPdf)) {
+            $hist = json_decode($gtk->rwy_kepangkatan, true);
+            if (!empty($hist) && isset($hist[0])) {
+                $skPdf = $hist[0]['nomor_sk'] ?? '-';
+                $tmtPdf = $hist[0]['tmt_pangkat'] ?? null;
+            }
+        }
+    @endphp
+
     <table class="data-table table-clean">
         <tr>
             <td width="50%" style="padding:0">
@@ -154,8 +170,9 @@
             </td>
             <td width="50%" style="padding:0">
                 <table class="data-table table-clean">
-                    <tr><td class="label">SK Pengangkatan</td><td class="sep">:</td><td class="val">{{ $gtk->sk_pengangkatan ?? '-' }}</td></tr>
-                    <tr><td class="label">TMT Pengangkatan</td><td class="sep">:</td><td class="val">{{ $gtk->tmt_pengangkatan ? \Carbon\Carbon::parse($gtk->tmt_pengangkatan)->translatedFormat('d F Y') : '-' }}</td></tr>
+                    {{-- Menggunakan Variabel $skPdf dan $tmtPdf yang sudah diproses --}}
+                    <tr><td class="label">SK Pengangkatan</td><td class="sep">:</td><td class="val">{{ $skPdf ?: '-' }}</td></tr>
+                    <tr><td class="label">TMT Pengangkatan</td><td class="sep">:</td><td class="val">{{ $tmtPdf ? \Carbon\Carbon::parse($tmtPdf)->translatedFormat('d F Y') : '-' }}</td></tr>
                     <tr><td class="label">Lembaga Pengangkat</td><td class="sep">:</td><td class="val">{{ $gtk->lembaga_pengangkat ?? '-' }}</td></tr>
                     <tr><td class="label">Sumber Gaji</td><td class="sep">:</td><td class="val">{{ $gtk->sumber_gaji ?? '-' }}</td></tr>
                 </table>
@@ -245,7 +262,7 @@
     </table>
 
     {{-- ================================================================= --}}
-    {{-- HALAMAN 2: LAMPIRAN PEMBELAJARAN (ROMBEL) - NEW SECTION --}}
+    {{-- HALAMAN 2: LAMPIRAN PEMBELAJARAN (ROMBEL) --}}
     {{-- ================================================================= --}}
     
     <div class="page-break"></div>
