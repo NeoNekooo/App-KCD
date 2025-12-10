@@ -102,7 +102,7 @@ Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])
 | Rute Panel Ppdb
 |--------------------------------------------------------------------------
 */
-Route::prefix('ppdb')->name('ppdb.')->group(function() {
+Route::prefix('spmb')->name('ppdb.')->group(function() {
     Route::get('/', [LandingPpdbController::class, 'beranda'])->name('beranda');
     Route::get('/kompetensi-keahlian', [LandingPpdbController::class, 'kompetensiKeahlian'])->name('kompetensiKeahlian');
     Route::get('/daftar-calon-siswa', [LandingPpdbController::class, 'daftarCalonSiswa'])->name('daftarCalonSiswa');
