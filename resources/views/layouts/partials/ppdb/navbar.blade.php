@@ -8,11 +8,11 @@
                 <!-- Navigasi Desktop -->
                 <nav class="hidden md:flex space-x-8 text-gray-600 font-medium h-full items-center">
                     <!-- Setiap link dibungkus dalam div untuk mengontrol border bawah tanpa memengaruhi flexbox utama -->
-                    <a href="{{ route('ppdb.beranda') }}/#beranda"
+                    <a href="{{ route('ppdb.beranda') }}#beranda"
                         class="nav-link nav-link-desktop hover:text-primary-blue transition duration-300 border-b-2 border-transparent py-3.5">Beranda</a>
-                    <a href="{{ route('ppdb.beranda') }}/#program"
+                    <a href="{{ route('ppdb.beranda') }}#program"
                         class="nav-link nav-link-desktop hover:text-primary-blue transition duration-300 border-b-2 border-transparent py-3.5">Keunggulan</a>
-                    <a href="{{ route('ppdb.beranda') }}/#alur"
+                    <a href="{{ route('ppdb.beranda') }}#alur"
                         class="nav-link nav-link-desktop hover:text-primary-blue transition duration-300 border-b-2 border-transparent py-3.5">Alur
                         Pendaftaran</a>
                     <a href="{{ route('ppdb.kompetensiKeahlian') }}"
