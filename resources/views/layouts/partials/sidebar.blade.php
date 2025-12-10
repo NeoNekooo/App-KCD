@@ -152,7 +152,6 @@
             <ul class="menu-sub">
                 <li class="menu-item {{ request()->is('admin/rombel*') ? 'open' : '' }}">
                     <a href="javascript:void(0);" class="menu-link menu-toggle">
-                        <i class="menu-icon tf-icons bx bx-group"></i>
                         <div data-i18n="Rombel">Rombongan Belajar</div>
                     </a>
                     <ul class="menu-sub">
