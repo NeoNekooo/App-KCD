@@ -3,7 +3,7 @@
         <header class="bg-white shadow-md sticky top-0 z-50">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
                 <div class="text-2xl font-extrabold text-primary-blue">
-                    PPDB {{ $kontakPpdb->singkatan ?? ''}}
+                    SPMB {{ $kontakPpdb->singkatan ?? ''}}
                 </div>
                 <!-- Navigasi Desktop -->
                 <nav class="hidden md:flex space-x-8 text-gray-600 font-medium h-full items-center">
@@ -33,7 +33,7 @@
                 transform hover:scale-105 
                 transition duration-300 ease-in-out 
                 ring-2 ring-transparent hover:ring-secondary-green/50 hover:ring-opacity-70">
-                    Daftar PPDB
+                    Daftar SPMB
                 </a>
                 <!-- Mobile Menu Button (Hamburger) -->
                 <button class="md:hidden text-gray-800 focus:outline-none"

@@ -23,7 +23,7 @@
                                     class="text-gray-400 hover:text-secondary-green transition duration-300">Keunggulan
                                     Sekolah</a></li>
                             <li><a href="#" class="text-gray-400 hover:text-secondary-green transition duration-300">FAQ
-                                    PPDB</a></li>
+                                    SPMB</a></li>
                             <li><a href="#"
                                     class="text-gray-400 hover:text-secondary-green transition duration-300">Biaya
                                     Pendidikan</a></li>
