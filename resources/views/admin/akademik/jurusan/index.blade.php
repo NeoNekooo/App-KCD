@@ -3,7 +3,7 @@
 @section('title', 'Data Jurusan')
 
 @section('content')
-<div class="container-xxl flex-grow-1 container-p-y">
+<div class="">
 
     {{-- 🔹 Header Halaman --}}
     <div class="d-flex justify-content-between align-items-center mb-4">
