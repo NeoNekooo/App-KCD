@@ -14,6 +14,7 @@ class TapelController extends Controller
      */
     public function index()
     {
+        // Urutkan dari yang terbaru
         $tapel = Tapel::orderByDesc('kode_tapel')->get();
 
         return view('admin.akademik.tapel.index', compact('tapel'));
@@ -21,52 +22,47 @@ class TapelController extends Controller
 
     /**
      * Sinkronkan tahun pelajaran dengan semester_id terbaru dari tabel rombels
+     * Dan otomatis set AKTIF hanya untuk data terbaru tersebut.
      */
     public function sinkron()
     {
+        // 1. Cari semester_id paling besar (terbaru) dari tabel rombels
         $latest = DB::table('rombels')
             ->select('semester_id')
             ->whereNotNull('semester_id')
-            ->distinct()
-            ->orderByDesc('semester_id')
+            ->orderByDesc('semester_id') // Pastikan mengambil yang paling besar angkanya
             ->first();
 
         if (!$latest) {
             return back()->with('warning', 'Tidak ada data semester_id di tabel rombels ❌');
         }
 
-        $kode = $latest->semester_id;
-        $tahun = substr($kode, 0, 4);
-        $semester = substr($kode, -1) == '1' ? 'Ganjil' : 'Genap';
+        $kodeTerbaru = $latest->semester_id;
+        
+        // 2. Siapkan data untuk Tapel baru/update
+        $tahun = substr($kodeTerbaru, 0, 4);
+        $semester = substr($kodeTerbaru, -1) == '1' ? 'Ganjil' : 'Genap';
         $tahunAjaran = $tahun . '/' . ($tahun + 1);
 
-        // Nonaktifkan semua tapel dulu
+        // 3. Reset semua Tapel menjadi TIDAK AKTIF terlebih dahulu
         Tapel::query()->update(['is_active' => false]);
 
-        $existing = Tapel::where('kode_tapel', $kode)->first();
+        // 4. Cek apakah Tapel dengan kode tersebut sudah ada
+        $existing = Tapel::where('kode_tapel', $kodeTerbaru)->first();
 
         if ($existing) {
+            // Jika ada, cukup update statusnya jadi AKTIF
             $existing->update(['is_active' => true]);
         } else {
+            // Jika belum ada, buat baru dan langsung set AKTIF
             Tapel::create([
-                'kode_tapel' => $kode,
+                'kode_tapel' => $kodeTerbaru,
                 'tahun_ajaran' => $tahunAjaran,
                 'semester' => $semester,
                 'is_active' => true,
             ]);
         }
 
-        return back()->with('success', 'Tapel berhasil disinkron dan dijadikan aktif 🟢');
-    }
-
-    /**
-     * Jadikan salah satu tapel sebagai aktif
-     */
-    public function setAktif($id)
-    {
-        Tapel::query()->update(['is_active' => false]);
-        Tapel::where('id', $id)->update(['is_active' => true]);
-
-        return back()->with('success', 'Tapel berhasil dijadikan aktif 🟢');
+        return back()->with('success', 'Sinkronisasi berhasil! Tapel terbaru (' . $tahunAjaran . ' - ' . $semester . ') kini AKTIF 🟢');
     }
 }

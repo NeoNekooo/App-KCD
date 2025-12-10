@@ -181,18 +181,28 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::resource('tugas-pegawai', TugasPegawaiController::class)->except(['create', 'edit', 'show']);
     });
 
-    // --- GRUP AKADEMIK ---
+    // 2. --- GRUP AKADEMIK ---
     Route::prefix('akademik')->name('akademik.')->group(function () {
-        Route::get('tapel', [TapelController::class, 'index'])->name('tapel.index');
-        Route::get('tapel/sinkron', [TapelController::class, 'sinkron'])->name('tapel.sinkron');
-        Route::post('tapel/aktif/{id}', [TapelController::class, 'setAktif'])->name('tapel.aktif');
+        
+        // Tapel (Tahun Pelajaran)
+        Route::controller(TapelController::class)->group(function () {
+            Route::get('tapel', 'index')->name('tapel.index');
+            Route::get('tapel/sinkron', 'sinkron')->name('tapel.sinkron');
+        });
+
+        // Jurusan (Hanya Index)
         Route::resource('jurusan', JurusanController::class)->only(['index']);
-        Route::get('mapel', [MapelController::class, 'index'])->name('mapel.index');
-        Route::resource('daftar-ekstrakurikuler', DaftarEkstrakurikulerController::class)->except(['show', 'create', 'edit']); 
-        Route::resource('daftar-ekstrakurikuler', DaftarEkstrakurikulerController::class);
+        
+        // Mata Pelajaran
+        Route::get('mapel', [MapelController::class, 'index'])->name('mapel.index'); 
+        
+        // Ekstrakurikuler (Kecuali Show, Create, Edit karena mungkin pakai Modal/Ajax)
+        Route::resource('daftar-ekstrakurikuler', DaftarEkstrakurikulerController::class)
+             ->except(['show', 'create', 'edit']); 
+
+
         Route::resource('jadwal-pelajaran', JadwalPelajaranController::class);
         Route::get('jadwal-pelajaran/{id}/json', [JadwalPelajaranController::class, 'getJadwalJson'])->name('jadwal-pelajaran.json');
-
     });
 
     /*

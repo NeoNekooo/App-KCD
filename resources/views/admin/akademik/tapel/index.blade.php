@@ -9,21 +9,22 @@
             <span class="text-muted fw-light">Akademik /</span> Tahun Pelajaran
         </h4>
         <a href="{{ route('admin.akademik.tapel.sinkron') }}" class="btn btn-success btn-sm shadow-sm">
-            <i class="bx bx-sync me-1"></i> Sinkron Tapel
+            <i class="bx bx-sync me-1"></i> Sinkron & Update Aktif
         </a>
     </div>
 
-    {{-- 🔹 (BARU) Alert Informasi sesuai Gambar --}}
+    {{-- 🔹 Alert Informasi --}}
     <div class="alert alert-info d-flex align-items-start mb-4" role="alert">
-        <i class="bx bx-info-circle bx-sm me-2 mt-1"></i> {{-- Icon Info Opsional --}}
+        <i class="bx bx-info-circle bx-sm me-2 mt-1"></i>
         <div>
+            <strong>Informasi Sistem:</strong>
             <ul class="mb-0 ps-3">
-                <li>Klik tombol <strong>Singkron Tapel</strong> untuk tarik data Tahun Pelajaran dari dapodik</li>
-                <li>Klik icon untuk mengaktifkan Tahun Pelajaran</li>
+                <li>Klik tombol <strong>Sinkron</strong> untuk mengambil data terbaru dari Rombel.</li>
+                <li>Sistem akan otomatis mengaktifkan <strong>Tahun Pelajaran Terbaru</strong> berdasarkan data Rombel.</li>
+                <li>Status aktif tidak dapat diubah secara manual.</li>
             </ul>
         </div>
     </div>
-    {{-- 🔹 Batas Alert --}}
 
     {{-- 🔹 Card Utama --}}
     <div class="card shadow-sm border-0">
@@ -46,6 +47,7 @@
                     </thead>
                     <tbody>
                         @forelse($tapel as $index => $item)
+                            {{-- REVISI: Class table-success dihapus agar background putih polos --}}
                             <tr>
                                 <td class="text-center fw-semibold">{{ $index + 1 }}</td>
                                 <td class="text-center">
@@ -60,15 +62,12 @@
                                 <td class="text-center">
                                     @if($item->is_active)
                                         <span class="badge bg-success fs-6 px-3 py-2">
-                                            <i class="bx bx-check-circle me-1"></i> Aktif
+                                            <i class="bx bx-check-circle me-1"></i> Aktif Saat Ini
                                         </span>
                                     @else
-                                        <form action="{{ route('admin.akademik.tapel.aktif', $item->id) }}" method="POST" class="d-inline">
-                                            @csrf
-                                            <button type="submit" class="btn btn-outline-primary btn-sm rounded-pill">
-                                                <i class="bx bx-bolt-circle me-1"></i> Jadikan Aktif
-                                            </button>
-                                        </form>
+                                        <span class="badge bg-label-secondary">
+                                            Non-Aktif
+                                        </span>
                                     @endif
                                 </td>
                             </tr>
