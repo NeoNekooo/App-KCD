@@ -132,8 +132,39 @@ class GtkController extends Controller
         return $pdf->stream($fileName);
     }
 
-    // --- FUNGSI UPLOAD MEDIA (FOTO & TTD) ---
+    // --- FUNGSI UPDATE DATA & UPLOAD MEDIA (BARU & LAMA) ---
 
+    // [BARU] Fungsi Update Data Lengkap (Identitas, Pribadi, dll)
+    public function updateData(Request $request, $id)
+    {
+        $gtk = Gtk::findOrFail($id);
+
+        // Validasi dasar (sesuaikan dengan kebutuhan)
+        // Saya buat nullable agar fleksibel, kecuali Nama
+        $request->validate([
+            'nama' => 'required|string|max:255',
+            'nik' => 'nullable|numeric',
+            'email' => 'nullable|email',
+            'tanggal_lahir' => 'nullable|date',
+            // Tambahkan validasi lain jika perlu
+        ]);
+
+        try {
+            // Ambil semua input kecuali token dan method PUT
+            $data = $request->except(['_token', '_method']);
+
+            // Update data ke database
+            $gtk->update($data);
+
+            return redirect()->back()->with('success', 'Data lengkap ' . $gtk->nama . ' berhasil diperbarui!');
+
+        } catch (\Exception $e) {
+            // Menangkap error jika nama kolom tidak sesuai
+            return redirect()->back()->withErrors(['msg' => 'Gagal menyimpan data: ' . $e->getMessage()])->withInput();
+        }
+    }
+
+    // Fungsi Upload Media (Foto & TTD) - Sudah ada sebelumnya
     public function uploadMedia(Request $request, $id)
     {
         $request->validate([
@@ -186,7 +217,7 @@ class GtkController extends Controller
 
         $gtks = $query->orderBy('nama', 'asc')->paginate(10);
         
-        // TAMBAHKAN INI: Ambil data sekolah untuk preview gambar di view
+        // Ambil data sekolah untuk preview gambar di view
         $sekolah = Sekolah::first(); 
 
         return view('admin.kepegawaian.gtk.index_cetak_kartu', compact('gtks', 'sekolah'));
@@ -219,6 +250,7 @@ class GtkController extends Controller
         // 4. Pakai view cetak massal yang sama
         return view('admin.kepegawaian.gtk.cetak_kartu_massal', compact('gtks', 'sekolah'));
     }
+
     public function cetakKartu($id)
     {
         // 1. Ambil data pegawai
