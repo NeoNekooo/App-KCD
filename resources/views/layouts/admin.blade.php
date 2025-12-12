@@ -20,14 +20,6 @@
     
     <title>Dashboard Admin Sekolah</title>
 
-    {{-- Sneat Vendor CSS --}}
-    <link rel="stylesheet" href="{{ asset('assets/vendor/fonts/boxicons.css') }}">
-    <link rel="stylesheet" href="{{ asset('assets/vendor/css/core.css') }}">
-    <link rel="stylesheet" href="{{ asset('assets/vendor/css/theme-default.css') }}">
-    <link rel="stylesheet" href="{{ asset('assets/css/demo.css') }}">
-    <link rel="stylesheet" href="{{ asset('assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css') }}">
-    <link rel="stylesheet" href="{{ asset('assets/vendor/libs/apex-charts/apex-charts.css') }}">
-
     {{-- Tailwind + Vite --}}
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @stack('styles')
