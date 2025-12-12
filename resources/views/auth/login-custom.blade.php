@@ -2,9 +2,11 @@
 <html lang="en" class="light-style customizer-hide" dir="ltr" data-theme="theme-default" data-assets-path="{{ asset('sneat/assets/') }}">
 <head>
     <meta charset="utf-8" />
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
     <title>Login - Sistem Informasi Akademik</title>
-    
+
     @vite([
         'resources/sneat/assets/vendor/fonts/boxicons.css',
         'resources/sneat/assets/vendor/css/core.css',
@@ -64,7 +66,7 @@
                     <div class="card-body">
                         <h4 class="mb-2 text-center">Masuk</h4>
                         <p class="mb-4 text-center">Selamat datang di SI-Akademik</p>
-                        
+
                         @if ($errors->any())
                             <div class="alert alert-danger py-2">
                                 <ul class="mb-0">@foreach ($errors->all() as $error)<li class="small">{{ $error }}</li>@endforeach</ul>
@@ -73,7 +75,7 @@
 
                         <form id="formAuthentication" class="mb-3" action="{{ route('login') }}" method="POST">
                             @csrf
-                            
+
                             <div class="mb-3">
                                 <label for="username" class="form-label">Username</label>
                                 <input type="text" class="form-control" id="username" name="username" placeholder="Masukkan username Anda" value="{{ old('username') }}" required autofocus />
@@ -101,7 +103,7 @@
                                     <label class="form-check-label" for="remember-me"> Ingatkan saya di peramban ini </label>
                                 </div>
                             </div>
-                            
+
                             <div class="d-flex gap-2">
                                 <button class="btn btn-primary d-grid w-100 btn-masuk" type="submit">Masuk</button>
                                 <a href="{{ route('register') }}" class="btn btn-primary d-grid w-100 btn-registrasi">Registrasi</a>
@@ -121,7 +123,7 @@
             togglePassword.addEventListener('click', function () {
                 const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
                 passwordInput.setAttribute('type', type);
-                
+
                 if (type === 'text') {
                     icon.classList.remove('bx-hide');
                     icon.classList.add('bx-show');
