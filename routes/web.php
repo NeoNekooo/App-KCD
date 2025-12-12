@@ -96,36 +96,6 @@ Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])
          ->name('logout');
 
 
-
-/*
-|--------------------------------------------------------------------------
-| Rute Panel Ppdb
-|--------------------------------------------------------------------------
-*/
-Route::prefix('spmb')->name('ppdb.')->group(function() {
-    Route::get('/', [LandingPpdbController::class, 'beranda'])->name('beranda');
-    Route::get('/kompetensi-keahlian', [LandingPpdbController::class, 'kompetensiKeahlian'])->name('kompetensiKeahlian');
-    Route::get('/daftar-calon-siswa', [LandingPpdbController::class, 'daftarCalonSiswa'])->name('daftarCalonSiswa');
-    Route::get('/formulir-pendaftaran', [LandingPpdbController::class, 'formulirPendaftaran'])->name('formulirPendaftaran');
-    Route::get('/kontak', [LandingPpdbController::class, 'kontak'])->name('kontak');
-
-    Route::get('/api/syarat-by-jalur/{jalurId}', function ($jalurId) {
-        return SyaratPendaftaran::where('is_active', true)
-            ->where('jalurPendaftaran_id', $jalurId)
-            ->select('id', 'syarat', 'is_active')
-            ->get();
-    });
-
-    Route::get('/check-nisn', function (Request $request) {
-        $exists = \App\Models\CalonSiswa::where('nisn', $request->nisn)->exists();
-        return response()->json(['exists' => $exists]);
-    });
-
-
-    // Tambahkan route POST untuk submit form pendaftaran
-    Route::post('/formulir-pendaftaran/store', [LandingPpdbController::class, 'formulirStore'])->name('formulir.store');
-});
-
 /*
 |--------------------------------------------------------------------------
 | Grup Rute untuk Panel Admin
