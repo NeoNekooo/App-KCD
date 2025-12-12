@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Log;
 
 class GenericSyncController extends Controller
 {
@@ -16,13 +17,19 @@ class GenericSyncController extends Controller
      */
     public function handleSync(Request $request, $entity)
     {
+        Log::info("--- MEMULAI SINKRONISASI ENTITAS: " . strtoupper($entity) . " ---");
+
         $dataFromDapodik = $request->all();
+        $totalData = count($dataFromDapodik);
+
+        Log::info("Jumlah data mentah diterima: " . $totalData);
 
         if (empty($dataFromDapodik)) {
+            Log::warning("Data kosong. Proses dihentikan.");
             return response()->json(['message' => 'Tidak ada data yang dikirim.'], 200);
         }
 
-        // 1. Tentukan nama tabel dari nama entitas (misal: 'gtk' -> 'gtks')
+        // 1. Tentukan nama tabel
         $tableName = Str::plural(Str::snake($entity));
 
         // 2. Ambil semua nama kolom dari data pertama yang dikirim
@@ -31,9 +38,7 @@ class GenericSyncController extends Controller
         // 3. Cek apakah tabel sudah ada. Jika belum, buat tabelnya.
         if (!Schema::hasTable($tableName)) {
             Schema::create($tableName, function ($table) use ($dapodikColumns) {
-                $table->id(); // Kolom ID utama
-
-                // Loop untuk membuat semua kolom secara dinamis
+                $table->id(); 
                 foreach ($dapodikColumns as $column) {
                     $this->defineColumnType($table, $column);
                 }
@@ -52,25 +57,45 @@ class GenericSyncController extends Controller
             }
         }
 
-        // 5. Lakukan proses Update atau Create data (Upsert)
+        // 4. Lakukan proses Update atau Create data (Upsert)
+        // FIX: Prioritas pengambilan ID sudah diperbaiki di fungsi getIdentifierColumn
         $identifierColumn = $this->getIdentifierColumn($dapodikColumns, $entity);
+        
+        Log::info("Kolom Identifier yang dipilih otomatis: " . $identifierColumn);
 
-        foreach ($dataFromDapodik as $row) {
+        $successCount = 0;
+        $failCount = 0;
 
-            // FIX: Cek setiap nilai di dalam baris data
+        foreach ($dataFromDapodik as $index => $row) {
+            
+            // Validasi: Pastikan kolom identifier ada datanya
+            if (!isset($row[$identifierColumn])) {
+                // Jika identifier null, skip agar tidak menimpa data lain
+                // Kecuali jika Anda ingin membuat ID baru, tapi untuk sinkronisasi sebaiknya skip
+                $failCount++;
+                continue; 
+            }
+
             foreach ($row as $key => $value) {
-                // Jika nilainya adalah sebuah array, ubah menjadi string JSON
                 if (is_array($value)) {
                     $row[$key] = json_encode($value, JSON_UNESCAPED_UNICODE);
                 }
             }
 
-            // Sekarang, $row dijamin aman untuk disimpan ke database
-            DB::table($tableName)->updateOrInsert(
-                [$identifierColumn => $row[$identifierColumn]], // Kunci untuk mencari
-                $row // Data yang sudah bersih dan lengkap
-            );
+            try {
+                DB::table($tableName)->updateOrInsert(
+                    [$identifierColumn => $row[$identifierColumn]], 
+                    $row 
+                );
+                $successCount++;
+            } catch (\Exception $e) {
+                Log::error("DB ERROR (Index: $index): " . $e->getMessage());
+                $failCount++;
+            }
         }
+
+        Log::info("--- SELESAI ---");
+        Log::info("Total Diterima: $totalData | Sukses Masuk DB: $successCount | Gagal/Skip: $failCount");
 
         return response()->json([
             'success' => true,
@@ -84,14 +109,15 @@ class GenericSyncController extends Controller
      */
     private function getIdentifierColumn(array $columns, string $entity)
     {
-        // Daftar prioritas kolom ID unik dari Dapodik
+        // FIX: Urutan dipindah. 'pengguna_id' & 'ptk_id' ditaruh paling atas
+        // agar data guru/staf tidak dianggap null dan tidak saling menimpa.
         $identifiers = [
-            'peserta_didik_id',
+            'pengguna_id',          // Prioritas 1: ID unik tabel pengguna
+            'ptk_id',               // Prioritas 2: ID unik tabel Guru/PTK
+            'peserta_didik_id',     // Prioritas 3: ID unik tabel Siswa
             'gtk_id',
             'sekolah_id',
             'rombongan_belajar_id',
-            'pengguna_id',
-
         ];
 
         foreach ($identifiers as $id) {
@@ -100,13 +126,12 @@ class GenericSyncController extends Controller
             }
         }
 
-        // Fallback jika tidak ada, gunakan ID unik entitas (misal: 'siswa_id')
+        // Fallback
         $fallbackId = Str::snake($entity) . '_id';
         if(in_array($fallbackId, $columns)) {
             return $fallbackId;
         }
 
-        // Jika semua gagal, asumsikan kolom pertama adalah ID (sangat berisiko)
         return $columns[0];
     }
 
@@ -118,7 +143,7 @@ class GenericSyncController extends Controller
         if (Str::endsWith($column, '_id_str')) {
             $table->text($column)->nullable();
         } elseif (Str::endsWith($column, '_id')) {
-            $table->string($column, 191)->nullable()->index(); // Gunakan string dengan index
+            $table->string($column, 191)->nullable()->index(); 
         } elseif (str_contains($column, 'tanggal')) {
             $table->date($column)->nullable();
         } else {
