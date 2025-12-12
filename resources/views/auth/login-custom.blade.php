@@ -7,13 +7,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
     <title>Login - Sistem Informasi Akademik</title>
 
-    @vite([
-        'resources/sneat/assets/vendor/fonts/boxicons.css',
-        'resources/sneat/assets/vendor/css/core.css',
-        'resources/sneat/assets/vendor/css/theme-default.css',
-        'resources/sneat/assets/css/demo.css',
-        'resources/sneat/assets/vendor/css/pages/page-auth.css',
-    ])
+    
+
+    {{-- Sneat Vendor CSS --}}
+    <link rel="stylesheet" href="{{ asset('assets/vendor/fonts/boxicons.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/vendor/css/core.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/vendor/css/theme-default.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/demo.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/vendor/libs/apex-charts/apex-charts.css') }}">
 
     <style>
         body {
