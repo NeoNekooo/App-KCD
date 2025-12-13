@@ -28,12 +28,6 @@ class AuthenticatedSessionController extends Controller
     {
         $request->authenticate();
     
-        // pastikan session tersimpan
-        session([
-            'role' => Auth::user()->peran_id_str,
-            'sub_role' => session('sub_role'), // sudah di-set LoginRequest
-        ]);
-    
         $request->session()->regenerate();
     
         return redirect()->intended(route('admin.dashboard'));
@@ -52,6 +46,6 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerateToken();
 
-        return redirect('/');
+        return redirect('/login');
     }
 }

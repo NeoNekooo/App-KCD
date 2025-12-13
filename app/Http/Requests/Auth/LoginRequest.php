@@ -69,15 +69,20 @@ class LoginRequest extends FormRequest
             
         // Jika PTK, ambil sub_role dari gtks
         $sub_role = null;
+        $gtk_id = null;
         if ($role === 'PTK' && $user->ptk_id) {
-            $gtks = \DB::table('gtks')->where('ptk_id', $user->ptk_id)->first();
-            $sub_role = $gtks->jenis_ptk_id_str ?? null;
+            $gtk = \DB::table('gtks')
+                ->where('ptk_id', $user->ptk_id)
+                ->first();
+            $sub_role = $gtk->jenis_ptk_id_str;
+            
         }
         
         // Set session
         session([
             'role' => $role,
             'sub_role' => $sub_role,
+            'ptk_id'   => $user->ptk_id,
         ]);
 
     }

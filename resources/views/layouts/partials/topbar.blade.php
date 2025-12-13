@@ -1,3 +1,13 @@
+@php
+    use App\Models\Gtk;
+    use Illuminate\Support\Facades\Storage;
+
+    $gtk = null;
+
+    if (auth()->check() && session('ptk_id')) {
+        $gtk = Gtk::where('ptk_id', session('ptk_id'))->first();
+    }
+@endphp
 <nav class="layout-navbar navbar navbar-expand-xl navbar-detached align-items-center bg-navbar-theme"
             id="layout-navbar">
             <div class="layout-menu-toggle navbar-nav align-items-xl-center me-3 me-xl-0 d-xl-none">
@@ -22,42 +32,26 @@
               <!-- /Search -->
 
               <ul class="navbar-nav flex-row align-items-center ms-auto">
-                <!-- Place this tag where you want the button to render. -->
-                <li class="nav-item lh-1 me-3">
-                  <a
-                    class="github-button"
-                    href="https://github.com/themeselection/sneat-html-admin-template-free"
-                    data-icon="octicon-star"
-                    data-size="large"
-                    data-show-count="true"
-                    aria-label="Star themeselection/sneat-html-admin-template-free on GitHub"
-                    >Star</a
-                  >
-                </li>
 
                 <!-- User -->
                 <li class="nav-item navbar-dropdown dropdown-user dropdown">
                   <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown">
                     <div class="avatar avatar-online">
-                      @php
-                          $gtk = session('gtk_login');
-                      @endphp
                                           
-                      @if($gtk && !empty($gtk->foto) && \Illuminate\Support\Facades\Storage::disk('public')->exists($gtk->foto))
-                          <img src="{{ asset('storage/' . $gtk->foto) }}" 
-                               alt="Avatar" 
-                               class="rounded-circle" 
+                      @if($gtk && $gtk->foto && Storage::disk('public')->exists($gtk->foto))
+                          <img src="{{ asset('storage/' . $gtk->foto) }}"
+                               alt="Avatar"
+                               class="rounded-circle"
                                style="width: 100%; height: 100%; object-fit: cover;">
                       @elseif($gtk)
-                          <img src="https://ui-avatars.com/api/?name={{ urlencode($gtk->nama) }}&background=random&color=ffffff&size=100" 
-                               alt="Avatar Default" 
-                               class="rounded-circle" 
+                          <img src="https://ui-avatars.com/api/?name={{ urlencode($gtk->nama) }}&background=random&color=ffffff&size=100"
+                               alt="Avatar Default"
+                               class="rounded-circle"
                                style="width: 100%; height: 100%; object-fit: cover;">
                       @else
-                          {{-- fallback jika bukan PTK atau GTK tidak ada --}}
-                          <img src="https://ui-avatars.com/api/?name=User&background=random&color=ffffff&size=100" 
-                               alt="Avatar Default" 
-                               class="rounded-circle" 
+                          <img src="https://ui-avatars.com/api/?name=User&background=random&color=ffffff&size=100"
+                               alt="Avatar Default"
+                               class="rounded-circle"
                                style="width: 100%; height: 100%; object-fit: cover;">
                       @endif
 
@@ -69,22 +63,21 @@
                         <div class="d-flex">
                           <div class="flex-shrink-0 me-3">
                             <div class="avatar avatar-online">
-                              @if(auth()->check())
-                                  @php
-                                      $user = auth()->user();
-                                  @endphp
-
-                                  @if(!empty($user->foto) && \Illuminate\Support\Facades\Storage::disk('public')->exists($user->foto))
-                                      <img src="{{ asset('storage/' . $user->foto) }}" 
-                                           alt="Avatar" 
-                                           class="w-px-40 h-auto rounded-circle" 
-                                           style="width: 100%; height: 100%; object-fit: cover;">
-                                  @else
-                                      <img src="https://ui-avatars.com/api/?name={{ urlencode($user->nama) }}&background=random&color=ffffff&size=100" 
-                                           alt="Avatar Default" 
-                                           class="w-px-40 h-auto rounded-circle" 
-                                           style="width: 100%; height: 100%; object-fit: cover;">
-                                  @endif
+                              @if($gtk && $gtk->foto && Storage::disk('public')->exists($gtk->foto))
+                                  <img src="{{ asset('storage/' . $gtk->foto) }}"
+                                       alt="Avatar"
+                                       class="rounded-circle"
+                                       style="width: 100%; height: 100%; object-fit: cover;">
+                              @elseif($gtk)
+                                  <img src="https://ui-avatars.com/api/?name={{ urlencode($gtk->nama) }}&background=random&color=ffffff&size=100"
+                                       alt="Avatar Default"
+                                       class="rounded-circle"
+                                       style="width: 100%; height: 100%; object-fit: cover;">
+                              @else
+                                  <img src="https://ui-avatars.com/api/?name=User&background=random&color=ffffff&size=100"
+                                       alt="Avatar Default"
+                                       class="rounded-circle"
+                                       style="width: 100%; height: 100%; object-fit: cover;">
                               @endif
                             </div>
                           </div>
@@ -108,15 +101,6 @@
                       <a class="dropdown-item" href="#">
                         <i class="bx bx-cog me-2"></i>
                         <span class="align-middle">Settings</span>
-                      </a>
-                    </li>
-                    <li>
-                      <a class="dropdown-item" href="#">
-                        <span class="d-flex align-items-center align-middle">
-                          <i class="flex-shrink-0 bx bx-credit-card me-2"></i>
-                          <span class="flex-grow-1 align-middle">Billing</span>
-                          <span class="flex-shrink-0 badge badge-center rounded-pill bg-danger w-px-20 h-px-20">4</span>
-                        </span>
                       </a>
                     </li>
                     <li>
