@@ -26,15 +26,20 @@ class AuthenticatedSessionController extends Controller
      */
     public function store(LoginRequest $request): RedirectResponse
     {
-        // Cukup panggil authenticate(), ini akan menangani pengecekan email & password.
         $request->authenticate();
-
-        // Jika berhasil, lanjutkan sesi.
+    
+        // pastikan session tersimpan
+        session([
+            'role' => Auth::user()->peran_id_str,
+            'sub_role' => session('sub_role'), // sudah di-set LoginRequest
+        ]);
+    
         $request->session()->regenerate();
-
-        // Arahkan ke dashboard admin.
-        return redirect()->intended(route('admin.dashboard', absolute: false));
+    
+        return redirect()->intended(route('admin.dashboard'));
     }
+
+
 
     /**
      * Hancurkan sesi otentikasi (logout).

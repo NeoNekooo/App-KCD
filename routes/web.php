@@ -101,7 +101,7 @@ Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])
 | Grup Rute untuk Panel Admin
 |--------------------------------------------------------------------------
 */
-Route::prefix('admin')->name('admin.')->group(function () {
+Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () {
 
     // Dashboard (dari V1)
     Route::get('/dashboard', function () {

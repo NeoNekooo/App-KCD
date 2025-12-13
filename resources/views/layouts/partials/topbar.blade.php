@@ -39,7 +39,28 @@
                 <li class="nav-item navbar-dropdown dropdown-user dropdown">
                   <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown">
                     <div class="avatar avatar-online">
-                      <img src="{{ asset('sneat/assets/img/avatars/1.png') }}" alt class="w-px-40 h-auto rounded-circle" />
+                      @php
+                          $gtk = session('gtk_login');
+                      @endphp
+                                          
+                      @if($gtk && !empty($gtk->foto) && \Illuminate\Support\Facades\Storage::disk('public')->exists($gtk->foto))
+                          <img src="{{ asset('storage/' . $gtk->foto) }}" 
+                               alt="Avatar" 
+                               class="rounded-circle" 
+                               style="width: 100%; height: 100%; object-fit: cover;">
+                      @elseif($gtk)
+                          <img src="https://ui-avatars.com/api/?name={{ urlencode($gtk->nama) }}&background=random&color=ffffff&size=100" 
+                               alt="Avatar Default" 
+                               class="rounded-circle" 
+                               style="width: 100%; height: 100%; object-fit: cover;">
+                      @else
+                          {{-- fallback jika bukan PTK atau GTK tidak ada --}}
+                          <img src="https://ui-avatars.com/api/?name=User&background=random&color=ffffff&size=100" 
+                               alt="Avatar Default" 
+                               class="rounded-circle" 
+                               style="width: 100%; height: 100%; object-fit: cover;">
+                      @endif
+
                     </div>
                   </a>
                   <ul class="dropdown-menu dropdown-menu-end">
@@ -48,12 +69,28 @@
                         <div class="d-flex">
                           <div class="flex-shrink-0 me-3">
                             <div class="avatar avatar-online">
-                              <img src="{{ asset('sneat/assets/img/avatars/1.png') }}" alt class="w-px-40 h-auto rounded-circle" />
+                              @if(auth()->check())
+                                  @php
+                                      $user = auth()->user();
+                                  @endphp
+
+                                  @if(!empty($user->foto) && \Illuminate\Support\Facades\Storage::disk('public')->exists($user->foto))
+                                      <img src="{{ asset('storage/' . $user->foto) }}" 
+                                           alt="Avatar" 
+                                           class="w-px-40 h-auto rounded-circle" 
+                                           style="width: 100%; height: 100%; object-fit: cover;">
+                                  @else
+                                      <img src="https://ui-avatars.com/api/?name={{ urlencode($user->nama) }}&background=random&color=ffffff&size=100" 
+                                           alt="Avatar Default" 
+                                           class="w-px-40 h-auto rounded-circle" 
+                                           style="width: 100%; height: 100%; object-fit: cover;">
+                                  @endif
+                              @endif
                             </div>
                           </div>
                           <div class="flex-grow-1">
-                            <span class="fw-semibold d-block">John Doe</span>
-                            <small class="text-muted">Admin</small>
+                            <span class="fw-semibold d-block">{{ Auth::user()->nama }}</span>
+                            <small class="text-muted">{{ session('role') }} - {{ session('sub_role') }}</small>
                           </div>
                         </div>
                       </a>
@@ -86,10 +123,14 @@
                       <div class="dropdown-divider"></div>
                     </li>
                     <li>
-                      <a class="dropdown-item" href="auth-login-basic.html">
-                        <i class="bx bx-power-off me-2"></i>
-                        <span class="align-middle">Log Out</span>
-                      </a>
+                      <form method="POST" action="{{ route('logout') }}">
+                          @csrf
+                          <a class="dropdown-item" href="{{ route('logout') }}" 
+                              onclick="event.preventDefault(); this.closest('form').submit();">
+                              <i class="bx bx-power-off me-2"></i>
+                              <span class="align-middle">Log Out</span>
+                          </a>
+                      </form>
                     </li>
                   </ul>
                 </li>

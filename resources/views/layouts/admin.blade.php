@@ -36,7 +36,7 @@
             <div class="layout-page ">
                 @include('layouts.partials.topbar')
                 <div class="content-wrapper">
-                    <div class="container-fluid flex-grow-1 container-p-y">
+                    <div class="container flex-grow-1 container-p-y">
                         @yield('content')
                     </div>
                     @include('layouts.partials.footer')
