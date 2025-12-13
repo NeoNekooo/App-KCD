@@ -9,13 +9,8 @@
 
     <title>Registrasi - Sistem Informasi Akademik</title>
 
-    @vite([
-        'resources/sneat/assets/vendor/fonts/boxicons.css',
-        'resources/sneat/assets/vendor/css/core.css',
-        'resources/sneat/assets/vendor/css/theme-default.css',
-        'resources/sneat/assets/css/demo.css',
-        'resources/sneat/assets/vendor/css/pages/page-auth.css',
-    ])
+    <link rel="stylesheet" href="{{ asset('vendor/fonts/boxicons.css') }}">
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     <style>
         body {

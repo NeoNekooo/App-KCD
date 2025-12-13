@@ -61,86 +61,151 @@
 
     <div class="menu-inner-shadow"></div>
 
+    {{-- ================= LOGIC ================= --}}
     @php
         $user = auth()->user();
         $role = $user?->peran_id_str;
+
         $menus = config('menu_access.sidebar_menu', []);
         $roleMap = config('menu_access.role_map', []);
-        $underConstructionRoutes = ['admin.underConstructions']; // route yang tidak bisa diklik
+        $subRole = session('sub_role');
+        $subRoleMap = config('menu_access.sub_role_map', []);
 
-        // akses penuh
-        $hasFullAccess = isset($roleMap[$role]) && in_array('*', $roleMap[$role]);
+        // ... Kode di atas (auth, config, dsb.)
 
-        function canAccessMenu($slug, $role, $roleMap, $hasFullAccess)
-        {
-            if ($hasFullAccess) {
+$underConstructionRoutes = ['admin.underConstructions'];
+
+$hasFullAccess = isset($roleMap[$role]) && in_array('*', $roleMap[$role]);
+
+/* ========== UTILITY: EVALUASI IS_ACTIVE ========== */
+function isMenuCurrentlyActive($menu)
+{
+    if (isset($menu['is_active'])) {
+        // Evaluasi string is_active dari config
+        return eval('return ' . $menu['is_active'] . ';');
+    }
+    return false;
+}
+
+/* ========== ACCESS CHECK ========== */
+function canAccessMenu($slug, $role, $subRole, $roleMap, $subRoleMap, $hasFullAccess)
+{
+    if (!$slug) return true;
+    if ($hasFullAccess) return true;
+
+    if ($role === 'PTK' && $subRole) {
+        return isset($subRoleMap[$subRole]) && in_array($slug, $subRoleMap[$subRole]);
+    }
+
+    return isset($roleMap[$role]) && in_array($slug, $roleMap[$role]);
+}
+
+/* ========== ACTIVE CHECK: Menentukan apakah menu atau salah satu anaknya aktif ========== */
+function checkChildActive($menu)
+{
+    // 1. Cek dirinya sendiri menggunakan properti is_active di config
+    if (isMenuCurrentlyActive($menu)) {
+        return true;
+    }
+
+    // 2. Cek submenu secara rekursif
+    if (isset($menu['submenu']) && is_array($menu['submenu'])) {
+        foreach ($menu['submenu'] as $child) {
+            if (checkChildActive($child)) {
                 return true;
             }
-            return isset($roleMap[$role]) && in_array($slug, $roleMap[$role]);
+        }
+    }
+
+    return false;
+}
+
+/* ========== RENDER MENU ========== */
+function renderMenuRecursive(
+    $menus,
+    $role,
+    $subRole,
+    $roleMap,
+    $subRoleMap,
+    $hasFullAccess,
+    $underConstructionRoutes
+) {
+    foreach ($menus as $menu) {
+
+        // ... (Logika akses sama)
+
+        if (
+            isset($menu['slug']) &&
+            !canAccessMenu($menu['slug'], $role, $subRole, $roleMap, $subRoleMap, $hasFullAccess)
+        ) {
+            continue;
         }
 
-        function checkChildActive($menu)
-        {
-            if (!empty($menu['route']) && request()->routeIs($menu['route'])) {
-                return true;
-            }
-            if (!empty($menu['submenu'])) {
-                foreach ($menu['submenu'] as $sub) {
-                    if (checkChildActive($sub)) {
-                        return true;
-                    }
-                }
-            }
-            return false;
+        $hasSubmenu = isset($menu['submenu']) && is_array($menu['submenu']);
+        // Menentukan apakah menu ini atau salah satu anaknya aktif
+        $isActive = checkChildActive($menu); 
+
+        $activeClass = $isActive ? 'active open' : '';
+        $menuToggle = $hasSubmenu ? 'menu-toggle' : '';
+        // Jika aktif, tambahkan 'show' pada ulClass untuk membuka submenu
+        $ulClass = $hasSubmenu ? ($isActive ? 'menu-sub show' : 'menu-sub') : '';
+
+        // ===== HREF AMAN (Sama) =====
+        if (
+            isset($menu['route']) &&
+            in_array($menu['route'], $underConstructionRoutes)
+        ) {
+            $href = 'javascript:void(0);';
+        } elseif ($hasSubmenu) {
+            $href = 'javascript:void(0);';
+        } elseif (isset($menu['route']) && Route::has($menu['route'])) {
+            $href = route($menu['route']);
+        } else {
+            $href = '#';
         }
 
-        function renderMenuRecursive($menus, $role, $roleMap, $hasFullAccess, $underConstructionRoutes)
-        {
-            foreach ($menus as $menu) {
-                // cek akses
-                if (isset($menu['slug']) && !canAccessMenu($menu['slug'], $role, $roleMap, $hasFullAccess)) {
-                    continue;
-                }
+        echo '<li class="menu-item ' . $activeClass . '">';
+        echo '<a href="' . $href . '" class="menu-link ' . $menuToggle . '">';
 
-                $hasSubmenu = !empty($menu['submenu']) && is_array($menu['submenu']);
-                $isChildActive = $hasSubmenu ? checkChildActive($menu) : false;
-
-                $isActive = (!empty($menu['route']) && request()->routeIs($menu['route'])) || $isChildActive;
-                $activeClass = $isActive ? 'active open' : '';
-                $menuToggle = $hasSubmenu ? 'menu-toggle' : '';
-                $ulClass = $hasSubmenu ? ($isChildActive ? 'menu-sub show' : 'menu-sub') : '';
-
-                // route aman
-                if (!empty($menu['route']) && in_array($menu['route'], $underConstructionRoutes)) {
-                    $href = 'javascript:void(0);';
-                } else {
-                    $href = $hasSubmenu
-                        ? 'javascript:void(0);'
-                        : (isset($menu['route']) && Route::has($menu['route'])
-                            ? route($menu['route'])
-                            : '#');
-                }
-
-                echo '<li class="menu-item ' . $activeClass . '">';
-                echo '<a href="' . $href . '" class="menu-link ' . $menuToggle . '">';
-                if (!empty($menu['icon'])) {
-                    echo '<i class="menu-icon tf-icons ' . $menu['icon'] . '"></i>';
-                }
-                echo '<div data-i18n="' . $menu['title'] . '">' . $menu['title'] . '</div>';
-                echo '</a>';
-
-                if ($hasSubmenu) {
-                    echo '<ul class="' . $ulClass . '">';
-                    renderMenuRecursive($menu['submenu'], $role, $roleMap, $hasFullAccess, $underConstructionRoutes);
-                    echo '</ul>';
-                }
-
-                echo '</li>';
-            }
+        if (isset($menu['icon'])) {
+            echo '<i class="menu-icon tf-icons ' . $menu['icon'] . '"></i>';
         }
+
+        echo '<div>' . ($menu['title'] ?? '-') . '</div>';
+        echo '</a>';
+
+        if ($hasSubmenu) {
+            echo '<ul class="' . $ulClass . '">';
+            renderMenuRecursive(
+                $menu['submenu'],
+                $role,
+                $subRole,
+                $roleMap,
+                $subRoleMap,
+                $hasFullAccess,
+                $underConstructionRoutes
+            );
+            echo '</ul>';
+        }
+
+        echo '</li>';
+    }
+}
     @endphp
+
+    {{-- ================= MENU ================= --}}
     <ul class="menu-inner py-1">
-        @php renderMenuRecursive($menus, $role, $roleMap, $hasFullAccess, $underConstructionRoutes); @endphp
+        @php
+            renderMenuRecursive(
+                $menus,
+                $role,
+                $subRole,
+                $roleMap,
+                $subRoleMap,
+                $hasFullAccess,
+                $underConstructionRoutes
+            );
+        @endphp
     </ul>
 
 </aside>

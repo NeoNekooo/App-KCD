@@ -14,11 +14,38 @@ return [
         // ROLE CONTOH
         'Operator Sekolah' => ['*'], // Akses ke semua menu
         'Kepala Sekolah' => [
-            'dashboard', 'profil-sekolah', 'kepegawaian', 'laporan-toggle',
-            'absensi-gtk', 'absensi-siswa', 'indisipliner-guru', 'indisipliner-siswa',
-            'pengaturan-absensi-toggle'
+            'dashboard', 
+            'profil-sekolah',
+            'ppdb',
+            'sarpras',
+            'kepegawaian',
+            'kesiswaan',
+            'indisipliner',
         ],
     ],
+
+    'sub_role_map' => [
+        'Guru' => [
+            'dashboard',
+            'ppdb',
+            'kesiswaan',
+            'kurikulum',
+            'humas',
+            'sarpras',
+            'indisipliner',
+            'indisipliner-siswa'
+
+        ],
+        'Tenaga Kependidikan' => [
+            'dashboard',
+            'ppdb',
+            'sarpras',
+            'kepegawaian',
+            'kesiswaan',
+            
+        ],
+    ],
+
 
     /*
     |--------------------------------------------------------------------------
@@ -160,6 +187,7 @@ return [
         // --- KEHADIRAN (ABSENSI) ---
         [
             'title' => 'Kehadiran',
+            'slug'  => 'kehadiran',
             'icon' => 'bx bx-calendar-check',
             'is_toggle' => true,
             'is_open' => 'request()->is("admin/absensi*")',
@@ -193,7 +221,7 @@ return [
         // --- LAPORAN ---
         [
             'title' => 'Laporan',
-            'slug' => 'laporan-toggle',
+            'slug' => 'laporan',
             'icon' => 'bx bxs-report',
             'is_toggle' => true,
             'is_open' => 'request()->is("admin/laporan*")',
@@ -208,6 +236,7 @@ return [
         [
             'title' => 'Indisipliner',
             'icon' => 'bx bx-shield-quarter',
+            'slug' => 'indisipliner',
             'is_toggle' => true,
             'is_open' => 'request()->is("admin/indisipliner*")',
             'submenu' => [
@@ -286,7 +315,7 @@ return [
         ],
         [
             'title' => 'Landing Page',
-            'slug' => 'landing-page-toggle',
+            'slug' => 'landing-page',
             'icon' => 'bx bxs-book-content',
             'is_toggle' => true,
             'is_open' => 'request()->is("admin/landing-page*")',
@@ -303,7 +332,7 @@ return [
         ],
         [
             'title' => 'Pengaturan Sistem',
-            'slug' => 'pengaturan-sistem-toggle',
+            'slug' => 'pengaturan-sistem',
             'icon' => 'bx bx-cog',
             'is_toggle' => true,
             'is_open' => 'request()->is("admin/pengaturan*")',
@@ -315,7 +344,7 @@ return [
         ],
         [
             'title' => 'Pengaturan Absensi',
-            'slug' => 'pengaturan-absensi-toggle',
+            'slug' => 'pengaturan-absensi',
             'icon' => 'bx bx-time',
             'is_toggle' => true,
             'is_open' => 'request()->is("admin/pengaturan/absensi*") || request()->is("admin/pengaturan/hari-libur*")',
