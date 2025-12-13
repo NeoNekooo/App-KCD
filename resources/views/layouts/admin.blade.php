@@ -19,6 +19,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     
     <title>Dashboard Admin Sekolah</title>
+    <link rel="stylesheet" href="{{ asset('vendor/fonts/boxicons.css') }}">
 
     {{-- Tailwind + Vite --}}
     @vite(['resources/css/app.css', 'resources/js/app.js'])
