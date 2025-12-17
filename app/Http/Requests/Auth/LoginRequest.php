@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
-use App\Models\Pengguna; // pastikan modelnya benar
+use App\Models\Pengguna;
 
 class LoginRequest extends FormRequest
 {
@@ -21,17 +21,24 @@ class LoginRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'username' => ['required', 'string'],
-            'password' => ['required', 'string'],
-            'tahun_pelajaran' => ['required', 'string'],
+            'username'         => ['required', 'string'],
+            'password'         => ['required', 'string'],
+            'tahun_pelajaran'  => ['required', 'string'],
         ];
     }
 
-    public function authenticate()
+    public function authenticate(): void
     {
+        // ==================================================
+        // RATE LIMIT
+        // ==================================================
+        $this->ensureIsNotRateLimited();
+
         $credentials = $this->only('username', 'password');
 
-        // Ambil user berdasarkan username
+        // ==================================================
+        // AMBIL USER
+        // ==================================================
         $user = Pengguna::where('username', $credentials['username'])->first();
 
         if (!$user) {
@@ -40,48 +47,38 @@ class LoginRequest extends FormRequest
             ]);
         }
 
-        // =========================
-        // VALIDASI PASSWORD
-        // =========================
+        // ==================================================
+        // VALIDASI PASSWORD (SATU-SATUNYA JALUR)
+        // ==================================================
+        if (!Hash::check($credentials['password'], $user->password)) {
+            throw ValidationException::withMessages([
+                'username' => trans('auth.failed'),
+            ]);
+        }
+
+        // ==================================================
+        // OPTIONAL: REHASH JIKA ALGORITMA BERUBAH
+        // ==================================================
         if (Hash::needsRehash($user->password)) {
-
-            // Password masih plain text
-            if ($credentials['password'] !== $user->password) {
-                throw ValidationException::withMessages([
-                    'username' => trans('auth.failed'),
-                ]);
-            }
-
-            // Rehash otomatis
             $user->update([
                 'password' => Hash::make($credentials['password']),
             ]);
-
-        } else {
-
-            // Password sudah di-hash
-            if (!Hash::check($credentials['password'], $user->password)) {
-                throw ValidationException::withMessages([
-                    'username' => trans('auth.failed'),
-                ]);
-            }
         }
 
-        // =========================
+        // ==================================================
         // LOGIN
-        // =========================
+        // ==================================================
         Auth::login($user, $this->boolean('remember'));
 
-        // =========================
+        // ==================================================
         // ROLE & SESSION
-        // =========================
+        // ==================================================
         $role               = $user->peran_id_str;
         $sub_role           = null;
         $peserta_didik_id   = null;
 
         // === PTK ===
         if ($role === 'PTK' && $user->ptk_id) {
-
             $gtk = \DB::table('gtks')
                 ->where('ptk_id', $user->ptk_id)
                 ->first();
@@ -96,9 +93,9 @@ class LoginRequest extends FormRequest
             $peserta_didik_id = $user->peserta_didik_id;
         }
 
-        // =========================
+        // ==================================================
         // SET SESSION FINAL
-        // =========================
+        // ==================================================
         session([
             'role'             => $role,
             'sub_role'         => $sub_role,
@@ -107,12 +104,14 @@ class LoginRequest extends FormRequest
         ]);
     }
 
-
     public function ensureIsNotRateLimited(): void
     {
-        if (!RateLimiter::tooManyAttempts($this->throttleKey(), 5)) return;
+        if (!RateLimiter::tooManyAttempts($this->throttleKey(), 5)) {
+            return;
+        }
 
         event(new Lockout($this));
+
         $seconds = RateLimiter::availableIn($this->throttleKey());
 
         throw ValidationException::withMessages([
@@ -125,7 +124,7 @@ class LoginRequest extends FormRequest
 
     public function throttleKey(): string
     {
-        return Str::transliterate(Str::lower($this->string('username')) . '|' . $this->ip());
+        return Str::lower($this->input('username')) . '|' . $this->ip();
     }
 
     protected function guard()
