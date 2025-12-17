@@ -6,7 +6,7 @@
 <div class="card">
     <div class="card-header">
         <div class="d-flex align-items-center justify-content-between">
-            <h5 class="card-title m-0 me-2">Daftar Tenaga Kependidikan</h5>
+            <h5 class="card-title m-0 me-2">Daftar Tenaga Kependidikan & Kepala Sekolah</h5>
             <div class="d-flex gap-2">
                 {{-- Tombol Lihat Data --}}
                 <a href="#" id="viewSelectedBtn" class="btn btn-info btn-sm" style="display: none;">
@@ -26,11 +26,17 @@
             </div>
         </div>
     </div>
+
+    {{-- PENCARIAN (HEADER TETAP BERSIH) --}}
     <div class="card-body">
         <form action="{{ route('admin.kepegawaian.tendik.index') }}" method="GET">
+            {{-- Pertahankan per_page saat mencari --}}
+            <input type="hidden" name="per_page" value="{{ request('per_page', 15) }}">
+            
             <div class="input-group input-group-merge">
                 <span class="input-group-text"><i class="bx bx-search"></i></span>
                 <input type="text" name="search" class="form-control" placeholder="Cari berdasarkan Nama, NIP, atau NIK..." value="{{ request('search') }}">
+                <button type="submit" class="btn btn-primary">Cari</button>
             </div>
         </form>
     </div>
@@ -41,7 +47,7 @@
                 <tr>
                     <th width="1%"><input class="form-check-input" type="checkbox" id="selectAllCheckbox"></th>
                     <th>Induk</th>
-                    <th>Nama Tendik</th>
+                    <th>Nama Lengkap</th>
                     <th>NIK</th>
                     <th>L/P</th>
                     <th>Tgl Lahir</th>
@@ -56,56 +62,35 @@
                 @forelse ($tendiks as $gtk)
                 <tr>
                     <td><input class="form-check-input row-checkbox" type="checkbox" value="{{ $gtk->id }}"></td>
-                    <td><span class="badge bg-label-secondary">{{ $gtk->ptk_induk == 1 ? 'Induk' : 'Non-Induk' }}</span></td>
-                    
-                    {{-- KOLOM NAMA (LOGIKA DIPERBAIKI SAMAKAN DENGAN GURU) --}}
+                    <td><span class="badge bg-label-{{ $gtk->ptk_induk == 1 ? 'success' : 'secondary' }}">{{ $gtk->ptk_induk == 1 ? 'Induk' : 'Non' }}</span></td>
                     <td style="min-width: 250px;">
                         <div class="d-flex justify-content-start align-items-center">
-                            {{-- Container Avatar --}}
                             <div class="avatar-wrapper me-3">
                                 <div class="avatar avatar-sm">
                                     @if(!empty($gtk->foto) && \Illuminate\Support\Facades\Storage::disk('public')->exists($gtk->foto))
-                                        {{-- Jika ada foto profil --}}
-                                        <img src="{{ asset('storage/' . $gtk->foto) }}" 
-                                             alt="Avatar" 
-                                             class="rounded-circle" 
-                                             style="width: 100%; height: 100%; object-fit: cover;">
+                                        <img src="{{ asset('storage/' . $gtk->foto) }}" alt="Avatar" class="rounded-circle" style="width: 100%; height: 100%; object-fit: cover;">
                                     @else
-                                        {{-- Jika tidak ada foto, pakai Inisial Nama (UI Avatars) --}}
-                                        <img src="https://ui-avatars.com/api/?name={{ urlencode($gtk->nama) }}&background=random&color=ffffff&size=100" 
-                                             alt="Avatar Default" 
-                                             class="rounded-circle" 
-                                             style="width: 100%; height: 100%; object-fit: cover;">
+                                        <img src="https://ui-avatars.com/api/?name={{ urlencode($gtk->nama) }}&background=random&color=ffffff&size=100" alt="Avatar" class="rounded-circle">
                                     @endif
                                 </div>
                             </div>
-                            
-                            {{-- Container Teks --}}
                             <div class="d-flex flex-column">
                                 <span class="fw-semibold text-truncate text-body">{{ $gtk->nama }}</span>
-                                <small class="text-muted">
-                                    {{-- LOGIKA SUBTITLE CERDAS (Ignore Strip) --}}
-                                    @if(!empty($gtk->nip) && trim($gtk->nip) != '-')
-                                        NIP: {{ $gtk->nip }}
-                                    @elseif(!empty($gtk->nuptk) && trim($gtk->nuptk) != '-')
-                                        NUPTK: {{ $gtk->nuptk }}
-                                    @else
-                                        -
-                                    @endif
-                                </small>
+                                <small class="text-muted">{{ $gtk->nip ? 'NIP: ' . $gtk->nip : '-' }}</small>
                             </div>
                         </div>
                     </td>
-                    {{-- END KOLOM NAMA --}}
-
                     <td>{{ $gtk->nik ?? '-' }}</td>
-                    
-                    {{-- PERBAIKAN LOGIKA JENIS KELAMIN --}}
                     <td>{{ ($gtk->jenis_kelamin == 'L' || $gtk->jenis_kelamin == 'Laki-laki') ? 'L' : 'P' }}</td>
-
                     <td>{{ $gtk->tanggal_lahir ? \Carbon\Carbon::parse($gtk->tanggal_lahir)->format('d-m-Y') : '-' }}</td>
                     <td><span class="badge bg-label-primary">{{ $gtk->status_kepegawaian_id_str ?? '-' }}</span></td>
-                    <td>{{ $gtk->jenis_ptk_id_str ?? '-' }}</td>
+                    <td>
+                        @if($gtk->jenis_ptk_id == 91 || str_contains(strtolower($gtk->jenis_ptk_id_str ?? ''), 'kepala sekolah'))
+                             <span class="badge bg-label-success fw-bold">Kepala Sekolah</span>
+                        @else
+                             <span class="badge bg-label-info">{{ $gtk->jenis_ptk_id_str ?? 'Tendik' }}</span>
+                        @endif
+                    </td>
                     <td>{{ $gtk->jabatan_ptk_id_str ?? '-' }}</td>
                     <td>{{ $gtk->nuptk ?? '-' }}</td>
                     <td>{{ $gtk->tanggal_surat_tugas ? \Carbon\Carbon::parse($gtk->tanggal_surat_tugas)->format('d-m-Y') : '-' }}</td>
@@ -113,10 +98,7 @@
                 @empty
                 <tr>
                     <td colspan="11" class="text-center py-5">
-                        <div class="d-flex flex-column align-items-center justify-content-center">
-                            <i class="bx bx-user-x bx-lg text-muted mb-2"></i>
-                            <h6 class="text-muted">Tidak ada data tendik ditemukan.</h6>
-                        </div>
+                        <h6 class="text-muted">Tidak ada data ditemukan.</h6>
                     </td>
                 </tr>
                 @endforelse
@@ -124,11 +106,41 @@
         </table>
     </div>
 
-    @if ($tendiks->hasPages())
-        <div class="card-footer d-flex justify-content-center">
-            {{ $tendiks->appends(request()->query())->links() }}
+    {{-- MODIFIKASI FOOTER: PENGATURAN SHOW DATA --}}
+    <div class="card-footer border-top">
+        <div class="row align-items-center">
+            
+            {{-- KIRI: INFO SHOWING & DROPDOWN --}}
+            <div class="col-md-6 d-flex align-items-center mb-2 mb-md-0">
+                <span class="text-muted me-2 small">Menampilkan</span>
+                
+                {{-- Form Kecil untuk ubah jumlah per halaman --}}
+                <form action="{{ route('admin.kepegawaian.tendik.index') }}" method="GET" class="d-inline-block">
+                    {{-- Pastikan Search tidak hilang saat ganti jumlah --}}
+                    <input type="hidden" name="search" value="{{ request('search') }}">
+                    
+                    <select name="per_page" class="form-select form-select-sm d-inline-block w-auto" onchange="this.form.submit()">
+                        <option value="15" {{ request('per_page') == '15' ? 'selected' : '' }}>15</option>
+                        <option value="35" {{ request('per_page') == '35' ? 'selected' : '' }}>35</option>
+                        <option value="50" {{ request('per_page') == '50' ? 'selected' : '' }}>50</option>
+                        <option value="all" {{ request('per_page') == 'all' ? 'selected' : '' }}>Semua</option>
+                    </select>
+                </form>
+
+                <span class="text-muted ms-2 small">
+                    dari <strong>{{ $tendiks->total() }}</strong> data
+                </span>
+            </div>
+
+            {{-- KANAN: PAGINATION LINK --}}
+            <div class="col-md-6 d-flex justify-content-md-end justify-content-center">
+                {{-- Jika mode 'Semua', matikan pagination agar tidak membingungkan --}}
+                @if(request('per_page') != 'all')
+                    {{ $tendiks->appends(request()->query())->links() }} 
+                @endif
+            </div>
         </div>
-    @endif
+    </div>
 </div>
 @endsection
 
@@ -171,10 +183,7 @@
                 const checkedCheckboxes = document.querySelectorAll('.row-checkbox:checked');
                 
                 if (checkedCheckboxes.length > 0) {
-                    const selectedIds = Array.from(checkedCheckboxes)
-                                             .map(cb => cb.value)
-                                             .join(',');
-                    
+                    const selectedIds = Array.from(checkedCheckboxes).map(cb => cb.value).join(',');
                     let url = `{{ route('admin.kepegawaian.gtk.show-multiple') }}?ids=${selectedIds}`;
                     window.location.href = url;
                 }
@@ -183,25 +192,20 @@
 
         if (exportSelectedLink) {
             exportSelectedLink.addEventListener('click', function(e) {
-                if (this.classList.contains('disabled')) {
-                    e.preventDefault();
-                    return;
-                }
+                if (this.classList.contains('disabled')) return;
                 e.preventDefault();
-                const selectedIds = Array.from(document.querySelectorAll('.row-checkbox:checked'))
-                                          .map(cb => cb.value)
-                                          .join(',');
+                const selectedIds = Array.from(document.querySelectorAll('.row-checkbox:checked')).map(cb => cb.value).join(',');
 
                 if (selectedIds) {
                     let url = `{{ route('admin.kepegawaian.tendik.export.excel') }}?ids=${selectedIds}`;
-                    const otherParams = new URLSearchParams(window.location.search);
-                    otherParams.delete('ids'); 
+                    const currentUrl = new URL(window.location.href);
+                    currentUrl.searchParams.delete('ids');
                     
-                    if (otherParams.toString()) {
-                        url += `&${otherParams.toString()}`;
+                    let finalUrl = url;
+                    if(currentUrl.search) {
+                         finalUrl += '&' + currentUrl.search.substring(1);
                     }
-                    
-                    window.location.href = url;
+                    window.location.href = finalUrl;
                 }
             });
         }

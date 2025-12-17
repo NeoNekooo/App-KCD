@@ -26,11 +26,16 @@
             </div>
         </div>
     </div>
+
+    {{-- PENCARIAN --}}
     <div class="card-body">
         <form action="{{ route('admin.kepegawaian.guru.index') }}" method="GET">
+            <input type="hidden" name="per_page" value="{{ request('per_page', 15) }}">
+            
             <div class="input-group input-group-merge">
                 <span class="input-group-text"><i class="bx bx-search"></i></span>
                 <input type="text" name="search" class="form-control" placeholder="Cari berdasarkan Nama, NIP, atau NIK..." value="{{ request('search') }}">
+                <button type="submit" class="btn btn-primary">Cari</button>
             </div>
         </form>
     </div>
@@ -56,62 +61,41 @@
                 @forelse ($gurus as $gtk)
                 <tr>
                     <td><input class="form-check-input row-checkbox" type="checkbox" value="{{ $gtk->id }}"></td>
-                    <td><span class="badge bg-label-secondary">{{ $gtk->ptk_induk == 1 ? 'Induk' : 'Non-Induk' }}</span></td>
                     
-                    {{-- KOLOM NAMA (LOGIKA DIPERBAIKI) --}}
+                    {{-- PERBAIKAN: Non -> Non-Induk --}}
+                    <td>
+                        <span class="badge bg-label-{{ $gtk->ptk_induk == 1 ? 'success' : 'secondary' }}">
+                            {{ $gtk->ptk_induk == 1 ? 'Induk' : 'Non-Induk' }}
+                        </span>
+                    </td>
+                    
                     <td style="min-width: 250px;">
                         <div class="d-flex justify-content-start align-items-center">
-                            {{-- Container Avatar --}}
                             <div class="avatar-wrapper me-3">
                                 <div class="avatar avatar-sm">
                                     @if(!empty($gtk->foto) && \Illuminate\Support\Facades\Storage::disk('public')->exists($gtk->foto))
-                                        {{-- Jika ada foto profil --}}
-                                        <img src="{{ asset('storage/' . $gtk->foto) }}" 
-                                             alt="Avatar" 
-                                             class="rounded-circle" 
-                                             style="width: 100%; height: 100%; object-fit: cover;">
+                                        <img src="{{ asset('storage/' . $gtk->foto) }}" alt="Avatar" class="rounded-circle" style="width: 100%; height: 100%; object-fit: cover;">
                                     @else
-                                        {{-- Jika tidak ada foto, pakai UI Avatars (Inisial Nama) --}}
-                                        <img src="https://ui-avatars.com/api/?name={{ urlencode($gtk->nama) }}&background=random&color=ffffff&size=100" 
-                                             alt="Avatar Default" 
-                                             class="rounded-circle" 
-                                             style="width: 100%; height: 100%; object-fit: cover;">
+                                        <img src="https://ui-avatars.com/api/?name={{ urlencode($gtk->nama) }}&background=random&color=ffffff&size=100" alt="Avatar" class="rounded-circle">
                                     @endif
                                 </div>
                             </div>
-                            
-                            {{-- Container Teks --}}
                             <div class="d-flex flex-column">
                                 <span class="fw-semibold text-truncate text-body">{{ $gtk->nama }}</span>
                                 <small class="text-muted">
-                                    {{-- LOGIKA SUBTITLE YANG LEBIH CERDAS --}}
-                                    {{-- Cek apakah NIP ada isinya DAN isinya bukan sekedar strip (-) --}}
-                                    @if(!empty($gtk->nip) && trim($gtk->nip) != '-')
-                                        NIP: {{ $gtk->nip }}
-                                    
-                                    {{-- Jika NIP kosong/strip, cek NUPTK --}}
-                                    @elseif(!empty($gtk->nuptk) && trim($gtk->nuptk) != '-')
-                                        NUPTK: {{ $gtk->nuptk }}
-                                    
-                                    {{-- Jika keduanya kosong/strip, tampilkan strip saja --}}
-                                    @else
-                                        -
-                                    @endif
+                                    @if($gtk->nip && trim($gtk->nip) != '-') NIP: {{ $gtk->nip }}
+                                    @elseif($gtk->nuptk && trim($gtk->nuptk) != '-') NUPTK: {{ $gtk->nuptk }}
+                                    @else - @endif
                                 </small>
                             </div>
                         </div>
                     </td>
-                    {{-- END KOLOM NAMA --}}
-
-                    <td>{{ $gtk->nik ?? '-' }}</td>
                     
-                    {{-- PERBAIKAN LOGIKA JENIS KELAMIN --}}
-                    {{-- Mengecek apakah datanya 'L' ATAU 'Laki-laki' --}}
+                    <td>{{ $gtk->nik ?? '-' }}</td>
                     <td>{{ ($gtk->jenis_kelamin == 'L' || $gtk->jenis_kelamin == 'Laki-laki') ? 'L' : 'P' }}</td>
-
                     <td>{{ $gtk->tanggal_lahir ? \Carbon\Carbon::parse($gtk->tanggal_lahir)->format('d-m-Y') : '-' }}</td>
                     <td><span class="badge bg-label-primary">{{ $gtk->status_kepegawaian_id_str ?? '-' }}</span></td>
-                    <td>{{ $gtk->jenis_ptk_id_str ?? '-' }}</td>
+                    <td><span class="badge bg-label-info">{{ $gtk->jenis_ptk_id_str ?? '-' }}</span></td>
                     <td>{{ $gtk->jabatan_ptk_id_str ?? '-' }}</td>
                     <td>{{ $gtk->nuptk ?? '-' }}</td>
                     <td>{{ $gtk->tanggal_surat_tugas ? \Carbon\Carbon::parse($gtk->tanggal_surat_tugas)->format('d-m-Y') : '-' }}</td>
@@ -130,11 +114,29 @@
         </table>
     </div>
 
-    @if ($gurus->hasPages())
-        <div class="card-footer d-flex justify-content-center">
-            {{ $gurus->appends(request()->query())->links() }}
+    {{-- FOOTER --}}
+    <div class="card-footer border-top">
+        <div class="row align-items-center">
+            <div class="col-md-6 d-flex align-items-center mb-2 mb-md-0">
+                <span class="text-muted me-2 small">Menampilkan</span>
+                <form action="{{ route('admin.kepegawaian.guru.index') }}" method="GET" class="d-inline-block">
+                    <input type="hidden" name="search" value="{{ request('search') }}">
+                    <select name="per_page" class="form-select form-select-sm d-inline-block w-auto" onchange="this.form.submit()">
+                        <option value="15" {{ request('per_page') == '15' ? 'selected' : '' }}>15</option>
+                        <option value="35" {{ request('per_page') == '35' ? 'selected' : '' }}>35</option>
+                        <option value="50" {{ request('per_page') == '50' ? 'selected' : '' }}>50</option>
+                        <option value="all" {{ request('per_page') == 'all' ? 'selected' : '' }}>Semua</option>
+                    </select>
+                </form>
+                <span class="text-muted ms-2 small">dari <strong>{{ $gurus->total() }}</strong> data</span>
+            </div>
+            <div class="col-md-6 d-flex justify-content-md-end justify-content-center">
+                @if(request('per_page') != 'all')
+                    {{ $gurus->appends(request()->query())->links() }} 
+                @endif
+            </div>
         </div>
-    @endif
+    </div>
 </div>
 @endsection
 
@@ -177,10 +179,7 @@
                 const checkedCheckboxes = document.querySelectorAll('.row-checkbox:checked');
                 
                 if (checkedCheckboxes.length > 0) {
-                    const selectedIds = Array.from(checkedCheckboxes)
-                                             .map(cb => cb.value)
-                                             .join(',');
-                    
+                    const selectedIds = Array.from(checkedCheckboxes).map(cb => cb.value).join(',');
                     let url = `{{ route('admin.kepegawaian.gtk.show-multiple') }}?ids=${selectedIds}`;
                     window.location.href = url;
                 }
@@ -189,25 +188,21 @@
 
         if (exportSelectedLink) {
             exportSelectedLink.addEventListener('click', function(e) {
-                if (this.classList.contains('disabled')) {
-                    e.preventDefault();
-                    return;
-                }
+                if (this.classList.contains('disabled')) return;
                 e.preventDefault();
-                const selectedIds = Array.from(document.querySelectorAll('.row-checkbox:checked'))
-                                          .map(cb => cb.value)
-                                          .join(',');
+                const selectedIds = Array.from(document.querySelectorAll('.row-checkbox:checked')).map(cb => cb.value).join(',');
 
                 if (selectedIds) {
                     let url = `{{ route('admin.kepegawaian.guru.export.excel') }}?ids=${selectedIds}`;
-                    const otherParams = new URLSearchParams(window.location.search);
-                    otherParams.delete('ids'); 
+                    const currentUrl = new URL(window.location.href);
+                    currentUrl.searchParams.delete('ids');
                     
-                    if (otherParams.toString()) {
-                        url += `&${otherParams.toString()}`;
+                    let finalUrl = url;
+                    if(currentUrl.search) {
+                         finalUrl += '&' + currentUrl.search.substring(1);
                     }
                     
-                    window.location.href = url;
+                    window.location.href = finalUrl;
                 }
             });
         }

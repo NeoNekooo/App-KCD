@@ -20,21 +20,23 @@ class SekolahController extends Controller
     }
 
     /**
-     * Update data sekolah (Logo, Peta, Media Sosial, dan Background Kartu).
+     * Update data sekolah (Logo, Peta, Media Sosial Dynamic, dan Background Kartu).
      */
     public function update(Request $request)
     {
         $request->validate([
             'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', 
             'background_kartu' => 'nullable|image|mimes:jpeg,png,jpg|max:2048', 
-            // --- VALIDASI BARU ---
-            'kode_sekolah' => 'nullable|string|max:50', // Tambahkan ini
-            // ---------------------
+            'kode_sekolah' => 'nullable|string|max:50',
             'peta' => 'nullable|string',
-            'facebook_url' => 'nullable|url|max:255',
-            'instagram_url' => 'nullable|url|max:255',
-            'youtube_url' => 'nullable|url|max:255',
-            'tiktok_url' => 'nullable|url|max:255',
+
+            // --- VALIDASI BARU UNTUK DYNAMIC SOCIAL MEDIA ---
+            // Kita menerima input array 'social_media'
+            'social_media' => 'nullable|array', 
+            'social_media.*.platform' => 'nullable|string', // Validasi tiap item di dalam array
+            'social_media.*.url' => 'nullable|url',
+            'social_media.*.username' => 'nullable|string',
+            // ------------------------------------------------
         ]);
 
         // Cari sekolah dengan ID 1.
@@ -42,7 +44,7 @@ class SekolahController extends Controller
         
         // Update data text sederhana
         $sekolah->peta = $request->peta;
-        $sekolah->kode_sekolah = $request->kode_sekolah; // <--- SIMPAN DATA DISINI
+        $sekolah->kode_sekolah = $request->kode_sekolah;
 
         // 1. Handle upload LOGO
         if ($request->hasFile('logo')) {
@@ -62,11 +64,14 @@ class SekolahController extends Controller
             $sekolah->background_kartu = $path;
         }
 
-        // Handle update media sosial
-        $sekolah->facebook_url = $request->facebook_url;
-        $sekolah->instagram_url = $request->instagram_url;
-        $sekolah->youtube_url = $request->youtube_url;
-        $sekolah->tiktok_url = $request->tiktok_url;
+        // --- HANDLE SIMPAN MEDIA SOSIAL (JSON) ---
+        // Karena di Model sudah di-cast 'array', kita bisa langsung assign array dari request.
+        // Jika null (kosong), kita simpan array kosong [].
+        $sekolah->social_media = $request->social_media ?? [];
+        
+        // Hapus properti lama (legacy) agar tidak error jika tidak sengaja terkirim
+        // (Facebook_url dkk sudah tidak ada di DB)
+        // -----------------------------------------
 
         $sekolah->save();
 

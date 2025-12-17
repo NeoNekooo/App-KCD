@@ -1,282 +1,509 @@
 @extends('layouts.admin')
 
 @section('content')
-<h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Pengaturan /</span> Profil Sekolah</h4>
 
-@if(session('success'))
-<div class="alert alert-success">
-    {{ session('success') }}
-</div>
-@endif
+    {{-- ============================================================== --}}
+    {{-- HEADER HALAMAN --}}
+    {{-- ============================================================== --}}
+    <h4 class="fw-bold py-3 mb-4">
+        <span class="text-muted fw-light">Pengaturan /</span> Profil Sekolah
+    </h4>
 
-{{-- Tampilkan Error Validasi --}}
-@if ($errors->any())
-    <div class="alert alert-danger">
-        <h5 class="alert-heading mb-1">Update Gagal!</h5>
-        <p class="mb-2">Pastikan semua data yang dimasukkan sudah benar.</p>
-        <ul class="mb-0">
-            @foreach ($errors->all() as $error)
-                <li>{{ $error }}</li>
-            @endforeach
-        </ul>
-    </div>
-@endif
-
-<div class="row">
-    <div class="col-md-5 col-lg-4">
-        <div class="card mb-4">
-            <div class="card-body text-center">
-                {{-- Tampilkan Logo jika ada, jika tidak, tampilkan ikon default --}}
-                @if($sekolah->logo)
-                    <img src="{{ asset('storage/' . $sekolah->logo) }}" alt="Logo Sekolah" class="img-fluid rounded mb-3 d-block mx-auto" style="max-width: 100px; height: auto; border: 0px solid #ddd;">
-                @else
-                    <i class="bx bxs-school bx-lg text-primary mb-3"></i>
-                @endif
-                <h5 class="card-title">{{ $sekolah->nama ?? 'Nama Sekolah Belum Diisi' }}</h5>
-                <p class="card-text">{{ $sekolah->bentuk_pendidikan_id_str ?? 'Bentuk Pendidikan' }}</p>
-                <div class="d-flex justify-content-center gap-2">
-                    <span class="badge bg-label-success">{{ $sekolah->status_sekolah_str ?? 'Status' }}</span>
-                    <span class="badge bg-label-info">NPSN: {{ $sekolah->npsn ?? '-' }}</span>
-                </div>
-            </div>
+    {{-- Alert Error Global --}}
+    @if ($errors->any())
+        <div class="alert alert-danger alert-dismissible fade show mb-4 shadow-sm border-0" role="alert">
+            <ul class="mb-0 small ps-3">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
-        <div class="card">
-            <div class="card-header d-flex align-items-center justify-content-between">
-                <h5 class="card-title m-0 me-2">Lokasi Sekolah</h5>
-            </div>
-            <div class="card-body">
-                {{-- Tampilkan Peta jika ada, jika tidak, tampilkan placeholder --}}
-                @if($sekolah->peta)
-                    <div class="map-container" style="height: 300px; width: 100%;">
-                        {!! $sekolah->peta !!}
-                    </div>
-                @else
-                <div class="p-3 bg-light rounded text-center">
-                    <i class="bx bx-map bx-md text-secondary"></i>
-                    <p class="mb-0 mt-2 text-muted">Peta Lokasi Belum Diatur</p>
-                </div>
-                @endif
-            </div>
-        </div>
-    </div>
+    @endif
 
-    <div class="col-md-7 col-lg-8">
-        <div class="card">
-            <div class="card-header">
-                <ul class="nav nav-pills card-header-pills" role="tablist">
-                    <li class="nav-item">
-                        <button type="button" class="nav-link active" role="tab" data-bs-toggle="tab" data-bs-target="#tab-detail" aria-controls="tab-detail" aria-selected="true">
-                            <i class="bx bx-list-ul me-1"></i> Detail
-                        </button>
-                    </li>
-                    <li class="nav-item">
-                        <button type="button" class="nav-link" role="tab" data-bs-toggle="tab" data-bs-target="#tab-logo" aria-controls="tab-logo" aria-selected="false">
-                            <i class="bx bx-image-alt me-1"></i> Logo
-                        </button>
-                    </li>
-                    <li class="nav-item">
-                        <button type="button" class="nav-link" role="tab" data-bs-toggle="tab" data-bs-target="#tab-peta" aria-controls="tab-peta" aria-selected="false">
-                           <i class="bx bx-map-pin me-1"></i> Peta
-                        </button>
-                    </li>
-                    {{-- TOMBOL TAB BARU --}}
-                    <li class="nav-item">
-                        <button type="button" class="nav-link" role="tab" data-bs-toggle="tab" data-bs-target="#tab-sosmed" aria-controls="tab-sosmed" aria-selected="false">
-                           <i class="bx bx-share-alt me-1"></i> Media Sosial
-                        </button>
-                    </li>
-                </ul>
-            </div>
-            <div class="card-body">
-                <form action="{{ route('admin.pengaturan.sekolah.update') }}" method="POST" enctype="multipart/form-data">
-                    @csrf
-                    @method('PUT')
+    {{-- ============================================================== --}}
+    {{-- MAIN WRAPPER --}}
+    {{-- ============================================================== --}}
+    <div class="card shadow-sm overflow-hidden fade-in-animation">
+        <div class="card-body p-0">
+            <div class="row g-0">
+
+                {{-- ========================================================== --}}
+                {{-- 1. SIDEBAR KIRI (LOGO & IDENTITAS) --}}
+                {{-- ========================================================== --}}
+                <div class="col-lg-3 border-end d-flex flex-column align-items-center text-center py-4 px-3 bg-light-gray">
                     
-                    <div class="tab-content">
-                        <div class="tab-pane fade show active" id="tab-detail" role="tabpanel">
-                            <h5 class="card-title mb-4">Detail Informasi Sekolah</h5>
-                            
-                            <h6 class="fw-semibold mb-3 text-primary">INFORMASI UMUM</h6>
-<dl class="row mb-4">
-    <dt class="col-sm-4">Nama Sekolah</dt>
-    <dd class="col-sm-8">: {{ $sekolah->nama ?? '-' }}</dd>
+                    {{-- Form Upload Logo --}}
+                    <form action="{{ route('admin.pengaturan.sekolah.update') }}" method="POST" enctype="multipart/form-data" class="w-100">
+                        @csrf
+                        @method('PUT')
 
-    <dt class="col-sm-4">NPSN / NSS</dt>
-    <dd class="col-sm-8">: {{ $sekolah->npsn ?? '-' }} / {{ $sekolah->nss ?? '-' }}</dd>
-
-    <dt class="col-sm-4">Status</dt>
-    <dd class="col-sm-8">: {{ $sekolah->status_sekolah_str ?? '-' }}</dd>
-
-    {{-- KODE SEKOLAH (Tampilan Invisible Input) --}}
-    <dt class="col-sm-4">Kode Sekolah</dt>
-    <dd class="col-sm-8">
-        <div class="d-flex align-items-center">
-            <span class="me-1">:</span>
-            <input type="text" 
-                   name="kode_sekolah" 
-                   id="kode_sekolah" 
-                   value="{{ old('kode_sekolah', $sekolah->kode_sekolah ?? '') }}" 
-                   class="form-control-plaintext" 
-                   style="padding: 0; outline: none; border: none; background: transparent; color: inherit; width: 100%;"
-                   placeholder="Klik untuk isi...">
-        </div>
-        @error('kode_sekolah')
-            <div class="text-danger small mt-1">{{ $message }}</div>
-        @enderror
-    </dd>
-</dl>
-                            <hr class="my-4">
-
-                            <h6 class="fw-semibold mb-3 text-primary">DETAIL ALAMAT</h6>
-                            <dl class="row mb-4">
-                                <dt class="col-sm-4">Alamat Jalan</dt>
-                                <dd class="col-sm-8">: {{ $sekolah->alamat_jalan ?? '-' }}</dd>
-
-                                <dt class="col-sm-4">RT / RW</dt>
-                                <dd class="col-sm-8">: {{ $sekolah->rt ?? '-' }} / {{ $sekolah->rw ?? '-' }}</dd>
-
-                                <dt class="col-sm-4">Dusun</dt>
-                                <dd class="col-sm-8">: {{ $sekolah->dusun ?? '-' }}</dd>
-
-                                <dt class="col-sm-4">Desa / Kelurahan</dt>
-                                <dd class="col-sm-8">: {{ $sekolah->desa_kelurahan ?? '-' }}</dd>
-
-                                <dt class="col-sm-4">Kecamatan</dt>
-                                <dd class="col-sm-8">: {{ $sekolah->kecamatan ?? '-' }}</dd>
-
-                                <dt class="col-sm-4">Kabupaten / Kota</dt>
-                                <dd class="col-sm-8">: {{ $sekolah->kabupaten_kota ?? '-' }}</dd>
-
-                                <dt class="col-sm-4">Provinsi</dt>
-                                <dd class="col-sm-8">: {{ $sekolah->provinsi ?? '-' }}</dd>
-
-                                <dt class="col-sm-4">Kode Pos</dt>
-                                <dd class="col-sm-8">: {{ $sekolah->kode_pos ?? '-' }}</dd>
-                            </dl>
-                            
-                            <hr class="my-4">
-
-                            <h6 class="fw-semibold mb-3 text-primary">KONTAK & MEDIA</h6>
-                             <dl class="row">
-                                <dt class="col-sm-4">Nomor Telepon</dt>
-                                <dd class="col-sm-8">: {{ $sekolah->nomor_telepon ?? '-' }}</dd>
-
-                                <dt class="col-sm-4">Nomor Fax</dt>
-                                <dd class="col-sm-8">: {{ $sekolah->nomor_fax ?? '-' }}</dd>
-
-                                <dt class="col-sm-4">Email</dt>
-                                <dd class="col-sm-8">: {{ $sekolah->email ?? '-' }}</dd>
-
-                                <dt class="col-sm-4">Website</dt>
-                                <dd class="col-sm-8">: <a href="{{ $sekolah->website ?? '#' }}" target="_blank">{{ $sekolah->website ?? '-' }}</a></dd>
-                            </dl>
-                        </div>
-
-                        <div class="tab-pane fade" id="tab-logo" role="tabpanel">
-                            <h5 class="mb-4">Upload Logo Sekolah</h5>
-                            <div class="mb-3">
-                                <label for="logo" class="form-label">Pilih File Logo</label>
-                                <input class="form-control @error('logo') is-invalid @enderror" type="file" id="logo" name="logo">
-                                @error('logo')
-                                    <div class="invalid-feedback">{{ $message }}</div>
+                        <div class="position-relative d-inline-block mb-2">
+                            {{-- Logo Preview --}}
+                            <div class="avatar-wrapper rounded p-2 d-flex align-items-center justify-content-center logo-container">
+                                @if($sekolah->logo)
+                                    <img src="{{ asset('storage/' . $sekolah->logo) }}" class="d-block object-fit-contain w-100 h-100">
                                 @else
-                                    <div class="form-text">Tipe file: jpeg, jpg, png. Maksimal ukuran 2MB.</div>
-                                @enderror
+                                    <i class="bx bxs-school text-muted logo-placeholder"></i>
+                                @endif
+                            </div>
+
+                            {{-- Tombol Kamera Floating --}}
+                            <label for="upload-logo" class="btn-upload-float shadow-sm" title="Ubah Logo">
+                                <i class="bx bx-camera small-icon"></i>
+                                <input type="file" id="upload-logo" name="logo" class="d-none" accept="image/png,image/jpeg,image/jpg" onchange="this.form.submit()">
+                            </label>
+                        </div>
+                    </form>
+
+                    {{-- Nama Sekolah --}}
+                    <h5 class="fw-bold text-dark mb-3 px-2 text-break lh-sm">
+                        {{ $sekolah->nama ?? 'Nama Sekolah' }}
+                    </h5>
+
+                    {{-- Badges (Bentuk, Status, NPSN) --}}
+                    <div class="d-flex flex-column align-items-center gap-2 mb-4 w-100 px-3">
+                        <span class="badge bg-label-primary px-3 py-2 rounded-pill shadow-sm ls-wide">
+                            {{ strtoupper($sekolah->bentuk_pendidikan_id_str ?? 'SEKOLAH') }}
+                        </span>
+                        <div class="d-flex gap-2 w-100 justify-content-center">
+                            <span class="badge bg-label-success flex-fill py-2 rounded-pill small-text">
+                                {{ strtoupper($sekolah->status_sekolah_str ?? '-') }}
+                            </span>
+                            <span class="badge bg-label-info flex-fill py-2 rounded-pill small-text">
+                                NPSN: {{ $sekolah->npsn ?? '-' }}
+                            </span>
+                        </div>
+                    </div>
+
+                    {{-- Area Peta --}}
+                    <div class="text-start px-2 w-100 mt-auto">
+                        <label class="small text-muted text-uppercase fw-bold mb-1 small-text">Lokasi Sekolah</label>
+                        <div class="signature-box border rounded bg-white position-relative overflow-hidden hover-lift map-wrapper">
+                            @if($sekolah->peta)
+                                <div class="w-100 h-100 map-iframe-box">
+                                    {!! $sekolah->peta !!}
+                                </div>
+                            @else
+                                <div class="text-muted small fst-italic text-center">
+                                    <i class='bx bx-map-alt fs-1 mb-1'></i><br>Belum ada peta
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+
+                {{-- ========================================================== --}}
+                {{-- 2. KONTEN KANAN (FORM DETAIL & TABS) --}}
+                {{-- ========================================================== --}}
+                <div class="col-lg-9 p-4 d-flex flex-column bg-white">
+
+                    {{-- Header Kanan & Tombol Aksi --}}
+                    <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+                        <h6 class="mb-0 text-primary fw-bold">
+                            <i class="bx bx-list-ul me-2"></i>Informasi Lengkap
+                        </h6>
+
+                        <div class="action-button-container">
+                            {{-- Tombol Edit --}}
+                            <button type="button" class="btn btn-sm btn-label-primary btn-edit-toggle" id="btn-edit-data">
+                                <i class="bx bx-edit-alt me-1"></i> Edit Data
+                            </button>
+                            
+                            {{-- Group Tombol Simpan/Batal --}}
+                            <div class="d-none align-items-center gap-2" id="action-buttons-group">
+                                <button type="button" class="btn btn-sm btn-label-secondary" id="btn-batal-edit">Batal</button>
+                                <button type="submit" form="form-data-sekolah" class="btn btn-sm btn-primary shadow-sm">
+                                    <i class="bx bx-save me-1"></i> Simpan
+                                </button>
                             </div>
                         </div>
+                    </div>
 
-                        <div class="tab-pane fade" id="tab-peta" role="tabpanel">
-                             <h5 class="mb-4">Sematkan Peta Lokasi</h5>
-                            <div class="mb-3">
-                                <label for="peta" class="form-label">Kode Semat (Embed) Google Maps</label>
-                                <textarea class="form-control @error('peta') is-invalid @enderror" id="peta" name="peta" rows="5">{{ old('peta', $sekolah->peta) }}</textarea>
-                                @error('peta')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @else
-                                    <div class="form-text">
-                                        Salin kode iframe dari Google Maps dan tempel di sini. Contoh: <code>&lt;iframe src="..."&gt;&lt;/iframe&gt;</code>
+                    {{-- Form Utama --}}
+                    <form action="{{ route('admin.pengaturan.sekolah.update') }}" method="POST" id="form-data-sekolah">
+                        @csrf
+                        @method('PUT')
+
+                        {{-- Navigasi Tab --}}
+                        <ul class="nav nav-pills nav-fill mb-3 custom-pills" role="tablist">
+                            <li class="nav-item"><button type="button" class="nav-link active btn-sm" data-bs-toggle="tab" data-bs-target="#tab-umum">Informasi Umum</button></li>
+                            <li class="nav-item"><button type="button" class="nav-link btn-sm" data-bs-toggle="tab" data-bs-target="#tab-alamat">Alamat</button></li>
+                            <li class="nav-item"><button type="button" class="nav-link btn-sm" data-bs-toggle="tab" data-bs-target="#tab-kontak">Kontak & Sosmed</button></li>
+                            <li class="nav-item"><button type="button" class="nav-link btn-sm" data-bs-toggle="tab" data-bs-target="#tab-peta-edit">Peta</button></li>
+                        </ul>
+
+                        <div class="tab-content p-0 mt-2">
+                            
+                            {{-- TAB 1: INFORMASI UMUM --}}
+                            <div class="tab-pane fade show active" id="tab-umum">
+                                
+                                <div class="row-clean">
+                                    <label>Nama Sekolah <i class="bx bx-lock-alt text-muted small ms-1" title="Data Dapodik"></i></label>
+                                    <div class="sep">:</div>
+                                    <div class="inp"><input type="text" name="nama" class="clean-input locked-dapodik" value="{{ $sekolah->nama }}" readonly></div>
+                                </div>
+                                <div class="row-clean">
+                                    <label>NPSN <i class="bx bx-lock-alt text-muted small ms-1" title="Data Dapodik"></i></label>
+                                    <div class="sep">:</div>
+                                    <div class="inp"><input type="text" name="npsn" class="clean-input locked-dapodik" value="{{ $sekolah->npsn }}" readonly></div>
+                                </div>
+                                <div class="row-clean">
+                                    <label>NSS <i class="bx bx-lock-alt text-muted small ms-1" title="Data Dapodik"></i></label>
+                                    <div class="sep">:</div>
+                                    <div class="inp"><input type="text" name="nss" class="clean-input locked-dapodik" value="{{ $sekolah->nss }}" readonly></div>
+                                </div>
+                                <div class="row-clean">
+                                    <label>Status <i class="bx bx-lock-alt text-muted small ms-1" title="Data Dapodik"></i></label>
+                                    <div class="sep">:</div>
+                                    <div class="inp"><input type="text" class="clean-input locked-dapodik" value="{{ $sekolah->status_sekolah_str ?? '-' }}" readonly></div>
+                                </div>
+                                <div class="row-clean">
+                                    <label>Bentuk Pendidikan <i class="bx bx-lock-alt text-muted small ms-1" title="Data Dapodik"></i></label>
+                                    <div class="sep">:</div>
+                                    <div class="inp"><input type="text" class="clean-input locked-dapodik" value="{{ $sekolah->bentuk_pendidikan_id_str }}" readonly></div>
+                                </div>
+
+                                {{-- Kode Sekolah (Editable) --}}
+                                <div class="row-clean">
+                                    <label>Kode Sekolah <i class="bx bx-pencil text-muted small ms-1" title="Dapat diedit"></i></label>
+                                    <div class="sep">:</div>
+                                    <div class="inp">
+                                        <input type="text" name="kode_sekolah" class="clean-input editable-field" 
+                                               value="{{ old('kode_sekolah', $sekolah->kode_sekolah) }}" 
+                                               readonly placeholder="Klik Edit Data...">
                                     </div>
-                                @enderror
+                                </div>
                             </div>
-                        </div>
 
-                        <div class="tab-pane fade" id="tab-sosmed" role="tabpanel">
-                            <h5 class="mb-4">Pengaturan Media Sosial</h5>
-                            
-                            {{-- Facebook --}}
-                            <div class="mb-3">
-                                <label for="facebook_url" class="form-label">Facebook</label>
-                                <div class="input-group input-group-merge">
-                                    <span class="input-group-text"><i class='bx bxl-facebook-circle'></i></span>
-                                    <input type="url" class="form-control @error('facebook_url') is-invalid @enderror" id="facebook_url" name="facebook_url" value="{{ old('facebook_url', $sekolah->facebook_url) }}" placeholder="https://www.facebook.com/sekolah">
+                            {{-- TAB 2: ALAMAT --}}
+                            <div class="tab-pane fade" id="tab-alamat">
+                                <div class="row-clean">
+                                    <label>Alamat Jalan <i class="bx bx-lock-alt text-muted small ms-1" title="Data Dapodik"></i></label>
+                                    <div class="sep">:</div>
+                                    <div class="inp"><input type="text" class="clean-input locked-dapodik" value="{{ $sekolah->alamat_jalan }}" readonly></div>
                                 </div>
-                                @error('facebook_url')
-                                    <div class="form-text text-danger">{{ $message }}</div>
-                                @enderror
-                            </div>
-                            
-                            {{-- Instagram --}}
-                            <div class="mb-3">
-                                <label for="instagram_url" class="form-label">Instagram</label>
-                                <div class="input-group input-group-merge">
-                                    <span class="input-group-text"><i class='bx bxl-instagram-alt'></i></span>
-                                    <input type="url" class="form-control @error('instagram_url') is-invalid @enderror" id="instagram_url" name="instagram_url" value="{{ old('instagram_url', $sekolah->instagram_url) }}" placeholder="https://www.instagram.com/sekolah">
+                                <div class="row-clean">
+                                    <label>RT / RW <i class="bx bx-lock-alt text-muted small ms-1" title="Data Dapodik"></i></label>
+                                    <div class="sep">:</div>
+                                    <div class="inp"><input type="text" class="clean-input locked-dapodik" value="{{ $sekolah->rt }} / {{ $sekolah->rw }}" readonly></div>
                                 </div>
-                                @error('instagram_url')
-                                    <div class="form-text text-danger">{{ $message }}</div>
-                                @enderror
-                            </div>
-                            
-                            {{-- YouTube --}}
-                            <div class="mb-3">
-                                <label for="youtube_url" class="form-label">YouTube</label>
-                                <div class="input-group input-group-merge">
-                                    <span class="input-group-text"><i class='bx bxl-youtube'></i></span>
-                                    <input type="url" class="form-control @error('youtube_url') is-invalid @enderror" id="youtube_url" name="youtube_url" value="{{ old('youtube_url', $sekolah->youtube_url) }}" placeholder="https://www.youtube.com/c/sekolah">
+                                <div class="row-clean">
+                                    <label>Dusun <i class="bx bx-lock-alt text-muted small ms-1" title="Data Dapodik"></i></label>
+                                    <div class="sep">:</div>
+                                    <div class="inp"><input type="text" class="clean-input locked-dapodik" value="{{ $sekolah->dusun }}" readonly></div>
                                 </div>
-                                @error('youtube_url')
-                                    <div class="form-text text-danger">{{ $message }}</div>
-                                @enderror
-                            </div>
-            
-                            {{-- TikTok --}}
-                            <div class="mb-3">
-                                <label for="tiktok_url" class="form-label">TikTok</label>
-                                <div class="input-group input-group-merge">
-                                    <span class="input-group-text"><i class='bx bxl-tiktok'></i></span>
-                                    <input type="url" class="form-control @error('tiktok_url') is-invalid @enderror" id="tiktok_url" name="tiktok_url" value="{{ old('tiktok_url', $sekolah->tiktok_url) }}" placeholder="https://www.tiktok.com/@sekolah">
+                                <div class="row-clean">
+                                    <label>Desa / Kelurahan <i class="bx bx-lock-alt text-muted small ms-1" title="Data Dapodik"></i></label>
+                                    <div class="sep">:</div>
+                                    <div class="inp"><input type="text" class="clean-input locked-dapodik" value="{{ $sekolah->desa_kelurahan }}" readonly></div>
                                 </div>
-                                @error('tiktok_url')
-                                    <div class="form-text text-danger">{{ $message }}</div>
-                                @enderror
+                                <div class="row-clean">
+                                    <label>Kecamatan <i class="bx bx-lock-alt text-muted small ms-1" title="Data Dapodik"></i></label>
+                                    <div class="sep">:</div>
+                                    <div class="inp"><input type="text" class="clean-input locked-dapodik" value="{{ $sekolah->kecamatan }}" readonly></div>
+                                </div>
+                                <div class="row-clean">
+                                    <label>Kabupaten / Kota <i class="bx bx-lock-alt text-muted small ms-1" title="Data Dapodik"></i></label>
+                                    <div class="sep">:</div>
+                                    <div class="inp"><input type="text" class="clean-input locked-dapodik" value="{{ $sekolah->kabupaten_kota }}" readonly></div>
+                                </div>
+                                <div class="row-clean">
+                                    <label>Provinsi <i class="bx bx-lock-alt text-muted small ms-1" title="Data Dapodik"></i></label>
+                                    <div class="sep">:</div>
+                                    <div class="inp"><input type="text" class="clean-input locked-dapodik" value="{{ $sekolah->provinsi }}" readonly></div>
+                                </div>
+                                <div class="row-clean">
+                                    <label>Kode Pos <i class="bx bx-lock-alt text-muted small ms-1" title="Data Dapodik"></i></label>
+                                    <div class="sep">:</div>
+                                    <div class="inp"><input type="text" class="clean-input locked-dapodik" value="{{ $sekolah->kode_pos }}" readonly></div>
+                                </div>
                             </div>
-                        </div>
 
-                    </div>
-                    
-                    <div class="pt-4">
-                        <button type="submit" class="btn btn-primary me-sm-3 me-1">Simpan Perubahan</button>
-                        <button type="reset" class="btn btn-label-secondary">Batal</button>
-                    </div>
-                </form>
+                            {{-- TAB 3: KONTAK & SOSMED (Dynamic) --}}
+                            <div class="tab-pane fade" id="tab-kontak">
+                                
+                                {{-- Kontak Dasar --}}
+                                <div class="row-clean">
+                                    <label>No. Telepon <i class="bx bx-lock-alt text-muted small ms-1"></i></label>
+                                    <div class="sep">:</div>
+                                    <div class="inp"><input type="text" class="clean-input locked-dapodik" value="{{ $sekolah->nomor_telepon }}" readonly></div>
+                                </div>
+                                <div class="row-clean">
+                                    <label>Fax <i class="bx bx-lock-alt text-muted small ms-1"></i></label>
+                                    <div class="sep">:</div>
+                                    <div class="inp"><input type="text" class="clean-input locked-dapodik" value="{{ $sekolah->nomor_fax }}" readonly></div>
+                                </div>
+                                <div class="row-clean">
+                                    <label>Email <i class="bx bx-lock-alt text-muted small ms-1"></i></label>
+                                    <div class="sep">:</div>
+                                    <div class="inp"><input type="email" class="clean-input locked-dapodik" value="{{ $sekolah->email }}" readonly></div>
+                                </div>
+                                <div class="row-clean">
+                                    <label>Website <i class="bx bx-lock-alt text-muted small ms-1"></i></label>
+                                    <div class="sep">:</div>
+                                    <div class="inp"><input type="url" class="clean-input locked-dapodik" value="{{ $sekolah->website }}" readonly></div>
+                                </div>
+
+                                <hr class="my-3 border-dashed">
+
+                                {{-- Header Sosmed --}}
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h6 class="fw-bold text-dark small text-uppercase mb-0">
+                                        <i class='bx bx-share-alt me-1'></i> Media Sosial
+                                    </h6>
+                                    <button type="button" class="btn btn-xs btn-primary rounded-pill d-none" id="btn-add-sosmed">
+                                        <i class="bx bx-plus"></i> Tambah
+                                    </button>
+                                </div>
+
+                                {{-- Container Sosmed --}}
+                                <div id="social-media-container">
+                                    @php
+                                        $sosmeds = $sekolah->social_media ?? [];
+                                        
+                                        // Definisi Map Icon
+                                        $iconMap = [
+                                            'facebook'  => ['icon' => 'bxl-facebook-circle', 'color' => 'text-primary'],
+                                            'instagram' => ['icon' => 'bxl-instagram-alt',   'color' => 'text-danger'],
+                                            'youtube'   => ['icon' => 'bxl-youtube',         'color' => 'text-danger'],
+                                            'tiktok'    => ['icon' => 'bxl-tiktok',          'color' => 'text-dark'],
+                                            'twitter'   => ['icon' => 'bxl-twitter',         'color' => 'text-info'],
+                                            'linkedin'  => ['icon' => 'bxl-linkedin-square', 'color' => 'text-primary'],
+                                            'whatsapp'  => ['icon' => 'bxl-whatsapp',        'color' => 'text-success'],
+                                        ];
+                                        $defaultIcon = ['icon' => 'bx-globe', 'color' => 'text-secondary'];
+                                    @endphp
+
+                                    @forelse($sosmeds as $index => $sosmed)
+                                        @php
+                                            $platform = strtolower($sosmed['platform'] ?? '');
+                                            $style = $iconMap[$platform] ?? $defaultIcon;
+                                        @endphp
+
+                                        <div class="row-clean social-row align-items-center" id="row-{{ $index }}">
+                                            <label class="d-flex align-items-center" style="width: 35%;">
+                                                <i class='bx {{ $style['icon'] }} fs-4 me-2 social-icon {{ $style['color'] }}'></i>
+                                                <span class="social-label d-none d-sm-block">{{ ucfirst($sosmed['platform'] ?? 'Website') }}</span>
+                                            </label>
+                                            
+                                            <div class="sep">:</div>
+                                            
+                                            <div class="inp d-flex align-items-center gap-2" style="width: 62%;">
+                                                <input type="text" 
+                                                       name="social_media[{{ $index }}][url]" 
+                                                       class="clean-input editable-field social-url-input" 
+                                                       value="{{ $sosmed['url'] ?? '' }}" 
+                                                       readonly 
+                                                       placeholder="https://..."
+                                                       oninput="detectSocialMedia(this)">
+
+                                                <input type="hidden" name="social_media[{{ $index }}][platform]" class="social-platform-input" value="{{ $sosmed['platform'] ?? 'website' }}">
+                                                <input type="hidden" name="social_media[{{ $index }}][username]" class="social-username-input" value="{{ $sosmed['username'] ?? '' }}">
+
+                                                <button type="button" class="btn btn-icon btn-xs btn-label-danger btn-remove-sosmed d-none" onclick="removeSocialRow(this)">
+                                                    <i class="bx bx-x"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    @empty
+                                        <div class="text-muted small fst-italic empty-sosmed-msg">Belum ada media sosial.</div>
+                                    @endforelse
+                                </div>
+                            </div>
+
+                            {{-- TAB 4: PETA --}}
+                            <div class="tab-pane fade" id="tab-peta-edit">
+                                <label class="form-label fw-bold text-dark small text-uppercase mb-2">
+                                    <i class='bx bx-code-alt me-1'></i> Embed Google Maps (Editable)
+                                </label>
+                                <textarea name="peta" 
+                                          class="form-control text-muted mb-3 editable-field" 
+                                          rows="4" 
+                                          placeholder='Paste kode <iframe src="..."></iframe> dari Google Maps di sini...' 
+                                          style="font-size: 13px; background-color: #fdfdfd; border-color: #eee;" 
+                                          readonly>{{ old('peta', $sekolah->peta) }}</textarea>
+                                
+                                <div class="alert alert-info py-2 px-3 small">
+                                    <i class="bx bx-info-circle me-1"></i> Preview peta akan muncul di sidebar kiri setelah disimpan.
+                                </div>
+                            </div>
+
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-<style>
-    /* Menyesuaikan ukuran iframe agar responsif */
-    .map-container iframe {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100% !important;
-        height: 100% !important;
-    }
-    .map-container {
-        position: relative;
-        overflow: hidden;
-        padding-top: 75%; /* Rasio aspek 4:3, sesuaikan jika perlu */
-    }
-</style>
+    {{-- ============================================================== --}}
+    {{-- CSS CUSTOMIZATION --}}
+    {{-- ============================================================== --}}
+    <style>
+        /* --- 1. Layout & Typography --- */
+        .bg-light-gray { background-color: #f5f5f9; }
+        .ls-wide { letter-spacing: 0.5px; }
+        .small-text { font-size: 0.75rem; }
+        
+        /* --- 2. Row Clean System --- */
+        .row-clean { display: flex; align-items: flex-start; padding: 4px 0; border-bottom: 1px solid transparent; line-height: 1.5; }
+        .row-clean label { width: 35%; font-weight: 600; color: #566a7f; margin: 0; font-size: 0.9375rem; }
+        .row-clean .sep { width: 3%; text-align: center; font-weight: 600; color: #566a7f; }
+        .row-clean .inp { width: 62%; }
+
+        /* --- 3. Clean Input Styling --- */
+        .clean-input { width: 100%; background: transparent !important; border: none !important; padding: 0; margin: 0; outline: none !important; box-shadow: none !important; font-size: 0.9375rem; color: #697a8d; pointer-events: none; font-family: inherit; }
+        .clean-input.locked-dapodik { cursor: not-allowed; color: #697a8d; }
+        
+        /* --- 4. Edit Mode Styling --- */
+        .clean-input.editing { pointer-events: auto; color: #333; cursor: text; border-bottom: 1px dashed #d9dee3 !important; }
+        .clean-input.editing:focus { border-bottom: 1px solid #696cff !important; }
+        .clean-input::placeholder { color: #b4bdc6; font-style: italic; opacity: 0; }
+        .clean-input.editing::placeholder { opacity: 1; }
+
+        /* --- 5. Components: Logo, Pills, Map --- */
+        .logo-container { width: 120px; height: 120px; }
+        .logo-placeholder { font-size: 4rem; opacity: 0.5; }
+        .btn-upload-float { position: absolute; bottom: 0; right: 0; width: 28px; height: 28px; background: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #696cff; cursor: pointer; transition: 0.2s; }
+        .btn-upload-float:hover { transform: scale(1.1); }
+        .small-icon { font-size: 0.9rem; }
+        
+        .custom-pills .nav-link { border-radius: 50rem; padding: 0.4rem 1rem; color: #697a8d; font-weight: 500; font-size: 0.85rem; border: 1px solid transparent; margin-right: 4px; margin-bottom: 4px; transition: all 0.2s; }
+        .custom-pills .nav-link:hover { background-color: rgba(67, 89, 113, 0.05); color: #696cff; }
+        .custom-pills .nav-link.active { background-color: #696cff; color: #fff; box-shadow: 0 2px 6px rgba(105, 108, 255, 0.4); }
+
+        .signature-box { background-image: radial-gradient(#e2e2e2 1px, transparent 1px); background-size: 8px 8px; }
+        .map-wrapper { height: 130px; display: flex; align-items: center; justify-content: center; }
+        .map-iframe-box iframe { width: 100% !important; height: 100% !important; border: none; }
+        
+        .fade-in-animation { animation: fadeIn 0.5s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+
 @endsection
+
+@push('scripts')
+<script>
+    // =========================================================================
+    // 1. CONFIGURATION
+    // =========================================================================
+    const socialPlatforms = [
+        { name: 'facebook', regex: /facebook\.com/, icon: 'bxl-facebook-circle', color: 'text-primary' },
+        { name: 'instagram', regex: /instagram\.com/, icon: 'bxl-instagram-alt', color: 'text-danger' },
+        { name: 'youtube', regex: /youtube\.com|youtu\.be/, icon: 'bxl-youtube', color: 'text-danger' },
+        { name: 'tiktok', regex: /tiktok\.com/, icon: 'bxl-tiktok', color: 'text-dark' },
+        { name: 'twitter', regex: /twitter\.com|x\.com/, icon: 'bxl-twitter', color: 'text-info' },
+        { name: 'linkedin', regex: /linkedin\.com/, icon: 'bxl-linkedin-square', color: 'text-primary' },
+        { name: 'whatsapp', regex: /wa\.me|whatsapp\.com/, icon: 'bxl-whatsapp', color: 'text-success' },
+    ];
+    let rowCount = 100; // Mulai dari 100
+
+    // =========================================================================
+    // 2. MAIN LOGIC (DOCUMENT READY)
+    // =========================================================================
+    document.addEventListener('DOMContentLoaded', function() {
+        const btnEdit = document.getElementById('btn-edit-data');
+        const btnBatal = document.getElementById('btn-batal-edit');
+        const actionGroup = document.getElementById('action-buttons-group');
+        const editableFields = document.querySelectorAll('.editable-field');
+        const btnAddSosmed = document.getElementById('btn-add-sosmed');
+
+        // A. Toggle Edit Mode
+        btnEdit.addEventListener('click', function() {
+            btnEdit.classList.add('d-none');
+            actionGroup.classList.remove('d-none');
+            actionGroup.classList.add('d-flex');
+
+            editableFields.forEach(field => {
+                field.removeAttribute('readonly');
+                field.classList.add('editing');
+            });
+
+            if(btnAddSosmed) btnAddSosmed.classList.remove('d-none');
+            document.querySelectorAll('.btn-remove-sosmed').forEach(btn => btn.classList.remove('d-none'));
+        });
+
+        // B. Tombol Batal
+        btnBatal.addEventListener('click', function() {
+            location.reload(); 
+        });
+
+        // C. Tombol Tambah Sosmed
+        if(btnAddSosmed) {
+            btnAddSosmed.addEventListener('click', function() {
+                addSocialRow();
+            });
+        }
+    });
+
+    // =========================================================================
+    // 3. HELPER FUNCTIONS
+    // =========================================================================
+    
+    // Auto Detect Platform by URL
+    window.detectSocialMedia = function(input) {
+        const url = input.value.toLowerCase();
+        const row = input.closest('.social-row');
+        const iconElement = row.querySelector('.social-icon');
+        const labelElement = row.querySelector('.social-label');
+        const platformInput = row.querySelector('.social-platform-input');
+
+        let matched = false;
+
+        for (const platform of socialPlatforms) {
+            if (platform.regex.test(url)) {
+                iconElement.className = `bx ${platform.icon} fs-4 me-2 social-icon ${platform.color}`;
+                labelElement.textContent = platform.name.charAt(0).toUpperCase() + platform.name.slice(1);
+                platformInput.value = platform.name;
+                matched = true;
+                break;
+            }
+        }
+
+        if (!matched) {
+            iconElement.className = `bx bx-globe fs-4 me-2 social-icon text-secondary`;
+            labelElement.textContent = 'Website';
+            platformInput.value = 'website';
+        }
+    };
+
+    // Add New Social Media Row
+    function addSocialRow() {
+        const container = document.getElementById('social-media-container');
+        const emptyMsg = container.querySelector('.empty-sosmed-msg');
+        if(emptyMsg) emptyMsg.remove(); 
+
+        rowCount++;
+        
+        const newRow = `
+            <div class="row-clean social-row align-items-center fade-in-animation mb-2">
+                <label class="d-flex align-items-center" style="width: 35%;">
+                    <i class='bx bx-globe fs-4 me-2 social-icon text-secondary'></i>
+                    <span class="social-label d-none d-sm-block">Website</span>
+                </label>
+                <div class="sep">:</div>
+                <div class="inp d-flex align-items-center gap-2" style="width: 62%;">
+                    <input type="text" 
+                           name="social_media[${rowCount}][url]" 
+                           class="clean-input editing social-url-input" 
+                           placeholder="Paste link di sini..." 
+                           oninput="detectSocialMedia(this)"
+                           autofocus>
+                    <input type="hidden" name="social_media[${rowCount}][platform]" class="social-platform-input" value="website">
+                    <input type="hidden" name="social_media[${rowCount}][username]" class="social-username-input" value="">
+                    
+                    <button type="button" class="btn btn-icon btn-xs btn-label-danger btn-remove-sosmed" onclick="removeSocialRow(this)">
+                        <i class="bx bx-x"></i>
+                    </button>
+                </div>
+            </div>
+        `;
+        container.insertAdjacentHTML('beforeend', newRow);
+    }
+
+    // Remove Social Row
+    window.removeSocialRow = function(btn) {
+        btn.closest('.social-row').remove();
+    };
+</script>
+@endpush

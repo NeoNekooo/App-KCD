@@ -9,36 +9,21 @@ class Gtk extends Model
 {
     use HasFactory;
 
-    /**
-     * Tabel terkait dengan model.
-     * Diasumsikan menggunakan tabel 'gtks' seperti pada dump database.
-     *
-     * @var string
-     */
-    protected $table = 'gtks';
+    protected $guarded = [];
 
     /**
-     * Kunci utama tabel.
-     *
-     * @var string
+     * Relasi ke banyak tugas pegawai (riwayat tugas).
      */
-    protected $primaryKey = 'id'; // Menggunakan 'id' sesuai struktur tabel 'gtks'
+    public function riwayatTugas()
+    {
+       return $this->hasMany(TugasPegawai::class, 'pegawai_id', 'ptk_id');
+    }
 
     /**
-     * Menonaktifkan timestamps karena tabel gtks biasanya tidak menggunakannya.
-     *
-     * @var bool
+     * Relasi ke rombel jika GTK ini adalah wali kelas.
      */
-    public $timestamps = false;
-    
-    /**
-     * Atribut yang dapat diisi secara massal.
-     * Hanya memasukkan 'nama' dan 'ptk_id' untuk tujuan tampilan.
-     *
-     * @var array<int, string>
-     */
-    protected $fillable = [
-        'nama', 
-        'ptk_id', // Jika diperlukan NIP/PTK ID
-    ];
+    public function rombelWali()
+    {
+        return $this->hasOne(Rombel::class, 'ptk_id', 'ptk_id');
+    }
 }

@@ -1,11 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Models\SyaratPendaftaran; // <---- tambahkan baris ini
-use Illuminate\Http\Request;
 
-// Controller Utama
-use App\Http\Controllers\LandingPpdbController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 
 // --- Controller dari V1 ---
@@ -154,21 +150,20 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
         Route::get('/gtk/show-multiple', [GtkController::class, 'showMultiple'])->name('gtk.show-multiple');
         Route::get('gtk/cetak-pdf/{id}', [GtkController::class, 'cetakPdf'])->name('gtk.cetak_pdf');
         Route::get('gtk/cetak-pdf-multiple', [GtkController::class, 'cetakPdfMultiple'])->name('gtk.cetak_pdf_multiple');
-        // Cukup tulis sisa path-nya saja, dan sisa namanya saja
         Route::put('gtk/{id}/update-data', [GtkController::class, 'updateData'])->name('gtk.update_data');
-
-        // --- RUTE BARU UNTUK UPLOAD FOTO & TTD ---
         Route::post('gtk/{id}/upload-media', [GtkController::class, 'uploadMedia'])->name('gtk.upload_media');
 
-        // --- RUTE BARU: CETAK KARTU ID ---
-        // Note: Nama route otomatis menjadi 'admin.kepegawaian.gtk.index-cetak-kartu' karena berada dalam grup.
-        Route::get('gtk/cetak-kartu', [GtkController::class, 'indexCetakKartu'])->name('gtk.index-cetak-kartu');
-        Route::get('gtk/cetak-kartu/{id}/print', [GtkController::class, 'cetakKartu'])->name('gtk.print-kartu');
-        Route::post('gtk/cetak-kartu/massal', [GtkController::class, 'cetakKartuMassal'])->name('gtk.print-kartu-massal');
-        Route::get('gtk/cetak-kartu/print-all', [GtkController::class, 'cetakSemua'])->name('gtk.print-all');
-        Route::post('gtk/cetak-kartu/upload-background', [GtkController::class, 'uploadBackgroundKartu'])->name('gtk.upload-background-kartu');
-        // Route untuk Tugas Pegawai
+       // 4. Route Cetak Kartu ID GTK
+        Route::controller(GtkController::class)->prefix('gtk/cetak-kartu')->name('gtk.')->group(function() {
+            Route::get('/', 'indexCetakKartu')->name('index-cetak-kartu');
+            Route::get('/print/{id}', 'cetakKartu')->name('print-kartu');
+            Route::get('/print-all', 'cetakSemua')->name('print-all');
+            Route::post('/upload-background', 'uploadBackgroundKartu')->name('upload-background-kartu');
+        });
+
         Route::resource('tugas-pegawai', TugasPegawaiController::class)->except(['create', 'edit', 'show']);
+
+
     });
 
     // 2. --- GRUP AKADEMIK ---
@@ -201,20 +196,13 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
     |--------------------------------------------------------------------------
     */
     Route::prefix('kesiswaan')->name('kesiswaan.')->group(function() {
+        Route::get('siswa/export/excel', [SiswaController::class, 'exportExcel'])->name('siswa.export.excel');
+        Route::get('siswa/show-multiple', [SiswaController::class, 'showMultiple'])->name('siswa.show-multiple');
+        Route::get('siswa/{id}/cetak-kartu', [SiswaController::class, 'cetakKartu'])->name('siswa.cetak_kartu');
         Route::resource('siswa', SiswaController::class);
-
-        /*
-        |--------------------------------------------------------------------------
-        | Kesiswaan (Siswa)
-        |--------------------------------------------------------------------------
-        */
-        Route::get('/siswa/{siswa}/cetak-kartu', [SiswaController::class, 'cetakKartu'])->name('siswa.cetak_kartu');
-        // Rute untuk menampilkan halaman pemilihan kelas
         Route::get('/cetak-kartu-massal', [SiswaController::class, 'showCetakMassalIndex'])->name('siswa.cetak_massal_index');
-        // Rute untuk menampilkan halaman cetak untuk kelas yang dipilih
         Route::get('/cetak-kartu-massal/{rombel}', [SiswaController::class, 'cetakKartuMassal'])->name('siswa.cetak_massal_show');
-        Route::resource('siswa', SiswaController::class);
-
+        Route::get('siswa/{id}/cetak-pdf', [SiswaController::class, 'cetakPdf'])->name('siswa.cetak_pdf');
     });
 
     /*

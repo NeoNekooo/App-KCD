@@ -32,14 +32,23 @@ class GtkController extends Controller
             });
         });
 
-        $gurus = $query->latest()->paginate(15);
+        // --- LOGIKA PAGINATION DINAMIS ---
+        $perPage = $request->input('per_page', 15); 
+
+        if ($perPage === 'all') {
+            $perPage = $query->count(); 
+            if ($perPage == 0) $perPage = 15; 
+        }
+
+        $gurus = $query->latest()->paginate($perPage)->appends($request->all());
         
         return view('admin.kepegawaian.gtk.index_guru', compact('gurus'));
     }
 
     public function indexTendik(Request $request)
     {
-        $query = Gtk::query()->where('jenis_ptk_id_str', 'Tenaga Kependidikan');
+        // 1. Filter Data (Gabungkan Kepsek (91) & Tendik (93))
+        $query = Gtk::query()->whereIn('jenis_ptk_id', ['91', '93']);
         
         $query->when($request->search, function ($q, $search) {
             return $q->where(function ($sub) use ($search) {
@@ -49,12 +58,20 @@ class GtkController extends Controller
             });
         });
 
-        $tendiks = $query->latest()->paginate(15);
+        // 2. LOGIKA PAGINATION DINAMIS
+        $perPage = $request->input('per_page', 15); 
+
+        if ($perPage === 'all') {
+            $perPage = $query->count(); 
+            if ($perPage == 0) $perPage = 15;
+        }
+
+        $tendiks = $query->latest()->paginate($perPage)->appends($request->all());
         
         return view('admin.kepegawaian.gtk.index_tendik', compact('tendiks'));
     }
 
-    // --- FUNGSI EXPORT & PDF BAWAAN (Lama) ---
+    // --- FUNGSI EXPORT & PDF BAWAAN ---
 
     public function exportGuruExcel(Request $request)
     {
@@ -79,7 +96,7 @@ class GtkController extends Controller
 
     public function exportTendikExcel(Request $request)
     {
-        $query = Gtk::query()->where('jenis_ptk_id_str', 'Tenaga Kependidikan');
+        $query = Gtk::query()->whereIn('jenis_ptk_id', ['91', '93']);
 
         if ($request->has('ids')) {
             $ids = explode(',', $request->input('ids'));
@@ -113,6 +130,7 @@ class GtkController extends Controller
         $qrCodeData = "Nama: " . $gtk->nama . "\nNUPTK: " . ($gtk->nuptk ?? '-');
         $rombelWali = Rombel::where('ptk_id', $gtk->ptk_id)->first();
         $rombelMengajar = Rombel::whereJsonContains('pembelajaran', ['ptk_id' => $gtk->ptk_id])->get();
+        
         $tugasTerbaru = TugasPegawai::where('pegawai_id', $gtk->ptk_id)->orderBy('tmt', 'desc')->first();
 
         $pdf = Pdf::loadView('admin.kepegawaian.gtk.gtk_pdf', compact(
@@ -129,44 +147,38 @@ class GtkController extends Controller
         $ids = explode(',', $request->input('ids'));
         $gtks = Gtk::find($ids); 
         $sekolah = Sekolah::first();
-        $pdf = Pdf::loadView('admin.kepegawaian.gtk.gtk_pdf_multiple', compact('gtks', 'sekolah'));
+        
+        $rombelMengajar = Rombel::all(); 
+
+        $pdf = Pdf::loadView('admin.kepegawaian.gtk.gtk_pdf_multiple', compact('gtks', 'sekolah', 'rombelMengajar'));
         $fileName = 'Kumpulan_Profil_GTK.pdf';
         return $pdf->stream($fileName);
     }
 
-    // --- FUNGSI UPDATE DATA & UPLOAD MEDIA (BARU & LAMA) ---
+    // --- FUNGSI UPDATE DATA & UPLOAD MEDIA ---
 
-    // [BARU] Fungsi Update Data Lengkap (Identitas, Pribadi, dll)
     public function updateData(Request $request, $id)
     {
         $gtk = Gtk::findOrFail($id);
 
-        // Validasi dasar (sesuaikan dengan kebutuhan)
-        // Saya buat nullable agar fleksibel, kecuali Nama
         $request->validate([
             'nama' => 'required|string|max:255',
             'nik' => 'nullable|numeric',
             'email' => 'nullable|email',
             'tanggal_lahir' => 'nullable|date',
-            // Tambahkan validasi lain jika perlu
         ]);
 
         try {
-            // Ambil semua input kecuali token dan method PUT
             $data = $request->except(['_token', '_method']);
-
-            // Update data ke database
             $gtk->update($data);
 
             return redirect()->back()->with('success', 'Data lengkap ' . $gtk->nama . ' berhasil diperbarui!');
 
         } catch (\Exception $e) {
-            // Menangkap error jika nama kolom tidak sesuai
             return redirect()->back()->withErrors(['msg' => 'Gagal menyimpan data: ' . $e->getMessage()])->withInput();
         }
     }
 
-    // Fungsi Upload Media (Foto & TTD) - Sudah ada sebelumnya
     public function uploadMedia(Request $request, $id)
     {
         $request->validate([
@@ -198,18 +210,17 @@ class GtkController extends Controller
 
     // --- FITUR BARU: CETAK KARTU ID ---
 
-    // 1. Halaman List Pencarian (Yang ada tombol Cetaknya)
     public function indexCetakKartu(Request $request)
     {
         $query = Gtk::query();
 
-        // 1. Filter Pencarian (Nama/NIP)
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('nama', 'like', "%{$search}%")
                   ->orWhere('nip', 'like', "%{$search}%")
-                  ->orWhere('nuptk', 'like', "%{$search}%");
+                  ->orWhere('nuptk', 'like', "%{$search}%")
+                  ->orWhere('nik', 'like', "%{$search}%"); // <--- UPDATE: Tambahkan pencarian NIK
             });
         }
 
@@ -218,73 +229,56 @@ class GtkController extends Controller
         }
 
         $gtks = $query->orderBy('nama', 'asc')->paginate(10);
-        
-        // Ambil data sekolah untuk preview gambar di view
         $sekolah = Sekolah::first(); 
 
         return view('admin.kepegawaian.gtk.index_cetak_kartu', compact('gtks', 'sekolah'));
     }
 
-    
     public function cetakSemua(Request $request)
     {
         $query = Gtk::query();
 
-        // 1. Terapkan Filter Pencarian (Copy dari index)
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('nama', 'like', "%{$search}%")
                   ->orWhere('nip', 'like', "%{$search}%")
-                  ->orWhere('nuptk', 'like', "%{$search}%");
+                  ->orWhere('nuptk', 'like', "%{$search}%")
+                  ->orWhere('nik', 'like', "%{$search}%"); // <--- UPDATE: Tambahkan pencarian NIK
             });
         }
 
-        // 2. Terapkan Filter Status (Copy dari index)
         if ($request->filled('status')) {
             $query->where('jenis_ptk_id_str', $request->status);
         }
 
-        // 3. AMBIL SEMUA DATA (Tanpa Pagination)
         $gtks = $query->orderBy('nama', 'asc')->get();
         $sekolah = Sekolah::first();
 
-        // 4. Pakai view cetak massal yang sama
         return view('admin.kepegawaian.gtk.cetak_kartu_massal', compact('gtks', 'sekolah'));
     }
 
     public function cetakKartu($id)
     {
-        // 1. Ambil data pegawai
         $gtk = Gtk::findOrFail($id);
-        
-        // 2. Ambil data sekolah
         $sekolah = Sekolah::first();
-
-        // 3. TRIK: Kita bungkus data satu orang ini menjadi 'koleksi' 
-        // supaya bisa memakai view 'cetak_kartu_massal' yang desainnya sudah bagus.
         $gtks = collect([$gtk]);
 
-        // 4. Tampilkan view
         return view('admin.kepegawaian.gtk.cetak_kartu_massal', compact('gtks', 'sekolah'));
     }
 
     public function uploadBackgroundKartu(Request $request)
     {
         $request->validate([
-            'background_kartu' => 'required|image|mimes:jpeg,png,jpg|max:2048', // Max 2MB
+            'background_kartu' => 'required|image|mimes:jpeg,png,jpg|max:2048', 
         ]);
 
-        // Ambil data sekolah (asumsi ID 1)
         $sekolah = Sekolah::firstOrCreate(['id' => 1]);
 
         if ($request->hasFile('background_kartu')) {
-            // Hapus background lama jika ada
             if ($sekolah->background_kartu && Storage::disk('public')->exists($sekolah->background_kartu)) {
                 Storage::disk('public')->delete($sekolah->background_kartu);
             }
-            
-            // Simpan background baru
             $path = $request->file('background_kartu')->store('sekolah_media/background', 'public');
             $sekolah->background_kartu = $path;
             $sekolah->save();
@@ -292,7 +286,6 @@ class GtkController extends Controller
 
         return back()->with('success', 'Background kartu berhasil diupdate!');
     }
-
 
     // Personal
     public function profil()
@@ -346,7 +339,5 @@ class GtkController extends Controller
             'guruList'        => collect(), // biar blade gak error
         ]);
     }
-
-
 
 }
