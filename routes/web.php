@@ -132,6 +132,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
         Route::get('sekolah', [SekolahController::class, 'index'])->name('sekolah.index');
         Route::put('sekolah', [SekolahController::class, 'update'])->name('sekolah.update');
         Route::get('/webservice', [ApiSettingsController::class, 'index'])->name('webservice.index');
+        Route::put('/webservice', [ApiSettingsController::class, 'update'])->name('webservice.update');
     });
     
     // --- GRUP KEPEGAWAIAN --- (Struktur dari V1)

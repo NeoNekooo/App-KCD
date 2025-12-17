@@ -481,6 +481,23 @@ return [
             ]
         ],
 
+        // DASHBOARD
+        [
+            'title' => 'Pengaturan Web Service',
+            'slug' => 'pengaturan-web-service',
+            'icon' => 'bx bx-home-circle',
+            'route' => 'admin.pengaturan.webservice.index',
+            'is_active' => 'request()->is("admin/pengaturan/webservice")',
+        ],
+
+        [
+            'title' => 'Pengaturan Web Service',
+            'slug' => 'pengaturan-web-service',
+            'icon' => 'bx bx-log-out',
+            'route' => 'admin.pengaturan.webservice',
+            'is_active' => 'request()->is("admin/pengaturan/webservice")',
+        ],
+
         // --- KELUAR ---
         [
             'title' => 'Keluar',

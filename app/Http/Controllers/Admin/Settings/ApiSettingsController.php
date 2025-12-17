@@ -3,49 +3,44 @@
 namespace App\Http\Controllers\Admin\Settings;
 
 use App\Http\Controllers\Controller;
-use App\Models\User; // Digunakan untuk simulasi pengambilan token
+use Illuminate\Http\Request;
+use App\Models\Setting;
 
 class ApiSettingsController extends Controller
 {
-    // ID user khusus yang tokennya digunakan untuk Web Service.
-    const SYSTEM_USER_ID = 1; 
-    const DOMAIN_KEY = 'app_domain';
-
     /**
-     * Menampilkan halaman Pengaturan Web Service.
+     * Menampilkan halaman input token
      */
     public function index()
     {
-        // --- 1. Ambil Data Setting (Simulasi dari Database) ---
-        $settings = $this->getSettings(); 
+        // Ambil data token dari database
+        // Kita gunakan first() agar bisa mengecek apakah data ada atau null
+        $setting = Setting::where('key', 'api_sync_token')->first();
 
-        // --- 2. Ambil Token Aktif (Simulasi dari System User) ---
-        $systemUser = User::find(self::SYSTEM_USER_ID);
-        
-        // Cek apakah user ada DAN model User memiliki metode 'tokens()' (yang seharusnya disediakan oleh HasApiTokens)
-        if ($systemUser && method_exists($systemUser, 'tokens')) {
-            $currentToken = $systemUser->tokens()->latest()->first();
-        } else {
-            // Kasus jika model User belum menggunakan HasApiTokens atau user tidak ditemukan.
-            $currentToken = null; 
-            // Tambahkan logging di sini jika perlu untuk debugging di server
-            // \Log::warning("System user ID " . self::SYSTEM_USER_ID . " not found or User model is missing HasApiTokens trait.");
-        }
-        
-        // Sensor token untuk keamanan
-        $settings['current_api_token'] = $currentToken 
-            ? substr($currentToken->token, 0, 4) . '****************' . substr($currentToken->token, -4) 
-            : 'Belum ada token aktif. Silakan hubungi admin atau pastikan model User menggunakan HasApiTokens.';
-        
-        return view('admin.settings.api_config', compact('settings'));
+        // Jika belum ada, nilainya kosong (jangan diisi random)
+        $tokenValue = $setting ? $setting->value : '';
+
+        return view('admin.settings.webservice.index', compact('tokenValue'));
     }
-    
-    // --- Fungsi Helper (Simulasi Database Setting) ---
-    private function getSettings()
+
+    /**
+     * Menyimpan token yang diinput manual oleh user
+     */
+    public function update(Request $request)
     {
-        // Ganti bagian ini dengan query database Anda yang sebenarnya dari tabel Setting
-        return [
-            self::DOMAIN_KEY => 'https://aplikasisekolahku.com', 
-        ];
+        // Validasi input
+        $request->validate([
+            'api_token' => 'required|string',
+        ], [
+            'api_token.required' => 'Token Webservice Dapodik wajib diisi.',
+        ]);
+
+        // Simpan atau Update ke database
+        Setting::updateOrCreate(
+            ['key' => 'api_sync_token'], // Pencarian berdasarkan key ini
+            ['value' => $request->api_token] // Nilai yang diupdate
+        );
+
+        return back()->with('success', 'Token Webservice Dapodik berhasil disimpan.');
     }
 }
