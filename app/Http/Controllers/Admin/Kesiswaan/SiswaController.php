@@ -8,6 +8,8 @@ use App\Models\Rombel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use App\Models\PelanggaranSanksi; // Pastikan model ini ada
+use App\Models\PelanggaranNilai;
 
 class SiswaController extends Controller
 {
@@ -205,5 +207,58 @@ class SiswaController extends Controller
 
         return view('admin.kesiswaan.siswa.kartu_massal', compact('siswas', 'rombel'));
     }
+
+    public function pelanggaran()
+{
+    // ===============================
+    // VALIDASI LOGIN SISWA
+    // ===============================
+    if (!session()->has('peserta_didik_id')) {
+        abort(403, 'Akses ditolak');
+    }
+
+    // ===============================
+    // AMBIL DATA SISWA LOGIN
+    // ===============================
+    $siswa = Siswa::where('peserta_didik_id', session('peserta_didik_id'))
+                  ->with('rombel')
+                  ->firstOrFail();
+
+    // ===============================
+    // AMBIL DATA PELANGGARAN SISWA
+    // ===============================
+    $pelanggaranSiswa = PelanggaranNilai::where('nipd', $siswa->nipd)
+        ->with('detailPoinSiswa')
+        ->orderBy('tanggal', 'desc')
+        ->get();
+
+    // ===============================
+    // HITUNG TOTAL POIN
+    // ===============================
+    $totalPoin = $pelanggaranSiswa->sum('poin');
+
+    // ===============================
+    // AMBIL SANKSI AKTIF
+    // ===============================
+    $sanksiAktif = PelanggaranSanksi::where('poin_min', '<=', $totalPoin)
+        ->where('poin_max', '>=', $totalPoin)
+        ->first();
+
+    // ===============================
+    // KIRIM KE VIEW
+    // ===============================
+    return view('admin.personal.siswa.pelanggaran', [
+        'siswa'             => $siswa,
+        'pelanggaranSiswa'  => $pelanggaranSiswa,
+        'totalPoin'         => $totalPoin,
+        'sanksiAktif'       => $sanksiAktif,
+
+        // dummy biar blade lama gak error
+        'tingkatList' => collect(),
+        'rombelList'  => collect(),
+        'siswaList'   => collect(),
+    ]);
+}
+
 }
 

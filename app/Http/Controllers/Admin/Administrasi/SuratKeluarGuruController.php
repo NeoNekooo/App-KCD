@@ -36,17 +36,19 @@ class SuratKeluarGuruController extends Controller
 
         $template = TipeSurat::findOrFail($request->tipe_surat_id);
         $guru     = Gtk::findOrFail($request->gtk_id);
-        $tapelAktif = Tapel::getAktif();
-
+        
         // Ambil isi template
         $isiSurat = $template->template_isi;
 
+        // Replace Placeholder
         $isiSurat = str_replace('{{nama}}', $guru->nama ?? '-', $isiSurat);
         $isiSurat = str_replace('{{nuptk}}', $guru->nuptk ?? '-', $isiSurat);
         $isiSurat = str_replace('{{nip}}', $guru->nip ?? '-', $isiSurat);
         $isiSurat = str_replace('{{mapel}}', $guru->mapel ?? $guru->jenis_ptk ?? '-', $isiSurat);
         $isiSurat = str_replace('{{jabatan}}', $guru->jabatan ?? '-', $isiSurat);
+        $isiSurat = str_replace('{{unit_kerja}}', $guru->unit_kerja ?? '-', $isiSurat); // Tambahan umum
         $isiSurat = str_replace('{{alamat}}', $guru->alamat ?? '-', $isiSurat);
+        $isiSurat = str_replace('{{tahun_pelajaran}}', $tapelAktif->tahun_ajaran ?? '-', $isiSurat); // Tambahan umum
 
         $isiSurat = str_replace(
             '{{tanggal}}',
@@ -54,8 +56,10 @@ class SuratKeluarGuruController extends Controller
             $isiSurat
         );
 
+        // PENTING: Kirim 'template_setting' ke View
         return back()
             ->withInput()
-            ->with('preview_surat', $isiSurat);
+            ->with('preview_surat', $isiSurat)
+            ->with('template_setting', $template); 
     }
 }

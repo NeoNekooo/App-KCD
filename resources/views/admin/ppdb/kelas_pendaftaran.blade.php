@@ -77,7 +77,7 @@
             </tr>
             @empty
             <tr>
-                <td colspan="{{ $tingkat->tingkat == 10 ? 6 : 5 }}" class="text-center">Belum ada data kelas</td>
+                <td colspan="{{ $tingkat->tingkat == 10 ? 7 : 5 }}" class="text-center">Belum ada data kelas</td>
             </tr>
             @endforelse
             </tbody>

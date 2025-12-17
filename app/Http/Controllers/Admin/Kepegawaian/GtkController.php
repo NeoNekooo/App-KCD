@@ -13,6 +13,8 @@ use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\GtkExport;
 use Illuminate\Support\Facades\Storage;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
+use App\Models\PelanggaranNilaiGtk;
+use App\Models\PelanggaranSanksiGtk;
 
 class GtkController extends Controller
 {
@@ -290,4 +292,61 @@ class GtkController extends Controller
 
         return back()->with('success', 'Background kartu berhasil diupdate!');
     }
+
+
+    // Personal
+    public function profil()
+    {
+        if (!auth()->check() || !session()->has('ptk_id')) {
+            abort(403);
+        }
+
+        $gtk = Gtk::where('ptk_id', session('ptk_id'))->firstOrFail();
+        $gtks = collect([$gtk]);
+
+        return view('admin.personal.guru.profil', compact('gtks'));
+    }
+
+    public function pelanggaran()
+    {
+        // ===============================
+        // AMBIL GTK BERDASARKAN LOGIN
+        // ===============================
+        if (!session()->has('ptk_id')) {
+            abort(403, 'Akses ditolak');
+        }
+
+        $gtk = Gtk::where('ptk_id', session('ptk_id'))->firstOrFail();
+
+        // ===============================
+        // AMBIL DATA PELANGGARAN
+        // ===============================
+        $pelanggaranGuru = PelanggaranNilaiGtk::where('nama_guru', $gtk->nama)
+            ->with('detailPoinGtk')
+            ->orderBy('tanggal', 'desc')
+            ->get();
+
+        // ===============================
+        // HITUNG TOTAL POIN
+        // ===============================
+        $totalPoin = $pelanggaranGuru->sum('poin');
+
+        // ===============================
+        // AMBIL SANKSI AKTIF
+        // ===============================
+        $sanksiAktif = PelanggaranSanksiGtk::where('poin_min', '<=', $totalPoin)
+            ->where('poin_max', '>=', $totalPoin)
+            ->first();
+
+        return view('admin.personal.guru.pelanggaran', [
+            'namaGuru'        => $gtk->nama,
+            'pelanggaranGuru' => $pelanggaranGuru,
+            'totalPoin'       => $totalPoin,
+            'sanksiAktif'     => $sanksiAktif,
+            'guruList'        => collect(), // biar blade gak error
+        ]);
+    }
+
+
+
 }

@@ -12,7 +12,17 @@ return [
     */
     'role_map' => [
         // ROLE CONTOH
-        'Operator Sekolah' => ['*'], // Akses ke semua menu
+        'Admin' => [
+            '*',
+            '!profil-guru',
+            '!pelanggaran-guru',
+            '!pelanggaran-siswa',
+        ],
+        'Operator Sekolah' => [
+            '*',
+            '!pelanggaran-siswa',
+        ],
+        // Akses ke semua menu
         'Kepala Sekolah' => [
             'dashboard', 
             'profil-sekolah',
@@ -22,12 +32,19 @@ return [
             'kesiswaan',
             'indisipliner',
         ],
+        'Peserta Didik' => [
+            'dashboard',
+            'profil-sekolah',
+            'pelanggaran-siswa',
+        ],
     ],
 
     'sub_role_map' => [
         'Guru' => [
             'dashboard',
-            'ppdb',
+            'profil-guru',
+            'pelanggaran-guru',
+            'ppdb-formulir',
             'kesiswaan',
             'kurikulum',
             'humas',
@@ -38,14 +55,16 @@ return [
         ],
         'Tenaga Kependidikan' => [
             'dashboard',
+            'profil-guru',
+            'pelanggaran-guru',
             'ppdb',
+            'ppdb-formulir',
             'sarpras',
             'kepegawaian',
             'kesiswaan',
             
         ],
     ],
-
 
     /*
     |--------------------------------------------------------------------------
@@ -72,6 +91,30 @@ return [
             'route' => 'admin.pengaturan.sekolah.index',
             'is_active' => 'request()->is("admin/pengaturan/sekolah*")',
         ],
+        // PROFIL PRIBADI
+        [
+            'title' => 'Profil Guru',
+            'slug' => 'profil-guru',
+            'icon' => 'bx bxs-user',
+            'route' => 'admin.personal.gtk.profil',
+            'is_active' => 'request()->is("admin/personal/gtk/profil")',
+        ],
+        // PELANGGARAN GURU  
+        [
+            'title' => 'Pelanggaran Guru',
+            'slug' => 'pelanggaran-guru',
+            'icon' => 'bx bxs-user-x',
+            'route' => 'admin.personal.gtk.pelanggaran',
+            'is_active' => 'request()->is("admin/personal/gtk/pelanggaran")',
+        ],  
+        // PELANGGARAN SISWA  
+        [
+            'title' => 'Pelanggaran Siswa',
+            'slug' => 'pelanggaran-siswa',
+            'icon' => 'bx bxs-user-x',
+            'route' => 'admin.personal.siswa.pelanggaran',
+            'is_active' => 'request()->is("admin/personal/siswa/pelanggaran")',
+        ],  
         // --- AKADEMIK ---
         [
             'title' => 'Akademik',
@@ -138,21 +181,104 @@ return [
             'is_toggle' => true,
             'is_open' => 'request()->is("admin/ppdb*")',
             'submenu' => [
-                ['title' => 'Tahun PPDB', 'route' => 'admin.ppdb.tahun-ppdb.index', 'is_active' => 'request()->routeIs("admin.ppdb.tahun-ppdb.index")'],
-                ['title' => 'Pengaturan Tingkat', 'route' => 'admin.ppdb.tingkat-ppdb.index', 'is_active' => 'request()->routeIs("admin.ppdb.tingkat-ppdb.index")'],
-                // ... Submenu PPDB lainnya
-                ['title' => 'Kompetensi', 'route' => 'admin.ppdb.kompetensi-ppdb.index', 'is_active' => 'request()->routeIs("admin.ppdb.kompetensi-ppdb.index")'],
-                ['title' => 'Kelas', 'route' => 'admin.ppdb.kelas-ppdb.index', 'is_active' => 'request()->routeIs("admin.ppdb.kelas-ppdb.index")'],
-                ['title' => 'Quota Pendaftaran', 'route' => 'admin.ppdb.quota-ppdb.index', 'is_active' => 'request()->routeIs("admin.ppdb.quota-ppdb.index")'],
-                ['title' => 'Jalur Pendaftaran', 'route' => 'admin.ppdb.jalur-ppdb.index', 'is_active' => 'request()->routeIs("admin.ppdb.jalur-ppdb.index")'],
-                ['title' => 'Syarat Pendaftaran', 'route' => 'admin.ppdb.syarat-ppdb.index', 'is_active' => 'request()->routeIs("admin.ppdb.syarat-ppdb.index")'],
-                ['title' => 'Formulir Pendaftaran', 'route' => 'admin.ppdb.formulir-ppdb.index', 'is_active' => 'request()->routeIs("admin.ppdb.formulir-ppdb.index")'],
-                ['title' => 'Calon Peserta Didik', 'route' => 'admin.ppdb.daftar-calon-peserta-didik.index', 'is_active' => 'request()->routeIs("admin.ppdb.daftar-calon-peserta-didik.index")'],
-                ['title' => 'Pemberian NIS', 'route' => 'admin.ppdb.pemberian-nis.index', 'is_active' => 'request()->routeIs("admin.ppdb.pemberian-nis.index")'],
-                ['title' => 'Peserta Didik Baru', 'route' => 'admin.ppdb.daftar-peserta-didik-baru.index', 'is_active' => 'request()->routeIs("admin.ppdb.daftar-peserta-didik-baru.index")'],
-                ['title' => 'Penempatan Kelas', 'route' => 'admin.ppdb.penempatan-kelas.index', 'is_active' => 'request()->routeIs("admin.ppdb.penempatan-kelas.index")'],
-                ['title' => 'Laporan Pendaftaran', 'route' => 'admin.ppdb.laporan-pendaftaran.index', 'is_active' => 'request()->routeIs("admin.ppdb.laporan-pendaftaran.index")'],
-                ['title' => 'Laporan Quota', 'route' => 'admin.ppdb.laporan-quota.index', 'is_active' => 'request()->routeIs("admin.ppdb.laporan-quota.index")'],
+            
+                [
+                    'title' => 'Tahun PPDB',
+                    'slug'  => 'ppdb-tahun',
+                    'route' => 'admin.ppdb.tahun-ppdb.index',
+                    'is_active' => 'request()->routeIs("admin.ppdb.tahun-ppdb.index")'
+                ],
+            
+                [
+                    'title' => 'Pengaturan Tingkat',
+                    'slug'  => 'ppdb-tingkat',
+                    'route' => 'admin.ppdb.tingkat-ppdb.index',
+                    'is_active' => 'request()->routeIs("admin.ppdb.tingkat-ppdb.index")'
+                ],
+            
+                [
+                    'title' => 'Kompetensi',
+                    'slug'  => 'ppdb-kompetensi',
+                    'route' => 'admin.ppdb.kompetensi-ppdb.index',
+                    'is_active' => 'request()->routeIs("admin.ppdb.kompetensi-ppdb.index")'
+                ],
+            
+                [
+                    'title' => 'Kelas',
+                    'slug'  => 'ppdb-kelas',
+                    'route' => 'admin.ppdb.kelas-ppdb.index',
+                    'is_active' => 'request()->routeIs("admin.ppdb.kelas-ppdb.index")'
+                ],
+            
+                [
+                    'title' => 'Quota Pendaftaran',
+                    'slug'  => 'ppdb-quota',
+                    'route' => 'admin.ppdb.quota-ppdb.index',
+                    'is_active' => 'request()->routeIs("admin.ppdb.quota-ppdb.index")'
+                ],
+            
+                [
+                    'title' => 'Jalur Pendaftaran',
+                    'slug'  => 'ppdb-jalur',
+                    'route' => 'admin.ppdb.jalur-ppdb.index',
+                    'is_active' => 'request()->routeIs("admin.ppdb.jalur-ppdb.index")'
+                ],
+            
+                [
+                    'title' => 'Syarat Pendaftaran',
+                    'slug'  => 'ppdb-syarat',
+                    'route' => 'admin.ppdb.syarat-ppdb.index',
+                    'is_active' => 'request()->routeIs("admin.ppdb.syarat-ppdb.index")'
+                ],
+            
+                [
+                    'title' => 'Formulir Pendaftaran',
+                    'slug'  => 'ppdb-formulir',
+                    'route' => 'admin.ppdb.formulir-ppdb.index',
+                    'is_active' => 'request()->routeIs("admin.ppdb.formulir-ppdb.index")'
+                ],
+            
+                [
+                    'title' => 'Calon Peserta Didik',
+                    'slug'  => 'ppdb-calon',
+                    'route' => 'admin.ppdb.daftar-calon-peserta-didik.index',
+                    'is_active' => 'request()->routeIs("admin.ppdb.daftar-calon-peserta-didik.index")'
+                ],
+            
+                [
+                    'title' => 'Pemberian NIS',
+                    'slug'  => 'ppdb-nis',
+                    'route' => 'admin.ppdb.pemberian-nis.index',
+                    'is_active' => 'request()->routeIs("admin.ppdb.pemberian-nis.index")'
+                ],
+            
+                [
+                    'title' => 'Peserta Didik Baru',
+                    'slug'  => 'ppdb-peserta-baru',
+                    'route' => 'admin.ppdb.daftar-peserta-didik-baru.index',
+                    'is_active' => 'request()->routeIs("admin.ppdb.daftar-peserta-didik-baru.index")'
+                ],
+            
+                [
+                    'title' => 'Penempatan Kelas',
+                    'slug'  => 'ppdb-penempatan',
+                    'route' => 'admin.ppdb.penempatan-kelas.index',
+                    'is_active' => 'request()->routeIs("admin.ppdb.penempatan-kelas.index")'
+                ],
+            
+                [
+                    'title' => 'Laporan Pendaftaran',
+                    'slug'  => 'ppdb-laporan',
+                    'route' => 'admin.ppdb.laporan-pendaftaran.index',
+                    'is_active' => 'request()->routeIs("admin.ppdb.laporan-pendaftaran.index")'
+                ],
+            
+                [
+                    'title' => 'Laporan Quota',
+                    'slug'  => 'ppdb-laporan-quota',
+                    'route' => 'admin.ppdb.laporan-quota.index',
+                    'is_active' => 'request()->routeIs("admin.ppdb.laporan-quota.index")'
+                ],
             ]
         ],
         // --- ALUMNI ---
@@ -163,7 +289,8 @@ return [
             'is_toggle' => true,
             'is_open' => 'request()->is("admin/alumni*")',
             'submenu' => [
-                ['title' => 'Data Alumni', 'route' => 'admin.underConstructions', 'is_active' => 'false'],
+                ['title' => 'Peluusan', 'route' => 'admin.alumni.pelulusan', 'is_active' => 'false'],
+                ['title' => 'Data Alumni', 'route' => 'admin.alumni.dataAlumni', 'is_active' => 'false'],
                 ['title' => 'Rekap Data Alumni', 'route' => 'admin.underConstructions', 'is_active' => 'false'],
             ]
         ],

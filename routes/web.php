@@ -42,6 +42,9 @@ use App\Http\Controllers\Admin\Ppdb\QuotaController;
 use App\Http\Controllers\Admin\Ppdb\SyaratController;
 use App\Http\Controllers\Admin\Ppdb\TahunPpdbController;
 
+// Controller Alumni
+use App\Http\Controllers\Admin\Alumni\AlumniController;
+
 // Controller Indisipliner
 use App\Http\Controllers\Admin\Indisipliner\IndisiplinerGtkController;
 use App\Http\Controllers\Admin\Indisipliner\IndisiplinerSiswaController;
@@ -107,6 +110,22 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
     Route::get('/dashboard', function () {
         return view('admin.dashboard');
     })->name('dashboard');
+
+    /*
+    |--------------------------------------------------------------------------
+    | Personal
+    |--------------------------------------------------------------------------
+    */
+    Route::prefix('personal')->name('personal.')->group(function () {
+        Route::prefix('gtk')->name('gtk.')->group(function () {
+            Route::get('profil', [GtkController::class, 'profil'])->name('profil');
+            Route::get('pelanggaran',[GtkController::class, 'pelanggaran'])->name('pelanggaran');
+        });
+        Route::prefix('siswa')->name('siswa.')->group(function () {
+            Route::get('profil', [SiswaController::class, 'profil'])->name('profil');
+            Route::get('pelanggaran',[SiswaController::class, 'pelanggaran'])->name('pelanggaran');
+        });
+    });
 
     // --- GRUP PENGATURAN --- (dari V1)
     Route::prefix('pengaturan')->name('pengaturan.')->group(function () {
@@ -247,6 +266,22 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
         Route::resource('landing', PpdbController::class);
 
         Route::post('submit', [PpdbController::class, 'submitForm'])->name('submit');
+    });
+
+    /*
+    |--------------------------------------------------------------------------
+    | (Alumni)
+    |--------------------------------------------------------------------------
+    */
+    Route::prefix('alumni')->name('alumni.')->group(function() {
+        Route::get('/dataAlumni', [AlumniController::class,'index'])->name('dataAlumni');
+        Route::get('/rekapDataAlumni', [AlumniController::class,'rekapDataAlumni']);
+
+        // Halaman index + filter kelas
+        Route::get('/pelulusan', [AlumniController::class, 'lulus'])->name('pelulusan');
+
+        // Proses pelulusan
+        Route::post('/process', [AlumniController::class, 'process'])->name('process');
     });
 
     // --- GRUP INDISIPLINER ---

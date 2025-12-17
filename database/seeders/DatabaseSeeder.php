@@ -15,6 +15,9 @@ class DatabaseSeeder extends Seeder
         $this->call([
             PengaturanAbsensiSeeder::class,
             TingkatSeeder::class,
+            // DatabaseSeeder.php
+            AdminSeeder::class,
+
         ]);
 
         // 3. Aktifkan kembali pengecekan foreign key

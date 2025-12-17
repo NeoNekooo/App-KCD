@@ -9,37 +9,44 @@ use Illuminate\Http\Request;
 class TipeSuratController extends Controller
 {
     /**
-     * Halaman utama template surat (Siswa/Guru)
+     * Halaman utama template surat
      */
     public function index(Request $request)
     {
-        // Tentukan kategori dari query string, default = siswa
+        // 1. Ambil kategori dari URL, default 'siswa'
         $kategori = $request->get('kategori', 'siswa');
 
-        // Ambil list template berdasarkan kategori
+        // 2. Ambil data list sesuai kategori
         $templates = TipeSurat::where('kategori', $kategori)
                               ->latest()
                               ->get();
 
-        return view('admin.administrasi.tipe_surat.index', compact('templates', 'kategori'));
+        // 3. Variabel $template kosong (mode create)
+        $template = null;
+
+        return view('admin.administrasi.tipe_surat.index', compact('templates', 'kategori', 'template'));
     }
 
     /**
-     * Simpan template baru.
+     * Simpan template baru
      */
     public function store(Request $request)
     {
         $request->validate([
-            'judul_surat'  => 'required|string|max:255',
-            'kategori'     => 'required|in:siswa,guru',
-            'template_isi' => 'required',
+            'judul_surat'   => 'required|string|max:255',
+            // UPDATE: Tambahkan 'sk' pada validasi
+            'kategori'      => 'required|in:siswa,guru,sk', 
+            'template_isi'  => 'required',
+            // UPDATE: Tambahkan validasi ukuran kertas
+            'ukuran_kertas' => 'required',
         ]);
 
         TipeSurat::create([
-            'judul_surat'  => $request->judul_surat,
-            'kategori'     => $request->kategori,
-            'template_isi' => $request->template_isi,
+            'judul_surat'   => $request->judul_surat,
+            'kategori'      => $request->kategori,
+            'template_isi'  => $request->template_isi,
             'ukuran_kertas' => $request->ukuran_kertas,
+            // Font size dihapus sesuai permintaan migrasi
         ]);
 
         return redirect()
@@ -48,28 +55,30 @@ class TipeSuratController extends Controller
     }
 
     /**
-     * Edit template.
+     * Edit template
+     * Mengembalikan view index tapi dengan variabel $template terisi
      */
-    public function edit($id, Request $request)
+    public function edit($id)
     {
         $template = TipeSurat::findOrFail($id);
-
         $kategori = $template->kategori;
 
+        // Ambil list untuk sidebar kanan
         $templates = TipeSurat::where('kategori', $kategori)->latest()->get();
 
-        return view('admin.administrasi.tipe_surat.index', compact('template','templates','kategori'));
+        // Return ke view index, tapi bawa data $template untuk diedit
+        return view('admin.administrasi.tipe_surat.index', compact('template', 'templates', 'kategori'));
     }
 
     /**
-     * Update template.
+     * Update template
      */
     public function update(Request $request, $id)
     {
         $request->validate([
-            'judul_surat'  => 'required|string|max:255',
-            'template_isi' => 'required',
-            'ukuran_kertas' => 'nullable|string',
+            'judul_surat'   => 'required|string|max:255',
+            'template_isi'  => 'required',
+            'ukuran_kertas' => 'required',
         ]);
 
         $tipeSurat = TipeSurat::findOrFail($id);
@@ -86,7 +95,7 @@ class TipeSuratController extends Controller
     }
 
     /**
-     * Hapus template.
+     * Hapus template
      */
     public function destroy($id)
     {

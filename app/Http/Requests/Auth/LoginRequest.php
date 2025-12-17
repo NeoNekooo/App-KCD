@@ -40,20 +40,26 @@ class LoginRequest extends FormRequest
             ]);
         }
 
-        // Cek apakah password sudah di-hash atau masih plain text
+        // =========================
+        // VALIDASI PASSWORD
+        // =========================
         if (Hash::needsRehash($user->password)) {
-            // Password masih plain text → bandingkan langsung
+
+            // Password masih plain text
             if ($credentials['password'] !== $user->password) {
                 throw ValidationException::withMessages([
                     'username' => trans('auth.failed'),
                 ]);
             }
 
-            // Rehash password otomatis
-            $user->password = Hash::make($credentials['password']);
-            $user->save();
+            // Rehash otomatis
+            $user->update([
+                'password' => Hash::make($credentials['password']),
+            ]);
+
         } else {
-            // Password sudah di-hash, pakai Hash::check
+
+            // Password sudah di-hash
             if (!Hash::check($credentials['password'], $user->password)) {
                 throw ValidationException::withMessages([
                     'username' => trans('auth.failed'),
@@ -61,31 +67,46 @@ class LoginRequest extends FormRequest
             }
         }
 
-        // Login user
+        // =========================
+        // LOGIN
+        // =========================
         Auth::login($user, $this->boolean('remember'));
 
-        // Ambil role dari peran_id_str
-        $role = $user->peran_id_str;
-            
-        // Jika PTK, ambil sub_role dari gtks
-        $sub_role = null;
-        $gtk_id = null;
+        // =========================
+        // ROLE & SESSION
+        // =========================
+        $role               = $user->peran_id_str;
+        $sub_role           = null;
+        $peserta_didik_id   = null;
+
+        // === PTK ===
         if ($role === 'PTK' && $user->ptk_id) {
+
             $gtk = \DB::table('gtks')
                 ->where('ptk_id', $user->ptk_id)
                 ->first();
-            $sub_role = $gtk->jenis_ptk_id_str;
-            
-        }
-        
-        // Set session
-        session([
-            'role' => $role,
-            'sub_role' => $sub_role,
-            'ptk_id'   => $user->ptk_id,
-        ]);
 
+            if ($gtk) {
+                $sub_role = $gtk->jenis_ptk_id_str;
+            }
+        }
+
+        // === PESERTA DIDIK ===
+        if ($role === 'Peserta Didik' && $user->peserta_didik_id) {
+            $peserta_didik_id = $user->peserta_didik_id;
+        }
+
+        // =========================
+        // SET SESSION FINAL
+        // =========================
+        session([
+            'role'             => $role,
+            'sub_role'         => $sub_role,
+            'ptk_id'           => $user->ptk_id,
+            'peserta_didik_id' => $peserta_didik_id,
+        ]);
     }
+
 
     public function ensureIsNotRateLimited(): void
     {
