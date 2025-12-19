@@ -15,6 +15,7 @@ return [
         'Admin' => [
             '*',
             '!profil-guru',
+            '!profil-siswa',
             '!pelanggaran-guru',
             '!pelanggaran-siswa',
         ],
@@ -35,6 +36,7 @@ return [
         'Peserta Didik' => [
             'dashboard',
             'profil-sekolah',
+            'profil-siswa',
             'pelanggaran-siswa',
         ],
     ],
@@ -91,13 +93,21 @@ return [
             'route' => 'admin.pengaturan.sekolah.index',
             'is_active' => 'request()->is("admin/pengaturan/sekolah*")',
         ],
-        // PROFIL PRIBADI
+        // PROFIL GURU
         [
             'title' => 'Profil Guru',
             'slug' => 'profil-guru',
             'icon' => 'bx bxs-user',
             'route' => 'admin.personal.gtk.profil',
             'is_active' => 'request()->is("admin/personal/gtk/profil")',
+        ],
+        // PROFIL SISWA
+        [
+            'title' => 'Profil Siswa',
+            'slug' => 'profil-siswa',
+            'icon' => 'bx bxs-user',
+            'route' => 'admin.personal.siswa.profil',
+            'is_active' => 'request()->is("admin/personal/siswa/profil")',
         ],
         // PELANGGARAN GURU  
         [

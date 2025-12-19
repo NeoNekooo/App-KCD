@@ -10,6 +10,8 @@ use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use App\Models\Pengguna;
+use Illuminate\Support\Facades\DB;
+
 
 class LoginRequest extends FormRequest
 {
@@ -79,7 +81,7 @@ class LoginRequest extends FormRequest
 
         // === PTK ===
         if ($role === 'PTK' && $user->ptk_id) {
-            $gtk = \DB::table('gtks')
+            $gtk = DB::table('gtks')
                 ->where('ptk_id', $user->ptk_id)
                 ->first();
 

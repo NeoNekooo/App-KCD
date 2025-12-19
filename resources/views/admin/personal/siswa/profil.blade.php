@@ -1,3 +1,18 @@
+@extends('layouts.admin')
+
+@section('content')
+
+@php
+    $namaKelas = $siswa->nama_rombel; 
+    if (empty($namaKelas)) {
+        $namaKelas = $siswa->rombel->nama ?? null; 
+    }
+    if (empty($namaKelas) && $siswa->peserta_didik_id) {
+        $rombelJson = \App\Models\Rombel::where('anggota_rombel', 'like', '%'.$siswa->peserta_didik_id.'%')->first();
+        if ($rombelJson) $namaKelas = $rombelJson->nama;
+    }
+    $namaKelas = $namaKelas ?? 'Belum Masuk Kelas';
+@endphp
 {{-- HEADER --}}
 <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-4">
     <h4 class="fw-bold py-3 mb-0">
@@ -262,3 +277,61 @@
         </div>
     </div>
 </div>
+
+<style>
+    .bg-light-gray { background-color: #f5f5f9; }
+    .object-fit-cover { object-fit: cover; }
+    
+    /* Layout Baris Bersih */
+    .row-clean { display: flex; align-items: flex-start; padding: 5px 0; border-bottom: none; line-height: 1.6; }
+    .row-clean label { width: 35%; font-weight: 600; color: #566a7f; margin: 0; font-size: 0.9375rem; }
+    .row-clean .sep { width: 3%; text-align: center; font-weight: 600; color: #566a7f; }
+    .row-clean .inp { width: 62%; font-size: 0.9375rem; color: #566a7f; font-weight: 400; }
+    
+    /* LOCKED STATE (DAPODIK) */
+    .inp.locked-dapodik { cursor: default; color: #697a8d; } 
+
+    /* EDITABLE STATE (DATA BARU) */
+    .clean-input { width: 100%; background: transparent; border: none; padding: 0; outline: none; color: inherit; font-family: inherit; font-size: inherit; }
+    .clean-input.editable-field { pointer-events: none; } /* Default state */
+    .clean-input.editing { pointer-events: auto; border-bottom: 1px dashed #696cff; color: #333; } /* Editing state */
+    .clean-input.editing:focus { border-bottom: 1px solid #696cff; }
+
+    /* Tab Styling */
+    .custom-pills .nav-link { border-radius: 50rem; padding: 0.3rem 0.8rem; color: #697a8d; font-weight: 500; font-size: 0.8rem; margin-right: 2px; margin-bottom: 4px; border: 1px solid transparent; }
+    .custom-pills .nav-link.active { background-color: #696cff; color: #fff; box-shadow: 0 2px 6px rgba(105, 108, 255, 0.4); }
+    
+    .btn-upload-float { position: absolute; bottom: -10px; right: -10px; background: #fff; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #696cff; cursor: pointer; box-shadow: 0 0.25rem 0.5rem rgba(161, 172, 184, 0.45); transition: 0.2s; }
+    .fade-in-animation { animation: fadeIn 0.5s ease-in-out; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+</style>
+
+@endsection
+
+@push('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const btnEdit = document.getElementById('btn-edit-data');
+        const btnBatal = document.getElementById('btn-batal-edit');
+        const actionGroup = document.getElementById('action-buttons-group');
+        const editableFields = document.querySelectorAll('.editable-field');
+
+        // Logic Tombol Edit (HANYA MEMBUKA KOLOM BARU)
+        btnEdit.addEventListener('click', function() {
+            btnEdit.classList.add('d-none');
+            actionGroup.classList.remove('d-none');
+            actionGroup.classList.add('d-flex');
+
+            editableFields.forEach(field => {
+                field.removeAttribute('readonly');
+                field.classList.add('editing');
+            });
+        });
+
+        // Logic Tombol Batal
+        btnBatal.addEventListener('click', function() {
+            location.reload(); 
+        });
+    });
+</script>
+@endpush

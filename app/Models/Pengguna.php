@@ -26,6 +26,9 @@ class Pengguna extends Authenticatable
     protected $fillable = [
         'username',
         'password',
+        'peran_id_str',
+        'peserta_didik_id',
+        'pengguna_id'
         // tambahkan kolom lain jika perlu
     ];
 

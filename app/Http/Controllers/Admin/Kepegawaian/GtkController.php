@@ -13,8 +13,6 @@ use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\GtkExport;
 use Illuminate\Support\Facades\Storage;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
-use App\Models\PelanggaranNilaiGtk;
-use App\Models\PelanggaranSanksiGtk;
 
 class GtkController extends Controller
 {
@@ -129,7 +127,11 @@ class GtkController extends Controller
         $sekolah = Sekolah::first();
         $qrCodeData = "Nama: " . $gtk->nama . "\nNUPTK: " . ($gtk->nuptk ?? '-');
         $rombelWali = Rombel::where('ptk_id', $gtk->ptk_id)->first();
-        $rombelMengajar = Rombel::whereJsonContains('pembelajaran', ['ptk_id' => $gtk->ptk_id])->get();
+        $rombelMengajar = Rombel::whereJsonContains(
+    'pembelajaran->*.ptk_id',
+    (string) $gtk->ptk_id
+)->get();
+
         
         $tugasTerbaru = TugasPegawai::where('pegawai_id', $gtk->ptk_id)->orderBy('tmt', 'desc')->first();
 
@@ -339,5 +341,4 @@ class GtkController extends Controller
             'guruList'        => collect(), // biar blade gak error
         ]);
     }
-
 }
