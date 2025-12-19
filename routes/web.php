@@ -196,13 +196,26 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
     |--------------------------------------------------------------------------
     */
     Route::prefix('kesiswaan')->name('kesiswaan.')->group(function() {
-        Route::get('siswa/export/excel', [SiswaController::class, 'exportExcel'])->name('siswa.export.excel');
-        Route::get('siswa/show-multiple', [SiswaController::class, 'showMultiple'])->name('siswa.show-multiple');
-        Route::get('siswa/{id}/cetak-kartu', [SiswaController::class, 'cetakKartu'])->name('siswa.cetak_kartu');
-        Route::resource('siswa', SiswaController::class);
-        Route::get('/cetak-kartu-massal', [SiswaController::class, 'showCetakMassalIndex'])->name('siswa.cetak_massal_index');
-        Route::get('/cetak-kartu-massal/{rombel}', [SiswaController::class, 'cetakKartuMassal'])->name('siswa.cetak_massal_show');
-        Route::get('siswa/{id}/cetak-pdf', [SiswaController::class, 'cetakPdf'])->name('siswa.cetak_pdf');
+        // 1. ROUTE SPESIFIK (JANGAN PAKAI {id} DISINI) - WAJIB DI ATAS RESOURCE
+    Route::get('siswa/export/excel', [SiswaController::class, 'exportExcel'])->name('siswa.export.excel');
+    Route::get('siswa/show-multiple', [SiswaController::class, 'showMultiple'])->name('siswa.show-multiple');
+    
+    // INI YANG TADI ERROR, SEKARANG PINDAH KE ATAS:
+    Route::get('siswa/cetak-pdf-multiple', [SiswaController::class, 'cetakPdfMultiple'])->name('siswa.cetak_pdf_multiple'); 
+
+    // 2. ROUTE CETAK MASSAL (Beda prefix, jadi aman di mana saja, tapi simpan di atas biar rapi)
+    Route::get('/cetak-kartu-massal', [SiswaController::class, 'showCetakMassalIndex'])->name('siswa.cetak_massal_index');
+    Route::get('/cetak-kartu-massal/{rombel}', [SiswaController::class, 'cetakKartuMassal'])->name('siswa.cetak_massal_show');
+
+    // 3. ROUTE RESOURCE (Standar CRUD: index, create, store, show {id}, edit {id}, update {id}, destroy {id})
+    // Route ini menangkap pola 'siswa/{id}'
+    Route::resource('siswa', SiswaController::class);
+
+    // 4. ROUTE DENGAN ID TAPI ADA TAMBAHAN URL (Ini aman di bawah resource)
+    // Pola: siswa/{id}/sesuatu
+    Route::get('siswa/{id}/cetak-kartu', [SiswaController::class, 'cetakKartu'])->name('siswa.cetak_kartu');
+    Route::get('siswa/{id}/cetak-pdf', [SiswaController::class, 'cetakPdf'])->name('siswa.cetak_pdf');
+
     });
 
     /*

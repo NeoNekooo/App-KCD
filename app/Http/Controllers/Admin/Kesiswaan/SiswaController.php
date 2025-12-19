@@ -12,8 +12,6 @@ use Illuminate\Support\Str;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\SiswaExport;
-use App\Models\PelanggaranSanksi; // Pastikan model ini ada
-use App\Models\PelanggaranNilai;
 
 class SiswaController extends Controller
 {
@@ -29,10 +27,10 @@ class SiswaController extends Controller
             $rombel = Rombel::find($request->rombel_id);
             if ($rombel) {
                 // Cek apakah sudah array atau masih string JSON
-                $anggotaData = is_array($rombel->anggota_rombel)
-                    ? $rombel->anggota_rombel
+                $anggotaData = is_array($rombel->anggota_rombel) 
+                    ? $rombel->anggota_rombel 
                     : json_decode($rombel->anggota_rombel, true);
-
+                
                 if (!empty($anggotaData)) {
                     $anggotaPdIds = array_column($anggotaData, 'peserta_didik_id');
                     $query->whereIn('peserta_didik_id', $anggotaPdIds);
@@ -49,30 +47,30 @@ class SiswaController extends Controller
             $searchTerm = $request->search;
             $query->where(function ($q) use ($searchTerm) {
                 $q->where('nama', 'like', "%{$searchTerm}%")
-                    ->orWhere('nisn', 'like', "%{$searchTerm}%")
-                    ->orWhere('nik', 'like', "%{$searchTerm}%");
+                  ->orWhere('nisn', 'like', "%{$searchTerm}%")
+                  ->orWhere('nik', 'like', "%{$searchTerm}%");
             });
         }
 
         // 3. PAGINASI
         $perPage = $request->input('per_page', 15);
-        $siswas = ($perPage == 'all')
-            ? $query->orderBy('nama', 'asc')->paginate(9999)
+        $siswas = ($perPage == 'all') 
+            ? $query->orderBy('nama', 'asc')->paginate(9999) 
             : $query->orderBy('nama', 'asc')->paginate($perPage);
 
         // 4. DATA ROMBEL (Untuk Dropdown)
         $rombels = Rombel::select('id', 'nama', 'anggota_rombel')
-            ->orderBy('nama', 'asc')
-            ->get()
-            ->unique('nama');
+                         ->orderBy('nama', 'asc')
+                         ->get()
+                         ->unique('nama');
 
         // 5. MAPPING KELAS MANUAL (Agar tabel tidak kosong kolom kelasnya)
         $siswaRombelMap = [];
-        foreach ($rombels as $r) {
+        foreach($rombels as $r) {
             $members = is_array($r->anggota_rombel) ? $r->anggota_rombel : json_decode($r->anggota_rombel, true);
-            if (is_array($members)) {
-                foreach ($members as $m) {
-                    if (isset($m['peserta_didik_id'])) {
+            if(is_array($members)) {
+                foreach($members as $m) {
+                    if(isset($m['peserta_didik_id'])) {
                         $siswaRombelMap[$m['peserta_didik_id']] = $r->nama;
                     }
                 }
@@ -99,33 +97,37 @@ class SiswaController extends Controller
     }
 
     /**
-     * Menampilkan Detail Siswa (Show)
+     * SHOW SINGLE (Dibungkus jadi Collection biar View-nya sama)
      */
     public function show($id)
     {
-        $siswa = Siswa::with('rombel')->findOrFail($id);
+        // Kita ambil pakai get() supaya jadi Collection (isi 1 item)
+        // Bukan findOrFail() yang langsung jadi object
+        $siswas = Siswa::with('rombel')->where('id', $id)->get();
 
-        // LOGIKA CARI KELAS (Khusus untuk halaman detail)
-        // 1. Coba dari database (Nama Rombel Langsung atau Relasi)
-        $namaKelas = $siswa->nama_rombel;
-        if (empty($namaKelas)) {
-            $namaKelas = optional($siswa->rombel)->nama;
-        }
-
-        // 2. Fallback ke JSON jika database null
-        if (empty($namaKelas) && $siswa->peserta_didik_id) {
-            $rombelJson = Rombel::where('anggota_rombel', 'like', '%' . $siswa->peserta_didik_id . '%')->first();
-            if ($rombelJson) {
-                $namaKelas = $rombelJson->nama;
-            }
-        }
-
-        // 3. Default
-        $namaKelas = $namaKelas ?? 'Belum Masuk Kelas';
-
-        return view('admin.kesiswaan.siswa.show', compact('siswa', 'namaKelas'));
+        return view('admin.kesiswaan.siswa.show', compact('siswas'));
     }
 
+    /**
+     * SHOW MULTIPLE (Ambil banyak ID, kirim sebagai Collection)
+     */
+    public function showMultiple(Request $request)
+    {
+        $idsStr = $request->query('ids', '');
+        if (empty($idsStr)) {
+            return redirect()->route('admin.kesiswaan.siswa.index');
+        }
+
+        $idsArray = explode(',', $idsStr);
+        
+        // Ambil semua siswa yang dipilih, urutkan sesuai nama
+        $siswas = Siswa::with('rombel')
+                        ->whereIn('id', $idsArray)
+                        ->orderBy('nama', 'asc')
+                        ->get();
+
+        return view('admin.kesiswaan.siswa.show', compact('siswas'));
+    }
     public function edit($id)
     {
         // Redirect ke show karena kita pakai One Page Edit
@@ -147,67 +149,30 @@ class SiswaController extends Controller
         // 1. Ambil inputan HANYA untuk kolom tambahan (Grup B + ALAMAT)
         $dataToUpdate = $request->only([
             // --- DATA BARU 1: ALAMAT (SEKARANG BOLEH DIEDIT) ---
-            'alamat_jalan',
-            'rt',
-            'rw',
-            'dusun',
-            'desa_kelurahan',
-            'kecamatan',
-            'kabupaten_kota',
-            'provinsi',
-            'kode_pos',
-            'lintang',
-            'bujur',
-            'jenis_tinggal_id_str', // Jenis tinggal juga biasanya nempel sama alamat
+            'alamat_jalan', 'rt', 'rw', 'dusun', 'desa_kelurahan', 
+            'kecamatan', 'kabupaten_kota', 'provinsi', 'kode_pos', 
+            'lintang', 'bujur', 'jenis_tinggal_id_str', // Jenis tinggal juga biasanya nempel sama alamat
 
             // --- DATA BARU 2: KESEJAHTERAAN ---
-            'no_kks',
-            'penerima_kps',
-            'no_kps',
-            'layak_pip',
-            'alasan_layak_pip',
-            'penerima_kip',
-            'no_kip',
-            'nama_di_kip',
-            'alasan_menolak_kip',
-
+            'no_kks', 'penerima_kps', 'no_kps', 'layak_pip', 'alasan_layak_pip',
+            'penerima_kip', 'no_kip', 'nama_di_kip', 'alasan_menolak_kip',
+            
             // --- DATA BARU 3: DETAIL ORTU & WALI ---
-            'tahun_lahir_ayah',
-            'pendidikan_ayah_id_str',
-            'penghasilan_ayah_id_str',
-            'kebutuhan_khusus_ayah',
-            'tahun_lahir_ibu',
-            'pendidikan_ibu_id_str',
-            'penghasilan_ibu_id_str',
-            'kebutuhan_khusus_ibu',
-            'tahun_lahir_wali',
-            'pendidikan_wali_id_str',
-            'penghasilan_wali_id_str',
-            'nama_wali',
-            'pekerjaan_wali_id_str',
+            'tahun_lahir_ayah', 'pendidikan_ayah_id_str', 'penghasilan_ayah_id_str', 'kebutuhan_khusus_ayah',
+            'tahun_lahir_ibu', 'pendidikan_ibu_id_str', 'penghasilan_ibu_id_str', 'kebutuhan_khusus_ibu',
+            'tahun_lahir_wali', 'pendidikan_wali_id_str', 'penghasilan_wali_id_str', 
+            'nama_wali', 'pekerjaan_wali_id_str',
 
             // --- DATA BARU 4: TRANSPORT & PERIODIK ---
-            'alat_transportasi_id_str',
-            'jarak_rumah_ke_sekolah_km',
-            'waktu_tempuh_menit',
-            'jumlah_saudara_kandung',
-            'tinggi_badan',
-            'berat_badan',
-
+            'alat_transportasi_id_str', 'jarak_rumah_ke_sekolah_km', 'waktu_tempuh_menit', 
+            'jumlah_saudara_kandung', 'tinggi_badan', 'berat_badan',
+            
             // --- DATA BARU 5: DOKUMEN ---
-            'npsn_sekolah_asal',
-            'no_seri_ijazah',
-            'no_seri_skhun',
-            'no_ujian_nasional',
-            'no_registrasi_akta_lahir',
-            'sekolah_asal',
-            'anak_keberapa',
+            'npsn_sekolah_asal', 'no_seri_ijazah', 'no_seri_skhun', 'no_ujian_nasional', 'no_registrasi_akta_lahir',
+            'sekolah_asal', 'anak_keberapa',
 
             // Kontak (Boleh Edit)
-            'email',
-            'nomor_telepon_seluler',
-            'agama_id_str',
-            'kewarganegaraan'
+            'email', 'nomor_telepon_seluler', 'agama_id_str', 'kewarganegaraan'
         ]);
 
         // 2. Handle Foto
@@ -223,7 +188,23 @@ class SiswaController extends Controller
         $siswa->update($dataToUpdate);
 
         return redirect()->route('admin.kesiswaan.siswa.show', $siswa->id)
-            ->with('success', 'Data siswa berhasil diperbarui.');
+                         ->with('success', 'Data siswa berhasil diperbarui.');
+
+        $siswa->update($dataToUpdate);
+
+        // LOGIC REDIRECT: Cek apakah sedang mode Multiple?
+        if ($request->has('_ids_multiple')) {
+            // Balik ke mode show-multiple di ID yang sama
+            return redirect()->route('admin.kesiswaan.siswa.show-multiple', [
+                'ids' => $request->_ids_multiple,
+                'current_id' => $siswa->id
+            ])->with('success', 'Data berhasil disimpan.');
+        }
+
+        // Redirect Biasa
+        return redirect()->route('admin.kesiswaan.siswa.show', $siswa->id)
+                         ->with('success', 'Data tambahan siswa berhasil diperbarui.');
+    
     }
 
     public function destroy(Siswa $siswa)
@@ -255,14 +236,14 @@ class SiswaController extends Controller
 
     public function cetakKartuMassal(Rombel $rombel)
     {
-        $anggotaData = is_array($rombel->anggota_rombel)
-            ? $rombel->anggota_rombel
+        $anggotaData = is_array($rombel->anggota_rombel) 
+            ? $rombel->anggota_rombel 
             : json_decode($rombel->anggota_rombel, true);
-
+            
         $siswaIds = [];
         if (!empty($anggotaData)) {
-            $anggotaPdIds = array_column($anggotaData, 'peserta_didik_id');
-            $siswaIds = Siswa::whereIn('peserta_didik_id', $anggotaPdIds)->pluck('id');
+             $anggotaPdIds = array_column($anggotaData, 'peserta_didik_id');
+             $siswaIds = Siswa::whereIn('peserta_didik_id', $anggotaPdIds)->pluck('id');
         }
 
         $siswas = Siswa::whereIn('id', $siswaIds)->orderBy('nama', 'asc')->get();
@@ -281,38 +262,78 @@ class SiswaController extends Controller
 
     public function cetakPdf($id)
     {
-        // 1. Ambil Data Siswa
         $siswa = Siswa::with('rombel')->findOrFail($id);
-
-        // 2. Ambil Data Sekolah (Ambil data pertama/satu-satunya)
         $sekolah = Sekolah::first();
 
-        // 3. Logic Kelas
-        $namaKelas = $siswa->nama_rombel;
-        if (empty($namaKelas)) $namaKelas = optional($siswa->rombel)->nama;
-        if (empty($namaKelas)) $namaKelas = 'Belum Masuk Kelas';
+        // WRAPPING: Bungkus jadi collection agar view bisa meloop
+        $siswas = collect([$siswa]); 
 
-        // 4. Load View PDF dengan data Sekolah
-        $pdf = Pdf::loadView('admin.kesiswaan.siswa.pdf_biodata', compact('siswa', 'namaKelas', 'sekolah'));
-
+        $pdf = Pdf::loadView('admin.kesiswaan.siswa.pdf_biodata', compact('siswas', 'sekolah'));
         $pdf->setPaper('a4', 'portrait');
-
-        return $pdf->stream('Biodata_' . $siswa->nama . '.pdf');
+        return $pdf->stream('Biodata_'.$siswa->nama.'.pdf');
     }
 
-    public function exportExcel(Request $request)
+    /**
+     * CETAK PDF MULTIPLE (Dari Tombol Header)
+     */
+    public function cetakPdfMultiple(Request $request)
     {
-        // Nama file dengan timestamp agar unik
-        $fileName = 'Data_Siswa_SMK_Merdeka_' . date('d-m-Y_H-i') . '.xlsx';
+        // Gunakan 'input' agar bisa menangkap dari Query String (?ids=...) maupun Body
+        $idsStr = $request->input('ids');
+        
+        // Debugging: Jika masih mental, uncomment baris di bawah ini untuk cek data masuk gak
+        // dd($idsStr); 
 
-        return Excel::download(new SiswaExport, $fileName);
+        if (empty($idsStr)) {
+            return redirect()->back()->with('error', 'Gagal mencetak: Tidak ada data siswa yang dipilih.');
+        }
+
+        $idsArray = explode(',', $idsStr);
+        $sekolah = Sekolah::first();
+
+        // Ambil data siswa
+        $siswas = Siswa::with('rombel')
+                        ->whereIn('id', $idsArray)
+                        ->orderBy('nama', 'asc')
+                        ->get();
+
+        if ($siswas->isEmpty()) {
+            return redirect()->back()->with('error', 'Data siswa tidak ditemukan di database.');
+        }
+
+        $pdf = Pdf::loadView('admin.kesiswaan.siswa.pdf_biodata', compact('siswas', 'sekolah'));
+        $pdf->setPaper('a4', 'portrait');
+        
+        $filename = 'Kumpulan_Biodata_Siswa_'.date('d-m-Y_His').'.pdf';
+        return $pdf->stream($filename);
     }
 
-    public function showMultiple(Request $request)
+   public function exportExcel(Request $request)
     {
-        $ids = explode(',', $request->query('ids', ''));
-        $siswas = Siswa::whereIn('id', $ids)->get();
-        return "Fitur Lihat Data Multiple (IDs: " . implode(', ', $ids) . ")";
+        // A. LOGIKA FILTER ID (SELECTED EXPORT)
+        $ids = null;
+        // Cek apakah ada parameter 'ids' di URL (dikirim dari Javascript index.blade.php)
+        if ($request->has('ids') && !empty($request->query('ids'))) {
+            $ids = explode(',', $request->query('ids'));
+        }
+
+        // B. LOGIKA NAMA FILE (DARI DB SEKOLAH)
+        $sekolah = Sekolah::first();
+        
+        if ($sekolah) {
+            // Ubah "SMK HEBAT" jadi "SMK_HEBAT" agar aman buat nama file
+            $schoolName = Str::slug($sekolah->nama, '_'); 
+        } else {
+            $schoolName = 'DATA_SISWA';
+        }
+
+        // Hasil: SMK_NURUL_ISLAM_AFFANDIYAH_DATA_SISWA_17-12-2025.xlsx
+        $fileName = strtoupper($schoolName) . '_DATA_SISWA_' . date('d-m-Y') . '.xlsx';
+        
+        // C. DOWNLOAD
+        // Kita kirim $ids ke class SiswaExport. 
+        // Jika $ids null, dia akan export semua. Jika ada isi, dia filter.
+        return Excel::download(new SiswaExport($ids), $fileName);
     }
 
     // Personal

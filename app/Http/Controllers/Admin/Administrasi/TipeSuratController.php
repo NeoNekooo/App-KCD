@@ -34,10 +34,8 @@ class TipeSuratController extends Controller
     {
         $request->validate([
             'judul_surat'   => 'required|string|max:255',
-            // UPDATE: Tambahkan 'sk' pada validasi
             'kategori'      => 'required|in:siswa,guru,sk', 
             'template_isi'  => 'required',
-            // UPDATE: Tambahkan validasi ukuran kertas
             'ukuran_kertas' => 'required',
         ]);
 
@@ -46,7 +44,9 @@ class TipeSuratController extends Controller
             'kategori'      => $request->kategori,
             'template_isi'  => $request->template_isi,
             'ukuran_kertas' => $request->ukuran_kertas,
-            // Font size dihapus sesuai permintaan migrasi
+            // PERBAIKAN: Tangani checkbox use_kop
+            // Jika dicentang (has 'use_kop') simpan 1, jika tidak simpan 0
+            'use_kop'       => $request->has('use_kop') ? 1 : 0, 
         ]);
 
         return redirect()
@@ -56,17 +56,14 @@ class TipeSuratController extends Controller
 
     /**
      * Edit template
-     * Mengembalikan view index tapi dengan variabel $template terisi
      */
     public function edit($id)
     {
         $template = TipeSurat::findOrFail($id);
         $kategori = $template->kategori;
 
-        // Ambil list untuk sidebar kanan
         $templates = TipeSurat::where('kategori', $kategori)->latest()->get();
 
-        // Return ke view index, tapi bawa data $template untuk diedit
         return view('admin.administrasi.tipe_surat.index', compact('template', 'templates', 'kategori'));
     }
 
@@ -87,6 +84,9 @@ class TipeSuratController extends Controller
             'judul_surat'   => $request->judul_surat,
             'template_isi'  => $request->template_isi,
             'ukuran_kertas' => $request->ukuran_kertas,
+            // PERBAIKAN: Tangani checkbox use_kop saat update
+            // Ini penting agar saat di-uncheck, nilainya berubah jadi 0 di database
+            'use_kop'       => $request->has('use_kop') ? 1 : 0,
         ]);
 
         return redirect()

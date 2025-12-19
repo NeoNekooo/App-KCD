@@ -1,109 +1,236 @@
 @extends('layouts.admin')
 
 @section('content')
+    {{-- 1. CSS Quill & Styling Kertas --}}
+    <link href="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.snow.css" rel="stylesheet">
+
     <style>
         /* =========================================
-                   1. DEFINISI FONT & STYLE (Sesuai Editor)
-                ========================================= */
+               1. DEFINISI FONT HELPER
+               ========================================= */
         .ql-font-times-new-roman {
-            font-family: 'Times New Roman', Times, serif;
+            font-family: 'Times New Roman', Times, serif !important;
         }
 
         .ql-font-arial {
-            font-family: Arial, Helvetica, sans-serif;
+            font-family: Arial, Helvetica, sans-serif !important;
         }
 
         .ql-font-courier-new {
-            font-family: 'Courier New', Courier, monospace;
+            font-family: 'Courier New', Courier, monospace !important;
         }
 
         .ql-font-calibri {
-            font-family: 'Calibri', sans-serif;
+            font-family: 'Calibri', sans-serif !important;
         }
 
         .ql-font-verdana {
-            font-family: Verdana, Geneva, sans-serif;
+            font-family: Verdana, Geneva, sans-serif !important;
         }
 
-        /* Alignment */
-        .ql-align-center {
-            text-align: center;
+        .ql-font-tahoma {
+            font-family: Tahoma, Geneva, sans-serif !important;
         }
 
-        .ql-align-right {
-            text-align: right;
-        }
-
-        .ql-align-justify {
-            text-align: justify;
+        .ql-font-georgia {
+            font-family: Georgia, serif !important;
         }
 
         /* =========================================
-                   2. TABEL LAYOUT (INVISIBLE / TANPA GARIS)
-                ========================================= */
-        /* Kita hilangkan border tabel di preview & print */
-        #area_surat table {
-            width: 100%;
-            border-collapse: collapse;
-            border: none !important;
-            /* Hapus garis luar */
-        }
+               2. SETTING KERTAS UTAMA
+               ========================================= */
+        .ql-editor {
+            /* Font Default */
+            font-family: 'Times New Roman', Times, serif !important;
+            font-size: 12px;
+            line-height: 1.42;
+            color: #000;
 
-        #area_surat td {
-            border: none !important;
-            /* Hapus garis sel */
-            padding: 2px 4px;
-            /* Spasi dikit biar rapi */
-            vertical-align: top;
-        }
+            /* Padding Kertas */
+            padding: 0.5cm 2.54cm 0.5cm 2.54cm !important;
 
-        /* =========================================
-                   3. SETTING AREA KERTAS
-                ========================================= */
-        #area_surat {
-            text-align: initial;
+            background: white;
+            height: 100%;
+
+            /* PERBAIKAN SCROLLBAR: */
+            border: none !important;
+            overflow: hidden !important;
+            /* HIDE SEMUA SCROLLBAR */
+            width: 100% !important;
             box-sizing: border-box;
-            white-space: pre-wrap !important;
-            /* Agar spasi & enter terbaca */
-            font-family: 'Times New Roman', serif;
-            /* Default font */
-            font-size: 12pt;
-            /* Default size */
         }
 
-        #area_surat p {
-            margin: 0;
-            /* Reset margin paragraf Quill */
-            padding: 0;
+        /* RESET FONT ELEMENT (Agar Inline Style Menang) */
+        .ql-editor h1,
+        .ql-editor h2,
+        .ql-editor h3,
+        .ql-editor h4,
+        .ql-editor h5,
+        .ql-editor h6,
+        .ql-editor p,
+        .ql-editor div,
+        .ql-editor li {
+            font-family: unset !important;
         }
 
-        /* Spacer Visual (Kop) */
-        #visual_spacer {
-            width: 100%;
-            height: 3cm;
-            background-color: #f8f9fa;
-            border-bottom: 1px dashed #ccc;
-            margin-bottom: 0px;
+        /* Pastikan strong/bold tetap tebal */
+        .ql-editor strong,
+        .ql-editor b {
+            font-weight: bold !important;
+        }
+
+        /* =========================================
+               3. SISTEM PREVIEW
+               ========================================= */
+        #preview-wrapper-bg {
+            background-color: #525659;
+            padding: 40px 0;
             display: flex;
+            flex-direction: column;
             align-items: center;
-            justify-content: center;
-            color: #999;
-            font-size: 10pt;
-            font-style: italic;
-            user-select: none;
+            gap: 30px;
+            overflow-x: auto;
+            /* Scroll hanya di background abu-abu, bukan di kertas */
+            width: 100%;
+            min-height: 600px;
+            border-radius: 8px;
+            border: 1px solid #444;
         }
 
-        /* Media Print */
+        .page-instance {
+            background: white;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 0;
+            transition: all 0.3s;
+            overflow: hidden !important;
+            /* Potong konten yang keluar kertas */
+            box-sizing: border-box;
+        }
+
+        /* UKURAN KERTAS */
+        .page-instance.paper-A4 {
+            width: 210mm;
+            height: 297mm;
+        }
+
+        .page-instance.paper-F4 {
+            width: 215mm;
+            height: 330mm;
+        }
+
+        .page-instance.paper-Legal {
+            width: 216mm;
+            height: 356mm;
+        }
+
+        .page-instance.paper-Letter {
+            width: 216mm;
+            height: 279mm;
+        }
+
+        /* LOGIKA KOP SURAT */
+        .page-instance.has-kop:first-child .ql-editor {
+            padding-top: 3.5cm !important;
+            padding-bottom: 0cm !important;
+        }
+
+        /* =========================================
+               4. TABLE FIXES (ANTI-SCROLL & NO BORDER)
+               ========================================= */
+        .ql-editor table {
+            table-layout: fixed !important;
+            width: 100% !important;
+            /* Paksa tabel selebar kertas, jangan lebih */
+            max-width: 100% !important;
+            border-collapse: collapse;
+            margin-bottom: 1em;
+            border: none !important;
+        }
+
+        .ql-editor td {
+            padding: 2px 4px;
+            vertical-align: top;
+            border: none !important;
+            /* Hapus border */
+            word-wrap: break-word;
+            /* Paksa teks turun ke bawah jika kepanjangan */
+            white-space: normal !important;
+            /* Jangan biarkan teks memanjang ke samping */
+            overflow-wrap: break-word;
+        }
+
+        /* =========================================
+               5. MEDIA PRINT (HILANGKAN SCROLLBAR SAAT CETAK)
+               ========================================= */
         @media print {
+            body * {
+                visibility: hidden;
+            }
+
+            #preview-wrapper-bg,
+            #preview-wrapper-bg * {
+                visibility: visible;
+            }
+
+            #preview-wrapper-bg {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                margin: 0;
+                padding: 0;
+                background: white;
+                border: none;
+                z-index: 99999;
+                overflow: hidden !important;
+                /* KUNCI: Matikan scrollbar saat print */
+            }
+
+            .page-instance {
+                box-shadow: none;
+                margin: 0;
+                width: 100% !important;
+                height: 100% !important;
+                page-break-after: always;
+                break-after: page;
+                border: none;
+                overflow: hidden !important;
+                /* KUNCI: Matikan scrollbar kertas */
+            }
+
+            .ql-editor {
+                overflow: hidden !important;
+                /* KUNCI: Matikan scrollbar editor */
+                width: 100% !important;
+            }
+
+            .page-instance:last-child {
+                page-break-after: auto;
+            }
+
             @page {
                 size: auto;
                 margin: 0mm;
             }
 
-            body {
-                margin: 0px;
-                -webkit-print-color-adjust: exact !important;
-                print-color-adjust: exact !important;
+            .btn,
+            .card-header,
+            .alert,
+            form,
+            .layout-navbar,
+            .layout-menu,
+            nav,
+            header,
+            footer {
+                display: none !important;
+            }
+
+            /* Sembunyikan scrollbar browser (Chrome/Safari) */
+            ::-webkit-scrollbar {
+                display: none;
             }
         }
     </style>
@@ -118,7 +245,7 @@
             </div>
 
             <div class="card-body">
-                {{-- FORM FILTER --}}
+                {{-- 2. FORM FILTER --}}
                 <form id="formSurat" action="{{ route('admin.administrasi.surat-keluar-guru.store') }}" method="POST">
                     @csrf
                     <input type="hidden" name="tanggal_surat" value="{{ date('Y-m-d') }}">
@@ -138,7 +265,8 @@
                                 <option value="">- Pilih Surat -</option>
                                 @foreach ($tipeSurats as $tipe)
                                     <option value="{{ $tipe->id }}"
-                                        {{ old('tipe_surat_id') == $tipe->id ? 'selected' : '' }}>{{ $tipe->judul_surat }}
+                                        {{ old('tipe_surat_id') == $tipe->id ? 'selected' : '' }}>
+                                        {{ $tipe->judul_surat }}
                                     </option>
                                 @endforeach
                             </select>
@@ -150,9 +278,7 @@
                                 <option value="">- Pilih Guru -</option>
                                 @foreach ($guruList as $g)
                                     <option value="{{ $g->id }}" {{ old('gtk_id') == $g->id ? 'selected' : '' }}>
-                                        {{ $g->nama }} @if ($g->nip)
-                                            ({{ $g->nip }})
-                                        @endif
+                                        {{ $g->nama }} {{ $g->nip ? '(' . $g->nip . ')' : '' }}
                                     </option>
                                 @endforeach
                             </select>
@@ -164,195 +290,98 @@
                     <i class="bx bx-info-circle me-1"></i> Silahkan pilih data lalu klik tombol **Tampilkan**.
                 </div>
 
-                {{-- AREA PREVIEW SURAT --}}
+                {{-- 3. AREA PREVIEW SURAT --}}
                 @if (session('preview_surat'))
                     @php
                         $setting = session('template_setting');
                         $kertasDB = $setting->ukuran_kertas ?? 'A4';
-
-                        // Default Fallback
-                        $width = '210mm';
-                        $minHeight = '297mm';
-
-                        if ($kertasDB == 'F4') {
-                            $width = '215mm';
-                            $minHeight = '330mm';
-                        }
-                        if ($kertasDB == 'Legal') {
-                            $width = '216mm';
-                            $minHeight = '356mm';
-                        }
-                        if ($kertasDB == 'Letter') {
-                            $width = '216mm';
-                            $minHeight = '279mm';
-                        }
+                        $useKop = $setting->use_kop ?? 0;
+                        $isiSuratRaw = session('preview_surat');
+                        // Bersihkan entities font
+                        $isiSuratRaw = str_replace('&quot;', "'", $isiSuratRaw);
                     @endphp
 
                     <hr class="my-4">
 
                     <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h5 class="fw-bold mb-0 text-primary"><i class="bx bx-file"></i> Preview Surat</h5>
-                        <div class="d-flex align-items-center gap-3">
-                            <div class="form-check form-switch mb-0">
-                                <input class="form-check-input" type="checkbox" id="toggleKop" checked
-                                    style="cursor: pointer;">
-                                <label class="form-check-label fw-bold" for="toggleKop">Pakai Jarak Kop?</label>
-                            </div>
-                            <button onclick="printDiv('area_surat')" class="btn btn-success"><i class="bx bx-printer"></i>
-                                Cetak Surat</button>
+                        <div>
+                            <h5 class="fw-bold mb-1 text-primary"><i class="bx bx-file"></i> Preview Surat</h5>
+                            <small class="text-muted">
+                                Kertas: <b>{{ $kertasDB }}</b> |
+                                Mode Kop: <b>{{ $useKop == 1 ? 'Aktif (Jarak 3.5cm)' : 'Non-Aktif' }}</b>
+                            </small>
                         </div>
+                        <button onclick="window.print()" class="btn btn-success">
+                            <i class="bx bx-printer me-1"></i> Cetak / PDF
+                        </button>
                     </div>
 
-                    {{-- Info Kertas --}}
-                    <div class="card bg-light border mb-3">
-                        <div class="card-body py-2">
-                            <div class="row align-items-center g-2">
-                                <div class="col-auto">
-                                    <span class="badge bg-label-primary">Kertas: {{ $kertasDB }}</span>
-                                </div>
-                                <div class="col-auto">
-                                    <div class="input-group input-group-sm">
-                                        <span class="input-group-text fw-bold">Margin (mm)</span>
-                                        <input type="number" id="paper_margin" class="form-control" value="20"
-                                            min="0" style="width: 60px;">
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    {{-- Wrapper Visual --}}
+                    <div id="preview-wrapper-bg"></div>
 
-                    {{-- Container Preview --}}
-                    <div class="card bg-secondary bg-opacity-10 p-4 rounded-3 text-center overflow-auto">
-                        <div id="area_surat"
-                            style="
-                                background: white;
-                                width: {{ $width }}; 
-                                min-height: {{ $minHeight }};
-                                height: auto; 
-                                margin: 0 auto;
-                                padding: 20mm;
-                                text-align: left;
-                                box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
-                                color: black;
-                                line-height: 1.5;
-                            ">
-                            {!! session('preview_surat') !!}
-                        </div>
-                    </div>
+                    {{-- Data Hidden untuk JS --}}
+                    <textarea id="raw_html_content" style="display:none;">{!! $isiSuratRaw !!}</textarea>
+                    <input type="hidden" id="paper_size_val" value="{{ $kertasDB }}">
+                    <input type="hidden" id="use_kop_val" value="{{ $useKop }}">
                 @endif
             </div>
         </div>
     </div>
 
+    {{-- 4. JAVASCRIPT --}}
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.js"></script>
+
     <script>
         $(document).ready(function() {
-            // Update Margin Realtime
-            $('#paper_margin').on('input change', function() {
-                $('#area_surat').css('padding', $(this).val() + 'mm');
-            });
+            const rawContent = $('#raw_html_content').val();
+            const paperSize = $('#paper_size_val').val();
+            const useKop = $('#use_kop_val').val();
+            const wrapper = document.getElementById('preview-wrapper-bg');
+            const pageDivider = '<div class="page-break-divider"></div>';
 
-            // Logika Spacer Kop
-            function updatePreviewSpacer() {
-                var useKop = $('#toggleKop').is(':checked');
-                var spacer = $('#visual_spacer');
-                if (useKop) {
-                    if (spacer.length === 0) $('#area_surat').prepend(
-                        '<div id="visual_spacer">Area Kop Surat (3cm)</div>');
-                    else spacer.show();
+            if (rawContent) {
+                let pages = [];
+                if (rawContent.includes('page-break-divider')) {
+                    pages = rawContent.split(pageDivider);
                 } else {
-                    if (spacer.length > 0) spacer.hide();
+                    pages = [rawContent];
                 }
+
+                pages.forEach((pageHtml, index) => {
+                    if (pageHtml.trim() === '') return;
+
+                    const pageDiv = document.createElement('div');
+                    pageDiv.className = `page-instance paper-${paperSize}`;
+
+                    if (index === 0 && useKop == '1') {
+                        pageDiv.classList.add('has-kop');
+                    }
+
+                    const contentDiv = `<div class="ql-editor">${pageHtml}</div>`;
+                    pageDiv.innerHTML = contentDiv;
+                    wrapper.appendChild(pageDiv);
+
+                    setTimeout(() => {
+                        restoreTableWidthsInPreview(pageDiv);
+                    }, 50);
+                });
             }
-            $('#toggleKop').on('change', updatePreviewSpacer);
-            if ($('#toggleKop').length > 0) {
-                updatePreviewSpacer();
+
+            function restoreTableWidthsInPreview(container) {
+                const tables = container.querySelectorAll('table');
+                tables.forEach(table => {
+                    table.style.tableLayout = 'fixed';
+                    table.style.width = '100%'; // Pastikan tabel selalu 100%
+                    const firstRow = table.querySelector('tr');
+                    if (firstRow) {
+                        Array.from(firstRow.cells).forEach(cell => {
+                            const w = cell.style.width || cell.getAttribute('width');
+                            if (w) cell.style.width = w;
+                        });
+                    }
+                });
             }
         });
-
-        // FUNGSI CETAK DENGAN STYLE LENGKAP
-        function printDiv(divId) {
-            var contentClone = document.getElementById(divId).cloneNode(true);
-            var useKop = document.getElementById('toggleKop').checked;
-
-            var currentWidth = $('#area_surat').css('width');
-            var currentPadding = $('#area_surat').css('padding');
-
-            var existingVisualSpacer = contentClone.querySelector('#visual_spacer');
-            if (existingVisualSpacer) {
-                existingVisualSpacer.remove();
-            }
-
-            // Ganti visual spacer dengan div kosong transparan untuk print
-            var spacerHtml = useKop ? '<div style="width: 100%; height: 3cm; display: block;"></div>' : '';
-
-            // Ambil CSS Framework (Bootstrap dll)
-            var stylesHtml = '';
-            $('link[rel="stylesheet"]').each(function() {
-                stylesHtml += '<link rel="stylesheet" href="' + $(this).attr('href') + '">';
-            });
-
-            // CSS Khusus Print (Font, Tabel Invisible, Layout)
-            var customCss = `
-                <style>
-                    body { background-color: white !important; -webkit-print-color-adjust: exact; }
-                    
-                    /* Wrapper Halaman */
-                    #print-wrapper {
-                        width: ${currentWidth} !important; 
-                        margin: 0 auto;
-                        padding: ${currentPadding} !important;
-                        box-sizing: border-box;
-                        overflow: hidden;
-                        white-space: pre-wrap !important;
-                        font-family: 'Times New Roman', serif; /* Font Default */
-                        font-size: 12pt;
-                        line-height: 1.5;
-                    }
-                    
-                    /* Reset Margin Paragraph */
-                    p { margin: 0; padding: 0; }
-
-                    @page { size: auto; margin: 0mm; }
-                    
-                    /* --- STYLE FONT DARI EDITOR --- */
-                    .ql-font-times-new-roman { font-family: 'Times New Roman', Times, serif !important; }
-                    .ql-font-arial { font-family: Arial, Helvetica, sans-serif !important; }
-                    .ql-font-courier-new { font-family: 'Courier New', Courier, monospace !important; }
-                    .ql-font-calibri { font-family: 'Calibri', sans-serif !important; }
-                    .ql-font-verdana { font-family: Verdana, Geneva, sans-serif !important; }
-
-                    /* --- ALIGNMENT --- */
-                    .ql-align-center { text-align: center !important; }
-                    .ql-align-right { text-align: right !important; }
-                    .ql-align-justify { text-align: justify !important; }
-
-                    /* --- TABEL INVISIBLE (LAYOUTING) --- */
-                    table { 
-                        width: 100% !important; 
-                        border-collapse: collapse !important; 
-                        border: none !important; /* HILANGKAN BORDER */
-                    }
-                    td { 
-                        border: none !important; /* HILANGKAN BORDER CELL */
-                        padding: 2px 4px !important;
-                        vertical-align: top;
-                    }
-                </style>
-            `;
-
-            var w = window.open('', '', 'height=800,width=1000');
-            w.document.write('<html><head><title>Cetak Surat</title>' + stylesHtml + customCss + '</head><body>');
-            w.document.write('<div id="print-wrapper">' + spacerHtml + contentClone.innerHTML + '</div>');
-            w.document.write('</body></html>');
-            w.document.close();
-            w.focus();
-
-            // Delay sedikit untuk memastikan style terload
-            setTimeout(function() {
-                w.print();
-                w.close();
-            }, 1000);
-        }
     </script>
 @endsection

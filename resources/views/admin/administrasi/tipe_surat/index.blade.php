@@ -7,7 +7,39 @@
         rel="stylesheet">
 
     <style>
-        /* 1. FONT DEFINITIONS */
+        /* =========================================
+               1. LOGIKA FONT UTAMA (SINKRON DENGAN PREVIEW)
+            ========================================= */
+
+        /* Font Utama Editor (Default: Times New Roman) */
+        .ql-editor {
+            font-family: 'Times New Roman', Times, serif !important;
+            font-size: 12px;
+            color: #000;
+            line-height: 1.42;
+            padding: 2.54cm !important;
+            /* Default Padding */
+            background-color: white !important;
+            height: 297mm;
+            /* Default A4 Height */
+            overflow-y: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        /* RESET QUILL SNOW:
+               Memaksa elemen anak (Heading, Paragraph) untuk melepaskan font bawaan Quill (Arial).
+               Mereka akan mengikuti Inline Style (jika dipilih user) atau Default Induk (Times New Roman).
+            */
+        .ql-editor h1,
+        .ql-editor h2,
+        .ql-editor h3,
+        .ql-editor p,
+        .ql-editor li,
+        .ql-editor div {
+            font-family: unset;
+        }
+
+        /* Helper Classes untuk Dropdown (Preview di Toolbar) */
         .ql-font-times-new-roman {
             font-family: 'Times New Roman', Times, serif;
         }
@@ -28,157 +60,167 @@
             font-family: Verdana, Geneva, sans-serif;
         }
 
-        /* 2. DROPDOWN MENU */
-        .ql-snow .ql-picker.ql-size {
-            width: 90px !important;
+        .ql-font-tahoma {
+            font-family: Tahoma, Geneva, sans-serif;
         }
 
+        /* Font Baru */
+        .ql-font-georgia {
+            font-family: Georgia, serif;
+        }
+
+        /* Font Baru */
+
+        /* =========================================
+               2. KUSTOMISASI DROPDOWN TOOLBAR
+            ========================================= */
+        /* Lebar Dropdown Font */
         .ql-snow .ql-picker.ql-font {
-            width: 150px !important;
+            width: 170px !important;
         }
 
-        .ql-snow .ql-picker.ql-size .ql-picker-label::before,
-        .ql-snow .ql-picker.ql-size .ql-picker-item::before {
+        .ql-snow .ql-picker.ql-size {
+            width: 100px !important;
+        }
+
+        /* Tampilkan Nama Font Asli di Dropdown */
+        .ql-snow .ql-picker.ql-font .ql-picker-label::before,
+        .ql-snow .ql-picker.ql-font .ql-picker-item::before {
             content: attr(data-value) !important;
         }
 
-        .ql-snow .ql-picker.ql-size .ql-picker-label:not([data-value])::before,
-        .ql-snow .ql-picker.ql-size .ql-picker-item:not([data-value])::before {
-            content: '12px' !important;
+        /* Styling Item Dropdown agar sesuai bentuk fontnya */
+        .ql-picker.ql-font .ql-picker-item[data-value="Times New Roman"]::before {
+            font-family: 'Times New Roman';
+            content: 'Times New Roman' !important;
         }
 
-        .ql-snow .ql-picker.ql-font .ql-picker-label[data-value="Times New Roman"]::before,
-        .ql-snow .ql-picker.ql-font .ql-picker-item[data-value="Times New Roman"]::before {
+        .ql-picker.ql-font .ql-picker-item[data-value="Arial"]::before {
+            font-family: Arial;
+            content: 'Arial' !important;
+        }
+
+        .ql-picker.ql-font .ql-picker-item[data-value="Courier New"]::before {
+            font-family: 'Courier New';
+            content: 'Courier New' !important;
+        }
+
+        .ql-picker.ql-font .ql-picker-item[data-value="Calibri"]::before {
+            font-family: 'Calibri';
+            content: 'Calibri' !important;
+        }
+
+        .ql-picker.ql-font .ql-picker-item[data-value="Verdana"]::before {
+            font-family: Verdana;
+            content: 'Verdana' !important;
+        }
+
+        .ql-picker.ql-font .ql-picker-item[data-value="Tahoma"]::before {
+            font-family: Tahoma;
+            content: 'Tahoma' !important;
+        }
+
+        .ql-picker.ql-font .ql-picker-item[data-value="Georgia"]::before {
+            font-family: Georgia;
+            content: 'Georgia' !important;
+        }
+
+        /* Label Default jika belum pilih font */
+        .ql-snow .ql-picker.ql-font .ql-picker-label:not([data-value])::before {
             content: 'Times New Roman' !important;
             font-family: 'Times New Roman';
         }
 
-        .ql-snow .ql-picker.ql-font .ql-picker-label[data-value="Arial"]::before,
-        .ql-snow .ql-picker.ql-font .ql-picker-item[data-value="Arial"]::before {
-            content: 'Arial' !important;
-            font-family: Arial;
-        }
-
-        .ql-snow .ql-picker.ql-font .ql-picker-label[data-value="Courier New"]::before,
-        .ql-snow .ql-picker.ql-font .ql-picker-item[data-value="Courier New"]::before {
-            content: 'Courier New' !important;
-            font-family: 'Courier New';
-        }
-
-        .ql-snow .ql-picker.ql-font .ql-picker-label[data-value="Calibri"]::before,
-        .ql-snow .ql-picker.ql-font .ql-picker-item[data-value="Calibri"]::before {
-            content: 'Calibri' !important;
-            font-family: 'Calibri';
-        }
-
-        .ql-snow .ql-picker.ql-font .ql-picker-label[data-value="Verdana"]::before,
-        .ql-snow .ql-picker.ql-font .ql-picker-item[data-value="Verdana"]::before {
-            content: 'Verdana' !important;
-            font-family: Verdana;
-        }
-
-        .ql-snow .ql-picker.ql-font .ql-picker-label:not([data-value])::before,
-        .ql-snow .ql-picker.ql-font .ql-picker-item:not([data-value])::before {
-            content: 'Sans Serif' !important;
-        }
-
-        /* 3. TOOLBAR & LAYOUT */
-        #toolbar-container {
-            background-color: #f8f9fa;
+        /* =========================================
+               3. UI & LAYOUT EDITOR
+            ========================================= */
+        #editor-wrapper-bg {
+            background-color: #525659;
+            /* Abu-abu gelap ala PDF Viewer */
+            padding: 40px 0;
             border: 1px solid #ddd;
-            border-top-left-radius: 0.375rem;
-            border-top-right-radius: 0.375rem;
-            border-bottom: 1px solid #ccc;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 40px;
+            overflow-x: auto;
+            width: 100%;
+            min-height: 600px;
+        }
+
+        .page-instance {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            width: 210mm;
+            transition: width 0.3s;
+            height: fit-content;
+        }
+
+        .page-header-info {
+            position: absolute;
+            top: -30px;
+            left: 0;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 2px;
+            pointer-events: none;
+        }
+
+        .page-label {
+            font-weight: bold;
+            font-size: 11px;
+            color: #ccc;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-delete-page {
+            pointer-events: auto;
+            background-color: #ff3e1d;
+            color: white;
+            border: none;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            cursor: pointer;
+        }
+
+        .page-toolbar-container {
             position: sticky;
             top: 0;
-            z-index: 100;
-            padding: 5px 10px !important;
-            width: 100%;
+            z-index: 50;
+            background: #f8f9fa;
+            border-bottom: 1px solid #ccc;
         }
 
+        /* Toolbar Buttons */
         .ql-toolbar.ql-snow {
             border: none !important;
             display: flex !important;
             flex-flow: row wrap !important;
-            align-items: center;
             gap: 2px;
-            padding: 0 !important;
+            padding: 5px !important;
         }
 
         .ql-toolbar.ql-snow button {
-            width: 26px !important;
-            height: 26px !important;
-            padding: 3px !important;
-            margin: 0 1px !important;
-            float: none !important;
+            width: 28px !important;
+            height: 28px !important;
         }
 
-        .ql-toolbar.ql-snow button svg {
-            width: 18px !important;
-            height: 18px !important;
+        /* KOP SURAT LOGIC */
+        .page-instance.has-kop:first-child .ql-editor {
+            padding: 5.54cm 2.54cm 2.54cm 2.54cm !important;
+            /* Top padding + 3cm */
         }
 
-        .ql-snow .ql-picker {
-            height: 26px !important;
-            margin-right: 5px;
+        .page-instance:not(:first-child) .ql-editor {
+            padding: 2.54cm !important;
         }
 
-        .ql-snow .ql-picker-label {
-            padding-left: 6px !important;
-            line-height: 24px;
-            border: 1px solid #ddd;
-            border-radius: 3px;
-        }
-
-        /* Tombol Tabel */
-        .table-controls-group {
-            display: none;
-            border-left: 1px solid #ccc;
-            padding-left: 8px;
-            margin-left: 5px;
-            background-color: #e8f0fe;
-            border-radius: 4px;
-        }
-
-        .ql-table_delete,
-        .ql-table_row_del,
-        .ql-table_col_del {
-            color: #ff3e1d !important;
-        }
-
-        /* Editor Wrapper */
-        #editor-wrapper-bg {
-            background-color: #e9ecef;
-            padding: 40px;
-            border: 1px solid #ddd;
-            border-top: none;
-            border-bottom-left-radius: 0.375rem;
-            border-bottom-right-radius: 0.375rem;
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            overflow-x: auto;
-            width: 100%;
-        }
-
-        #editor_konten_quill {
-            width: fit-content;
-            min-width: 210mm;
-        }
-
-        .ql-editor {
-            background-color: white !important;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
-            margin: 0 auto;
-            border: 1px solid #ccc !important;
-            min-height: 297mm;
-            padding: 2.54cm 2.54cm !important;
-            white-space: pre-wrap !important;
-            font-family: 'Times New Roman', Times, serif;
-            font-size: 12px;
-        }
-
-        /* Utils & Chips */
+        /* Helper Chips */
         .var-chip {
             cursor: pointer;
             transition: all 0.2s;
@@ -190,78 +232,80 @@
             background-color: #e7e7ff !important;
             color: #696cff !important;
             border-color: #696cff;
-            transform: translateY(-1px);
         }
 
-        .paper-A4 {
+        /* Paper Sizes */
+        .page-instance.paper-A4 {
             width: 210mm;
         }
 
-        .paper-F4 {
+        .page-instance.paper-A4 .ql-editor {
+            height: 297mm;
+        }
+
+        .page-instance.paper-F4 {
             width: 215mm;
-            min-height: 330mm;
         }
 
-        .paper-Legal {
+        .page-instance.paper-F4 .ql-editor {
+            height: 330mm;
+        }
+
+        .page-instance.paper-Legal {
             width: 216mm;
-            min-height: 356mm;
         }
 
-        .paper-Letter {
+        .page-instance.paper-Legal .ql-editor {
+            height: 356mm;
+        }
+
+        .page-instance.paper-Letter {
             width: 216mm;
-            min-height: 279mm;
         }
 
-        .ql-editor.show-guide::after {
-            content: "";
+        .page-instance.paper-Letter .ql-editor {
+            height: 279mm;
+        }
+
+        /* Table & Resizer */
+        .ql-editor table {
+            table-layout: fixed !important;
+            width: 100% !important;
+            border-collapse: collapse;
+            margin-bottom: 1em;
+        }
+
+        .ql-editor td {
+            border: 1px solid #000;
+            padding: 5px;
+            position: relative;
+            word-wrap: break-word;
+        }
+
+        .ql-editor td:hover::after {
+            content: '';
             position: absolute;
+            right: -4px;
             top: 0;
             bottom: 0;
-            left: 50%;
-            width: 1px;
-            background-image: linear-gradient(to bottom, rgba(255, 0, 0, 0.3) 5px, transparent 5px);
-            background-size: 1px 10px;
-            background-repeat: repeat-y;
-            transform: translateX(-50%);
-            pointer-events: none;
-            z-index: 999;
-            display: block;
+            width: 8px;
+            cursor: col-resize;
+            z-index: 10;
         }
 
-        /* Button Styles */
-        .btn-soft-primary {
-            background-color: rgba(105, 108, 255, 0.16);
-            color: #696cff;
-            border: none;
+        .table-controls-group {
+            display: none;
+            background-color: #e8f0fe;
+            border-radius: 4px;
+            margin-left: 5px;
         }
 
-        .btn-soft-primary:hover {
-            background-color: #696cff;
-            color: #fff;
+        .resizing-cursor {
+            cursor: col-resize !important;
+            user-select: none;
         }
 
-        .btn-soft-danger {
-            background-color: rgba(255, 62, 29, 0.16);
-            color: #ff3e1d;
-            border: none;
-        }
-
-        .btn-soft-danger:hover {
-            background-color: #ff3e1d;
-            color: #fff;
-        }
-
-        .btn-icon {
-            width: 32px;
-            height: 32px;
-            padding: 0;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 0.375rem;
-        }
-
-        /* Toast */
+        /* Copy Toast */
         #copy-toast {
             visibility: hidden;
             min-width: 250px;
@@ -277,12 +321,6 @@
             transform: translateX(-50%) translateY(20px);
             opacity: 0;
             transition: all 0.3s ease-in-out;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
         }
 
         #copy-toast.show {
@@ -290,92 +328,31 @@
             transform: translateX(-50%) translateY(0);
             opacity: 1;
         }
-
-        #copy-toast i {
-            font-size: 18px;
-            color: #4ade80;
-        }
-
-        /* 4. TABLE RESIZER STYLES */
-        .ql-editor table {
-            table-layout: fixed !important;
-            width: 100% !important;
-            border-collapse: collapse;
-            margin-bottom: 1em;
-        }
-
-        .ql-editor td {
-            border: 1px solid #000;
-            padding: 5px;
-            position: relative;
-            box-sizing: border-box;
-            overflow-wrap: break-word;
-            word-wrap: break-word;
-            hyphens: auto;
-            vertical-align: top;
-        }
-
-        .ql-editor td:hover::after {
-            content: '';
-            position: absolute;
-            right: -3px;
-            top: 0;
-            bottom: 0;
-            width: 6px;
-            cursor: col-resize;
-            background-color: rgba(105, 108, 255, 0.2);
-            z-index: 10;
-        }
-
-        .resizing-cursor {
-            cursor: col-resize !important;
-            user-select: none;
-        }
-
-        .ql-editor td img {
-            max-width: 100%;
-            height: auto;
-        }
     </style>
 
     <div class="container-xxl flex-grow-1 container-p-y">
         <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Administrasi /</span> Template Surat</h4>
 
         @php
-            $kategoriAktif = request()->kategori ?? 'siswa';
-            $variables = [];
-            // ... (Variable logic kept same) ...
+            $reqKategori = request()->kategori;
+            if (empty($reqKategori) && isset($template)) {
+                $reqKategori = $template->kategori;
+            }
+            $kategoriAktif = $reqKategori ?? 'siswa';
+
+            // Variabel disederhanakan untuk contoh
+            $variables = [
+                ['code' => '{{ nama }}', 'desc' => 'Nama'],
+                ['code' => '{{ tanggal }}', 'desc' => 'Tanggal Surat'],
+                ['code' => '{{ nomor_surat }}', 'desc' => 'Nomor Surat'],
+                ['code' => '{{ alamat }}', 'desc' => 'Alamat'],
+            ];
             if ($kategoriAktif == 'siswa') {
-                $variables = [
-                    ['code' => '{{ nama }}', 'desc' => 'Nama Siswa'],
+                $variables = array_merge($variables, [
                     ['code' => '{{ nisn }}', 'desc' => 'NISN'],
-                    ['code' => '{{ nipd }}', 'desc' => 'NIPD'],
                     ['code' => '{{ kelas }}', 'desc' => 'Kelas'],
                     ['code' => '{{ tempat_lahir }}', 'desc' => 'Tempat Lahir'],
-                    ['code' => '{{ tanggal_lahir }}', 'desc' => 'Tanggal Lahir'],
-                    ['code' => '{{ alamat }}', 'desc' => 'Alamat'],
-                    ['code' => '{{ nama_wali }}', 'desc' => 'Nama Wali'],
-                    ['code' => '{{ tanggal }}', 'desc' => 'Tanggal Surat'],
-                ];
-            } elseif ($kategoriAktif == 'guru') {
-                $variables = [
-                    ['code' => '{{ nama }}', 'desc' => 'Nama Guru'],
-                    ['code' => '{{ nuptk }}', 'desc' => 'NUPTK'],
-                    ['code' => '{{ nip }}', 'desc' => 'NIP'],
-                    ['code' => '{{ jabatan }}', 'desc' => 'Jabatan'],
-                    ['code' => '{{ unit_kerja }}', 'desc' => 'Unit Kerja'],
-                    ['code' => '{{ alamat }}', 'desc' => 'Alamat Guru'],
-                    ['code' => '{{ tanggal }}', 'desc' => 'Tanggal Surat'],
-                ];
-            } else {
-                $variables = [
-                    ['code' => '{{ nomor_surat }}', 'desc' => 'Nomor Surat'],
-                    ['code' => '{{ perihal }}', 'desc' => 'Perihal'],
-                    ['code' => '{{ nama_tujuan }}', 'desc' => 'Nama Tujuan'],
-                    ['code' => '{{ instansi }}', 'desc' => 'Instansi'],
-                    ['code' => '{{ hari_ini }}', 'desc' => 'Hari Ini'],
-                    ['code' => '{{ tanggal }}', 'desc' => 'Tanggal Surat'],
-                ];
+                ]);
             }
         @endphp
 
@@ -426,11 +403,21 @@
                                     </select>
                                 </div>
                                 <input type="hidden" name="font_size" value="12">
-                                <div class="col-md-2 d-flex align-items-end">
-                                    <div class="form-check form-switch mb-2">
-                                        <input class="form-check-input" type="checkbox" id="toggleCenterGuide">
-                                        <label class="form-check-label small text-muted" for="toggleCenterGuide">Garis
-                                            Tengah</label>
+
+                                <div class="col-md-2 d-flex flex-column justify-content-end gap-2">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" name="use_kop" id="toggleKop"
+                                            value="1"
+                                            {{ old('use_kop', $template->use_kop ?? 0) == 1 ? 'checked' : '' }}
+                                            style="cursor:pointer;">
+                                        <label class="form-check-label small text-muted" for="toggleKop"
+                                            style="cursor:pointer;">Jarak Kop 3cm</label>
+                                    </div>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="toggleCenterGuide"
+                                            style="cursor:pointer;">
+                                        <label class="form-check-label small text-muted" for="toggleCenterGuide"
+                                            style="cursor:pointer;">Garis Tengah</label>
                                     </div>
                                 </div>
                             </div>
@@ -449,10 +436,7 @@
 
                             <div class="mb-4">
                                 <label class="form-label fw-bold mb-1">Isi Dokumen</label>
-                                <div id="toolbar-container"></div>
-                                <div id="editor-wrapper-bg">
-                                    <div id="editor_konten_quill"></div>
-                                </div>
+                                <div id="editor-wrapper-bg"></div>
                                 <textarea name="template_isi" id="template_isi_hidden" style="display:none;">{{ old('template_isi', $template->template_isi ?? '') }}</textarea>
                             </div>
 
@@ -484,18 +468,13 @@
                                         <small class="badge bg-label-secondary">{{ $t->ukuran_kertas }}</small>
                                     </div>
                                     <div class="d-flex gap-1">
-                                        <a href="{{ route('admin.administrasi.tipe-surat.edit', $t->id) }}"
-                                            class="btn btn-sm btn-soft-primary btn-icon" data-bs-toggle="tooltip"
-                                            title="Edit"><i class="bx bx-pencil"></i></a>
-
-                                        {{-- === [MODIFIKASI 1] TOMBOL HAPUS LAMA DIGANTI TOMBOL TRIGGER MODAL === --}}
+                                        <a href="{{ route('admin.administrasi.tipe-surat.edit', ['tipe_surat' => $t->id, 'kategori' => $kategoriAktif]) }}"
+                                            class="btn btn-sm btn-soft-primary btn-icon" title="Edit"><i
+                                                class="bx bx-pencil"></i></a>
                                         <button type="button" class="btn btn-sm btn-soft-danger btn-icon"
                                             data-bs-toggle="modal" data-bs-target="#deleteModal"
                                             data-action="{{ route('admin.administrasi.tipe-surat.destroy', $t->id) }}"
-                                            title="Hapus">
-                                            <i class="bx bx-trash"></i>
-                                        </button>
-                                        {{-- =================================================================== --}}
+                                            title="Hapus"><i class="bx bx-trash"></i></button>
                                     </div>
                                 </div>
                             </li>
@@ -506,13 +485,13 @@
         </div>
     </div>
 
-    {{-- Modal & Toast --}}
+    {{-- MODALS --}}
     <div class="modal fade" id="variableModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content">
                 <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title text-white">Daftar Variabel</h5><button type="button"
-                        class="btn-close btn-white" data-bs-dismiss="modal"></button>
+                    <h5 class="modal-title text-white">Daftar Variabel</h5>
+                    <button type="button" class="btn-close btn-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body bg-light">
                     <div class="row g-3">
@@ -528,109 +507,180 @@
         </div>
     </div>
 
-    {{-- === [MODIFIKASI 2] MODAL KONFIRMASI HAPUS (BARU) === --}}
     <div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Konfirmasi Hapus</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <h5 class="modal-title">Konfirmasi Hapus</h5><button type="button" class="btn-close"
+                        data-bs-dismiss="modal"></button>
                 </div>
-                <form id="deleteForm" method="POST" action="">
-                    @csrf
-                    @method('DELETE')
+                <form id="deleteForm" method="POST" action="">@csrf @method('DELETE')
                     <div class="modal-body">
-                        <p class="mb-0">Apakah Anda yakin ingin menghapus template surat ini?</p>
-                        <small class="text-danger">Tindakan ini tidak dapat dibatalkan.</small>
+                        <p class="mb-0">Yakin hapus?</p><small class="text-danger">Tak bisa dibatalkan.</small>
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
-                        <button type="submit" class="btn btn-danger">Ya, Hapus</button>
-                    </div>
+                    <div class="modal-footer"><button type="button" class="btn btn-outline-secondary"
+                            data-bs-dismiss="modal">Batal</button><button type="submit" class="btn btn-danger">Ya,
+                            Hapus</button></div>
                 </form>
             </div>
         </div>
     </div>
-    {{-- ====================================================== --}}
+
+    <div class="modal fade" id="deletePageModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Hapus Halaman?</h5><button type="button" class="btn-close"
+                        data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-0">Hapus halaman ini beserta isinya?</p>
+                </div>
+                <div class="modal-footer"><button type="button" class="btn btn-outline-secondary"
+                        data-bs-dismiss="modal">Batal</button><button type="button" class="btn btn-danger"
+                        id="confirmDeletePageBtn">Ya, Hapus</button></div>
+            </div>
+        </div>
+    </div>
 
     <div id="copy-toast"><i class='bx bx-check-circle'></i> <span>Variabel berhasil disalin!</span></div>
 
     @push('scripts')
         <script src="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/quill-html-edit-button@2.2.11/dist/quill-html-edit-button.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
         <script>
             document.addEventListener('DOMContentLoaded', function() {
-                var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-                var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
-                    return new bootstrap.Tooltip(tooltipTriggerEl)
-                })
-
-                // === [MODIFIKASI 3] LOGIKA JAVASCRIPT UNTUK MODAL HAPUS ===
-                const deleteModal = document.getElementById('deleteModal');
-                if (deleteModal) {
-                    deleteModal.addEventListener('show.bs.modal', function(event) {
-                        // Tombol yang memicu modal
-                        const button = event.relatedTarget;
-                        // Ambil link dari data-action
-                        const actionUrl = button.getAttribute('data-action');
-                        // Update action pada form di dalam modal
-                        const modalForm = deleteModal.querySelector('#deleteForm');
-                        modalForm.setAttribute('action', actionUrl);
-                    });
-                }
-                // ==========================================================
-            });
-
-            let toastTimeout;
-
-            function copyToClipboard(text) {
-                navigator.clipboard.writeText(text).then(function() {
-                    var x = document.getElementById("copy-toast");
-                    x.querySelector('span').innerText = text + " disalin!";
-                    x.className = "show";
-                    if (toastTimeout) clearTimeout(toastTimeout);
-                    toastTimeout = setTimeout(() => x.className = x.className.replace("show", ""), 3000);
-                }, function(err) {
-                    alert('Gagal menyalin: ' + err);
-                });
-            }
-
-            document.addEventListener("DOMContentLoaded", () => {
-                const editorDiv = document.querySelector('#editor_konten_quill');
-                const hiddenInput = document.querySelector('#template_isi_hidden');
-                const paperSelect = document.getElementById('paperSizeSelect');
-                const guideToggle = document.getElementById('toggleCenterGuide');
-
-                // 1. INIT PARCHMENT & REGISTERS
+                // 1. REGISTER FONT WHITELIST & SIZE
                 const Size = Quill.import('attributors/style/size');
                 Size.whitelist = ['10px', '11px', '12px', '13px', '14px', '16px', '18px', '20px', '24px', '36px'];
                 Quill.register(Size, true);
+
                 const Font = Quill.import('attributors/style/font');
-                Font.whitelist = ['Times New Roman', 'Arial', 'Courier New', 'Calibri', 'Verdana'];
+                // MENAMBAHKAN FONT BARU KE WHITELIST
+                Font.whitelist = ['Times New Roman', 'Arial', 'Courier New', 'Calibri', 'Verdana', 'Tahoma', 'Georgia'];
                 Quill.register(Font, true);
 
-                // --- HELPER: RESET LEBAR (Untuk Kolom Baru) ---
-                const resetTableColumnWidths = (quillInstance) => {
-                    setTimeout(() => {
-                        const editor = quillInstance.root;
-                        const tables = editor.querySelectorAll('table');
-                        tables.forEach(table => {
-                            if (table.style.tableLayout !== 'fixed') {
-                                table.style.tableLayout = 'fixed';
-                                table.style.width = '100%';
+                // Register Table Cell Custom
+                try {
+                    const TableCell = Quill.import('formats/table-cell');
+                    class CustomTableCell extends TableCell {
+                        static formats(domNode) {
+                            const formats = super.formats(domNode) || {};
+                            if (domNode.style.width) formats['width'] = domNode.style.width;
+                            else if (domNode.getAttribute('width')) formats['width'] = domNode.getAttribute(
+                            'width');
+                            return formats;
+                        }
+                        format(name, value) {
+                            if (name === 'width') {
+                                if (value) {
+                                    this.domNode.style.width = value;
+                                    this.domNode.setAttribute('width', value);
+                                } else {
+                                    this.domNode.style.width = '';
+                                    this.domNode.removeAttribute('width');
+                                }
+                            } else {
+                                super.format(name, value);
                             }
-                            const row = table.rows[0];
-                            if (row) {
-                                const percentage = 100 / row.cells.length;
-                                Array.from(row.cells).forEach(cell => cell.style.width =
-                                    percentage + '%');
-                            }
-                        });
-                    }, 10);
-                };
+                        }
+                    }
+                    Quill.register('formats/table-cell', CustomTableCell, true);
+                } catch (e) {
+                    console.error("Gagal register TableCell", e);
+                }
 
-                // 2. CONFIG
+                // 2. ICONS
+                const icons = Quill.import('ui/icons');
+                const iconsMap = {
+                    'ql-table_add': [
+                        '<rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="3" y1="15" x2="21" y2="15"></line><line x1="9" y1="3" x2="9" y2="21"></line><line x1="15" y1="3" x2="15" y2="21"></line>',
+                        'Buat Tabel'
+                    ],
+                    'ql-table_row_up': [
+                        '<path d="M5 12h14"/><path d="M12 5v14"/><path d="M12 5l-4 4"/><path d="M12 5l4 4"/>',
+                        'Baris Atas'
+                    ],
+                    'ql-table_row_down': [
+                        '<path d="M5 12h14"/><path d="M12 5v14"/><path d="M12 19l-4-4"/><path d="M12 19l4-4"/>',
+                        'Baris Bawah'
+                    ],
+                    'ql-table_row_del': ['<line x1="5" y1="12" x2="19" y2="12"></line>', 'Hapus Baris', 'red'],
+                    'ql-table_col_left': [
+                        '<path d="M12 5v14"/><path d="M5 12h14"/><path d="M5 12l4-4"/><path d="M5 12l4 4"/>',
+                        'Kolom Kiri'
+                    ],
+                    'ql-table_col_right': [
+                        '<path d="M12 5v14"/><path d="M5 12h14"/><path d="M19 12l-4-4"/><path d="M19 12l4 4"/>',
+                        'Kolom Kanan'
+                    ],
+                    'ql-table_col_del': ['<line x1="12" y1="5" x2="12" y2="19"></line>', 'Hapus Kolom', 'red'],
+                    'ql-table_delete': [
+                        '<polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>',
+                        'Hapus Tabel', 'red'
+                    ]
+                };
+                const createIcon = (svg, color = 'currentColor') =>
+                    `<svg viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${svg}</svg>`;
+                Object.entries(iconsMap).forEach(([key, val]) => {
+                    icons[key.replace('ql-', '')] = createIcon(val[0], val[2] || 'currentColor');
+                });
+
+                // 3. EDITOR INIT
+                let quillInstances = [];
+                const pageDivider = '<div class="page-break-divider"></div>';
+                const editorWrapperBg = document.getElementById('editor-wrapper-bg');
+                const hiddenInput = document.getElementById('template_isi_hidden');
+                const paperSelect = document.getElementById('paperSizeSelect');
+                const guideToggle = document.getElementById('toggleCenterGuide');
+                const kopToggle = document.getElementById('toggleKop');
+
+                function updateKopStatus() {
+                    const firstPage = document.querySelector('.page-instance:first-child');
+                    if (firstPage) {
+                        if (kopToggle.checked) firstPage.classList.add('has-kop');
+                        else firstPage.classList.remove('has-kop');
+                    }
+                }
+
+                function restoreTableWidths(quillInstance, rawHTML) {
+                    if (!rawHTML) return;
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(rawHTML, 'text/html');
+                    const sourceTables = doc.querySelectorAll('table');
+                    const editorTables = quillInstance.root.querySelectorAll('table');
+                    editorTables.forEach((table, index) => {
+                        if (sourceTables[index]) {
+                            table.style.tableLayout = 'fixed';
+                            table.style.width = '100%';
+                            const sourceRow = sourceTables[index].querySelector('tr');
+                            const targetRow = table.querySelector('tr');
+                            if (sourceRow && targetRow) {
+                                Array.from(sourceRow.cells).forEach((sourceCell, i) => {
+                                    const w = sourceCell.style.width || sourceCell.getAttribute(
+                                    'width');
+                                    if (w && targetRow.cells[i]) {
+                                        targetRow.cells[i].style.width = w;
+                                        const blot = Quill.find(targetRow.cells[i]);
+                                        if (blot) blot.format('width', w);
+                                    }
+                                });
+                            }
+                        }
+                    });
+                }
+
+                function debounce(func, wait) {
+                    let timeout;
+                    return function(...args) {
+                        const context = this;
+                        clearTimeout(timeout);
+                        timeout = setTimeout(() => func.apply(context, args), wait);
+                    };
+                }
+
                 const toolbarOptions = [
                     [{
                         'header': [1, 2, 3, 4, 5, 6, false]
@@ -656,298 +706,308 @@
                     }],
                     ['link', 'image', 'code-block'],
                     ['table_add'],
-                    ['table_row_up', 'table_row_down', 'table_row_del'],
-                    ['table_col_left', 'table_col_right', 'table_col_del'],
-                    ['table_delete'],
+                    ['table_row_up', 'table_row_down', 'table_row_del', 'table_col_left', 'table_col_right',
+                        'table_col_del', 'table_delete'
+                    ],
                     ['clean', 'htmlEditButton']
                 ];
 
-                // 3. ICON BUILDER
-                const createIcon = (svg, color = 'currentColor') =>
-                    `<svg viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${svg}</svg>`;
+                function createPage(content = '') {
+                    const pageIndex = quillInstances.length + 1;
+                    const pageWrapper = document.createElement('div');
+                    pageWrapper.className = `page-instance paper-${paperSelect.value}`;
+                    pageWrapper.id = `page-${pageIndex}`;
+                    if (pageIndex === 1 && kopToggle.checked) pageWrapper.classList.add('has-kop');
 
-                // 4. LOAD DATA (RAW HTML) BEFORE QUILL INIT
-                // Ini mencegah Quill menghapus style width saat inisialisasi
-                if (hiddenInput.value.trim()) {
-                    editorDiv.innerHTML = hiddenInput.value.trim();
-                }
+                    let deleteBtn = (pageIndex > 1 || content.trim() !== '') ?
+                        `<button type="button" class="btn-delete-page" onclick="requestDeletePage(this)"><i class='bx bx-trash'></i> Hapus Halaman</button>` :
+                        '';
 
-                // 5. INIT QUILL
-                const quill = new Quill(editorDiv, {
-                    theme: 'snow',
-                    modules: {
-                        table: true,
-                        htmlEditButton: {
-                            msg: "Edit HTML",
-                            okText: "Simpan",
-                            cancelText: "Batal",
-                            buttonHTML: "&lt;&gt;"
-                        },
-                        toolbar: {
-                            container: toolbarOptions,
-                            handlers: {
-                                'table_add': function() {
-                                    this.quill.getModule('table').insertTable(3, 3);
-                                    resetTableColumnWidths(this.quill);
-                                },
-                                'table_row_up': function() {
-                                    this.quill.getModule('table').insertRowAbove();
-                                },
-                                'table_row_down': function() {
-                                    this.quill.getModule('table').insertRowBelow();
-                                },
-                                'table_row_del': function() {
-                                    this.quill.getModule('table').deleteRow();
-                                },
-                                'table_col_left': function() {
-                                    this.quill.getModule('table').insertColumnLeft();
-                                    resetTableColumnWidths(this.quill);
-                                },
-                                'table_col_right': function() {
-                                    this.quill.getModule('table').insertColumnRight();
-                                    resetTableColumnWidths(this.quill);
-                                },
-                                'table_col_del': function() {
-                                    this.quill.getModule('table').deleteColumn();
-                                    resetTableColumnWidths(this.quill);
-                                },
-                                'table_delete': function() {
-                                    this.quill.getModule('table').deleteTable();
+                    pageWrapper.innerHTML = `
+                        <div class="page-header-info"><span class="page-label">HALAMAN ${pageIndex}</span>${deleteBtn}</div>
+                        <div class="page-toolbar-container"></div>
+                        <div class="editor-container"></div>
+                    `;
+                    editorWrapperBg.appendChild(pageWrapper);
+
+                    const quill = new Quill(pageWrapper.querySelector('.editor-container'), {
+                        theme: 'snow',
+                        modules: {
+                            table: true,
+                            htmlEditButton: {
+                                msg: "Edit HTML",
+                                okText: "Simpan",
+                                cancelText: "Batal",
+                                buttonHTML: "&lt;&gt;"
+                            },
+                            toolbar: {
+                                container: toolbarOptions,
+                                handlers: {
+                                    'table_add': function() {
+                                        this.quill.getModule('table').insertTable(3, 3);
+                                    },
+                                    'table_row_up': function() {
+                                        this.quill.getModule('table').insertRowAbove();
+                                    },
+                                    'table_row_down': function() {
+                                        this.quill.getModule('table').insertRowBelow();
+                                    },
+                                    'table_row_del': function() {
+                                        this.quill.getModule('table').deleteRow();
+                                    },
+                                    'table_col_left': function() {
+                                        this.quill.getModule('table').insertColumnLeft();
+                                    },
+                                    'table_col_right': function() {
+                                        this.quill.getModule('table').insertColumnRight();
+                                    },
+                                    'table_col_del': function() {
+                                        this.quill.getModule('table').deleteColumn();
+                                    },
+                                    'table_delete': function() {
+                                        this.quill.getModule('table').deleteTable();
+                                    }
                                 }
                             }
-                        }
-                    }
-                });
-
-                // === SOLUSI UTAMA: RESTORE WIDTHS SETELAH QUILL LOADING ===
-                // Quill mungkin tetap membersihkan style width saat render pertama.
-                // Kita akan membaca ulang data asli dan memaksa style width kembali ke DOM Quill.
-                setTimeout(() => {
-                    const originalHTML = hiddenInput.value.trim();
-                    if (originalHTML) {
-                        // Parse HTML asli di memori (virtual)
-                        const parser = new DOMParser();
-                        const doc = parser.parseFromString(originalHTML, 'text/html');
-                        const savedTables = doc.querySelectorAll('table');
-                        const editorTables = editorDiv.querySelectorAll('table');
-
-                        editorTables.forEach((table, index) => {
-                            if (savedTables[index]) {
-                                const savedRow = savedTables[index].querySelector('tr');
-                                const editorRow = table.querySelector('tr');
-
-                                if (savedRow && editorRow) {
-                                    // Paksa style table fixed agar width sel bekerja
-                                    table.style.tableLayout = 'fixed';
-                                    table.style.width = '100%';
-
-                                    Array.from(savedRow.cells).forEach((savedCell, cellIndex) => {
-                                        if (savedCell.style.width && editorRow.cells[
-                                                cellIndex]) {
-                                            // Kembalikan width ke cell di editor
-                                            editorRow.cells[cellIndex].style.width = savedCell
-                                                .style.width;
-                                        }
-                                    });
-                                }
-                            }
-                        });
-                    }
-                }, 100); // Delay sedikit untuk memastikan Quill selesai render
-
-                // Pindahkan Toolbar
-                const toolbarElement = editorDiv.previousSibling;
-                if (toolbarElement && toolbarElement.classList.contains('ql-toolbar')) {
-                    document.getElementById('toolbar-container').appendChild(toolbarElement);
-                }
-
-                // Setup Icons (sama seperti sebelumnya)
-                const btnAdd = document.querySelector('.ql-table_add');
-                if (btnAdd) {
-                    btnAdd.innerHTML = createIcon(
-                        '<rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="3" y1="15" x2="21" y2="15"></line><line x1="9" y1="3" x2="9" y2="21"></line><line x1="15" y1="3" x2="15" y2="21"></line>'
-                    );
-                    btnAdd.title = "Buat Tabel Baru";
-                }
-                const btnRowUp = document.querySelector('.ql-table_row_up');
-                if (btnRowUp) {
-                    btnRowUp.innerHTML = createIcon(
-                        '<path d="M5 12h14"/><path d="M12 5v14"/><path d="M12 5l-4 4"/><path d="M12 5l4 4"/>');
-                    btnRowUp.title = "Tambah Baris Atas";
-                }
-                const btnRowDown = document.querySelector('.ql-table_row_down');
-                if (btnRowDown) {
-                    btnRowDown.innerHTML = createIcon(
-                        '<path d="M5 12h14"/><path d="M12 5v14"/><path d="M12 19l-4-4"/><path d="M12 19l4-4"/>');
-                    btnRowDown.title = "Tambah Baris Bawah";
-                }
-                const btnRowDel = document.querySelector('.ql-table_row_del');
-                if (btnRowDel) {
-                    btnRowDel.innerHTML = createIcon('<line x1="5" y1="12" x2="19" y2="12"></line>', 'red');
-                    btnRowDel.title = "Hapus Baris";
-                }
-                const btnColLeft = document.querySelector('.ql-table_col_left');
-                if (btnColLeft) {
-                    btnColLeft.innerHTML = createIcon(
-                        '<path d="M12 5v14"/><path d="M5 12h14"/><path d="M5 12l4-4"/><path d="M5 12l4 4"/>');
-                    btnColLeft.title = "Tambah Kolom Kiri";
-                }
-                const btnColRight = document.querySelector('.ql-table_col_right');
-                if (btnColRight) {
-                    btnColRight.innerHTML = createIcon(
-                        '<path d="M12 5v14"/><path d="M5 12h14"/><path d="M19 12l-4-4"/><path d="M19 12l4 4"/>');
-                    btnColRight.title = "Tambah Kolom Kanan";
-                }
-                const btnColDel = document.querySelector('.ql-table_col_del');
-                if (btnColDel) {
-                    btnColDel.innerHTML = createIcon('<line x1="12" y1="5" x2="12" y2="19"></line>', 'red');
-                    btnColDel.title = "Hapus Kolom";
-                }
-                const btnDelTable = document.querySelector('.ql-table_delete');
-                if (btnDelTable) {
-                    btnDelTable.innerHTML = createIcon(
-                        '<polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>',
-                        'red');
-                    btnDelTable.title = "Hapus Tabel";
-                }
-
-                // Logic Tombol Tabel
-                const tableControlsGroups = document.querySelectorAll(
-                    '.ql-formats:has(.ql-table_row_up), .ql-formats:has(.ql-table_col_left), .ql-formats:has(.ql-table_delete)'
-                );
-                tableControlsGroups.forEach(group => {
-                    group.classList.add('table-controls-group');
-                    group.style.display = 'none';
-                });
-                quill.on('selection-change', (range) => {
-                    if (range) {
-                        const formats = quill.getFormat(range);
-                        const isInTable = formats['table-cell'] !== undefined || formats['table'] !== undefined;
-                        tableControlsGroups.forEach(group => group.style.display = isInTable ? 'flex' : 'none');
-                    }
-                });
-
-                function updateEditorVisuals() {
-                    const editorElement = editorDiv.querySelector('.ql-editor');
-                    if (!editorElement) return;
-                    editorElement.className = 'ql-editor';
-                    editorElement.classList.add('paper-' + paperSelect.value);
-                    editorElement.style.lineHeight = '1.5';
-                    if (guideToggle.checked) editorElement.classList.add('show-guide');
-                }
-                paperSelect.addEventListener('change', updateEditorVisuals);
-                guideToggle.addEventListener('change', updateEditorVisuals);
-                setTimeout(updateEditorVisuals, 100);
-
-                // ============================================================
-                // 7. FITUR RESIZE (LOGIKA DRAG)
-                // ============================================================
-                const editorContent = editorDiv.querySelector('.ql-editor');
-                let isResizing = false;
-                let currentCell = null;
-                let nextCell = null;
-                let startX = 0;
-                let startWidth = 0;
-                let nextStartWidth = 0;
-
-                const getTargetCell = (e) => {
-                    const cell = e.target.closest('td');
-                    if (!cell) return null;
-                    const rect = cell.getBoundingClientRect();
-                    const offsetX = e.clientX - rect.left;
-                    if (rect.width - offsetX < 10) return cell;
-                    return null;
-                };
-
-                editorContent.addEventListener('mousemove', function(e) {
-                    if (isResizing && currentCell && nextCell) {
-                        e.preventDefault();
-                        const diff = e.pageX - startX;
-                        const newCurrentWidth = startWidth + diff;
-                        const newNextWidth = nextStartWidth - diff;
-                        if (newCurrentWidth > 30 && newNextWidth > 30) {
-                            currentCell.style.width = newCurrentWidth + 'px';
-                            nextCell.style.width = newNextWidth + 'px';
-                        }
-                        return;
-                    }
-                    const target = getTargetCell(e);
-                    if (target && target.nextElementSibling) {
-                        target.style.cursor = 'col-resize';
-                        editorContent.style.cursor = 'col-resize';
-                    } else {
-                        const cell = e.target.closest('td');
-                        if (cell) cell.style.cursor = 'text';
-                        else editorContent.style.cursor = 'text';
-                    }
-                });
-
-                editorContent.addEventListener('mousedown', function(e) {
-                    const target = getTargetCell(e);
-                    if (target && target.nextElementSibling) {
-                        isResizing = true;
-                        currentCell = target;
-                        nextCell = target.nextElementSibling;
-                        startX = e.pageX;
-                        startWidth = currentCell.offsetWidth;
-                        nextStartWidth = nextCell.offsetWidth;
-                        document.body.classList.add('resizing-cursor');
-                        e.preventDefault();
-                    }
-                });
-
-                document.addEventListener('mouseup', function() {
-                    if (isResizing) {
-                        isResizing = false;
-                        currentCell = null;
-                        nextCell = null;
-                        document.body.classList.remove('resizing-cursor');
-                        editorContent.style.cursor = 'text';
-                    }
-                });
-
-                // Observer: Hanya untuk tabel BARU yang belum punya width
-                const observer = new MutationObserver(function(mutations) {
-                    const tables = editorContent.querySelectorAll('table');
-                    tables.forEach(tbl => {
-                        if (tbl.style.tableLayout !== 'fixed') {
-                            tbl.style.tableLayout = 'fixed';
-                            tbl.style.width = '100%';
-                        }
-                        const rowOne = tbl.rows[0];
-                        if (!rowOne) return;
-
-                        // Cek apakah ada width (dari restore function di atas)
-                        let hasDefinedWidth = false;
-                        for (let i = 0; i < rowOne.cells.length; i++) {
-                            if (rowOne.cells[i].style.width && rowOne.cells[i].style.width !== "") {
-                                hasDefinedWidth = true;
-                                break;
-                            }
-                        }
-                        // Jika benar-benar kosong (tabel baru dibuat), baru reset rata
-                        if (!hasDefinedWidth) {
-                            const pct = 100 / rowOne.cells.length;
-                            Array.from(rowOne.cells).forEach(c => c.style.width = pct + '%');
                         }
                     });
-                });
 
-                // Nyalakan observer setelah restore function berjalan
-                setTimeout(() => {
-                    observer.observe(editorContent, {
+                    // Match TD Width on Paste
+                    quill.clipboard.addMatcher('TD', function(node, delta) {
+                        const width = node.style.width || node.getAttribute('width');
+                        if (width) {
+                            delta.forEach(op => {
+                                op.attributes = op.attributes || {};
+                                op.attributes.width = width;
+                            });
+                        }
+                        return delta;
+                    });
+
+                    // Setup Toolbar & Icons
+                    const toolbarContainer = pageWrapper.querySelector('.page-toolbar-container');
+                    const generatedToolbar = pageWrapper.querySelector('.ql-toolbar');
+                    if (generatedToolbar) {
+                        toolbarContainer.appendChild(generatedToolbar);
+                        setupTableIcons(generatedToolbar, quill);
+                    }
+
+                    if (guideToggle.checked) pageWrapper.querySelector('.ql-editor').classList.add('show-guide');
+                    initTableResizer(pageWrapper.querySelector('.ql-editor'), quill);
+
+                    if (content && content.trim() !== '') {
+                        quill.clipboard.dangerouslyPasteHTML(0, content);
+                        setTimeout(() => {
+                            restoreTableWidths(quill, content);
+                        }, 50);
+                    }
+
+                    // Table Layout Observer
+                    const observer = new MutationObserver(function(mutations) {
+                        const tables = quill.root.querySelectorAll('table');
+                        tables.forEach(tbl => {
+                            if (tbl.style.tableLayout !== 'fixed') {
+                                tbl.style.tableLayout = 'fixed';
+                                tbl.style.width = '100%';
+                            }
+                            const rowOne = tbl.rows[0];
+                            if (rowOne && !rowOne.cells[0].style.width) {
+                                const pct = 100 / rowOne.cells.length;
+                                Array.from(rowOne.cells).forEach(c => c.style.width = pct + '%');
+                            }
+                        });
+                    });
+                    observer.observe(quill.root, {
                         childList: true,
                         subtree: true
                     });
-                }, 500);
 
-                // Submit Form
-                document.getElementById('formTemplate').addEventListener('submit', function() {
-                    let htmlContent = editorDiv.querySelector('.ql-editor').innerHTML;
-                    htmlContent = htmlContent.replace(/ {2,}/g, match => '&nbsp;'.repeat(match.length));
-                    hiddenInput.value = htmlContent;
+                    quill.on('text-change', debounce((delta, oldDelta, source) => {
+                        if (source === 'user') handlePagination(quill);
+                    }, 250));
+
+                    quillInstances.push(quill);
+                    return quill;
+                }
+
+                function setupTableIcons(toolbarEl, quillInstance) {
+                    Object.entries(iconsMap).forEach(([cls, val]) => {
+                        const btn = toolbarEl.querySelector('.' + cls);
+                        if (btn) btn.title = val[1];
+                    });
+                    const tableControls = toolbarEl.querySelectorAll(
+                        '.ql-formats:has(.ql-table_row_up), .ql-formats:has(.ql-table_col_left), .ql-formats:has(.ql-table_delete)'
+                        );
+                    tableControls.forEach(g => {
+                        g.classList.add('table-controls-group');
+                        g.style.display = 'none';
+                    });
+                    quillInstance.on('selection-change', (range) => {
+                        if (range) {
+                            const formats = quillInstance.getFormat(range);
+                            const isInTable = formats['table-cell'] || formats['table'] || formats['width'];
+                            tableControls.forEach(g => g.style.display = isInTable ? 'flex' : 'none');
+                        }
+                    });
+                }
+
+                function initTableResizer(editorContent, quillInstance) {
+                    let isResizing = false,
+                        currentCell = null,
+                        nextCell = null,
+                        startX = 0,
+                        startWidth = 0,
+                        nextStartWidth = 0;
+                    editorContent.addEventListener('mousedown', function(e) {
+                        const cell = e.target.closest('td');
+                        if (!cell) return;
+                        const rect = cell.getBoundingClientRect();
+                        if (e.clientX - rect.left > rect.width - 10 && cell.nextElementSibling) {
+                            isResizing = true;
+                            currentCell = cell;
+                            nextCell = cell.nextElementSibling;
+                            startX = e.pageX;
+                            startWidth = currentCell.offsetWidth;
+                            nextStartWidth = nextCell.offsetWidth;
+                            document.body.classList.add('resizing-cursor');
+                            e.preventDefault();
+                        }
+                    });
+                    editorContent.addEventListener('mousemove', function(e) {
+                        if (isResizing && currentCell && nextCell) {
+                            const diff = e.pageX - startX;
+                            if (currentCell.offsetWidth + diff > 30 && nextCell.offsetWidth - diff > 30) {
+                                currentCell.style.width = (startWidth + diff) + 'px';
+                                nextCell.style.width = (nextStartWidth - diff) + 'px';
+                            }
+                        } else {
+                            const cell = e.target.closest('td');
+                            if (cell) {
+                                const rect = cell.getBoundingClientRect();
+                                if (e.clientX - rect.left > rect.width - 10 && cell.nextElementSibling) cell
+                                    .style.cursor = 'col-resize';
+                                else cell.style.cursor = 'text';
+                            }
+                        }
+                    });
+                    document.addEventListener('mouseup', function() {
+                        if (isResizing && currentCell && nextCell) {
+                            const currentBlot = Quill.find(currentCell);
+                            const nextBlot = Quill.find(nextCell);
+                            if (currentBlot) currentBlot.format('width', currentCell.style.width);
+                            if (nextBlot) nextBlot.format('width', nextCell.style.width);
+                            isResizing = false;
+                            document.body.classList.remove('resizing-cursor');
+                        }
+                    });
+                }
+
+                function handlePagination(quillInstance) {
+                    const editorRoot = quillInstance.root;
+                    quillInstances = quillInstances.filter(q => document.body.contains(q.root));
+                    let currentIndex = quillInstances.indexOf(quillInstance);
+                    while (editorRoot.scrollHeight > editorRoot.clientHeight + 1) {
+                        let nextQuill = quillInstances[currentIndex + 1];
+                        if (!nextQuill) {
+                            createPage();
+                            nextQuill = quillInstances[quillInstances.length - 1];
+                        }
+                        const textContent = quillInstance.getText();
+                        const length = quillInstance.getLength();
+                        let splitIndex = textContent.lastIndexOf('\n', textContent.length - 2);
+                        if (splitIndex < 0) splitIndex = length - 1;
+                        else splitIndex += 1;
+                        if (splitIndex <= 0) break;
+                        const contentToMove = quillInstance.getContents(splitIndex);
+                        quillInstance.deleteText(splitIndex, length - splitIndex);
+                        const nextContent = nextQuill.getContents();
+                        nextQuill.setContents(contentToMove.concat(nextContent), 'api');
+                    }
+                }
+
+                // --- INIT MODAL PAGES ---
+                const deletePageModalElement = document.getElementById('deletePageModal');
+                const deletePageModal = new bootstrap.Modal(deletePageModalElement);
+                const confirmDeletePageBtn = document.getElementById('confirmDeletePageBtn');
+                let pageToDelete = null;
+
+                window.requestDeletePage = function(btn) {
+                    pageToDelete = btn.closest('.page-instance');
+                    deletePageModal.show();
+                };
+
+                confirmDeletePageBtn.addEventListener('click', function() {
+                    if (pageToDelete) {
+                        const quillToRemove = quillInstances.find(q => pageToDelete.contains(q.root));
+                        if (quillToRemove) quillInstances = quillInstances.filter(q => q !== quillToRemove);
+                        pageToDelete.remove();
+                        document.querySelectorAll('.page-instance .page-label').forEach((el, idx) => el
+                            .innerText = `HALAMAN ${idx + 1}`);
+                        deletePageModal.hide();
+                        updateKopStatus();
+                    }
                 });
+
+                // --- EXECUTE INITIAL LOAD ---
+                let rawContent = hiddenInput.value;
+                if (rawContent && rawContent.trim()) {
+                    const pages = rawContent.split(pageDivider);
+                    if (pages.length > 0) pages.forEach(p => {
+                        if (p.trim()) createPage(p);
+                    });
+                    else createPage(rawContent);
+                } else {
+                    createPage();
+                }
+                updateKopStatus();
+
+                // --- EVENT LISTENERS UI ---
+                paperSelect.addEventListener('change', function() {
+                    document.querySelectorAll('.page-instance').forEach(el => el.className =
+                        `page-instance paper-${this.value}`);
+                    updateKopStatus();
+                });
+                kopToggle.addEventListener('change', updateKopStatus);
+                guideToggle.addEventListener('change', function() {
+                    document.querySelectorAll('.ql-editor').forEach(ed => this.checked ? ed.classList.add(
+                        'show-guide') : ed.classList.remove('show-guide'));
+                });
+
+                document.getElementById('formTemplate').addEventListener('submit', function() {
+                    let combinedHTML = '';
+                    document.querySelectorAll('.page-instance .ql-editor').forEach((editor, idx) => {
+                        const editorContent = editor.innerHTML;
+                        if (idx > 0) combinedHTML += pageDivider;
+                        combinedHTML += editorContent.replace(/ {2,}/g, match => '&nbsp;'.repeat(match
+                            .length));
+                    });
+                    hiddenInput.value = combinedHTML;
+                });
+
+                // Modal Hapus Template Logic
+                const deleteModalTemplate = document.getElementById('deleteModal');
+                if (deleteModalTemplate) {
+                    deleteModalTemplate.addEventListener('show.bs.modal', function(event) {
+                        const button = event.relatedTarget;
+                        const actionUrl = button.getAttribute('data-action');
+                        const form = deleteModalTemplate.querySelector('#deleteForm');
+                        form.setAttribute('action', actionUrl);
+                    });
+                }
             });
+
+            // Copy to Clipboard Utils
+            let toastTimeout;
+
+            function copyToClipboard(text) {
+                navigator.clipboard.writeText(text).then(() => {
+                    const toast = document.getElementById("copy-toast");
+                    toast.querySelector('span').innerText = text + " disalin!";
+                    toast.className = "show";
+                    clearTimeout(toastTimeout);
+                    toastTimeout = setTimeout(() => toast.className = "", 3000);
+                });
+            }
         </script>
     @endpush
 @endsection

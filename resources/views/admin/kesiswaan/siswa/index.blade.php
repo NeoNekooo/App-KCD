@@ -14,8 +14,6 @@
                     <i class="bx bx-show-alt me-1"></i> Lihat Data
                 </a>
 
-                
-
                 {{-- Tombol Export --}}
                 <div class="dropdown">
                     <button class="btn btn-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -71,7 +69,6 @@
                     <th>NISN</th>
                     <th>TTL</th>
                     <th>Kelas</th>
-                    {{-- Kolom Aksi SUDAH DIHAPUS --}}
                 </tr>
             </thead>
             <tbody class="table-border-bottom-0">
@@ -135,8 +132,6 @@
                             <span class="badge bg-label-secondary">Belum Masuk Kelas</span>
                         @endif
                     </td>
-
-                    {{-- Kolom Aksi SUDAH DIHAPUS --}}
                 </tr>
                 @empty
                 <tr>
