@@ -1,18 +1,35 @@
 <?php
 
-        namespace App\Models;
+namespace App\Models;
 
-        use Illuminate\Database\Eloquent\Factories\HasFactory;
-        use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
-        class TugasPegawai extends Model
-        {
-            use HasFactory;
+class TugasPegawai extends Model
+{
+    use HasFactory;
 
-            protected $guarded = [];
+    /**
+     * Nama tabel yang digunakan oleh model.
+     *
+     * @var string
+     */
+    protected $table = 'tugas_pegawais';
 
-            public function pegawai()
-            {
-                return $this->belongsTo(Pegawai::class);
-            }
-        }
+    /**
+     * Atribut yang tidak boleh diisi secara massal.
+     *
+     * @var array
+     */
+    protected $guarded = [];
+
+    /**
+     * Relasi ke model Gtk untuk mengambil data pegawai.
+     */
+    public function gtk()
+    {
+        // Menghubungkan 'pegawai_id' (foreign key) 
+        // ke 'id' (primary key) di tabel gtks
+        return $this->belongsTo(Gtk::class, 'pegawai_id');
+    }
+}

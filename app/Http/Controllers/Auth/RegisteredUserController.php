@@ -29,38 +29,38 @@ class RegisteredUserController extends Controller
      *
      * @throws \Illuminate\Validation\ValidationException
      */
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request)
 {
     $request->validate([
         'nik' => ['required', 'digits:16', 'exists:siswas,nik'],
-        'email' => ['required', 'email', 'max:255', 'unique:penggunas,username'],
-        'password' => ['required', 'confirmed', Rules\Password::defaults()],
+        'username' => ['required','unique:penggunas,username'],
+        'password' => ['required'],
     ]);
 
     $siswa = Siswa::where('nik', $request->nik)->firstOrFail();
 
-    $sudahAdaWali = Pengguna::where('peserta_didik_id', $siswa->peserta_didik_id)
+    $exists = Pengguna::where('peserta_didik_id', $siswa->peserta_didik_id)
         ->where('peran_id_str', 'wali')
         ->exists();
 
-    if ($sudahAdaWali) {
+    if ($exists) {
         return back()->withErrors([
             'nik' => 'Siswa ini sudah memiliki akun wali'
-        ])->withInput();
+        ]);
     }
 
     Pengguna::create([
-        'pengguna_id'       => (string) Str::uuid(),
-        'username'          => $request->email,
-        'password'          => Hash::make($request->password),
-        'peran_id_str'      => 'wali',
-        'peserta_didik_id'  => $siswa->peserta_didik_id,
+        'pengguna_id' => (string) \Str::uuid(),
+        'username' => $request->username,
+        'password' => \Hash::make($request->password),
+        'peran_id_str' => 'wali',
+        'peserta_didik_id' => $siswa->peserta_didik_id,
     ]);
 
-    return redirect()
-        ->route('login')
-        ->with('success', 'Registrasi berhasil. Silakan login.');
+    return redirect()->route('login')
+        ->with('success', 'Akun berhasil dibuat.');
 }
+
 
 
 
@@ -86,6 +86,8 @@ class RegisteredUserController extends Controller
                 'nama' => $siswa->nama,
                 'kelas' => $siswa->nama_rombel ?? '-',
                 'tanggal_lahir' => $siswa->tanggal_lahir,
+                'ayah' => $siswa->nama_ayah,
+                'ibu' => $siswa->nama_ibu,
             ]
         ], 200);
     }
