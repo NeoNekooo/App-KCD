@@ -9,12 +9,20 @@ class TipeSurat extends Model
 {
     use HasFactory;
 
-    // Menentukan nama tabel secara eksplisit
     protected $table = 'tipe_surats';
 
-    // Mengizinkan semua kolom diisi (mass assignment)
-    // Kolom: judul_surat, kategori, template_isi
+    // $guarded = [] sudah aman, tapel_id otomatis bisa diinput.
     protected $guarded = [];
+
+    /**
+     * Relasi ke Tapel (Tahun Pelajaran)
+     * Menghubungkan kolom 'tapel_id' di tabel ini ke tabel 'tapel'
+     */
+    public function tapel()
+    {
+        // belongsTo artinya "Tipe Surat ini MILIK satu Tapel"
+        return $this->belongsTo(Tapel::class, 'tapel_id');
+    }
 
     /**
      * Relasi: Satu tipe surat bisa digunakan di banyak surat keluar

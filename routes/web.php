@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\Settings\ApiSettingsController;
 use App\Http\Controllers\Admin\Settings\SekolahController;
 use App\Http\Controllers\Admin\Kepegawaian\GtkController;
 use App\Http\Controllers\Admin\Kepegawaian\TugasPegawaiController;
+use App\Http\Controllers\Admin\Kepegawaian\TempalateSuratSkController;
 
 // Controller Akademik
 use App\Http\Controllers\Admin\Akademik\TapelController;
@@ -133,6 +134,9 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
     
     // --- GRUP KEPEGAWAIAN --- (Struktur dari V1)
     Route::prefix('kepegawaian')->name('kepegawaian.')->group(function () {
+        // === PERBAIKAN: HAPUS ->names([...]) ===
+        // Otomatis menjadi: admin.kepegawaian.TemplateSk.index, dll
+        Route::resource('TemplateSk', TempalateSuratSkController::class);
         
         // Route untuk Guru
         Route::prefix('guru')->name('guru.')->controller(GtkController::class)->group(function () {
@@ -161,7 +165,12 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
             Route::post('/upload-background', 'uploadBackgroundKartu')->name('upload-background-kartu');
         });
 
-        Route::resource('tugas-pegawai', TugasPegawaiController::class)->except(['create', 'edit', 'show']);
+        Route::get('tugas-pegawai', [TugasPegawaiController::class, 'index'])->name('tugas-pegawai.index');
+    Route::post('tugas-pegawai/sync', [TugasPegawaiController::class, 'syncDariRombel'])->name('tugas-pegawai.sync');
+    Route::post('tugas-pegawai/update-sk', [TugasPegawaiController::class, 'updateSk'])->name('tugas-pegawai.update-sk');
+    Route::get('tugas-pegawai/cetak/{id}', [TugasPegawaiController::class, 'cetak'])->name('tugas-pegawai.cetak');
+    Route::post('tugas-pegawai/store', [TugasPegawaiController::class, 'store'])->name('tugas-pegawai.store');
+Route::delete('tugas-pegawai/{id}', [TugasPegawaiController::class, 'destroy'])->name('tugas-pegawai.destroy');
 
 
     });

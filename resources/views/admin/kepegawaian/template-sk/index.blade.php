@@ -77,6 +77,7 @@
         }
 
         /* --- PERBAIKAN: MENAMPILKAN ANGKA PADA SIZE --- */
+        /* Memaksa label Font DAN Size untuk mengambil teks dari atribut data-value */
         .ql-snow .ql-picker.ql-font .ql-picker-label::before,
         .ql-snow .ql-picker.ql-font .ql-picker-item::before,
         .ql-snow .ql-picker.ql-size .ql-picker-label::before,
@@ -208,7 +209,7 @@
             height: 28px !important;
         }
 
-        /* KOP SURAT LOGIC */
+        /* KOP SURAT */
         .page-instance.has-kop:first-child .ql-editor {
             padding: 5.54cm 2.54cm 2.54cm 2.54cm !important;
         }
@@ -217,7 +218,7 @@
             padding: 2.54cm !important;
         }
 
-        /* Helper Chips */
+        /* Chips */
         .var-chip {
             cursor: pointer;
             transition: all 0.2s;
@@ -264,7 +265,7 @@
             height: 279mm;
         }
 
-        /* Table & Resizer */
+        /* Table */
         .ql-editor table {
             table-layout: fixed !important;
             width: 100% !important;
@@ -328,63 +329,43 @@
     </style>
 
     <div class="container-xxl flex-grow-1 container-p-y">
-        <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Administrasi /</span> Template Surat</h4>
+        <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Administrasi /</span> Template Surat SK</h4>
 
         @php
-            $reqKategori = request()->kategori;
-            if (empty($reqKategori) && isset($template)) {
-                $reqKategori = $template->kategori;
-            }
-            $kategoriAktif = $reqKategori ?? 'siswa';
-
-            // Variabel disederhanakan untuk contoh
+            // VARIABEL HANYA UNTUK SK
             $variables = [
-                ['code' => '{{ nama }}', 'desc' => 'Nama'],
+                ['code' => '{{ nama }}', 'desc' => 'Nama Penerima'],
+                ['code' => '{{ jabatan }}', 'desc' => 'Jabatan'],
+                ['code' => '{{ nip }}', 'desc' => 'NIP/Niy'],
                 ['code' => '{{ tanggal }}', 'desc' => 'Tanggal Surat'],
                 ['code' => '{{ nomor_surat }}', 'desc' => 'Nomor Surat'],
+                ['code' => '{{ perihal }}', 'desc' => 'Perihal'],
                 ['code' => '{{ alamat }}', 'desc' => 'Alamat'],
             ];
-            if ($kategoriAktif == 'siswa') {
-                $variables = array_merge($variables, [
-                    ['code' => '{{ nisn }}', 'desc' => 'NISN'],
-                    ['code' => '{{ kelas }}', 'desc' => 'Kelas'],
-                    ['code' => '{{ tempat_lahir }}', 'desc' => 'Tempat Lahir'],
-                ]);
-            }
         @endphp
-
-        <ul class="nav nav-pills mb-3">
-            <li class="nav-item"><a class="nav-link {{ $kategoriAktif == 'siswa' ? 'active' : '' }}"
-                    href="{{ route('admin.administrasi.tipe-surat.index', ['kategori' => 'siswa']) }}"><i
-                        class='bx bx-user me-1'></i> Siswa</a></li>
-            <li class="nav-item"><a class="nav-link {{ $kategoriAktif == 'guru' ? 'active' : '' }}"
-                    href="{{ route('admin.administrasi.tipe-surat.index', ['kategori' => 'guru']) }}"><i
-                        class='bx bx-briefcase-alt-2 me-1'></i> Guru</a></li>
-            {{-- TAB SK DIHAPUS DISINI --}}
-        </ul>
 
         <div class="row">
             <div class="col-md-9">
                 <div class="card h-100 shadow-sm border-0">
                     <div class="card-header bg-white border-bottom">
                         <h5 class="mb-0 fw-bold text-primary">
-                            {{ isset($template) ? 'Edit Template' : 'Buat Template Baru' }}</h5>
+                            {{ isset($template) ? 'Edit Template SK' : 'Buat Template SK Baru' }}</h5>
                     </div>
                     <div class="card-body mt-3">
+                        {{-- FORM START --}}
                         <form
-                            action="{{ isset($template) ? route('admin.administrasi.tipe-surat.update', $template->id) : route('admin.administrasi.tipe-surat.store') }}"
+                            action="{{ isset($template) ? route('admin.kepegawaian.TemplateSk.update', $template->id) : route('admin.kepegawaian.TemplateSk.store') }}"
                             method="POST" id="formTemplate">
                             @csrf
                             @if (isset($template))
                                 @method('PUT')
                             @endif
-                            <input type="hidden" name="kategori" value="{{ $kategoriAktif }}">
 
                             <div class="row g-3 mb-4">
                                 <div class="col-md-7">
                                     <label class="form-label fw-bold">Judul Surat</label>
                                     <input type="text" name="judul_surat" class="form-control"
-                                        placeholder="Contoh: Surat Keputusan"
+                                        placeholder="Contoh: SK Pengangkatan"
                                         value="{{ old('judul_surat', $template->judul_surat ?? '') }}" required>
                                 </div>
                                 <div class="col-md-3">
@@ -408,7 +389,6 @@
                                         <label class="form-check-label small text-muted" for="toggleKop"
                                             style="cursor:pointer;">Jarak Kop 3cm</label>
                                     </div>
-                                    {{-- TOGGLE GARIS TENGAH DIHAPUS DISINI --}}
                                 </div>
                             </div>
 
@@ -433,20 +413,19 @@
                             <div class="d-flex gap-2 pt-2 border-top">
                                 <button type="submit" class="btn btn-primary"><i class="bx bx-save me-1"></i> Simpan
                                     Template</button>
-                                @if (isset($template))
-                                    <a href="{{ route('admin.administrasi.tipe-surat.index', ['kategori' => $kategoriAktif]) }}"
-                                        class="btn btn-outline-secondary">Batal</a>
-                                @endif
+                                <a href="{{ route('admin.kepegawaian.TemplateSk.index') }}"
+                                    class="btn btn-outline-secondary">Batal / Kembali</a>
                             </div>
                         </form>
                     </div>
                 </div>
             </div>
 
+            {{-- SIDEBAR LIST TEMPLATE SK --}}
             <div class="col-md-3">
                 <div class="card h-100 shadow-sm border-0">
                     <div class="card-header bg-light">
-                        <h6 class="mb-0 fw-bold text-secondary">List {{ ucfirst($kategoriAktif) }}</h6>
+                        <h6 class="mb-0 fw-bold text-secondary">Daftar Template SK</h6>
                     </div>
                     <ul class="list-group list-group-flush">
                         @foreach ($templates as $t)
@@ -456,32 +435,22 @@
                                         <h6 class="mb-1 text-truncate" style="max-width: 130px;">{{ $t->judul_surat }}
                                         </h6>
                                         <small class="badge bg-label-secondary">{{ $t->ukuran_kertas }}</small>
-
-                                        {{-- === TAMBAHAN UNTUK TAPEL === --}}
-                                        @if ($t->tapel)
-                                            <small
-                                                class="badge bg-label-info">{{ $t->tapel->tahun_pelajaran ?? $t->tapel->nama }}</small>
-                                        @endif
-                                        {{-- ============================ --}}
                                     </div>
 
-                                    {{-- === BAGIAN TOMBOL DIPERBAIKI (BUTTON GROUP) === --}}
+                                    {{-- === TOMBOL DIPERBAIKI (BUTTON GROUP) === --}}
                                     <div class="btn-group btn-group-sm shadow-sm" role="group" aria-label="Aksi">
-                                        {{-- Tombol Edit (Biru / Primary) --}}
-                                        <a href="{{ route('admin.administrasi.tipe-surat.edit', ['tipe_surat' => $t->id, 'kategori' => $kategoriAktif]) }}"
+                                        <a href="{{ route('admin.kepegawaian.TemplateSk.edit', $t->id) }}"
                                             class="btn btn-primary" title="Edit">
                                             <i class="bx bx-pencil"></i>
                                         </a>
-
-                                        {{-- Tombol Hapus (Merah / Danger) --}}
                                         <button type="button" class="btn btn-danger" data-bs-toggle="modal"
                                             data-bs-target="#deleteModal"
-                                            data-action="{{ route('admin.administrasi.tipe-surat.destroy', $t->id) }}"
+                                            data-action="{{ route('admin.kepegawaian.TemplateSk.destroy', $t->id) }}"
                                             title="Hapus">
                                             <i class="bx bx-trash"></i>
                                         </button>
                                     </div>
-                                    {{-- ============================================= --}}
+                                    {{-- ======================================= --}}
 
                                 </div>
                             </li>
@@ -497,7 +466,7 @@
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content">
                 <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title text-white">Daftar Variabel</h5>
+                    <h5 class="modal-title text-white">Daftar Variabel SK</h5>
                     <button type="button" class="btn-close btn-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body bg-light">
@@ -523,7 +492,8 @@
                 </div>
                 <form id="deleteForm" method="POST" action="">@csrf @method('DELETE')
                     <div class="modal-body">
-                        <p class="mb-0">Yakin hapus?</p><small class="text-danger">Tak bisa dibatalkan.</small>
+                        <p class="mb-0">Yakin hapus template ini?</p><small class="text-danger">Tak bisa
+                            dibatalkan.</small>
                     </div>
                     <div class="modal-footer"><button type="button" class="btn btn-outline-secondary"
                             data-bs-dismiss="modal">Batal</button><button type="submit" class="btn btn-danger">Ya,
@@ -641,7 +611,6 @@
                 const editorWrapperBg = document.getElementById('editor-wrapper-bg');
                 const hiddenInput = document.getElementById('template_isi_hidden');
                 const paperSelect = document.getElementById('paperSizeSelect');
-                // const guideToggle = document.getElementById('toggleCenterGuide'); // DIHAPUS
                 const kopToggle = document.getElementById('toggleKop');
 
                 function updateKopStatus() {
@@ -799,7 +768,6 @@
                         setupTableIcons(generatedToolbar, quill);
                     }
 
-                    // LOGIKA GARIS TENGAH DIHAPUS DISINI
                     initTableResizer(pageWrapper.querySelector('.ql-editor'), quill);
 
                     if (content && content.trim() !== '') {
@@ -975,7 +943,6 @@
                     updateKopStatus();
                 });
                 kopToggle.addEventListener('change', updateKopStatus);
-                // guideToggle.addEventListener('change', ...) // DIHAPUS
 
                 document.getElementById('formTemplate').addEventListener('submit', function() {
                     let combinedHTML = '';

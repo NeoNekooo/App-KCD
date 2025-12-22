@@ -6,120 +6,165 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Rombel;
 use App\Models\Gtk;
-use App\Models\TugasPegawai; 
-use Illuminate\Support\Collection; 
+use App\Models\Tapel;
+use App\Models\TipeSurat;
+use App\Models\TugasPegawai;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class TugasPegawaiController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
-    {
-        // --- PENGATURAN TAHUN AKTIF ---
-        $tahunAktifTampil = '2024/2025';
-        $semesterAktifTampil = 'Ganjil';
-        $semesterAktifId = '20251'; // ID Semester dari rombels.sql
+    // ... part of index method
+public function index(Request $request)
+{
+    $tapelAktif = Tapel::where('is_active', 1)->first();
+    $tahunAktifTampil = $tapelAktif->tahun_ajaran ?? '-';
+    $semesterAktifTampil = $tapelAktif->semester ?? '-';
 
-        // --- AMBIL DATA TUGAS POKOK (Sudah Benar) ---
-        
-        $rombels = Rombel::where('semester_id', $semesterAktifId)->get();
-        $allPembelajaran = new Collection(); 
+    // 1. Tab Mata Pelajaran (Hanya yang memiliki jam mengajar > 0)
+    $tugasPokok = TugasPegawai::select('tugas_pegawais.*')
+        ->join('gtks', 'tugas_pegawais.pegawai_id', '=', 'gtks.id')
+        ->with('gtk')
+        ->where('tahun_pelajaran', $tahunAktifTampil)
+        ->where('semester', $semesterAktifTampil)
+        ->where('jumlah_jam', '>', 0)
+        ->orderBy('gtks.nama', 'asc')
+        ->paginate(10, ['*'], 'page_mapel');
+
+    // 2. Tab Jabatan Struktural (CRUD - Memfilter Kepala Sekolah)
+    // Kita ambil data tugas tambahan yang tidak ada di rombel (jam bisa 0 atau ekuivalen)
+    $jabatanStruktural = TugasPegawai::with('gtk')
+        ->where('tahun_pelajaran', $tahunAktifTampil)
+        ->where('semester', $semesterAktifTampil)
+        ->where('tugas_pokok', 'NOT LIKE', '%Kepala Sekolah%')
+        ->where('jumlah_jam', '=', 0) // Asumsi tugas tambahan jamnya diinput manual/0
+        ->orWhereIn('tugas_pokok', ['Wakil Kepala Sekolah', 'Kepala Lab', 'Kepala Perpustakaan'])
+        ->paginate(10, ['*'], 'page_struktural');
+
+    // Data Pegawai untuk Dropdown di Modal Tambah
+    $allGtk = Gtk::orderBy('nama', 'asc')->get();
+
+    return view('admin.kepegawaian.tugas-pegawai.index', compact(
+        'tugasPokok', 'jabatanStruktural', 'allGtk',
+        'tahunAktifTampil', 'semesterAktifTampil'
+    ));
+}
+
+public function store(Request $request)
+{
+    $tapelAktif = Tapel::where('is_active', 1)->first();
+
+    TugasPegawai::create([
+        'pegawai_id' => $request->pegawai_id,
+        'tugas_pokok' => $request->tugas_pokok,
+        'jumlah_jam' => $request->jumlah_jam ?? 0,
+        'nomor_sk' => $request->nomor_sk,
+        'tahun_pelajaran' => $tapelAktif->tahun_ajaran,
+        'semester' => $tapelAktif->semester,
+    ]);
+
+    return back()->with('success', 'Tugas tambahan berhasil ditambahkan.');
+}
+
+public function destroy($id)
+{
+    TugasPegawai::findOrFail($id)->delete();
+    return back()->with('success', 'Tugas berhasil dihapus.');
+}
+
+    public function syncDariRombel()
+    {
+        $tapelAktif = Tapel::where('is_active', 1)->first();
+        if (!$tapelAktif) return back()->with('error', 'Tahun Pelajaran Aktif tidak ditemukan.');
+
+        $rombels = Rombel::where('semester_id', $tapelAktif->kode_tapel)->get();
+        $allLessons = collect();
 
         foreach ($rombels as $rombel) {
-            if (!empty($rombel->pembelajaran)) {
-                $pembelajaranArray = $rombel->pembelajaran; 
-                if (is_array($pembelajaranArray)) {
-                    foreach ($pembelajaranArray as $pembelajaran) {
-                        $allPembelajaran->push($pembelajaran);
+            $pems = is_array($rombel->pembelajaran) ? $rombel->pembelajaran : json_decode($rombel->pembelajaran, true);
+            if ($pems) {
+                foreach ($pems as $p) {
+                    if (!empty($p['ptk_id'])) {
+                        // Memastikan mapel tidak capslock saat dimasukkan ke koleksi
+                        $allLessons->push([
+                            'ptk_id' => $p['ptk_id'],
+                            'nama_mapel' => Str::title(strtolower(trim($p['nama_mata_pelajaran']))),
+                            'jam' => (int)($p['jam_mengajar_per_minggu'] ?? 0)
+                        ]);
                     }
                 }
             }
         }
 
-        $ptkUuids = $allPembelajaran->pluck('ptk_id')->unique()->filter()->all();
-        $gtks = Gtk::whereIn('ptk_id', $ptkUuids)->get()->keyBy('ptk_id');
+        $groupedByGtk = $allLessons->groupBy('ptk_id');
 
-        $tugasPokok = $allPembelajaran->map(function ($tugas) use ($gtks) {
-            
-            $tugasObj = is_array($tugas) ? (object) $tugas : $tugas;
-            $gtk = $gtks->get($tugasObj->ptk_id);
-            $tugasObj->gtk = $gtk; 
+        DB::beginTransaction();
+        try {
+            TugasPegawai::where('tahun_pelajaran', $tapelAktif->tahun_ajaran)
+                        ->where('semester', $tapelAktif->semester)
+                        ->delete();
 
-            $tugasObj->tugas_pokok = $tugasObj->nama_mata_pelajaran ?? 'N/A';
-            $tugasObj->jumlah_jam = $tugasObj->jam_mengajar_per_minggu ?? 0;
-            
-            if ($gtk) {
-                $tugasObj->tmt = $gtk->tanggal_surat_tugas; 
-                $rwyKepangkatan = json_decode($gtk->rwy_kepangkatan); 
-                
-                if (!empty($rwyKepangkatan) && is_array($rwyKepangkatan) && isset($rwyKepangkatan[0])) {
-                    $skTerbaru = (object) $rwyKepangkatan[0];
-                    if (isset($skTerbaru->nomor_sk)) {
-                        $tugasObj->nomor_sk = $skTerbaru->nomor_sk;
-                    } else {
-                        $tugasObj->nomor_sk = null;
-                    }
-                } else {
-                    $tugasObj->nomor_sk = null; 
+            foreach ($groupedByGtk as $ptkId => $lessons) {
+                $gtk = Gtk::where('ptk_id', $ptkId)->first();
+                if ($gtk) {
+                    $mergedMapel = $lessons->pluck('nama_mapel')->unique()->implode(', ');
+                    $totalJam = $lessons->sum('jam');
+
+                    TugasPegawai::create([
+                        'pegawai_id'      => $gtk->id,
+                        'tahun_pelajaran' => $tapelAktif->tahun_ajaran,
+                        'semester'        => $tapelAktif->semester,
+                        'tugas_pokok'     => $mergedMapel,
+                        'jumlah_jam'      => $totalJam,
+                        'nomor_sk'        => null,
+                    ]);
                 }
-            } else {
-                $tugasObj->tmt = null;
-                $tugasObj->nomor_sk = null;
             }
-            return $tugasObj;
-        });
-
-        $tugasPokok = $tugasPokok->unique(function ($item) {
-            return $item->ptk_id . $item->tugas_pokok;
-        });
-
-
-        // --- AMBIL DATA TUGAS TAMBAHAN ---
-        
-        // 1. Wali Kelas (INI YANG DIPERBAIKI: Ditambah filter jenis_rombel_str)
-        $waliKelas = Rombel::with('waliKelas') 
-            ->where('semester_id', $semesterAktifId) 
-            ->whereNotNull('ptk_id')
-            ->where('jenis_rombel_str', 'Kelas') // <-- PERBAIKAN DI SINI
-            ->get();
-
-        // 2. Pembina Ekskul (Datanya belum ada di SQL yg kamu kirim)
-        // $pembinaEkskul = new Collection(); // Kita buat kosong dulu
-        
-        // 3. Jabatan Struktural (Sudah Benar)
-        $jabatanStrukturalList = [
-            'Kepala Sekolah',
-            'Wakil Kepala Sekolah Bidang Kurikulum',
-            'Wakil Kepala Sekolah Bidang Kesiswaan',
-            'Kepala Program Keahlian'
-        ];
-        $jabatanStruktural = Gtk::whereIn('jabatan_ptk_id_str', $jabatanStrukturalList)->get();
-
-        // 4. Tenaga Kependidikan (INI YANG BARU)
-        $tendik = Gtk::whereNotIn('jabatan_ptk_id_str', $jabatanStrukturalList) // Ambil yang BUKAN struktural
-                    ->where('jenis_ptk_id_str', 'Tenaga Kependidikan') // Filter hanya tendik
-                    ->get();
-
-
-        // 5. KIRIM SEMUA DATA KE VIEW
-        return view('admin.kepegawaian.tugas-pegawai.index', compact(
-            'tugasPokok',
-            'waliKelas',
-            // 'pembinaEkskul', 
-            'jabatanStruktural',
-            'tendik', // <-- Kirim data baru
-            'tahunAktifTampil',
-            'semesterAktifTampil'
-        ));
+            DB::commit();
+            return back()->with('success', 'Sinkronisasi berhasil! Format teks telah diperbaiki.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with('error', 'Gagal: ' . $e->getMessage());
+        }
     }
 
-    // ... sisa Controller ...
-    
-    public function create(){}
-    public function store(Request $request){}
-    public function show(string $id){}
-    public function edit(string $id){}
-    public function update(Request $request, string $id){}
-    public function destroy(string $id){}
+    public function updateSk(Request $request)
+    {
+        $tugas = TugasPegawai::find($request->id);
+        if ($tugas) {
+            $tugas->nomor_sk = $request->nomor_sk;
+            $tugas->save();
+            return response()->json(['success' => true]);
+        }
+        return response()->json(['success' => false], 404);
+    }
+
+    public function cetak(Request $request, $id)
+    {
+        $tugas = TugasPegawai::with('gtk')->findOrFail($id);
+        $template = TipeSurat::where('id', $request->template_id)->where('kategori', 'sk')->firstOrFail();
+
+        $isiSurat = $template->template_isi;
+        $replacements = [
+            '{{ nama }}'           => Str::title(strtolower($tugas->gtk->nama)),
+            '{{ nip }}'            => $tugas->gtk->nip ?? $tugas->gtk->nik ?? '-',
+            '{{ jabatan }}'        => Str::title(strtolower($tugas->gtk->jabatan_ptk_id_str ?? 'Guru')),
+            '{{ nomor_sk }}'       => $tugas->nomor_sk ?? '.../.../...',
+            '{{ mata_pelajaran }}' => $tugas->tugas_pokok,
+            '{{ jumlah_jam }}'     => $tugas->jumlah_jam,
+            '{{ tahun_ajaran }}'   => $tugas->tahun_pelajaran,
+            '{{ semester }}'       => $tugas->semester,
+            '{{ tanggal }}'        => now()->translatedFormat('d F Y'),
+        ];
+
+        foreach ($replacements as $key => $value) {
+            $isiSurat = str_replace($key, $value, $isiSurat);
+        }
+
+        $pdf = Pdf::loadView('admin.kepegawaian.tugas-pegawai.pdf-template', compact('isiSurat', 'template'))
+                  ->setPaper(strtolower($template->ukuran_kertas), 'portrait');
+
+        return $pdf->stream("SK_{$tugas->gtk->nama}.pdf");
+    }
 }

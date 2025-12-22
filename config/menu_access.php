@@ -149,6 +149,7 @@ return [
             'submenu' => [
                 ['title' => 'Data Guru', 'route' => 'admin.kepegawaian.guru.index', 'is_active' => 'request()->routeIs("admin.kepegawaian.guru.*")'],
                 ['title' => 'Tenaga Kependidikan', 'route' => 'admin.kepegawaian.tendik.index', 'is_active' => 'request()->routeIs("admin.kepegawaian.tendik.*")'],
+                ['title' => 'Template Surat SK', 'route' => 'admin.kepegawaian.TemplateSk.index', 'is_active' => 'request()->is("admin.kepegawaian.TemplateSk.*")'],
                 ['title' => 'Tugas Pegawai', 'route' => 'admin.kepegawaian.tugas-pegawai.index', 'is_active' => 'request()->is("admin/kepegawaian/tugas-pegawai*")'],
                 ['title' => 'Cetak Kartu ID', 'route' => 'admin.kepegawaian.gtk.index-cetak-kartu', 'is_active' => 'request()->routeIs("gtk.index-cetak-kartu")'],
             ]
