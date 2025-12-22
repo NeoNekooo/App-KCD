@@ -12,6 +12,8 @@ use Illuminate\Support\Str;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\SiswaExport;
+use App\Models\PelanggaranSanksi;
+use App\Models\PelanggaranNilai;
 
 class SiswaController extends Controller
 {
