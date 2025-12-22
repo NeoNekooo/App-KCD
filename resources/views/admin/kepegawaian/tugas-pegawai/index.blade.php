@@ -103,17 +103,17 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {{-- @foreach ($waliKelas as $w)
+                        @foreach ($waliKelas as $w)
                         <tr>
                             <td>{{ $loop->iteration }}</td>
                             <td>{{ $w->nama }}</td>
                             <td>{{ Str::title(strtolower($w->waliKelas->nama ?? '-')) }}</td>
                         </tr>
-                        @endforeach --}}
+                        @endforeach
                     </tbody>
                 </table>
             </div>
-            {{-- <div class="mt-3">{{ $waliKelas->appends(request()->except('page_wali'))->links() }}</div> --}}
+            <div class="mt-3">{{ $waliKelas->appends(request()->except('page_wali'))->links() }}</div>
         </div>
     </div>
 </div>
