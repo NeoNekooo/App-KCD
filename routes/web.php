@@ -87,7 +87,7 @@ use App\Http\Controllers\Admin\Administrasi\SuratMasukController;
 
 // Menggunakan 'welcome' dari V2
 Route::get('/', function () {
-    return view('welcome');
+    return view('auth.login-custom');
 });
 
 Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])
