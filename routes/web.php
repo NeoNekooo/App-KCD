@@ -166,12 +166,12 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
         });
 
         Route::get('tugas-pegawai', [TugasPegawaiController::class, 'index'])->name('tugas-pegawai.index');
-    Route::post('tugas-pegawai/sync', [TugasPegawaiController::class, 'syncDariRombel'])->name('tugas-pegawai.sync');
-    Route::post('tugas-pegawai/update-sk', [TugasPegawaiController::class, 'updateSk'])->name('tugas-pegawai.update-sk');
-    Route::get('tugas-pegawai/cetak/{id}', [TugasPegawaiController::class, 'cetak'])->name('tugas-pegawai.cetak');
-    Route::post('tugas-pegawai/store', [TugasPegawaiController::class, 'store'])->name('tugas-pegawai.store');
-Route::delete('tugas-pegawai/{id}', [TugasPegawaiController::class, 'destroy'])->name('tugas-pegawai.destroy');
-
+        Route::post('tugas-pegawai/sync', [TugasPegawaiController::class, 'syncDariRombel'])->name('tugas-pegawai.sync');
+        Route::post('tugas-pegawai/update-sk', [TugasPegawaiController::class, 'updateSk'])->name('tugas-pegawai.update-sk');
+        Route::get('tugas-pegawai/cetak/{id}', [TugasPegawaiController::class, 'cetak'])->name('tugas-pegawai.cetak');
+        Route::post('tugas-pegawai/store', [TugasPegawaiController::class, 'store'])->name('tugas-pegawai.store');
+        Route::delete('tugas-pegawai/{id}', [TugasPegawaiController::class, 'destroy'])->name('tugas-pegawai.destroy');
+        Route::put('tugas-pegawai/{id}', [TugasPegawaiController::class, 'update'])->name('tugas-pegawai.update');
 
     });
 
