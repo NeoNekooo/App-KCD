@@ -203,7 +203,7 @@ document.addEventListener("DOMContentLoaded", function () {
       const tingkat = parseInt(this.dataset.tingkat);
       const rombel = this.dataset.rombel;
 
-      formEdit.action = `/admin/kesiswaan/ppdb/kelas-ppdb/${id}`;
+      formEdit.action = `/admin/ppdb/kelas-ppdb/${id}`;
       document.getElementById("editTingkat").value = tingkat;
       document.getElementById("editRombel").value = rombel;
 

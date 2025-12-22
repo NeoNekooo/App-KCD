@@ -195,7 +195,7 @@ document.addEventListener("DOMContentLoaded", function() {
   editButtons.forEach(btn => {
     btn.addEventListener("click", function() {
       const id = this.dataset.id;
-      formEdit.action = `/admin/kesiswaan/ppdb/quota-ppdb/${id}`;
+      formEdit.action = `/admin/ppdb/quota-ppdb/${id}`;
       Object.keys(this.dataset).forEach(key => {
         const input = document.getElementById("edit" + key.charAt(0).toUpperCase() + key.slice(1));
         if (input) input.value = this.dataset[key];

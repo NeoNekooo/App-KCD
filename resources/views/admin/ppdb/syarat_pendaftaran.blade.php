@@ -179,7 +179,7 @@ document.addEventListener("DOMContentLoaded", () => {
         btn.addEventListener("click", () => {
             const { id, tahun, tahunid, jalur, syarat } = btn.dataset;
 
-            formEdit.action = `/admin/kesiswaan/ppdb/syarat-ppdb/${id}`;
+            formEdit.action = `/admin/ppdb/syarat-ppdb/${id}`;
             document.getElementById("editTahun").value = tahun;
             document.getElementById("editTahunId").value = tahunid;
             document.getElementById("editJalur").value = jalur;

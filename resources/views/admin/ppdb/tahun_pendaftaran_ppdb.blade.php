@@ -165,7 +165,7 @@ document.addEventListener("DOMContentLoaded", function() {
       const tahun = this.dataset.tahun;
       const keterangan = this.dataset.keterangan;
 
-      formEdit.action = `/admin/kesiswaan/ppdb/tahun-ppdb/${id}`;
+      formEdit.action = `/admin/ppdb/tahun-ppdb/${id}`;
 
       document.getElementById("editTahun").value = tahun;
       document.getElementById("editKeterangan").value = keterangan;

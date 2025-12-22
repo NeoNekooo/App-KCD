@@ -196,7 +196,7 @@ document.addEventListener("DOMContentLoaded", function () {
             const jalur = this.dataset.jalur;
             const keterangan = this.dataset.keterangan;
 
-            formEdit.action = `/admin/kesiswaan/ppdb/jalur-ppdb/${id}`;
+            formEdit.action = `/admin/ppdb/jalur-ppdb/${id}`;
             document.getElementById("editKode").value = kode;
             document.getElementById("editJalur").value = jalur;
             document.getElementById("editKeterangan").value = keterangan;

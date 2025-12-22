@@ -172,7 +172,7 @@ document.addEventListener("DOMContentLoaded", function () {
             const kompetensi = this.dataset.kompetensi;
 
             // isi form
-            formEdit.action = `/admin/kesiswaan/ppdb/kompetensi-ppdb/${id}`;
+            formEdit.action = `/admin/ppdb/kompetensi-ppdb/${id}`;
             document.getElementById("editKode").value = kode;
             document.getElementById("editKompetensi").value = kompetensi;
 
