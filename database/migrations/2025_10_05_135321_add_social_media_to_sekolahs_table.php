@@ -12,11 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('sekolahs', function (Blueprint $table) {
-            // Menambahkan kolom baru setelah kolom 'peta'
-            $table->string('facebook_url')->nullable()->after('peta');
-            $table->string('instagram_url')->nullable()->after('facebook_url');
-            $table->string('youtube_url')->nullable()->after('instagram_url');
-            $table->string('tiktok_url')->nullable()->after('youtube_url');
+            // Kita gunakan tipe data JSON agar bisa menyimpan banyak sosmed sekaligus
+            // Format datanya nanti array: [{"platform": "facebook", "url": "...", "username": "..."}, ...]
+            $table->json('social_media')->nullable()->after('peta');
         });
     }
 
@@ -26,12 +24,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('sekolahs', function (Blueprint $table) {
-            $table->dropColumn([
-                'facebook_url', 
-                'instagram_url', 
-                'youtube_url', 
-                'tiktok_url'
-            ]);
+            $table->dropColumn('social_media');
         });
     }
 };
