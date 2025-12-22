@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html lang="en" class="light-style customizer-hide" dir="ltr" data-theme="theme-default"
-    data-assets-path="{{ asset('sneat/assets/') }}">
+      data-assets-path="{{ asset('sneat/assets/') }}">
 
 <head>
-    <meta charset="utf-8" />
+    <meta charset="utf-8"/>
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 
     <title>Registrasi - Sistem Informasi Akademik</title>
 
@@ -40,7 +40,6 @@
             border-color: #00a9be !important;
         }
 
-        /* ANIMASI STEP */
         .step-animate {
             overflow: hidden;
             opacity: 0;
@@ -102,14 +101,17 @@
                                 <label class="form-label">Password</label>
                                 <div class="input-group">
                                     <input type="text" class="form-control" id="password" name="password" readonly>
-                                    <button type="button" class="btn btn-outline-secondary" id="copyPassword">
-                                        Salin
+
+                                    <button type="button"
+                                            class="btn btn-outline-secondary"
+                                            id="copyPassword"
+                                            disabled>
+                                        <i class="bx bx-copy"></i>
                                     </button>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- BUTTON DINAMIS -->
                         <button type="button" id="actionButton"
                                 class="btn btn-primary w-100 btn-registrasi mt-2">
                             Konfirmasi
@@ -143,6 +145,10 @@
     const actionButton = document.getElementById('actionButton');
     const form = document.getElementById('form-register');
 
+    const passwordInput = document.getElementById('password');
+    const copyBtn = document.getElementById('copyPassword');
+    const copyIcon = copyBtn.querySelector('i');
+
     let siswaData = null;
     let step = 1;
 
@@ -160,6 +166,11 @@
         nikInput.value = nikInput.value.replace(/\D/g, '');
         infoSiswa.className = 'alert d-none';
         hideStepAkun();
+
+        passwordInput.value = '';
+        copyBtn.disabled = true;
+        copyIcon.className = 'bx bx-copy';
+
         step = 1;
         actionButton.textContent = 'Konfirmasi';
 
@@ -175,7 +186,7 @@
                 "Content-Type": "application/json",
                 "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content
             },
-            body: JSON.stringify({ nik })
+            body: JSON.stringify({nik})
         });
 
         const data = await res.json();
@@ -209,8 +220,8 @@
             step = 2;
 
         } else if (step === 2) {
-            document.getElementById('password').value =
-                Math.random().toString(36).slice(-8);
+            passwordInput.value = Math.random().toString(36).slice(-8);
+            copyBtn.disabled = false;
             actionButton.textContent = 'Registrasi';
             step = 3;
 
@@ -219,13 +230,20 @@
         }
     });
 
-    document.getElementById('copyPassword').onclick = async () => {
-        const pwd = document.getElementById('password').value;
-        if (!pwd) return;
+    copyBtn.addEventListener('click', async () => {
+        if (!passwordInput.value) return;
 
-        await navigator.clipboard.writeText(pwd);
-        new bootstrap.Toast(document.getElementById('toastCopy'), { delay: 2000 }).show();
-    };
+        copyBtn.disabled = true;
+        await navigator.clipboard.writeText(passwordInput.value);
+
+        copyIcon.className = 'bx bx-check';
+        new bootstrap.Toast(document.getElementById('toastCopy'), {delay: 2000}).show();
+
+        setTimeout(() => {
+            copyIcon.className = 'bx bx-copy';
+            copyBtn.disabled = false;
+        }, 4000);
+    });
 </script>
 
 </body>
