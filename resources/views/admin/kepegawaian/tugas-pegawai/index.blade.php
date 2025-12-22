@@ -1,189 +1,184 @@
 @extends('layouts.admin')
 
 @section('content')
+<div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 9999">
+    <div id="liveToast" class="toast align-items-center text-white border-0" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+            <div class="toast-body" id="toastMessage"></div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    </div>
+</div>
+
 <div class="d-flex justify-content-between align-items-center py-3 mb-4">
     <h4 class="fw-bold mb-0"><span class="text-muted fw-light">Kepegawaian /</span> Tugas Pegawai</h4>
     <div class="d-flex align-items-center">
         <form action="{{ route('admin.kepegawaian.tugas-pegawai.sync') }}" method="POST" class="me-3">
             @csrf
-            <button type="submit" class="btn btn-primary btn-sm"><i class="bx bx-sync me-1"></i> Sinkron dari Rombel</button>
+            <button type="submit" class="btn btn-primary btn-sm"><i class="bx bx-sync me-1"></i> Sinkron Rombel</button>
         </form>
-        <div class="badge bg-label-primary fs-6">{{ $tahunAktifTampil }} - Semester {{ $semesterAktifTampil }}</div>
+        <div class="badge bg-label-primary fs-6">{{ $tahunAktif }} - {{ $semesterAktif }}</div>
     </div>
 </div>
 
 <div class="nav-align-top mb-4">
     <ul class="nav nav-tabs" role="tablist">
-        <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-mapel"><i class="bx bx-book me-1"></i> Mata Pelajaran</button></li>
-        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-struktural"><i class="bx bx-briefcase me-1"></i> Jabatan Struktural</button></li>
-        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-wali"><i class="bx bx-user me-1"></i> Wali Kelas</button></li>
+        <li class="nav-item">
+            <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-mapel">
+                <i class="bx bx-book me-1"></i> Mata Pelajaran
+            </button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-struktural">
+                <i class="bx bx-briefcase me-1"></i> Jabatan Struktural
+            </button>
+        </li>
     </ul>
     <div class="tab-content">
         <div class="tab-pane fade show active" id="tab-mapel">
-            <div class="table-responsive text-nowrap">
-                <table class="table table-hover">
-                    <thead>
-                        <tr>
-                            <th>No</th>
-                            <th>Nama Pegawai</th>
-                            <th>Mata Pelajaran</th>
-                            <th>Jam</th>
-                            <th>Nomor SK</th>
-                            <th>Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach ($tugasPokok as $t)
-                        <tr>
-                            <td>{{ $loop->iteration + ($tugasPokok->currentPage() - 1) * $tugasPokok->perPage() }}</td>
-                            <td>
-                                <strong>{{ Str::title(strtolower($t->gtk->nama)) }}</strong>
-                                <div class="small text-muted">{{ $t->gtk->nip ?? $t->gtk->nik }}</div>
-                            </td>
-                            <td>
-                                <span class="text-capitalize-custom">{{ $t->tugas_pokok }}</span>
-                            </td>
-                            <td><span class="badge bg-label-info">{{ $t->jumlah_jam }} Jam</span></td>
-                            <td>
-                                <div class="edit-sk-container" data-id="{{ $t->id }}">
-                                    <span class="sk-text cursor-pointer text-primary" onclick="toggleEditSk('{{ $t->id }}')">
-                                        {{ $t->nomor_sk ?? 'Klik untuk isi SK...' }} <i class="bx bx-pencil ms-1 small"></i>
-                                    </span>
-                                    <div class="sk-input-group d-none" id="input-group-{{ $t->id }}">
-                                        <div class="input-group input-group-sm">
-                                            <input type="text" class="form-control" id="input-{{ $t->id }}" value="{{ $t->nomor_sk }}">
-                                            <button class="btn btn-primary" onclick="saveSk('{{ $t->id }}')"><i class="bx bx-check"></i></button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </td>
-                            <td>
-                                <button class="btn btn-sm btn-label-primary" onclick="openCetakModal('{{ $t->id }}', '{{ Str::title(strtolower($t->gtk->nama)) }}')"><i class="bx bx-printer"></i></button>
-                            </td>
-                        </tr>
-                        @endforeach
-                    </tbody>
-                </table>
+            <div class="mb-3">
+                <input type="text" id="search-mapel" class="form-control" placeholder="Cari guru mapel...">
             </div>
-            <div class="mt-3">{{ $tugasPokok->appends(request()->except('page_mapel'))->links() }}</div>
+            <div id="container-mapel">
+                @include('admin.kepegawaian.tugas-pegawai.partials._table_mapel')
+            </div>
         </div>
 
         <div class="tab-pane fade" id="tab-struktural">
-            <div class="table-responsive text-nowrap">
-                <table class="table table-hover">
-                    <thead>
-                        <tr>
-                            <th>No</th>
-                            <th>Nama Pegawai</th>
-                            <th>Jabatan</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach ($jabatanStruktural as $j)
-                        <tr>
-                            <td>{{ $loop->iteration }}</td>
-                            <td><strong>{{ Str::title(strtolower($j->nama)) }}</strong></td>
-                            <td>{{ Str::title(strtolower($j->jabatan_ptk_id_str)) }}</td>
-                        </tr>
-                        @endforeach
-                    </tbody>
-                </table>
+            <div class="d-flex justify-content-between mb-3">
+                <input type="text" id="search-struktural" class="form-control w-50" placeholder="Cari nama atau jabatan...">
+                <button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#modalTambahStruktural">
+                    <i class="bx bx-plus me-1"></i> Tambah Jabatan
+                </button>
             </div>
-            <div class="mt-3">{{ $jabatanStruktural->appends(request()->except('page_struktural'))->links() }}</div>
-        </div>
-
-        <div class="tab-pane fade" id="tab-wali">
-            <div class="table-responsive text-nowrap">
-                <table class="table table-hover">
-                    <thead>
-                        <tr>
-                            <th>No</th>
-                            <th>Kelas</th>
-                            <th>Wali Kelas</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach ($waliKelas as $w)
-                        <tr>
-                            <td>{{ $loop->iteration }}</td>
-                            <td>{{ $w->nama }}</td>
-                            <td>{{ Str::title(strtolower($w->waliKelas->nama ?? '-')) }}</td>
-                        </tr>
-                        @endforeach
-                    </tbody>
-                </table>
+            <div id="container-struktural">
+                @include('admin.kepegawaian.tugas-pegawai.partials._table_struktural')
             </div>
-            <div class="mt-3">{{ $waliKelas->appends(request()->except('page_wali'))->links() }}</div>
         </div>
     </div>
 </div>
 
-{{-- MODAL CETAK --}}
-<div class="modal fade" id="modalCetakSk" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <form class="modal-content" id="formCetakSk" target="_blank">
-            <div class="modal-header">
-                <h5 class="modal-title">Pilih Template SK</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <p>Mencetak SK untuk: <b id="targetNama"></b></p>
-                <div class="mb-3">
-                    <label class="form-label">Daftar Template SK</label>
-                    <select name="template_id" class="form-select" required>
-                        @foreach(\App\Models\TipeSurat::where('kategori', 'sk')->get() as $tmpl)
-                            <option value="{{ $tmpl->id }}">{{ $tmpl->judul_surat }} ({{ $tmpl->ukuran_kertas }})</option>
-                        @endforeach
-                    </select>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="submit" class="btn btn-primary">Preview PDF</button>
-            </div>
-        </form>
-    </div>
-</div>
+@include('admin.kepegawaian.tugas-pegawai.partials._modals')
+@endsection
 
 @push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <script>
-    function toggleEditSk(id) {
-        $(`.edit-sk-container[data-id="${id}"] .sk-text`).toggleClass('d-none');
-        $(`#input-group-${id}`).toggleClass('d-none');
+// Memastikan script jalan setelah jQuery siap
+function initTugasPegawai() {
+    if (typeof $ === 'undefined') {
+        console.error("jQuery masih belum terbaca!");
+        return;
     }
 
-    function saveSk(id) {
-        const val = $(`#input-${id}`).val();
-        $.ajax({
-            url: "{{ route('admin.kepegawaian.tugas-pegawai.update-sk') }}",
-            method: "POST",
-            data: { _token: "{{ csrf_token() }}", id: id, nomor_sk: val },
-            success: function() {
-                $(`.edit-sk-container[data-id="${id}"] .sk-text`).html(val ? val + ' <i class="bx bx-pencil ms-1 small"></i>' : 'Klik untuk isi...');
-                toggleEditSk(id);
-            }
-        });
-    }
+    // Setup CSRF untuk AJAX
+    $.ajaxSetup({
+        headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') }
+    });
 
-    function openCetakModal(id, nama) {
+    // --- 1. SEARCH LOGIC ---
+    let searchTimer;
+    $(document).on('keyup', '#search-mapel, #search-struktural', function() {
+        clearTimeout(searchTimer);
+        let id = $(this).attr('id');
+        let target = (id === 'search-mapel') ? '#container-mapel' : '#container-struktural';
+        let param = (id === 'search-mapel') ? 'search_mapel' : 'search_struktural';
+        let val = $(this).val();
+
+        searchTimer = setTimeout(function() {
+            $.get("{{ route('admin.kepegawaian.tugas-pegawai.index') }}?" + param + "=" + val, function(data) {
+                $(target).html(data);
+            });
+        }, 500);
+    });
+
+    // --- 2. EDIT SK INLINE ---
+    window.toggleEditSk = function(id) {
+        $('.sk-input-group').addClass('d-none');
+        $('.sk-text').removeClass('d-none');
+        $(`.edit-sk-container[data-id="${id}"] .sk-text`).addClass('d-none');
+        $(`#input-group-${id}`).removeClass('d-none').find('input').focus();
+    };
+
+    window.saveSk = function(id) {
+    let val = $('#input-'+id).val();
+
+    $.ajax({
+        url: "{{ route('admin.kepegawaian.tugas-pegawai.update-sk') }}",
+        type: "POST",
+        data: {
+            _token: $('meta[name="csrf-token"]').attr('content'), // Mengambil token dari meta tag
+            id: id,
+            nomor_sk: val
+        },
+        success: function(response) {
+            showToast('Nomor SK berhasil disimpan');
+            $(`.edit-sk-container[data-id="${id}"] .sk-text`)
+                .html(`${val || 'Isi SK...'} <i class="bx bx-pencil small"></i>`)
+                .removeClass('d-none');
+            $(`#input-group-${id}`).addClass('d-none');
+        },
+        error: function(xhr) {
+            console.error(xhr.responseText);
+            showToast('Gagal menyimpan SK. Silahkan refresh halaman.', 'danger');
+        }
+    });
+};
+
+    // --- 3 & 4. MODAL EDIT & CETAK ---
+    window.editStruktural = function(id, nama, tugas, jam, sk) {
+        $('#edit_nama_pegawai').text(nama);
+        $('#edit_tugas_pokok').val(tugas);
+        $('#edit_jumlah_jam').val(jam);
+        $('#edit_nomor_sk').val(sk);
+        $('#formEditStruktural').attr('action', "{{ route('admin.kepegawaian.tugas-pegawai.update', ':id') }}".replace(':id', id));
+
+        let modalEdit = new bootstrap.Modal(document.getElementById('modalEditStruktural'));
+        modalEdit.show();
+    };
+
+    window.openCetakModal = function(id, nama) {
         $('#targetNama').text(nama);
-        let url = "{{ route('admin.kepegawaian.tugas-pegawai.cetak', ':id') }}";
-        url = url.replace(':id', id);
-        $('#formCetakSk').attr('action', url);
-        $('#modalCetakSk').modal('show');
-    }
-</script>
-@endpush
+        $('#formCetakSk').attr('action', "{{ route('admin.kepegawaian.tugas-pegawai.cetak', ':id') }}".replace(':id', id));
 
+        let modalCetak = new bootstrap.Modal(document.getElementById('modalCetakSk'));
+        modalCetak.show();
+    };
+
+    // --- 5. HAPUS (SweetAlert2) ---
+    window.confirmDelete = function(e, form) {
+        e.preventDefault();
+        Swal.fire({
+            title: 'Hapus data?',
+            text: "Data yang dihapus tidak bisa dikembalikan!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#696cff',
+            confirmButtonText: 'Ya, Hapus!',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) form.submit();
+        });
+    };
+}
+
+// Jalankan saat halaman load
+document.addEventListener('DOMContentLoaded', initTugasPegawai);
+
+// Toast Helper
+window.showToast = function(msg, type = 'success') {
+    const t = document.getElementById('liveToast');
+    const m = document.getElementById('toastMessage');
+    if(t) {
+        t.className = `toast align-items-center text-white border-0 bg-${type}`;
+        m.innerText = msg;
+        new bootstrap.Toast(t).show();
+    }
+};
+</script>
 <style>
     .cursor-pointer { cursor: pointer; }
     .sk-text:hover { color: #696cff !important; text-decoration: underline; }
-    /* Memastikan huruf awal kapital lewat CSS (opsional sebagai cadangan) */
-    .text-capitalize-custom {
-        text-transform: lowercase;
-        display: inline-block;
-    }
-    .text-capitalize-custom::first-line {
-        text-transform: capitalize;
-    }
 </style>
-@endsection
+@endpush
