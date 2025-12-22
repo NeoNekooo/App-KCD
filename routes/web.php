@@ -276,7 +276,13 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
     |--------------------------------------------------------------------------
     */
     Route::prefix('alumni')->name('alumni.')->group(function() {
-        Route::get('/dataAlumni', [AlumniController::class,'index'])->name('dataAlumni');
+        
+        Route::resource('dataAlumni', AlumniController::class)
+        ->only(['index', 'show', 'update']);
+
+        Route::get('show-multiple', [AlumniController::class, 'showMultiple'])
+            ->name('show-multiple');
+
         Route::get('/rekapDataAlumni', [AlumniController::class,'rekapDataAlumni']);
 
         // Halaman index + filter kelas
