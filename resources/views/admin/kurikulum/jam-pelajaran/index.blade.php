@@ -74,11 +74,11 @@
                                                     <button class="btn btn-sm btn-outline-primary btn-edit"
                                                             data-data="{{ json_encode($jam) }}"
                                                             data-bs-toggle="modal" data-bs-target="#modalEdit">
-                                                        <i class="bi bi-pencil"></i>
+                                                        <i class="bx bx-edit"></i>
                                                     </button>
                                                     <form action="{{ route('admin.kurikulum.jam-pelajaran.destroy', $jam->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Hapus jam ini?')">
                                                         @csrf @method('DELETE')
-                                                        <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+                                                        <button class="btn btn-sm btn-outline-danger"><i class="bx bx-trash"></i></button>
                                                     </form>
                                                 </td>
                                             </tr>
