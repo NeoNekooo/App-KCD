@@ -1,3 +1,9 @@
+@php
+    $host = request()->getHost();
+    $spmbHost = preg_replace('/^[^.]+/', 'spmb', $host);
+    $spmbUrl = request()->getScheme() . '://' . $spmbHost;
+@endphp
+
 <section id="agenda" class="py-20 bg-slate-50 relative overflow-hidden">
     {{-- Hiasan Background --}}
     <div class="absolute top-0 left-0 w-64 h-64 bg-indigo-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20 -translate-x-1/2 -translate-y-1/2"></div>
@@ -48,7 +54,7 @@
 
                 {{-- Button Aksi --}}
                 <div class="mt-8 pt-6 border-t border-gray-100">
-                    <a href="{{ route('ppdb.beranda') }}" class="w-full flex items-center justify-center px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700">
+                    <a href="{{ $spmbUrl }}" class="w-full flex items-center justify-center px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700">
                         Lihat Jadwal PPDB
                     </a>
                 </div>
