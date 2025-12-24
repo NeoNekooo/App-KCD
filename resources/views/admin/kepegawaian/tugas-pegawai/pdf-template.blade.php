@@ -2,27 +2,72 @@
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title>Cetak SK</title>
     <style>
-        @page { margin: 0; }
-        body { font-family: 'Times New Roman', Times, serif; font-size: 12px; margin: 0; padding: 0; }
-        .container { padding: 2.54cm; position: relative; }
-        .kop-spacing { height: 3cm; width: 100%; }
-        .page-break { page-break-after: always; }
-        table { width: 100%; border-collapse: collapse; }
-        table, td, th { border: 1px solid black; padding: 4px; }
+        /* === 1. SETUP HALAMAN === */
+        @page { 
+            margin: 0; /* Margin diatur lewat padding body */
+        }
+        
+        body { 
+            font-family: 'Times New Roman', serif; 
+            font-size: 12pt; 
+            line-height: 1.5;
+            color: #000;
+            padding: 2.54cm; /* Margin Default (Atas/Kanan/Bawah/Kiri) */
+            
+            /* Pastikan teks panjang membungkus ke bawah (tidak melebar) */
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+
+        /* === 2. HANDLING PAGE BREAK === */
+        /* Class ini otomatis dibuat TinyMCE saat tombol Page Break diklik */
+        .mce-pagebreak {
+            page-break-after: always;
+            border: 0;
+            height: 0;
+            margin: 0;
+            display: block;
+        }
+
+        /* Kop Surat (Khusus Halaman 1 jika opsi dicentang) */
+        .has-kop {
+            padding-top: 5cm !important; 
+        }
+
+        /* === 3. STYLE TABEL === */
+        /* Kita hanya atur layout. Urusan border diatur oleh Controller & TinyMCE */
+        table {
+            width: 100% !important;
+            border-collapse: collapse;
+            table-layout: fixed; /* Wajib agar kolom sesuai persentase */
+            margin-bottom: 1em;
+            empty-cells: show;
+        }
+        
+        td, th {
+            padding: 2px 4px;
+            vertical-align: top;
+            
+            /* Mencegah teks panjang merusak tabel */
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+
+        /* === 4. GAMBAR & UTILS === */
+        img { max-width: 100%; height: auto; }
+        
+        p { margin-top: 0; margin-bottom: 8px; }
+        .text-center { text-align: center; }
+        .text-right { text-align: right; }
+        .text-justify { text-align: justify; }
     </style>
 </head>
-<body>
-    @php $pages = explode('<div class="page-break-divider"></div>', $isiSurat); @endphp
-    @foreach($pages as $index => $content)
-        <div class="container {{ !$loop->last ? 'page-break' : '' }}">
-            @if($index == 0 && $template->use_kop == 1)
-                <div class="kop-spacing"></div>
-            @endif
-            <div class="isi-surat">
-                {!! $content !!}
-            </div>
-        </div>
-    @endforeach
+<body class="{{ ($template->use_kop == 1) ? 'has-kop' : '' }}">
+    
+    {{-- Render HTML yang sudah diproses --}}
+    {!! $isiSurat !!}
+
 </body>
 </html>

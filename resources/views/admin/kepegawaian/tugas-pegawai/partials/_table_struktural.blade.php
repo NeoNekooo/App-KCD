@@ -5,42 +5,60 @@
                 <th>No</th>
                 <th>Nama Pegawai</th>
                 <th>Jabatan</th>
-                <th>Total Jam</th>
+                <th>Jam</th>
                 <th>Nomor SK</th>
                 <th>Aksi</th>
             </tr>
         </thead>
         <tbody>
             @foreach ($jabatanStruktural as $j)
+            @php
+                // Escape data agar aman untuk JavaScript
+                $safeNama = addslashes(Str::title(strtolower($j->parent->gtk->nama)));
+                $safeTugas = addslashes($j->tugas_pokok);
+                $safeSk = addslashes($j->parent->nomor_sk ?? '');
+            @endphp
             <tr>
                 <td>{{ $loop->iteration + ($jabatanStruktural->currentPage() - 1) * $jabatanStruktural->perPage() }}</td>
-                <td><strong>{{ Str::title(strtolower($j->gtk->nama)) }}</strong></td>
+                <td><strong>{{ Str::title(strtolower($j->parent->gtk->nama)) }}</strong></td>
                 <td class="text-wrap" style="max-width: 300px;">{{ $j->tugas_pokok }}</td>
                 <td><span class="badge bg-label-secondary">{{ $j->jumlah_jam }} Jam</span></td>
                 <td>
-                    <div class="edit-sk-container" data-id="{{ $j->id }}">
-                        <span class="sk-text cursor-pointer text-primary small" onclick="toggleEditSk('{{ $j->id }}')">
-                            {{ $j->nomor_sk ?? 'Isi SK...' }} <i class="bx bx-pencil small"></i>
+                    <div class="edit-sk-container" data-id="{{ $j->tugas_pegawai_id }}">
+                        <span class="sk-text cursor-pointer text-primary small" onclick="toggleEditSk('{{ $j->tugas_pegawai_id }}')">
+                            {{ $j->parent->nomor_sk ?? 'Isi SK...' }} <i class="bx bx-pencil small"></i>
                         </span>
-                        <div class="sk-input-group d-none" id="input-group-{{ $j->id }}">
+                        <div class="sk-input-group d-none" id="input-group-{{ $j->tugas_pegawai_id }}">
                             <div class="input-group input-group-sm">
-                                <input type="text" class="form-control" id="input-{{ $j->id }}"
-                                       value="{{ $j->nomor_sk }}"
-                                       onkeyup="if(event.keyCode === 13) saveSk('{{ $j->id }}')">
-                                <button class="btn btn-primary" onclick="saveSk('{{ $j->id }}')"><i class="bx bx-check"></i></button>
+                                <input type="text" class="form-control" id="input-{{ $j->tugas_pegawai_id }}"
+                                       value="{{ $j->parent->nomor_sk }}"
+                                       onkeyup="if(event.key === 'Enter') saveSk('{{ $j->tugas_pegawai_id }}')">
+                                <button class="btn btn-primary" onclick="saveSk('{{ $j->tugas_pegawai_id }}')"><i class="bx bx-check"></i></button>
                             </div>
                         </div>
                     </div>
                 </td>
                 <td>
                     <div class="d-flex">
-                        <button class="btn btn-sm btn-icon btn-label-warning me-1" onclick="editStruktural('{{ $j->id }}', '{{ $j->gtk->nama }}', '{{ $j->tugas_pokok }}', '{{ $j->jumlah_jam }}', '{{ $j->nomor_sk }}')"><i class="bx bx-edit"></i></button>
-                        <button class="btn btn-sm btn-icon btn-label-primary me-1" onclick="openCetakModal('{{ $j->id }}', '{{ $j->gtk->nama }}')"><i class="bx bx-printer"></i></button>
-                        <form action="{{ route('admin.kepegawaian.tugas-pegawai.destroy', $j->id) }}" method="POST" onsubmit="confirmDelete(event, this)">
+                        {{-- Tombol Edit menggunakan data yang sudah di-escape --}}
+                        <button class="btn btn-sm btn-icon btn-label-warning me-1"
+                                onclick="editStruktural('{{ $j->id }}', '{{ $safeNama }}', '{{ $safeTugas }}', '{{ $j->jumlah_jam }}', '{{ $safeSk }}')">
+                            <i class="bx bx-edit"></i>
+                        </button>
+
+                        {{-- Cetak menggunakan ID Header ($j->tugas_pegawai_id) --}}
+                        <button class="btn btn-sm btn-icon btn-label-primary me-1"
+                                onclick="openCetakModal('{{ $j->tugas_pegawai_id }}', '{{ $safeNama }}')">
+                            <i class="bx bx-printer"></i>
+                        </button>
+
+                        <button type="button" class="btn btn-sm btn-icon btn-label-danger" onclick="confirmDeleteDetail('{{ $j->id }}')">
+    <i class="bx bx-trash"></i>
+</button>
+
+{{-- Form disembunyikan, akan di-submit via JS --}}
+<form id="form-delete-{{ $j->id }}" action="{{ route('admin.kepegawaian.tugas-pegawai.destroy-detail', $j->id) }}" method="POST" style="display:none;">
     @csrf @method('DELETE')
-    <button type="submit" class="btn btn-sm btn-icon btn-label-danger">
-        <i class="bx bx-trash"></i>
-    </button>
 </form>
                     </div>
                 </td>
