@@ -223,12 +223,9 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
         Route::resource('daftar-ekstrakurikuler', DaftarEkstrakurikulerController::class)
              ->except(['show', 'create', 'edit']);
 
-
-        Route::resource('jadwal-pelajaran', JadwalPelajaranController::class);
-        Route::get('jadwal-pelajaran/{id}/json', [JadwalPelajaranController::class, 'getJadwalJson'])->name('jadwal-pelajaran.json');
     });
 
-      Route::prefix('kurikulum')->name('kurikulum.')->group(function () {
+    Route::prefix('kurikulum')->name('kurikulum.')->group(function () {
          Route::resource('jam-pelajaran', JamPelajaranController::class);
         Route::resource('jadwal-pelajaran', JamPelajaranController::class);
         // Halaman Index & Filter Rombel
