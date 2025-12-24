@@ -234,8 +234,12 @@ class HomeController extends Controller
 
         // Jika ditemukan agenda PPDB yang aktif
         if ($agendaAktif) {
-            // BUKA: Arahkan ke halaman pendaftaran utama
-            return redirect()->route('ppdb.beranda');
+            $host = request()->getHost();
+            $spmbHost = preg_replace('/^[^.]+/', 'spmb', $host);
+            $spmbUrl = request()->getScheme() . '://' . $spmbHost;
+                    
+            return redirect()->away($spmbUrl);
+
         } 
         
         // TUTUP: Arahkan ke halaman pengumuman tutup
