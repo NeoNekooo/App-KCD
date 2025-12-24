@@ -313,7 +313,7 @@ $logoSekolah = ($sekolah && $sekolah->logo) ? asset('storage/' . $sekolah->logo)
                                             class="block px-5 py-3 text-sm font-medium text-gray-600 hover:bg-blue-50 hover:text-blue-600 transition-colors border-b border-gray-50 flex items-center gap-2">
                                             <i class='bx bx-phone text-blue-500'></i> Kontak
                                         </a>
-                                        <a href="{{ route('ppdb.cek_status') }}"
+                                        <a href="/spmb/cek_status"
                                             class="mobile-link block py-2 text-sm text-gray-600 hover:text-blue-700 border-l-2 border-transparent hover:border-blue-500 pl-3 transition-all">Info
                                             SPMB</a>
                                     </div>
