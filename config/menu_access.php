@@ -458,7 +458,7 @@ return [
             'is_toggle' => true,
             'is_open' => 'request()->is("admin/landing-page*")',
             'submenu' => [
-                ['title' => 'Landing PPDB', 'route' => 'admin.ppdb.landing.index', 'is_active' => 'request()->routeIs("admin.ppdb.landing")'],
+                ['title' => 'Pengaturan Web SPMB', 'route' => 'admin.ppdb.landing.index', 'is_active' => 'request()->routeIs("admin.ppdb.landing")'],
             ]
         ],
         
