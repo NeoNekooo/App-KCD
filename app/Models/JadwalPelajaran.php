@@ -2,28 +2,28 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class JadwalPelajaran extends Model
 {
-    use HasFactory;
-    protected $table = 'jadwal_pelajaran';
+    protected $table = 'jadwal_pelajarans';
+    protected $guarded = [];
 
-    // Definisikan relasi ke model lain
+    // Relasi ke Master Waktu
+    public function jamPelajaran()
+    {
+        return $this->belongsTo(JamPelajaran::class, 'jam_pelajaran_id');
+    }
+
+    // Relasi ke Pembelajaran (Guru + Mapel)
+    public function pembelajaran()
+    {
+        return $this->belongsTo(Pembelajaran::class, 'pembelajaran_id');
+    }
+
+    // Relasi ke Rombel
     public function rombel()
     {
         return $this->belongsTo(Rombel::class);
-    }
-
-    public function guru()
-    {
-        // Asumsi relasi ke Gtk melalui kolom ptk_id
-        return $this->belongsTo(Gtk::class, 'ptk_id', 'ptk_id');
-    }
-
-    public function absensiSiswa()
-    {
-        return $this->hasMany(AbsensiSiswa::class, 'jadwal_id');
     }
 }

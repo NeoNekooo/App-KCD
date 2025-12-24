@@ -42,7 +42,7 @@ class Rombel extends Model
      * Relasi ke semua Siswa di Rombel ini.
      * Menghubungkan rombels.rombongan_belajar_id (Varchar) -> siswas.rombongan_belajar_id (Varchar)
      */
-    
+
     public function siswas()
     {
         return $this->hasMany(Siswa::class, 'rombongan_belajar_id', 'rombongan_belajar_id');
@@ -61,7 +61,7 @@ class Rombel extends Model
      * Relasi ke Ptk (Wali Kelas)
      * Satu Rombel punya SATU Wali Kelas
      */
-    public function wali() 
+    public function wali()
     {
         // 'wali_id' adalah foreign key di tabel 'rombels'
         return $this->belongsTo(Ptk::class, 'wali_id');
@@ -71,7 +71,7 @@ class Rombel extends Model
      * Relasi ke Jurusan
      * Satu Rombel punya SATU Jurusan
      */
-    public function jurusan() 
+    public function jurusan()
     {
         // 'jurusan_id' adalah foreign key
         return $this->belongsTo(Jurusan::class, 'jurusan_id');
@@ -81,15 +81,21 @@ class Rombel extends Model
      * Relasi ke Kurikulum
      * Satu Rombel punya SATU Kurikulum
      */
-    public function kurikulum() 
+    public function kurikulum()
     {
         // 'kurikulum_id' adalah foreign key
         return $this->belongsTo(Kurikulum::class, 'kurikulum_id');
     }
 
-    
+
     public function waliKelas()
     {
         return $this->belongsTo(Gtk::class, 'ptk_id', 'ptk_id');
     }
+
+
+    public function pembelajarans()
+{
+    return $this->hasMany(Pembelajaran::class, 'rombel_id');
+}
 }
