@@ -2,6 +2,8 @@
 
 use Illuminate\Support\Facades\Route;
 
+// --- Controller Utama & Auth ---
+use App\Http\Controllers\HomeController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 
 // --- Controller dari V1 ---
@@ -63,6 +65,7 @@ use App\Http\Controllers\Admin\Rombel\RombelWaliController;
 
 // Controller Landing
 use App\Http\Controllers\Admin\Landing\PpdbController;
+use App\Http\Controllers\Admin\Landing\LandingSliderController;
 
 // Controller Keuangan
 use App\Http\Controllers\Bendahara\Keuangan\IuranController;
@@ -87,9 +90,24 @@ use App\Http\Controllers\Admin\Administrasi\SuratMasukController;
 */
 
 // Menggunakan 'welcome' dari V2
-Route::get('/', function () {
-    return view('auth.login-custom');
-});
+// Halaman Depan
+Route::get('/', [HomeController::class, 'index'])->name('home');
+
+// Rute Detail Public
+Route::get('/sambutan-kepala-sekolah', [HomeController::class, 'sambutanLengkap'])->name('sambutan.lengkap');
+Route::get('/jurusan/{id}', [\App\Http\Controllers\HomeController::class, 'showJurusan'])->name('jurusan.show');
+Route::get('/prestasi/{id}', [\App\Http\Controllers\HomeController::class, 'showPrestasi'])->name('prestasi.show');
+Route::get('/fasilitas-sekolah', [\App\Http\Controllers\HomeController::class, 'fasilitasSemua'])->name('fasilitas.semua');
+Route::get('/berita/{id}', [\App\Http\Controllers\HomeController::class, 'showBerita'])->name('berita.show');
+
+// Tambahkan baris ini di dalam Rute Web Utama (Frontend Public)
+Route::get('/profil-sekolah', [HomeController::class, 'profilSekolah'])->name('profil.sekolah');
+
+// Di bagian Rute Web Utama (Frontend Public)
+Route::get('/kontak', [HomeController::class, 'kontak'])->name('kontak');
+
+// [BARU] Route Galeri Lengkap
+Route::get('/galeri', [\App\Http\Controllers\HomeController::class, 'galeriLengkap'])->name('galeri.index');
 
 Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])
          ->middleware('auth')
@@ -230,6 +248,26 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
     Route::get('siswa/{id}/cetak-pdf', [SiswaController::class, 'cetakPdf'])->name('siswa.cetak_pdf');
 
     });
+
+
+    // --- GRUP MANAJEMEN LANDING PAGE ---
+    Route::resource('/landing/slider', LandingSliderController::class, ['as' => 'landing']);
+    
+    Route::get('/landing/sambutan', [App\Http\Controllers\Admin\Landing\SambutanController::class, 'index'])->name('landing.sambutan.index');
+    Route::post('/landing/sambutan', [App\Http\Controllers\Admin\Landing\SambutanController::class, 'update'])->name('landing.sambutan.update');
+
+    Route::resource('/landing/fasilitas', \App\Http\Controllers\Admin\Landing\FasilitasController::class, ['as' => 'landing'])->except(['create', 'edit', 'show']);
+    Route::resource('/landing/jurusan', \App\Http\Controllers\Admin\Landing\JurusanController::class, ['as' => 'landing'])->except(['create', 'edit', 'show']);
+    Route::resource('/landing/berita', \App\Http\Controllers\Admin\Landing\BeritaController::class, ['as' => 'landing'])->except(['create', 'edit', 'show']);
+    Route::resource('/landing/prestasi', \App\Http\Controllers\Admin\Landing\PrestasiController::class, ['as' => 'landing'])->except(['create', 'edit', 'show']);
+    Route::resource('/landing/galeri', \App\Http\Controllers\Admin\Landing\GaleriController::class, ['as' => 'landing'])->except(['create', 'edit', 'show']);
+    Route::resource('/landing/mitra', \App\Http\Controllers\Admin\Landing\MitraController::class, ['as' => 'landing'])->except(['create', 'edit', 'show']);
+
+    Route::put('/landing/testimoni/{id}/toggle', [\App\Http\Controllers\Admin\Landing\TestimoniController::class, 'toggleStatus'])->name('landing.testimoni.toggle');
+    Route::resource('/landing/testimoni', \App\Http\Controllers\Admin\Landing\TestimoniController::class, ['as' => 'landing'])->except(['create', 'edit', 'show']);
+
+    Route::resource('/landing/ekstrakurikuler', \App\Http\Controllers\Admin\Landing\EkstrakurikulerController::class, ['as' => 'landing'])->except(['create', 'edit', 'show']);
+    Route::resource('/landing/agenda', \App\Http\Controllers\Admin\Landing\AgendaController::class, ['as' => 'landing'])->except(['create', 'edit', 'show']);
 
     /*
     |--------------------------------------------------------------------------
@@ -520,6 +558,8 @@ Route::prefix('bendahara')->name('bendahara.')->group(function () {
         Route::post('tagihan/generate', [TagihanController::class, 'store'])->name('tagihan.store');
     });
 });
+
+Route::post('/testimoni-kirim', [HomeController::class, 'storeTestimoni'])->name('testimoni.store');
 
 
 // Menggunakan file auth standar dari V2

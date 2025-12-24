@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Agenda;
 use App\Models\CalonSiswa;
 use App\Models\TahunPelajaran;
 use App\Models\JalurPendaftaran;
@@ -225,5 +226,43 @@ class LandingPpdbController extends Controller
         $calon->save();
 
         return redirect()->back()->with('success', 'Formulir calon peserta didik berhasil disimpan.');
+    }
+
+    /**
+     * LOGIKA UTAMA: Cek apakah hari ini masuk jadwal PPDB?
+     * (Digunakan oleh tombol "Daftar Sekarang" di Navbar/Home)
+     */
+    public function cekStatusPpdb()
+    {
+        $sekarang = Carbon::now();
+
+        // Cari Agenda dengan kategori 'PPDB' yang SEDANG BERLANGSUNG hari ini
+        $agendaAktif = Agenda::where('kategori', 'PPDB') 
+                            ->whereDate('tanggal_mulai', '<=', $sekarang)
+                            ->whereDate('tanggal_selesai', '>=', $sekarang)
+                            ->first();
+
+        // Jika ditemukan agenda PPDB yang aktif
+        if ($agendaAktif) {
+            // BUKA: Arahkan ke halaman pendaftaran utama
+            return redirect()->route('ppdb.beranda');
+        } 
+        
+        // TUTUP: Arahkan ke halaman pengumuman tutup
+        return redirect()->route('ppdb.tutup');
+    }
+
+    /**
+     * Menampilkan Halaman Pengumuman (Jika Tutup)
+     */
+    public function halamanTutup()
+    {
+        // Cari Agenda PPDB yang AKAN DATANG (untuk memberi info ke user)
+        $agendaAkanDatang = Agenda::where('kategori', 'PPDB')
+                                  ->whereDate('tanggal_mulai', '>', Carbon::now())
+                                  ->orderBy('tanggal_mulai', 'asc')
+                                  ->first();
+        
+        return view('landing.ppdb.closed', compact('agendaAkanDatang'));
     }
 }
