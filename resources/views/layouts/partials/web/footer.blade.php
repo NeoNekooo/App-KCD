@@ -68,7 +68,7 @@
                     <li><a href="{{ route('home') }}#fasilitas" class="hover:text-blue-400 transition-colors duration-300 flex items-center gap-2 group"><i class='bx bx-chevron-right text-blue-400/50 group-hover:translate-x-1 transition-transform'></i> Fasilitas</a></li>
                     
                     {{-- Link ke Halaman Lain (Tetap Aman) --}}
-                    <li><a href="{{ route('ppdb.cek_status') }}" class="hover:text-blue-400 transition-colors duration-300 flex items-center gap-2 group"><i class='bx bx-chevron-right text-blue-400/50 group-hover:translate-x-1 transition-transform'></i> Info SPMB</a></li>
+                    <li><a href="/spmb/cek_status" class="hover:text-blue-400 transition-colors duration-300 flex items-center gap-2 group"><i class='bx bx-chevron-right text-blue-400/50 group-hover:translate-x-1 transition-transform'></i> Info SPMB</a></li>
                 </ul>
             </div>
 
