@@ -165,13 +165,17 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
             Route::post('/upload-background', 'uploadBackgroundKartu')->name('upload-background-kartu');
         });
 
-        Route::get('tugas-pegawai', [TugasPegawaiController::class, 'index'])->name('tugas-pegawai.index');
-        Route::post('tugas-pegawai/sync', [TugasPegawaiController::class, 'syncDariRombel'])->name('tugas-pegawai.sync');
-        Route::post('tugas-pegawai/update-sk', [TugasPegawaiController::class, 'updateSk'])->name('tugas-pegawai.update-sk');
-        Route::get('tugas-pegawai/cetak/{id}', [TugasPegawaiController::class, 'cetak'])->name('tugas-pegawai.cetak');
-        Route::post('tugas-pegawai/store', [TugasPegawaiController::class, 'store'])->name('tugas-pegawai.store');
-        Route::delete('tugas-pegawai/{id}', [TugasPegawaiController::class, 'destroy'])->name('tugas-pegawai.destroy');
-        Route::put('tugas-pegawai/{id}', [TugasPegawaiController::class, 'update'])->name('tugas-pegawai.update');
+        Route::prefix('tugas-pegawai')->name('tugas-pegawai.')->group(function () {
+        Route::get('/', [TugasPegawaiController::class, 'index'])->name('index');
+        Route::post('/sync', [TugasPegawaiController::class, 'syncDariRombel'])->name('sync');
+        Route::post('/store', [TugasPegawaiController::class, 'store'])->name('store');
+        Route::post('/update-sk', [TugasPegawaiController::class, 'updateSk'])->name('update-sk');
+        Route::get('/detail/{id}', [TugasPegawaiController::class, 'getDetail'])->name('detail');
+        Route::delete('/destroy/{id}', [TugasPegawaiController::class, 'destroy'])->name('destroy');
+        Route::post('/cetak/{id}', [TugasPegawaiController::class, 'cetak'])->name('cetak');
+        Route::delete('/destroy-detail/{id}', [TugasPegawaiController::class, 'destroyDetail'])->name('destroy-detail');
+        Route::put('/update/{id}', [TugasPegawaiController::class, 'update'])->name('update');
+    });
 
     });
 
