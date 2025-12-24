@@ -164,7 +164,7 @@ $logoSekolah = ($sekolah && $sekolah->logo) ? asset('storage/' . $sekolah->logo)
 
                 {{-- 3. CTA BUTTON (DESKTOP) --}}
                 <div class="hidden lg:flex items-center ml-4">
-                    <a href="{{ route('ppdb.cek_status') }}"
+                    <a href="/spmb/cek_status"
                         class="group relative inline-flex items-center justify-center px-6 py-2.5 overflow-hidden font-bold text-white transition-all duration-300 bg-blue-600 rounded-full hover:bg-blue-700 shadow-md hover:shadow-lg hover:shadow-blue-500/30 focus:outline-none ring-offset-2 focus:ring-2 ring-blue-500">
                         <span
                             class="absolute w-0 h-0 transition-all duration-500 ease-out bg-white rounded-full group-hover:w-56 group-hover:h-56 opacity-10"></span>
