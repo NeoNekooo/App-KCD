@@ -25,7 +25,6 @@ use App\Http\Controllers\Admin\Kurikulum\JadwalPelajaranController;
 
 // Controller Kesiswaan
 use App\Http\Controllers\Admin\Kesiswaan\SiswaController;
-
 // Controller ppdb
 
 // Controller Ppdb
