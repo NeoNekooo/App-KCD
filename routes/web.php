@@ -20,8 +20,8 @@ use App\Http\Controllers\Admin\Akademik\MapelController;
 use App\Http\Controllers\Admin\Akademik\DaftarEkstrakurikulerController;
 
 // kurikulum
-use App\Http\Controllers\Admin\kurikulum\JamPelajaranController;
-use App\Http\Controllers\Admin\kurikulum\JadwalPelajaranController;
+use App\Http\Controllers\Admin\Kurikulum\JamPelajaranController;
+use App\Http\Controllers\Admin\Kurikulum\JadwalPelajaranController;
 
 // Controller Kesiswaan
 use App\Http\Controllers\Admin\Kesiswaan\SiswaController;
