@@ -169,7 +169,8 @@ return [
                     ['title' => 'Mapel Pilihan', 'route' => 'admin.rombel.mapel-pilihan.index', 'is_active' => 'request()->is("admin/rombel/mapel-pilihan*")'],
                     ['title' => 'Wali', 'route' => 'admin.rombel.wali.index', 'is_active' => 'request()->is("admin/rombel/wali*")'],
                 ]],
-                ['title' => 'Jadwal Pelajaran', 'route' => 'admin.akademik.jadwal-pelajaran.index', 'is_active' => 'request()->is("admin/akademik/jadwal-pelajaran*")'],
+                ['title' => 'Pengaturan Jam', 'route' => 'admin.kurikulum.jam-pelajaran.index', 'is_active' => 'request()->is("admin/kurikulum/jam-pelajaran*")'],
+                ['title' => 'Jadwal Pelajaran', 'route' => 'admin.kurikulum.jadwal-pelajaran.index', 'is_active' => 'request()->is("admin/akurikulum/jadwal-pelajaran*")'],
             ]
         ],
         // --- KESISWAAN ---
