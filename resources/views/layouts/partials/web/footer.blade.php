@@ -12,11 +12,6 @@
     $ig = $sekolah ? $sekolah->instagram_url : null;
     $yt = $sekolah ? $sekolah->youtube_url : null;
     $tt = $sekolah ? $sekolah->tiktok_url : null;
-
-    $host = request()->getHost();
-    $spmbHost = preg_replace('/^[^.]+/', 'spmb', $host);
-    $spmbUrl = request()->getScheme() . '://' . $spmbHost;
-
 @endphp
 
 <footer class="bg-gray-900 text-white pt-16 pb-8 font-sans relative">
@@ -73,7 +68,7 @@
                     <li><a href="{{ route('home') }}#fasilitas" class="hover:text-blue-400 transition-colors duration-300 flex items-center gap-2 group"><i class='bx bx-chevron-right text-blue-400/50 group-hover:translate-x-1 transition-transform'></i> Fasilitas</a></li>
                     
                     {{-- Link ke Halaman Lain (Tetap Aman) --}}
-                    <li><a href="{{ $spmbUrl }}/cek_status" class="hover:text-blue-400 transition-colors duration-300 flex items-center gap-2 group"><i class='bx bx-chevron-right text-blue-400/50 group-hover:translate-x-1 transition-transform'></i> Info SPMB</a></li>
+                    <li><a href="{{ route('ppdb.cek_status') }}" class="hover:text-blue-400 transition-colors duration-300 flex items-center gap-2 group"><i class='bx bx-chevron-right text-blue-400/50 group-hover:translate-x-1 transition-transform'></i> Info SPMB</a></li>
                 </ul>
             </div>
 

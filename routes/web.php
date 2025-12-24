@@ -109,6 +109,10 @@ Route::get('/kontak', [HomeController::class, 'kontak'])->name('kontak');
 // [BARU] Route Galeri Lengkap
 Route::get('/galeri', [\App\Http\Controllers\HomeController::class, 'galeriLengkap'])->name('galeri.index');
 
+// --- Rute Pengecekan Jadwal PPDB ---
+Route::get('/cek-status-ppdb', [HomeController::class, 'cekStatusPpdb'])->name('ppdb.cek_status');
+Route::get('/ppdb-tutup', [HomeController::class, 'halamanTutup'])->name('ppdb.tutup');
+
 Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])
          ->middleware('auth')
          ->name('logout');

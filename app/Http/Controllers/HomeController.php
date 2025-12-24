@@ -19,6 +19,7 @@ use App\Models\Ekstrakurikuler;
 use App\Models\Agenda;
 use App\Models\VideoProfil;
 use App\Models\Sekolah; // Tambahkan ini
+use Carbon\Carbon;
 
 class HomeController extends Controller
 {
@@ -219,5 +220,39 @@ class HomeController extends Controller
         } catch (\Exception $e) {
             return redirect()->back()->with('error_testimoni', 'Maaf, terjadi kesalahan saat mengirim testimoni. Silakan coba lagi.');
         }
+    }
+
+    public function cekStatusPpdb()
+    {
+        $sekarang = Carbon::now();
+
+        // Cari Agenda dengan kategori 'PPDB' yang SEDANG BERLANGSUNG hari ini
+        $agendaAktif = Agenda::where('kategori', 'PPDB') 
+                            ->whereDate('tanggal_mulai', '<=', $sekarang)
+                            ->whereDate('tanggal_selesai', '>=', $sekarang)
+                            ->first();
+
+        // Jika ditemukan agenda PPDB yang aktif
+        if ($agendaAktif) {
+            // BUKA: Arahkan ke halaman pendaftaran utama
+            return redirect()->route('ppdb.beranda');
+        } 
+        
+        // TUTUP: Arahkan ke halaman pengumuman tutup
+        return redirect()->route('ppdb.tutup');
+    }
+
+    /**
+     * Menampilkan Halaman Pengumuman (Jika Tutup)
+     */
+    public function halamanTutup()
+    {
+        // Cari Agenda PPDB yang AKAN DATANG (untuk memberi info ke user)
+        $agendaAkanDatang = Agenda::where('kategori', 'PPDB')
+                                  ->whereDate('tanggal_mulai', '>', Carbon::now())
+                                  ->orderBy('tanggal_mulai', 'asc')
+                                  ->first();
+        
+        return view('landing.web.closed', compact('agendaAkanDatang'));
     }
 }

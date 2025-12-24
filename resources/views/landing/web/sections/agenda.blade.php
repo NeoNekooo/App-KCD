@@ -48,7 +48,7 @@
 
                 {{-- Button Aksi --}}
                 <div class="mt-8 pt-6 border-t border-gray-100">
-                    <a href="/spmb" class="w-full flex items-center justify-center px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700">
+                    <a href="{{ route('ppdb.beranda') }}" class="w-full flex items-center justify-center px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700">
                         Lihat Jadwal PPDB
                     </a>
                 </div>
