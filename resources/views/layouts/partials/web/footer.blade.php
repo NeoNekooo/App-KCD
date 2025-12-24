@@ -12,6 +12,11 @@
     $ig = $sekolah ? $sekolah->instagram_url : null;
     $yt = $sekolah ? $sekolah->youtube_url : null;
     $tt = $sekolah ? $sekolah->tiktok_url : null;
+
+    $host = request()->getHost();
+    $spmbHost = preg_replace('/^[^.]+/', 'spmb', $host);
+    $spmbUrl = request()->getScheme() . '://' . $spmbHost;
+
 @endphp
 
 <footer class="bg-gray-900 text-white pt-16 pb-8 font-sans relative">

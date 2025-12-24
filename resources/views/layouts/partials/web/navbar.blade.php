@@ -2,6 +2,12 @@
 $sekolah = \App\Models\Sekolah::first();
 $namaSekolah = $sekolah ? $sekolah->nama : 'SEKOLAHKU';
 $logoSekolah = ($sekolah && $sekolah->logo) ? asset('storage/' . $sekolah->logo) : null;
+
+
+$host = request()->getHost();
+$spmbHost = preg_replace('/^[^.]+/', 'spmb', $host);
+$spmbUrl = request()->getScheme() . '://' . $spmbHost;
+
 @endphp
 
 <header>
