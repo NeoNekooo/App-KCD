@@ -461,6 +461,73 @@ return [
                 ['title' => 'Landing PPDB', 'route' => 'admin.ppdb.landing.index', 'is_active' => 'request()->routeIs("admin.ppdb.landing")'],
             ]
         ],
+        
+        // --- LANDING WEB ---
+        [
+            'title' => 'Landing Web',
+            'slug' => 'landing',
+            'icon' => 'bx bx-globe',
+            'is_toggle' => true,
+            'is_open' => 'request()->is("admin/landing*")',
+            'submenu' => [
+                [
+                    'title' => 'Slider Utama',
+                    'route' => 'admin.landing.slider.index',
+                    'is_active' => 'request()->routeIs("admin.landing.slider.*")',
+                ],
+                [
+                    'title' => 'Sambutan Kepsek',
+                    'route' => 'admin.landing.sambutan.index',
+                    'is_active' => 'request()->routeIs("admin.landing.sambutan.index")',
+                ],
+                [
+                    'title' => 'Fasilitas Sekolah',
+                    'route' => 'admin.landing.fasilitas.index',
+                    'is_active' => 'request()->routeIs("admin.landing.fasilitas.index")',
+                ],
+                [
+                    'title' => 'Kompetensi Keahlian',
+                    'route' => 'admin.landing.jurusan.index',
+                    'is_active' => 'request()->routeIs("admin.landing.jurusan.index")',
+                ],
+                [
+                    'title' => 'Berita & Artikel',
+                    'route' => 'admin.landing.berita.index',
+                    'is_active' => 'request()->routeIs("admin.landing.berita.index")',
+                ],
+                [
+                    'title' => 'Prestasi Sekolah',
+                    'route' => 'admin.landing.prestasi.index',
+                    'is_active' => 'request()->routeIs("admin.landing.prestasi.index")',
+                ],
+                [
+                    'title' => 'Galeri Kegiatan',
+                    'route' => 'admin.landing.galeri.index',
+                    'is_active' => 'request()->routeIs("admin.landing.galeri.index")',
+                ],
+                [
+                    'title' => 'Mitra Industri',
+                    'route' => 'admin.landing.mitra.index',
+                    'is_active' => 'request()->routeIs("admin.landing.mitra.index")',
+                ],
+                [
+                    'title' => 'Testimoni',
+                    'route' => 'admin.landing.testimoni.index',
+                    'is_active' => 'request()->routeIs("admin.landing.testimoni.index")',
+                ],
+                [
+                    'title' => 'Ekstrakurikuler',
+                    'route' => 'admin.landing.ekstrakurikuler.index',
+                    'is_active' => 'request()->routeIs("admin.landing.ekstrakurikuler.index")',
+                ],
+                [
+                    'title' => 'Agenda Sekolah',
+                    'route' => 'admin.landing.agenda.index',
+                    'is_active' => 'request()->routeIs("admin.landing.agenda.index")',
+                ],
+            ]
+        ],
+
 
         // --- PENGATURAN SISTEM ---
         [
