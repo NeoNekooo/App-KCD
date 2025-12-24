@@ -184,6 +184,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // ============================================================
 
     // Detail Modal
+    // Detail Modal
     window.showDetail = function(id, nama) {
         $('#detailNamaGuru').text(nama);
         $('#isi-tabel-detail').html('<tr><td colspan="4" class="text-center py-4"><div class="spinner-border text-primary spinner-border-sm"></div> Loading detail...</td></tr>');
@@ -193,15 +194,28 @@ document.addEventListener('DOMContentLoaded', function() {
 
         $.get("{{ url('admin/kepegawaian/tugas-pegawai/detail') }}/" + id, function(data) {
             let html = '';
+            // 1. Siapkan counter manual agar nomor tetap urut walau ada yang di-skip
+            let no = 1;
+
             if(data.length > 0) {
                 data.forEach((item, index) => {
+                    // 2. LOGIKA FILTER: Lewati jika nama tugas mengandung 'Wali Kelas'
+                    if (item.tugas_pokok.toLowerCase().includes('wali kelas')) {
+                        return; // Skip ke iterasi berikutnya
+                    }
+
                     html += `<tr>
-                        <td>${index + 1}</td>
-                        <td>${item.tugas_pokok}</td>
+                        <td>${no++}</td> <td>${item.tugas_pokok}</td>
                         <td>${item.kelas ?? '-'}</td>
                         <td class="text-center"><span class="badge bg-label-info">${item.jumlah_jam} Jam</span></td>
                     </tr>`;
                 });
+
+                // Cek jika setelah difilter ternyata kosong (misal guru cuma jadi wali kelas)
+                if (html === '') {
+                    html = '<tr><td colspan="4" class="text-center text-muted">Hanya tugas Wali Kelas (disembunyikan).</td></tr>';
+                }
+
             } else {
                 html = '<tr><td colspan="4" class="text-center text-muted">Tidak ada rincian tugas.</td></tr>';
             }

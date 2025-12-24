@@ -69,7 +69,7 @@ class TugasPegawaiController extends Controller
     return view('admin.kepegawaian.tugas-pegawai.index', compact(
         'tugasPokok', 'jabatanStruktural', 'allGtk', 'tahunAktif', 'semesterAktif'
     ));
-}   
+}
 
 public function syncDariRombel()
 {
@@ -114,8 +114,7 @@ public function syncDariRombel()
 
             // 2. LOOP SETIAP MAPEL
             foreach ($pems as $key => $p) {
-                $namaMapel = $p['nama_mata_pelajaran'] ?? 'TANPA NAMA';
-                $ptkId     = $p['ptk_id'] ?? null;
+$namaMapel = $p['mata_pelajaran_id_str'] ?? $p['nama_mata_pelajaran'] ?? 'TANPA NAMA';                $ptkId     = $p['ptk_id'] ?? null;
                 $jam       = $p['jam_mengajar_per_minggu'] ?? 0;
 
                 // A. Cek ID Guru

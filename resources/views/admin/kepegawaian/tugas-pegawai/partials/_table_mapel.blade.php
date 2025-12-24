@@ -18,8 +18,11 @@
                 <td class="text-wrap" style="max-width: 250px;">
                     {{ $t->details->where('jenis', 'pembelajaran')->pluck('tugas_pokok')->unique()->implode(', ') }}
                 </td>
-                <td><span class="badge bg-label-info">{{ $t->details->sum('jumlah_jam') }} Jam</span></td>
-                <td>
+<td>
+    <span class="badge bg-label-info">
+        {{ $t->details->where('jenis', 'pembelajaran')->sum('jumlah_jam') }} Jam
+    </span>
+</td>                <td>
                     <div class="edit-sk-container" data-id="{{ $t->id }}">
                         <span class="sk-text cursor-pointer text-primary" onclick="toggleEditSk('{{ $t->id }}')">
                             {{ $t->nomor_sk ?? 'Klik isi SK...' }} <i class="bx bx-pencil small"></i>
