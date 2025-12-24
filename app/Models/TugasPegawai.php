@@ -9,27 +9,30 @@ class TugasPegawai extends Model
 {
     use HasFactory;
 
-    /**
-     * Nama tabel yang digunakan oleh model.
-     *
-     * @var string
-     */
-    protected $table = 'tugas_pegawais';
+    protected $fillable = [
+        'pegawai_id',
+        'tahun_pelajaran',
+        'semester',
+        'nomor_sk',
+        'tmt',
+        'keterangan'
+    ];
 
-    /**
-     * Atribut yang tidak boleh diisi secara massal.
-     *
-     * @var array
-     */
-    protected $guarded = [];
-
-    /**
-     * Relasi ke model Gtk untuk mengambil data pegawai.
-     */
+    // Relasi ke data GTK/Guru
     public function gtk()
     {
-        // Menghubungkan 'pegawai_id' (foreign key) 
-        // ke 'id' (primary key) di tabel gtks
         return $this->belongsTo(Gtk::class, 'pegawai_id');
+    }
+
+    // Relasi ke rincian mengajar (1 SK punya banyak rincian)
+    public function details()
+    {
+        return $this->hasMany(TugasPegawaiDetail::class, 'tugas_pegawai_id');
+    }
+
+    // Helper untuk hitung total jam otomatis dari detail
+    public function getTotalJamAttribute()
+    {
+        return $this->details->sum('jumlah_jam');
     }
 }
