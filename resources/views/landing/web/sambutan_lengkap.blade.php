@@ -132,7 +132,7 @@
     <div class="container mx-auto px-4 text-center relative z-10">
         <h2 class="text-3xl md:text-4xl font-bold text-white mb-8">Bergabunglah Menjadi Bagian dari Kami</h2>
         <div class="flex flex-col sm:flex-row gap-4 justify-center">
-            <a href="/spmb/cek_status" class="group relative inline-flex items-center justify-center px-6 py-3 overflow-hidden font-bold text-white rounded-full shadow-lg transition-all duration-300 bg-white text-blue-700 hover:bg-slate-100 transform hover:-translate-y-1">
+            <a href="{{ $spmbUrl }}/cek_status" class="group relative inline-flex items-center justify-center px-6 py-3 overflow-hidden font-bold text-white rounded-full shadow-lg transition-all duration-300 bg-white text-blue-700 hover:bg-slate-100 transform hover:-translate-y-1">
                 <span class="relative flex items-center gap-2 text-sm">
                     <i class='bx bxs-user-plus text-lg'></i>
                     Daftar SPMB Sekarang

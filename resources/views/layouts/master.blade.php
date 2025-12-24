@@ -19,6 +19,11 @@
     @include('partials.web.navbar')
 
     <main class="flex-grow-1">
+        @php
+            $host = request()->getHost();          // review.hexanusa.com
+            $spmbHost = preg_replace('/^[^.]+/', 'spmb', $host);
+            $spmbUrl = request()->getScheme() . '://' . $spmbHost;
+        @endphp
         @yield('content')
     </main>
 

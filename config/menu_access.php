@@ -447,12 +447,12 @@ return [
 
         // --- MANAJEMEN LANDING ---
         [
-            'title' => 'Manajemen Landing',
+            'title' => 'Manajemen Web',
             'slug' => 'manajemen-landing-header',
             'is_header' => true,
         ],
         [
-            'title' => 'Landing Page',
+            'title' => 'Web SPMB',
             'slug' => 'landing-page',
             'icon' => 'bx bxs-book-content',
             'is_toggle' => true,
@@ -464,7 +464,7 @@ return [
         
         // --- LANDING WEB ---
         [
-            'title' => 'Landing Web',
+            'title' => 'Web Profile',
             'slug' => 'landing',
             'icon' => 'bx bx-globe',
             'is_toggle' => true,

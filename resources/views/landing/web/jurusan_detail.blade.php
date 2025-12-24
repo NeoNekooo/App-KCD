@@ -121,7 +121,7 @@
                     </div>
 
                     {{-- Tombol Daftar (Sidebar) --}}
-                    <a href="/spmb/cek_status" class="animate-on-scroll group block w-full py-4 bg-gradient-to-r from-blue-600 to-blue-600 hover:from-blue-700 hover:to-blue-700 text-white font-bold rounded-2xl text-center shadow-xl shadow-blue-600/30 transition-all transform hover:-translate-y-1 opacity-0" data-animate="fade-in-right" data-delay="200">
+                    <a href="{{ $spmbUrl }}/cek_status" class="animate-on-scroll group block w-full py-4 bg-gradient-to-r from-blue-600 to-blue-600 hover:from-blue-700 hover:to-blue-700 text-white font-bold rounded-2xl text-center shadow-xl shadow-blue-600/30 transition-all transform hover:-translate-y-1 opacity-0" data-animate="fade-in-right" data-delay="200">
                         <span class="flex items-center justify-center gap-2">
                             <i class='bx bxs-user-plus text-xl'></i>
                             Daftar Jurusan Ini Sekarang

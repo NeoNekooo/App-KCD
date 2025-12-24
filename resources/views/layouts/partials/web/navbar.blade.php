@@ -145,7 +145,7 @@ $logoSekolah = ($sekolah && $sekolah->logo) ? asset('storage/' . $sekolah->logo)
                                     class="block px-5 py-3 text-sm font-medium text-gray-600 hover:bg-blue-50 hover:text-blue-600 transition-colors border-b border-gray-50 flex items-center gap-2">
                                     <i class='bx bx-phone text-blue-500'></i> Kontak
                                 </a>
-                                <a href="/spmb/cek_status"
+                                <a href="{{ $spmbUrl }}/cek_status"
                                     class="block px-5 py-3 text-sm font-medium text-gray-600 hover:bg-blue-50 hover:text-blue-600 transition-colors flex items-center gap-2">
                                     <i class='bx bxs-user-plus text-blue-500'></i> Info SPMB
                                 </a>
@@ -164,7 +164,7 @@ $logoSekolah = ($sekolah && $sekolah->logo) ? asset('storage/' . $sekolah->logo)
 
                 {{-- 3. CTA BUTTON (DESKTOP) --}}
                 <div class="hidden lg:flex items-center ml-4">
-                    <a href="/spmb/cek_status"
+                    <a href="{{ $spmbUrl }}/cek_status"
                         class="group relative inline-flex items-center justify-center px-6 py-2.5 overflow-hidden font-bold text-white transition-all duration-300 bg-blue-600 rounded-full hover:bg-blue-700 shadow-md hover:shadow-lg hover:shadow-blue-500/30 focus:outline-none ring-offset-2 focus:ring-2 ring-blue-500">
                         <span
                             class="absolute w-0 h-0 transition-all duration-500 ease-out bg-white rounded-full group-hover:w-56 group-hover:h-56 opacity-10"></span>
@@ -313,7 +313,7 @@ $logoSekolah = ($sekolah && $sekolah->logo) ? asset('storage/' . $sekolah->logo)
                                             class="block px-5 py-3 text-sm font-medium text-gray-600 hover:bg-blue-50 hover:text-blue-600 transition-colors border-b border-gray-50 flex items-center gap-2">
                                             <i class='bx bx-phone text-blue-500'></i> Kontak
                                         </a>
-                                        <a href="/spmb/cek_status"
+                                        <a href="{{ $spmbUrl }}/cek_status"
                                             class="mobile-link block py-2 text-sm text-gray-600 hover:text-blue-700 border-l-2 border-transparent hover:border-blue-500 pl-3 transition-all">Info
                                             SPMB</a>
                                     </div>
@@ -335,7 +335,7 @@ $logoSekolah = ($sekolah && $sekolah->logo) ? asset('storage/' . $sekolah->logo)
 
                     {{-- CTA Button Mobile --}}
                     <div class="mt-8">
-                        <a href="/spmb/cek_status"
+                        <a href="{{ $spmbUrl }}/cek_status"
                             class="flex w-full items-center justify-center px-6 py-4 border border-transparent text-base font-bold rounded-xl text-white bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-700 hover:to-blue-900 shadow-lg shadow-blue-500/30 transition-all transform hover:-translate-y-1 active:scale-98">
                             <i class='bx bxs-user-plus mr-2 text-xl'></i>
                             Daftar SPMB Sekarang
