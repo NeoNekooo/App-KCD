@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 
 // --- Controller Utama & Auth ---
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\PublicScanController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 
 // --- Controller dari V1 ---
@@ -93,14 +94,42 @@ use App\Http\Controllers\Admin\Administrasi\SuratMasukController;
 
 // Menggunakan 'welcome' dari V2
 // Halaman Depan
-Route::get('/', function () {
-        return view('auth.login-custom');
-    });
-
 Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])
          ->middleware('auth')
          ->name('logout');
 
+// Halaman Depan
+Route::get('/', [HomeController::class, 'index'])->name('home');
+
+Route::get('/scan/{id}', [PublicScanController::class, 'showVerificationPage'])->name('scan.page');
+Route::post('/scan/verify', [PublicScanController::class, 'processVerification'])->name('scan.verify');
+
+// Rute Detail Public
+Route::get('/sambutan-kepala-sekolah', [HomeController::class, 'sambutanLengkap'])->name('sambutan.lengkap');
+Route::get('/jurusan/{id}', [\App\Http\Controllers\HomeController::class, 'showJurusan'])->name('jurusan.show');
+Route::get('/prestasi/{id}', [\App\Http\Controllers\HomeController::class, 'showPrestasi'])->name('prestasi.show');
+Route::get('/fasilitas-sekolah', [\App\Http\Controllers\HomeController::class, 'fasilitasSemua'])->name('fasilitas.semua');
+Route::get('/berita/{id}', [\App\Http\Controllers\HomeController::class, 'showBerita'])->name('berita.show');
+
+// Tambahkan baris ini di dalam Rute Web Utama (Frontend Public)
+Route::get('/profil-sekolah', [HomeController::class, 'profilSekolah'])->name('profil.sekolah');
+
+// Di bagian Rute Web Utama (Frontend Public)
+Route::get('/kontak', [HomeController::class, 'kontak'])->name('kontak');
+
+// [BARU] Route Galeri Lengkap
+Route::get('/galeri', [\App\Http\Controllers\HomeController::class, 'galeriLengkap'])->name('galeri.index');
+
+Route::get('/program-keahlian', [HomeController::class, 'jurusanIndex'])->name('jurusan.index');
+
+// Tambahkan baris ini di grup Rute Web Utama (Frontend Public)
+Route::get('/program-keahlian', [HomeController::class, 'jurusanLengkap'])->name('jurusan.lengkap');
+
+// --- Rute Pengecekan Jadwal PPDB ---
+Route::get('/cek-status-ppdb', [HomeController::class, 'cekStatusPpdb'])->name('ppdb.cek_status');
+Route::get('/ppdb-tutup', [HomeController::class, 'halamanTutup'])->name('ppdb.tutup');
+
+Route::post('/testimoni-kirim', [HomeController::class, 'storeTestimoni'])->name('testimoni.store');
 
 /*
 |--------------------------------------------------------------------------
@@ -565,8 +594,6 @@ Route::prefix('bendahara')->name('bendahara.')->group(function () {
         Route::post('tagihan/generate', [TagihanController::class, 'store'])->name('tagihan.store');
     });
 });
-
-Route::post('/testimoni-kirim', [HomeController::class, 'storeTestimoni'])->name('testimoni.store');
 
 
 // Menggunakan file auth standar dari V2
