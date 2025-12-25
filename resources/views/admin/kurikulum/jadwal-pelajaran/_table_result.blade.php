@@ -8,17 +8,16 @@
     </div>
 @else
     <div class="nav-align-top mb-4">
-
         {{-- TABS DENGAN STYLE 'FLOATING' --}}
        <ul class="nav nav-pills nav-tabs-floating bg-light p-2 rounded" role="tablist">
-    @foreach($rombels as $index => $rombel)
-        <li class="nav-item">
-            <button type="button" class="nav-link {{ $index == 0 ? 'active' : '' }}" role="tab" data-bs-toggle="tab" data-bs-target="#tab-{{ $rombel->id }}">
-                <i class="bx bx-chalkboard"></i> <span>{{ $rombel->nama }}</span>
-            </button>
-        </li>
-    @endforeach
-</ul>
+        @foreach($rombels as $index => $rombel)
+            <li class="nav-item">
+                <button type="button" class="nav-link {{ $index == 0 ? 'active' : '' }}" role="tab" data-bs-toggle="tab" data-bs-target="#tab-{{ $rombel->id }}">
+                    <i class="bx bx-chalkboard"></i> <span>{{ $rombel->nama }}</span>
+                </button>
+            </li>
+        @endforeach
+       </ul>
 
         <div class="tab-content shadow-sm p-0 bg-white" style="border-radius: 12px; border: 1px solid #dfe3e7;">
             @foreach($rombels as $index => $rombel)
@@ -65,17 +64,29 @@
                                     </td>
                                     @foreach($days as $hari)
                                         @php $data = $jadwalGrouped[$rombel->id][$hari][$jam->urutan] ?? null; @endphp
+
+                                        {{-- LOGIC WARNA BACKGROUND CELL KOSONG --}}
                                         <td class="p-1 {{ !$data && $jam->tipe == 'kbm' ? 'td-empty' : '' }}">
                                             @if($data)
                                                 @if($data->jamPelajaran->tipe != 'kbm')
-                                                    <span class='bg-istirahat'>{{ strtoupper($data->jamPelajaran->nama) }}</span>
+                                                    {{-- [PERBAIKAN] Logic Badge Warna-Warni --}}
+                                                    @php
+                                                        $badgeClass = match($data->jamPelajaran->tipe) {
+                                                            'upacara' => 'bg-primary text-white',
+                                                            'keagamaan' => 'bg-success text-white',
+                                                            'literasi' => 'bg-info text-white',
+                                                            'wali_kelas' => 'bg-info text-dark',
+                                                            'istirahat' => 'bg-warning text-dark',
+                                                            default => 'bg-secondary text-white'
+                                                        };
+                                                    @endphp
+                                                    <span class="badge {{ $badgeClass }} w-100 py-2">{{ strtoupper($data->jamPelajaran->nama) }}</span>
+
                                                 @elseif($data->pembelajaran)
                                                     @php
                                                         $namaMapel = $data->pembelajaran->nama_mata_pelajaran;
                                                         $hash = crc32($namaMapel);
                                                         $bgClass = 'bg-soft-' . (abs($hash) % 10);
-
-                                                        // LOGIC KODE GURU (Priority: Field 'kode' di tabel Guru -> ID)
                                                         $kodeGuru = $data->pembelajaran->guru->kode ?? $data->pembelajaran->guru->id ?? '?';
                                                         $namaGuru = $data->pembelajaran->guru->nama ?? 'Belum ada guru';
                                                     @endphp
@@ -84,15 +95,26 @@
                                                          data-bs-toggle="tooltip"
                                                          data-bs-html="true"
                                                          title="<div class='text-center fw-bold'>{{ $namaMapel }}</div><small>{{ $namaGuru }}</small>">
-
-                                                        {{-- FORMAT: MTK(12) --}}
                                                         <div class="fw-bold text-dark text-truncate" style="max-width: 140px; font-size: 0.85rem;">
                                                             {{ $controller->helperSingkatan($namaMapel) }}<span class="text-secondary ms-1 small">({{ $kodeGuru }})</span>
                                                         </div>
                                                     </div>
                                                 @endif
                                             @else
-                                                @if($jam->tipe != 'kbm') <span class='bg-istirahat'>{{ strtoupper($jam->nama) }}</span> @endif
+                                                {{-- SLOT KOSONG TAPI BUKAN KBM --}}
+                                                @if($jam->tipe != 'kbm')
+                                                    @php
+                                                        $badgeClass = match($jam->tipe) {
+                                                            'upacara' => 'bg-primary text-white',
+                                                            'keagamaan' => 'bg-success text-white',
+                                                            'literasi' => 'bg-info text-white',
+                                                            'wali_kelas' => 'bg-info text-dark',
+                                                            'istirahat' => 'bg-warning text-dark',
+                                                            default => 'bg-secondary text-white'
+                                                        };
+                                                    @endphp
+                                                    <span class="badge {{ $badgeClass }} w-100 py-2">{{ strtoupper($jam->nama) }}</span>
+                                                @endif
                                             @endif
                                         </td>
                                     @endforeach
@@ -106,30 +128,31 @@
         </div>
     </div>
 
-    {{-- LEGEND / DAFTAR GURU (STATIC) --}}
+    {{-- LEGEND GURU --}}
     <div class="card mt-4 border-start border-warning border-4 shadow-sm">
-        <div class="card-header py-2 bg-light d-flex justify-content-between align-items-center">
+        <div class="card-header py-2 bg-light d-flex justify-content-between align-items-center cursor-pointer"
+             data-bs-toggle="collapse" data-bs-target="#collapseLegend">
             <span class="fw-bold text-uppercase text-dark small">
                 <i class="bx bx-id-card me-2"></i> Daftar Kode & Nama Guru
             </span>
+            <i class="bx bx-chevron-down"></i>
         </div>
-
-        <div class="card-body p-3 bg-white">
-            <div class="row g-2">
-                @foreach($listGuru as $g)
-                    <div class="col-lg-3 col-md-4 col-6">
-                        <div class="d-flex align-items-center p-2 border rounded bg-light">
-                            {{-- KODE GURU --}}
-                            <span class="badge bg-warning text-dark me-2 shadow-sm" style="min-width: 30px; text-align: center;">
-                                {{ $g->kode ?? $g->id }}
-                            </span>
-                            {{-- NAMA GURU --}}
-                            <span class="text-truncate small fw-bold" title="{{ $g->nama }}">
-                                {{ $g->nama }}
-                            </span>
+        <div class="collapse show" id="collapseLegend">
+            <div class="card-body p-3 bg-white">
+                <div class="row g-2">
+                    @foreach($listGuru as $g)
+                        <div class="col-lg-3 col-md-4 col-6">
+                            <div class="d-flex align-items-center p-2 border rounded bg-light">
+                                <span class="badge bg-warning text-dark me-2 shadow-sm" style="min-width: 30px; text-align: center;">
+                                    {{ $g->kode ?? $g->id }}
+                                </span>
+                                <span class="text-truncate small fw-bold" title="{{ $g->nama }}">
+                                    {{ $g->nama }}
+                                </span>
+                            </div>
                         </div>
-                    </div>
-                @endforeach
+                    @endforeach
+                </div>
             </div>
         </div>
     </div>

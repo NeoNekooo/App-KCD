@@ -16,12 +16,11 @@
                 <div class="col-md-7 text-end">
                     <div class="d-flex justify-content-md-end gap-2">
 
-                        {{-- TOMBOL SYNC (Trigger SweetAlert) --}}
+                        {{-- TOMBOL SYNC --}}
                         @if($rombelId)
                         <button type="button" class="btn btn-outline-warning btn-sm" onclick="confirmSync()">
                             <i class="bx bx-sync me-1"></i> Sync Mapel
                         </button>
-                        {{-- Form Tersembunyi untuk Sync --}}
                         <form id="formSync" action="{{ route('admin.kurikulum.jadwal-pelajaran.sync') }}" method="POST" style="display: none;">
                             @csrf
                             <input type="hidden" name="rombel_id" value="{{ $rombelId }}">
@@ -51,6 +50,7 @@
     @else
 
         <div class="row position-relative">
+            {{-- PANEL KIRI: BANK MAPEL --}}
             <div class="col-md-3">
                 <div class="sticky-sidebar">
                     <div class="card h-100 shadow-sm border-primary border-top border-3">
@@ -62,7 +62,6 @@
                         <div class="card-body bg-light p-2 scrollable-source position-relative">
                             <div id="source-items" class="d-flex flex-column gap-2 h-100">
 
-                                {{-- LOGIC JIKA KOSONG --}}
                                 @if($pembelajarans->isEmpty())
                                     <div class="d-flex flex-column align-items-center justify-content-center h-100 text-center p-3 opacity-75">
                                         <i class='bx bx-data fs-1 text-warning mb-2'></i>
@@ -70,14 +69,11 @@
                                         <p class="small text-muted mb-3" style="line-height: 1.2;">
                                             Data mata pelajaran belum ditarik dari Rombel.
                                         </p>
-
-                                        {{-- Tombol CTA Langsung --}}
                                         <button class="btn btn-sm btn-warning w-100" onclick="confirmSync()">
                                             <i class='bx bx-sync me-1'></i> Sync Sekarang
                                         </button>
                                     </div>
                                 @else
-                                    {{-- LOOP DATA SEPERTI BIASA --}}
                                     @foreach($pembelajarans as $p)
                                         @php
                                             $disabled = $p->is_full ? 'disabled-item' : '';
@@ -132,8 +128,8 @@
 
                                         <div class="card-body p-2">
                                             @if($jam->tipe == 'kbm')
+                                                {{-- DROP ZONE (Hanya untuk KBM) --}}
                                                 <div class="slot-drop-zone sortable-target" data-jam-id="{{ $jam->id }}">
-
                                                     @if(isset($existingJadwal[$jam->id]))
                                                         @php
                                                             $pembelajaranId = $existingJadwal[$jam->id];
@@ -156,11 +152,24 @@
                                                     @else
                                                         <div class="placeholder-text"><i class='bx bx-down-arrow-alt'></i> Drop</div>
                                                     @endif
-
                                                 </div>
                                             @else
-                                                <div class="slot-blocked p-3 text-center rounded">
-                                                    <span class="badge bg-label-secondary text-uppercase" style="font-size: 0.7rem;">{{ $jam->nama }}</span>
+                                                {{-- [PERBAIKAN] SLOT BLOCKED WARNA-WARNI SESUAI TIPE --}}
+                                                @php
+                                                    $blockedClass = match($jam->tipe) {
+                                                        'upacara' => 'bg-primary text-white',
+                                                        'keagamaan' => 'bg-success text-white',
+                                                        'literasi' => 'bg-info text-white',
+                                                        'wali_kelas' => 'bg-info text-dark',
+                                                        'istirahat' => 'bg-warning text-dark',
+                                                        default => 'bg-secondary text-white'
+                                                    };
+                                                @endphp
+                                                <div class="slot-blocked p-3 text-center rounded {{ $blockedClass }} opacity-75">
+                                                    <span class="fw-bold text-uppercase" style="font-size: 0.75rem;">
+                                                        @if($jam->tipe == 'istirahat') <i class='bx bx-coffee me-1'></i> @endif
+                                                        {{ $jam->nama }}
+                                                    </span>
                                                 </div>
                                             @endif
                                         </div>
@@ -187,12 +196,11 @@
 @endsection
 
 @push('scripts')
-{{-- 1. LOAD LIBRARY (SweetAlert2 & SortableJS) --}}
+{{-- LIBRARY SweetAlert2 & SortableJS --}}
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
 
 <style>
-    /* CSS STYLE (Sama seperti sebelumnya) */
     .sticky-sidebar { position: -webkit-sticky; position: sticky; top: 20px; height: calc(100vh - 40px); z-index: 100; display: flex; flex-direction: column; }
     .scrollable-source { overflow-y: auto; flex: 1; scrollbar-width: thin; }
     .schedule-wrapper { display: flex; overflow-x: auto; gap: 15px; padding-bottom: 50px; }
@@ -213,29 +221,16 @@
     document.addEventListener('DOMContentLoaded', function () {
         if (typeof Sortable === 'undefined') return;
 
-        // --- 1. HANDLING NOTIFIKASI SWEETALERT SAAT REFRESH (SERVER SIDE) ---
+        // --- 1. HANDLING NOTIFIKASI SWEETALERT ---
         const flashSuccess = document.getElementById('flash-success-msg');
         const flashError = document.getElementById('flash-error-msg');
-
-        // Config Mixin untuk Notif Pojok Kanan Atas (Mirip Toast tapi stabil)
         const Toast = Swal.mixin({
-            toast: true,
-            position: 'top-end',
-            showConfirmButton: false,
-            timer: 3000,
-            timerProgressBar: true,
-            didOpen: (toast) => {
-                toast.addEventListener('mouseenter', Swal.stopTimer)
-                toast.addEventListener('mouseleave', Swal.resumeTimer)
-            }
+            toast: true, position: 'top-end', showConfirmButton: false, timer: 3000, timerProgressBar: true,
+            didOpen: (toast) => { toast.addEventListener('mouseenter', Swal.stopTimer); toast.addEventListener('mouseleave', Swal.resumeTimer); }
         });
 
-        if(flashSuccess) {
-            Toast.fire({ icon: 'success', title: flashSuccess.getAttribute('data-msg') });
-        }
-        if(flashError) {
-            Toast.fire({ icon: 'error', title: flashError.getAttribute('data-msg') });
-        }
+        if(flashSuccess) Toast.fire({ icon: 'success', title: flashSuccess.getAttribute('data-msg') });
+        if(flashError) Toast.fire({ icon: 'error', title: flashError.getAttribute('data-msg') });
 
         const rombelId = "{{ $rombelId ?? '' }}";
         if(!rombelId) return;
@@ -323,82 +318,52 @@
             .then(res => res.json())
             .then(data => {
                 if(data.status === 'success') {
-                    // Berhasil
-                    const Toast = Swal.mixin({
-                        toast: true, position: 'top-end', showConfirmButton: false, timer: 3000, timerProgressBar: true,
-                        didOpen: (toast) => { toast.addEventListener('mouseenter', Swal.stopTimer); toast.addEventListener('mouseleave', Swal.resumeTimer); }
-                    });
                     Toast.fire({ icon: 'success', title: 'Tersimpan' });
                 } else {
-                    // GAGAL / BENTROK
                     Swal.fire({
-                        icon: 'error',
-                        title: 'Gagal Menyimpan',
-                        text: data.message, // Pesan detail bentrok dari controller
-                        confirmButtonText: 'Oke, Kembalikan',
-                        allowOutsideClick: false
-                    }).then(() => {
-                        // Reload halaman agar posisi kartu kembali seperti semula (sebelum di-drag)
-                        // Ini cara paling aman untuk "undo" drag and drop yang kompleks
-                        location.reload();
-                    });
+                        icon: 'error', title: 'Gagal Menyimpan', text: data.message,
+                        confirmButtonText: 'Oke, Kembalikan', allowOutsideClick: false
+                    }).then(() => { location.reload(); });
                 }
             })
-            .catch(err => {
-                console.error(err);
-                Swal.fire('Error', 'Terjadi kesalahan server', 'error');
-            });
+            .catch(err => { Swal.fire('Error', 'Terjadi kesalahan server', 'error'); });
+        }
+
+        // --- 5. FUNGSI KONFIRMASI SYNC ---
+        window.confirmSync = function() {
+            Swal.fire({
+                title: 'Sync Ulang Mapel?',
+                text: "Data mapel & Jadwal akan di-reset.",
+                icon: 'warning', showCancelButton: true,
+                confirmButtonColor: '#ffc107', cancelButtonColor: '#d33',
+                confirmButtonText: 'Ya, Reset', cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) document.getElementById('formSync').submit();
+            })
+        }
+
+        // --- 6. FUNGSI DELETE ---
+        window.deleteJadwal = function(btn) {
+            Swal.fire({
+                title: 'Hapus jadwal?', text: "Mapel kembali ke panel kiri.", icon: 'question',
+                showCancelButton: true, confirmButtonColor: '#3085d6', cancelButtonColor: '#d33',
+                confirmButtonText: 'Ya, Hapus', width: '300px'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const item = btn.closest('.mapel-item');
+                    const slot = item.closest('.slot-drop-zone');
+                    const jamId = slot.getAttribute('data-jam-id');
+                    const mapelId = item.getAttribute('data-id');
+
+                    item.remove();
+                    const placeholder = slot.querySelector('.placeholder-text');
+                    if(placeholder) placeholder.style.display = 'block';
+
+                    window.updateCounterUI(mapelId, 1);
+                    window.saveData(jamId, null);
+                }
+            })
         }
     });
-
-    // --- 5. FUNGSI KONFIRMASI SYNC (SWEETALERT) ---
-    function confirmSync() {
-        Swal.fire({
-            title: 'Sync Ulang Mapel?',
-            text: "Data mapel di panel kiri akan di-reset dari Rombel. Jadwal yang sudah disusun di kanan akan DIHAPUS karena ID-nya berubah.",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#ffc107', // Warning color
-            cancelButtonColor: '#d33',
-            confirmButtonText: 'Ya, Reset & Sync',
-            cancelButtonText: 'Batal'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                document.getElementById('formSync').submit();
-            }
-        })
-    }
-
-    // --- 6. FUNGSI DELETE ITEM (SWEETALERT) ---
-    window.deleteJadwal = function(btn) {
-        // Tampilkan konfirmasi SweetAlert dulu
-        Swal.fire({
-            title: 'Hapus jadwal?',
-            text: "Mapel akan dikembalikan ke panel kiri.",
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
-            confirmButtonText: 'Ya, Hapus',
-            cancelButtonText: 'Batal',
-            width: '300px' // Kecil saja
-        }).then((result) => {
-            if (result.isConfirmed) {
-                // Eksekusi Hapus
-                const item = btn.closest('.mapel-item');
-                const slot = item.closest('.slot-drop-zone');
-                const jamId = slot.getAttribute('data-jam-id');
-                const mapelId = item.getAttribute('data-id');
-
-                item.remove();
-
-                const placeholder = slot.querySelector('.placeholder-text');
-                if(placeholder) placeholder.style.display = 'block';
-
-                window.updateCounterUI(mapelId, 1);
-                window.saveData(jamId, null);
-            }
-        })
-    }
 </script>
 @endpush

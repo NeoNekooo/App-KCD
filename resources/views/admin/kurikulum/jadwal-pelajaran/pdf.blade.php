@@ -58,15 +58,20 @@
         .hdr-Sabtu  { background-color: #AB47BC; color: white; } /* Ungu */
         .hdr-Minggu { background-color: #8D6E63; color: white; } /* Coklat */
 
-        /* Cell Istirahat (Gelap Tegas) */
-        .cell-merged {
-            background-color: #546E7A; /* Blue Grey Gelap */
-            color: #fff;
+        /* STYLE KHUSUS TIPE KEGIATAN (Merged Cells) */
+        .merged-base {
             font-weight: bold;
             letter-spacing: 1px;
             text-transform: uppercase;
             border: 1px solid #333;
+            color: #fff;
         }
+        .merged-istirahat { background-color: #546E7A; } /* Abu Gelap */
+        .merged-upacara   { background-color: #1976D2; } /* Biru Tua */
+        .merged-literasi  { background-color: #0097A7; } /* Cyan Gelap */
+        .merged-wali      { background-color: #7B1FA2; } /* Ungu Tua */
+        .merged-agama     { background-color: #388E3C; } /* Hijau Tua */
+        .merged-lainnya   { background-color: #616161; } /* Abu Biasa */
 
         /* MATRIX GABUNGAN */
         .table-matrix {
@@ -147,7 +152,7 @@
                 <tr>
                     <th style="width: {{ $widthWaktu }}; background-color: #263238;">WAKTU</th>
                     @foreach($rombels as $rombel)
-                        {{-- Header Nama Kelas (Selang seling warna dikit biar ga bosen) --}}
+                        {{-- Header Nama Kelas --}}
                         @php $bgHeader = ($loop->iteration % 2 == 0) ? '#455A64' : '#546E7A'; @endphp
                         <th style="background-color: {{ $bgHeader }};" title="{{ $rombel->nama }}">
                             @if($jmlKelas > 30)
@@ -161,7 +166,7 @@
             </thead>
             <tbody>
                 @foreach($days as $hari)
-                    {{-- JUDUL HARI (DENGAN WARNA KHAS HARI) --}}
+                    {{-- JUDUL HARI --}}
                     <tr>
                         <td colspan="{{ $rombels->count() + 1 }}" class="row-hari hdr-{{ $hari }}">
                             {{ strtoupper($hari) }}
@@ -177,18 +182,28 @@
                                 {{ \Carbon\Carbon::parse($jam->jam_mulai)->format('H:i') }} - {{ \Carbon\Carbon::parse($jam->jam_selesai)->format('H:i') }}
                             </td>
 
-                            {{-- LOGIKA MERGE --}}
+                            {{-- LOGIKA MERGE BERDASARKAN TIPE --}}
                             @if($jam->tipe != 'kbm')
-                                <td colspan="{{ $rombels->count() }}" class="cell-merged">
+                                @php
+                                    $classMerged = match($jam->tipe) {
+                                        'istirahat' => 'merged-istirahat',
+                                        'upacara' => 'merged-upacara',
+                                        'literasi' => 'merged-literasi',
+                                        'wali_kelas' => 'merged-wali',
+                                        'keagamaan' => 'merged-agama',
+                                        default => 'merged-lainnya'
+                                    };
+                                @endphp
+                                <td colspan="{{ $rombels->count() }}" class="merged-base {{ $classMerged }}">
                                     {{ strtoupper($jam->nama) }}
                                 </td>
                             @else
-                                {{-- LOOP KELAS --}}
+                                {{-- LOOP KELAS (KBM) --}}
                                 @foreach($rombels as $rombel)
                                     @php
                                         $data = $jadwalGrouped[$rombel->id][$hari][$jam->urutan] ?? null;
                                         $content = '';
-                                        $bgClass = 'background-color: #fff;';
+                                        $idx = -1;
 
                                         if ($data && $data->pembelajaran) {
                                             $namaMapel = $data->pembelajaran->nama_mata_pelajaran;
@@ -196,14 +211,9 @@
                                             $kodeGuru = $data->pembelajaran->guru->id ?? '?';
                                             $content = $singkatan . " (" . $kodeGuru . ")";
 
-                                            // WARNA-WARNI RANDOM BERDASARKAN NAMA MAPEL
+                                            // WARNA-WARNI
                                             $hash = crc32($namaMapel);
-                                            $idx = abs($hash) % 8; // 0-7
-                                            // Kita inject class lewat style karena class blade loop kadang tricky
-                                            // atau pake class clr-X
-                                            $bgClass = ''; // Reset inline style
-                                        } else {
-                                            $idx = -1; // Kosong
+                                            $idx = abs($hash) % 8;
                                         }
                                     @endphp
 
@@ -223,7 +233,7 @@
 
 
     {{-- ================================================================= --}}
-    {{-- BAGIAN 2: JADWAL DETAIL PER KELAS (COLORFUL) --}}
+    {{-- BAGIAN 2: JADWAL DETAIL PER KELAS --}}
     {{-- ================================================================= --}}
 
     @foreach($rombels as $index => $rombel)
@@ -259,7 +269,6 @@
                 <thead>
                     <tr>
                         <th width="15%" style="background-color: #37474F; color: white;">WAKTU</th>
-                        {{-- Header Hari Warna-Warni --}}
                         @foreach($days as $hari)
                             <th width="17%" class="hdr-{{ $hari }}">{{ strtoupper($hari) }}</th>
                         @endforeach
@@ -282,11 +291,18 @@
 
                                 if($jamDataHariIni) {
                                     if($jamDataHariIni->tipe != 'kbm') {
-                                        // ISTIRAHAT (GELAP)
+                                        // NON-KBM (WARNA WARNI SESUAI TIPE)
                                         $content = strtoupper($jamDataHariIni->nama);
-                                        $cellClass = 'cell-merged';
+                                        $cellClass = 'merged-base ' . match($jamDataHariIni->tipe) {
+                                            'istirahat' => 'merged-istirahat',
+                                            'upacara' => 'merged-upacara',
+                                            'literasi' => 'merged-literasi',
+                                            'wali_kelas' => 'merged-wali',
+                                            'keagamaan' => 'merged-agama',
+                                            default => 'merged-lainnya'
+                                        };
                                     } else {
-                                        // MAPEL (WARNA WARNI)
+                                        // MAPEL
                                         $d = $jadwalGrouped[$rombel->id][$hari][$jamRef->urutan] ?? null;
                                         if($d && $d->pembelajaran) {
                                             $mapel = $controller->helperSingkatan($d->pembelajaran->nama_mata_pelajaran);
@@ -302,7 +318,7 @@
                                     }
                                 } else {
                                     $content = '-';
-                                    $style = 'background-color: #eee;'; // Tidak ada jam
+                                    $style = 'background-color: #eee;';
                                 }
                             @endphp
 
@@ -320,7 +336,7 @@
     @endforeach
 
     {{-- ================================================================= --}}
-    {{-- BAGIAN 3: DAFTAR GURU (TERANG & BERKOP & HEADER BERWARNA) --}}
+    {{-- BAGIAN 3: DAFTAR GURU --}}
     {{-- ================================================================= --}}
 
     @if($listGuru->isNotEmpty())
@@ -335,10 +351,6 @@
                 </td>
                 <td align="center">
                     <h2 class="nama-sekolah">{{ $sekolah->nama ?? 'NAMA SEKOLAH' }}</h2>
-                    <div class="alamat-sekolah">
-                        {{ $sekolah->alamat ?? '' }}
-                        @if(!empty($sekolah->telepon)) | Telp: {{ $sekolah->telepon }} @endif
-                    </div>
                     <div style="margin-top: 5px; font-weight: bold; text-decoration: underline;">DAFTAR KODE GURU</div>
                     <div style="font-size: 10px;">TA: {{ $tapelAktif->tahun_ajaran }}</div>
                 </td>
@@ -348,7 +360,6 @@
 
         <table style="width: 100%; font-size: 10px; border: none; margin-top: 10px; border-collapse: collapse;">
              <thead>
-                {{-- Header Tabel Guru Biru Gelap Elegant --}}
                 <tr style="background:#1565C0; color:#fff;">
                     <th style="padding:8px; border:1px solid #000;">Kode</th>
                     <th style="padding:8px; border:1px solid #000;">Nama Guru</th>
@@ -370,7 +381,6 @@
                 @endphp
 
                 @for($i = 0; $i < $maxRows; $i++)
-                    {{-- Zebra Striping untuk baris guru --}}
                     @php $bgRow = ($i % 2 == 0) ? '#fff' : '#E3F2FD'; @endphp
                     <tr style="background-color: {{ $bgRow }};">
                         <td style="border:1px solid #ccc; font-weight:bold; text-align:center; padding: 4px;">{{ $col1[$i]->id ?? '' }}</td>
@@ -392,4 +402,4 @@
     @endif
 
 </body>
-</html>
+</html> 
