@@ -93,27 +93,9 @@ use App\Http\Controllers\Admin\Administrasi\SuratMasukController;
 
 // Menggunakan 'welcome' dari V2
 // Halaman Depan
-Route::get('/', [HomeController::class, 'index'])->name('home');
-
-// Rute Detail Public
-Route::get('/sambutan-kepala-sekolah', [HomeController::class, 'sambutanLengkap'])->name('sambutan.lengkap');
-Route::get('/jurusan/{id}', [\App\Http\Controllers\HomeController::class, 'showJurusan'])->name('jurusan.show');
-Route::get('/prestasi/{id}', [\App\Http\Controllers\HomeController::class, 'showPrestasi'])->name('prestasi.show');
-Route::get('/fasilitas-sekolah', [\App\Http\Controllers\HomeController::class, 'fasilitasSemua'])->name('fasilitas.semua');
-Route::get('/berita/{id}', [\App\Http\Controllers\HomeController::class, 'showBerita'])->name('berita.show');
-
-// Tambahkan baris ini di dalam Rute Web Utama (Frontend Public)
-Route::get('/profil-sekolah', [HomeController::class, 'profilSekolah'])->name('profil.sekolah');
-
-// Di bagian Rute Web Utama (Frontend Public)
-Route::get('/kontak', [HomeController::class, 'kontak'])->name('kontak');
-
-// [BARU] Route Galeri Lengkap
-Route::get('/galeri', [\App\Http\Controllers\HomeController::class, 'galeriLengkap'])->name('galeri.index');
-
-// --- Rute Pengecekan Jadwal PPDB ---
-Route::get('/cek-status-ppdb', [HomeController::class, 'cekStatusPpdb'])->name('ppdb.cek_status');
-Route::get('/ppdb-tutup', [HomeController::class, 'halamanTutup'])->name('ppdb.tutup');
+Route::get('/', function () {
+        return view('auth.login-custom');
+    });
 
 Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])
          ->middleware('auth')
