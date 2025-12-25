@@ -169,9 +169,11 @@ return [
                     ['title' => 'Mapel Pilihan', 'route' => 'admin.rombel.mapel-pilihan.index', 'is_active' => 'request()->is("admin/rombel/mapel-pilihan*")'],
                     ['title' => 'Wali', 'route' => 'admin.rombel.wali.index', 'is_active' => 'request()->is("admin/rombel/wali*")'],
                 ]],
-                ['title' => 'Pengaturan Jam', 'route' => 'admin.kurikulum.jam-pelajaran.index', 'is_active' => 'request()->is("admin/kurikulum/jam-pelajaran*")'],
-                ['title' => 'Penyusunan Jadwal', 'route' => 'admin.kurikulum.jadwal-pelajaran.index', 'is_active' => 'request()->is("admin/akurikulum/jadwal-pelajaran*")'],
-                ['title' => 'Rekap & Cetak', 'route' => 'admin.kurikulum.jadwal-pelajaran.rekap', 'is_active' => 'request()->is("admin/akurikulum/jadwal-pelajaran*")'],
+                ['title' => 'Jadwal Pelajaran', 'is_toggle' => true, 'is_open' => 'request()->is("admin/kurikulum*")', 'submenu' => [
+                    ['title' => 'Pengaturan Jam', 'route' => 'admin.kurikulum.jam-pelajaran.index', 'is_active' => 'request()->is("admin/kurikulum/jam-pelajaran*")'],
+                    ['title' => 'Penyusunan Jadwal', 'route' => 'admin.kurikulum.jadwal-pelajaran.index', 'is_active' => 'request()->is("admin/akurikulum/jadwal-pelajaran*")'],
+                    ['title' => 'Rekap & Cetak', 'route' => 'admin.kurikulum.jadwal-pelajaran.rekap', 'is_active' => 'request()->is("admin/akurikulum/jadwal-pelajaran*")'],
+                ]],
             ]
         ],
         // --- KESISWAAN ---
