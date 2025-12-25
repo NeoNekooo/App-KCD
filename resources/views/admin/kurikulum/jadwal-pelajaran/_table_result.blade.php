@@ -106,33 +106,30 @@
         </div>
     </div>
 
-    {{-- LEGEND / DAFTAR GURU (MUNCUL KEMBALI DI SINI) --}}
+    {{-- LEGEND / DAFTAR GURU (STATIC) --}}
     <div class="card mt-4 border-start border-warning border-4 shadow-sm">
-        <div class="card-header py-2 bg-light d-flex justify-content-between align-items-center cursor-pointer"
-             data-bs-toggle="collapse" data-bs-target="#collapseLegend">
+        <div class="card-header py-2 bg-light d-flex justify-content-between align-items-center">
             <span class="fw-bold text-uppercase text-dark small">
                 <i class="bx bx-id-card me-2"></i> Daftar Kode & Nama Guru
             </span>
-            <i class="bx bx-chevron-down"></i>
         </div>
-        <div class="collapse show" id="collapseLegend">
-            <div class="card-body p-3 bg-white">
-                <div class="row g-2">
-                    @foreach($listGuru as $g)
-                        <div class="col-lg-3 col-md-4 col-6">
-                            <div class="d-flex align-items-center p-2 border rounded bg-light">
-                                {{-- KODE GURU --}}
-                                <span class="badge bg-warning text-dark me-2 shadow-sm" style="min-width: 30px; text-align: center;">
-                                    {{ $g->kode ?? $g->id }}
-                                </span>
-                                {{-- NAMA GURU --}}
-                                <span class="text-truncate small fw-bold" title="{{ $g->nama }}">
-                                    {{ $g->nama }}
-                                </span>
-                            </div>
+
+        <div class="card-body p-3 bg-white">
+            <div class="row g-2">
+                @foreach($listGuru as $g)
+                    <div class="col-lg-3 col-md-4 col-6">
+                        <div class="d-flex align-items-center p-2 border rounded bg-light">
+                            {{-- KODE GURU --}}
+                            <span class="badge bg-warning text-dark me-2 shadow-sm" style="min-width: 30px; text-align: center;">
+                                {{ $g->kode ?? $g->id }}
+                            </span>
+                            {{-- NAMA GURU --}}
+                            <span class="text-truncate small fw-bold" title="{{ $g->nama }}">
+                                {{ $g->nama }}
+                            </span>
                         </div>
-                    @endforeach
-                </div>
+                    </div>
+                @endforeach
             </div>
         </div>
     </div>
