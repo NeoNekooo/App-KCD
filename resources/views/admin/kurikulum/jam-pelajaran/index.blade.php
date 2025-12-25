@@ -56,6 +56,7 @@
                                     </thead>
                                     <tbody>
                                         @foreach($dataJam as $jam)
+                                            {{-- Memberikan warna background baris khusus untuk Istirahat dan Upacara agar mencolok --}}
                                             <tr class="{{ $jam->tipe == 'istirahat' ? 'table-warning' : ($jam->tipe == 'upacara' ? 'table-info' : '') }}">
                                                 <td class="text-center fw-bold">{{ $jam->urutan }}</td>
                                                 <td>
@@ -66,9 +67,22 @@
                                                 </td>
                                                 <td>{{ $jam->nama }}</td>
                                                 <td>
-                                                    @if($jam->tipe == 'kbm') <span class="badge bg-success">KBM</span>
-                                                    @elseif($jam->tipe == 'istirahat') <span class="badge bg-warning text-dark">Istirahat</span>
-                                                    @else <span class="badge bg-info">Lainnya</span> @endif
+                                                    {{-- Logika Badge Warna-warni sesuai Tipe --}}
+                                                    @if($jam->tipe == 'kbm')
+                                                        <span class="badge bg-success">KBM</span>
+                                                    @elseif($jam->tipe == 'upacara')
+                                                        <span class="badge bg-primary">Upacara</span>
+                                                    @elseif($jam->tipe == 'keagamaan')
+                                                        <span class="badge bg-success bg-gradient">Keagamaan</span>
+                                                    @elseif($jam->tipe == 'literasi')
+                                                        <span class="badge bg-info text-dark">Literasi</span>
+                                                    @elseif($jam->tipe == 'wali_kelas')
+                                                        <span class="badge bg-primary bg-gradient">Wali Kelas</span>
+                                                    @elseif($jam->tipe == 'istirahat')
+                                                        <span class="badge bg-warning text-dark">Istirahat</span>
+                                                    @else
+                                                        <span class="badge bg-secondary">Lainnya</span>
+                                                    @endif
                                                 </td>
                                                 <td class="text-end">
                                                     <button class="btn btn-sm btn-outline-primary btn-edit"
@@ -125,10 +139,15 @@
                         </div>
                         <div class="col-6 mb-3">
                             <label class="form-label">Tipe</label>
-                            <select name="tipe" class="form-select">
+                            {{-- UPDATE: Pilihan Tipe Lengkap --}}
+                            <select name="tipe" class="form-select" required>
                                 <option value="kbm">KBM (Belajar)</option>
-                                <option value="istirahat">Istirahat</option>
                                 <option value="upacara">Upacara</option>
+                                <option value="keagamaan">Keagamaan</option>
+                                <option value="literasi">Literasi</option>
+                                <option value="wali_kelas">Wali Kelas</option>
+                                <option value="istirahat">Istirahat</option>
+                                <option value="lainnya">Lainnya</option>
                             </select>
                         </div>
                     </div>
@@ -157,7 +176,7 @@
     </div>
 </div>
 
-{{-- Modal Edit (Akan diisi via JS) --}}
+{{-- Modal Edit --}}
 <div class="modal fade" id="modalEdit" tabindex="-1">
     <div class="modal-dialog">
         <form id="formEdit" action="" method="POST">
@@ -168,7 +187,6 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    {{-- Di Edit, Hari tidak bisa diubah massal (hanya edit row ini) --}}
                     <input type="hidden" name="hari" id="edit_hari">
 
                     <div class="row g-2">
@@ -178,10 +196,15 @@
                         </div>
                         <div class="col-6 mb-3">
                             <label class="form-label">Tipe</label>
-                            <select name="tipe" id="edit_tipe" class="form-select">
+                            {{-- UPDATE: Pilihan Tipe Lengkap di Edit --}}
+                            <select name="tipe" id="edit_tipe" class="form-select" required>
                                 <option value="kbm">KBM (Belajar)</option>
-                                <option value="istirahat">Istirahat</option>
                                 <option value="upacara">Upacara</option>
+                                <option value="keagamaan">Keagamaan</option>
+                                <option value="literasi">Literasi</option>
+                                <option value="wali_kelas">Wali Kelas</option>
+                                <option value="istirahat">Istirahat</option>
+                                <option value="lainnya">Lainnya</option>
                             </select>
                         </div>
                     </div>
@@ -213,7 +236,6 @@
 @push('scripts')
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        // Script untuk menangani tombol edit
         const editButtons = document.querySelectorAll('.btn-edit');
         const formEdit = document.getElementById('formEdit');
 
@@ -226,7 +248,7 @@
 
                 // Set Values
                 document.getElementById('edit_urutan').value = data.urutan;
-                document.getElementById('edit_tipe').value = data.tipe;
+                document.getElementById('edit_tipe').value = data.tipe; // Ini akan otomatis memilih opsi yang sesuai
                 document.getElementById('edit_nama').value = data.nama;
                 document.getElementById('edit_hari').value = data.hari;
 

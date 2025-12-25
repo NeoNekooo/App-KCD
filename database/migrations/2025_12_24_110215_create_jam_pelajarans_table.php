@@ -24,7 +24,13 @@ return new class extends Migration
             $table->time('jam_selesai');
 
             // Tipe slot. Penting untuk drag-and-drop nanti (Istirahat tidak bisa di-drop mapel)
-            $table->enum('tipe', ['kbm', 'istirahat', 'upacara', 'lainnya'])->default('kbm');
+            $table->enum('tipe', ['kbm',
+                'istirahat',
+                'upacara',
+                'lainnya',
+                'keagamaan',
+                'literasi',
+                'wali_kelas'])->default('kbm');
 
             $table->timestamps();
 

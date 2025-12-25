@@ -400,27 +400,24 @@ class JadwalPelajaranController extends Controller
 
         $listGuru = $listGuru->unique('id')->sortBy('nama')->values();
 
-        // [PERBAIKAN DISINI]
-        // Ambil SEMUA jam pelajaran, urutkan field hari agar Senin -> Minggu, lalu urutan jam
+        // Mengambil semua slot jam dan mengelompokkan per hari untuk header PDF
         $rawJams = JamPelajaran::orderByRaw("FIELD(hari, 'Senin','Selasa','Rabu','Kamis','Jumat','Sabtu','Minggu')")
             ->orderBy('urutan')
             ->get();
 
-        // Grouping per hari agar di View bisa dipanggil spesifik per hari
         $allMasterJams = $rawJams->groupBy('hari');
 
-        // Pastikan urutan hari sesuai keinginan
         $days = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
-        // Filter hari yang benar-benar punya jam pelajaran
         $activeDays = collect($days)->filter(function($day) use ($allMasterJams) {
             return isset($allMasterJams[$day]);
         });
 
-        $pdf = \PDF::loadView('admin.kurikulum.jadwal-pelajaran.pdf', [
+        // [FIX] Menggunakan PDF Facade dengan benar
+        $pdf = Pdf::loadView('admin.kurikulum.jadwal-pelajaran.pdf', [
             'sekolah'       => $sekolah,
             'rombels'       => $rombels,
             'jadwalGrouped' => $jadwalGrouped,
-            'allMasterJams' => $allMasterJams, // <--- Kirim variable baru ini
+            'allMasterJams' => $allMasterJams,
             'listGuru'      => $listGuru,
             'days'          => $activeDays,
             'tapelAktif'    => $tapelAktif,
