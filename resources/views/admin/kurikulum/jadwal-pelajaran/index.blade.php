@@ -50,7 +50,7 @@
         </div>
     @else
 
-        <div class="row position-relative"> 
+        <div class="row position-relative">
             <div class="col-md-3">
                 <div class="sticky-sidebar">
                     <div class="card h-100 shadow-sm border-primary border-top border-3">
@@ -323,13 +323,31 @@
             .then(res => res.json())
             .then(data => {
                 if(data.status === 'success') {
-                    // Notifikasi Kecil di Pojok (Tanpa Block Layar)
+                    // Berhasil
+                    const Toast = Swal.mixin({
+                        toast: true, position: 'top-end', showConfirmButton: false, timer: 3000, timerProgressBar: true,
+                        didOpen: (toast) => { toast.addEventListener('mouseenter', Swal.stopTimer); toast.addEventListener('mouseleave', Swal.resumeTimer); }
+                    });
                     Toast.fire({ icon: 'success', title: 'Tersimpan' });
                 } else {
-                    Toast.fire({ icon: 'error', title: 'Gagal: ' + data.message });
+                    // GAGAL / BENTROK
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Gagal Menyimpan',
+                        text: data.message, // Pesan detail bentrok dari controller
+                        confirmButtonText: 'Oke, Kembalikan',
+                        allowOutsideClick: false
+                    }).then(() => {
+                        // Reload halaman agar posisi kartu kembali seperti semula (sebelum di-drag)
+                        // Ini cara paling aman untuk "undo" drag and drop yang kompleks
+                        location.reload();
+                    });
                 }
             })
-            .catch(err => console.error(err));
+            .catch(err => {
+                console.error(err);
+                Swal.fire('Error', 'Terjadi kesalahan server', 'error');
+            });
         }
     });
 

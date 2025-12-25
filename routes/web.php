@@ -224,16 +224,26 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
 
     });
 
+    // --- GRUP KURIKULUM ---
     Route::prefix('kurikulum')->name('kurikulum.')->group(function () {
-         Route::resource('jam-pelajaran', JamPelajaranController::class);
-        Route::resource('jadwal-pelajaran', JamPelajaranController::class);
-        // Halaman Index & Filter Rombel
-        Route::get('jadwal-pelajaran', [JadwalPelajaranController::class, 'index'])->name('jadwal-pelajaran.index');
 
-        // API Ajax Simpan Jadwal
+        // 1. Master Jam Pelajaran
+        Route::resource('jam-pelajaran', JamPelajaranController::class);
+
+        // Route Rekap & PDF (Taruh disini agar "rekap" tidak dianggap sebagai ID)
+        Route::get('jadwal-pelajaran/rekap', [JadwalPelajaranController::class, 'rekap'])->name('jadwal-pelajaran.rekap');
+        Route::get('jadwal-pelajaran/cetak-pdf', [JadwalPelajaranController::class, 'cetakPdf'])->name('jadwal-pelajaran.cetak-pdf');
+
+        // Route Ajax Helper
+        Route::get('jadwal-pelajaran/{id}/json', [JadwalPelajaranController::class, 'getJadwalJson'])->name('jadwal-pelajaran.json');
         Route::post('jadwal-pelajaran/update', [JadwalPelajaranController::class, 'updateJadwal'])->name('jadwal-pelajaran.update-ajax');
-        Route::post('jadwal-pelajaran/sync', [JadwalPelajaranController::class, 'syncMapel'])
-            ->name('jadwal-pelajaran.sync');
+        Route::post('jadwal-pelajaran/sync', [JadwalPelajaranController::class, 'syncMapel'])->name('jadwal-pelajaran.sync');
+
+        // -----------------------------------------------------------------
+        // 2. Route Resource Jadwal (Generic) - TARUH PALING BAWAH
+        // -----------------------------------------------------------------
+        // Pastikan ini JadwalPelajaranController, BUKAN JamPelajaranController
+        Route::resource('jadwal-pelajaran', JadwalPelajaranController::class);
     });
 
     /*
