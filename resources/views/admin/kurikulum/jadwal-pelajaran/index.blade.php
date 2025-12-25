@@ -168,7 +168,7 @@
                                                 <div class="slot-blocked p-3 text-center rounded {{ $blockedClass }} opacity-75">
                                                     <span class="fw-bold text-uppercase" style="font-size: 0.75rem;">
                                                         @if($jam->tipe == 'istirahat') <i class='bx bx-coffee me-1'></i> @endif
-                                                        {{ $jam->nama }}
+                                                        {{ $jam->tipe }}
                                                     </span>
                                                 </div>
                                             @endif

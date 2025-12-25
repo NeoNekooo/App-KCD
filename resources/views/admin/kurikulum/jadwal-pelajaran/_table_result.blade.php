@@ -80,7 +80,7 @@
                                                             default => 'bg-secondary text-white'
                                                         };
                                                     @endphp
-                                                    <span class="badge {{ $badgeClass }} w-100 py-2">{{ strtoupper($data->jamPelajaran->tipe) }}</span>
+                                                    <span class="badge {{ $badgeClass }} w-100 py-2">{{ strtoupper($data->jamPelajaran->nama) }}</span>
 
                                                 @elseif($data->pembelajaran)
                                                     @php
@@ -113,7 +113,7 @@
                                                             default => 'bg-secondary text-white'
                                                         };
                                                     @endphp
-                                                    <span class="badge {{ $badgeClass }} w-100 py-2">{{ strtoupper($jam->nama) }}</span>
+                                                    <span class="badge {{ $badgeClass }} w-100 py-2">{{ strtoupper($jam->tipe) }}</span>
                                                 @endif
                                             @endif
                                         </td>
