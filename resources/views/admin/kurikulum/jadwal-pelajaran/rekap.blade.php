@@ -9,7 +9,7 @@
         --secondary-bg: #f5f5f9;
         --border-color: #dfe3e7;
     }
-    
+
 
     /* ==================================================
        1. FIX LAYOUT CHECKBOX & HILANGKAN DOUBLE CENTANG
@@ -167,15 +167,15 @@
     </div>
 
     {{-- FILTER KELAS --}}
+    {{-- FILTER KELAS --}}
     <div class="card shadow-sm mb-4 filter-card noprint">
-        <div class="card-header bg-white py-3 cursor-pointer" data-bs-toggle="collapse" data-bs-target="#collapseFilter">
+        <div class="card-header bg-white py-3">
             <div class="d-flex justify-content-between align-items-center">
                 <h6 class="mb-0 fw-bold text-dark"><i class="bx bx-filter-alt me-1 text-primary"></i> Filter Kelas</h6>
-                <small class="text-muted"><i class="bx bx-chevron-down"></i> Buka/Tutup</small>
-            </div>
+                </div>
         </div>
 
-        <div class="collapse show" id="collapseFilter">
+        <div>
             <div class="card-body bg-light pt-3">
                 <form id="formFilterJadwal" action="{{ route('admin.kurikulum.jadwal-pelajaran.rekap') }}" method="GET">
 
@@ -210,22 +210,22 @@
 
                                     <div class="card-body p-2 bg-white" style="max-height: 250px; overflow-y: auto;">
                                         <div class="row g-2">
-                                           @foreach($dataKelas as $r)
-    <div class="col-6">
-    <label class="btn-check-custom d-flex align-items-center" title="{{ $r->nama }}" style="gap: 8px; cursor: pointer;">
-        <input type="checkbox"
-               class="rombel-check"
-               name="rombel_ids[]"
-               value="{{ $r->id }}"
-               onchange="loadJadwalAjax()"
-               {{ in_array($r->id, $selectedRombels) ? 'checked' : '' }}>
+                                            @foreach($dataKelas as $r)
+                                            <div class="col-6">
+                                                <label class="btn-check-custom d-flex align-items-center" title="{{ $r->nama }}" style="gap: 8px; cursor: pointer;">
+                                                    <input type="checkbox"
+                                                           class="rombel-check"
+                                                           name="rombel_ids[]"
+                                                           value="{{ $r->id }}"
+                                                           onchange="loadJadwalAjax()"
+                                                           {{ in_array($r->id, $selectedRombels) ? 'checked' : '' }}>
 
-        <span class="chip-body">
-            <span class="chip-text">{{ $r->nama }}</span>
-        </span>
-    </label>
-</div>
-@endforeach
+                                                    <span class="chip-body">
+                                                        <span class="chip-text">{{ $r->nama }}</span>
+                                                    </span>
+                                                </label>
+                                            </div>
+                                            @endforeach
                                         </div>
                                     </div>
                                 </div>
