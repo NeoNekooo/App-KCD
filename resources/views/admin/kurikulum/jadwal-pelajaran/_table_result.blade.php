@@ -80,7 +80,7 @@
                                                             default => 'bg-secondary text-white'
                                                         };
                                                     @endphp
-                                                    <span class="badge {{ $badgeClass }} w-100 py-2">{{ strtoupper($data->jamPelajaran->nama) }}</span>
+                                                    <span class="badge {{ $badgeClass }} w-100 py-2">{{ strtoupper($data->jamPelajaran->tipe) }}</span>
 
                                                 @elseif($data->pembelajaran)
                                                     @php
