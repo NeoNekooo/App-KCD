@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Admin\kurikulum;
+namespace App\Http\Controllers\Admin\Kurikulum;
 
 use App\Http\Controllers\Controller;
 use App\Models\JamPelajaran;

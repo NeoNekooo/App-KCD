@@ -304,7 +304,7 @@ return [
             'is_toggle' => true,
             'is_open' => 'request()->is("admin/alumni*")',
             'submenu' => [
-                ['title' => 'Peluusan', 'route' => 'admin.alumni.pelulusan', 'is_active' => 'false'],
+                ['title' => 'Penetapan Kelulusan', 'route' => 'admin.alumni.pelulusan', 'is_active' => 'false'],
                 ['title' => 'Data Alumni', 'route' => 'admin.alumni.dataAlumni.index', 'is_active' => 'false'],
                 ['title' => 'Rekap Data Alumni', 'route' => 'admin.underConstructions', 'is_active' => 'false'],
             ]
