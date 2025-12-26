@@ -53,9 +53,10 @@
                     <th>Tgl Lahir</th>
                     <th>Status</th>
                     <th>Jenis GTK</th>
-                    <th>Jabatan</th>
+                    {{-- <th>Jabatan</th> --}}
                     <th>NUPTK</th>
                     <th>Tgl Surat Tugas</th>
+                    <th width="5%">Aksi</th>
                 </tr>
             </thead>
             <tbody class="table-border-bottom-0">
@@ -91,9 +92,18 @@
                              <span class="badge bg-label-info">{{ $gtk->jenis_ptk_id_str ?? 'Tendik' }}</span>
                         @endif
                     </td>
-                    <td>{{ $gtk->jabatan_ptk_id_str ?? '-' }}</td>
+                    {{-- <td>{{ $gtk->jabatan_ptk_id_str ?? '-' }}</td> --}}
                     <td>{{ $gtk->nuptk ?? '-' }}</td>
                     <td>{{ $gtk->tanggal_surat_tugas ? \Carbon\Carbon::parse($gtk->tanggal_surat_tugas)->format('d-m-Y') : '-' }}</td>
+                    <td>
+                        <button type="button"
+                                class="btn btn-sm btn-outline-danger btnRegisterKeluarGTK"
+                                data-id="{{ $gtk->id }}"
+                                data-nama="{{ $gtk->nama }}"
+                                data-url="{{ route('admin.kepegawaian.gtk.register-keluar', $gtk->id) }}">
+                            <i class="bx bx-log-out-circle me-1"></i> Register Keluar
+                        </button>
+                    </td>
                 </tr>
                 @empty
                 <tr>
@@ -142,6 +152,64 @@
         </div>
     </div>
 </div>
+
+<div class="modal fade" id="modalRegisterKeluarGTK" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <form id="formRegisterKeluarGTK" method="POST">
+                @csrf
+                @method('PATCH')
+                <div class="modal-header border-bottom">
+                    <h5 class="modal-title">Register Keluar GTK: <span id="namaGTKModal" class="fw-bold"></span></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="bg-light p-3 rounded mb-3" style="border-left: 4px solid #ffab00;">
+                        <small class="text-dark">
+                            <i class="bx bx-info-circle me-1"></i>
+                            Pastikan data penugasan dan hak akses GTK yang bersangkutan telah diselesaikan sebelum melakukan proses ini.
+                        </small>
+                    </div>
+
+                    <div class="mb-3 row">
+                        <label class="col-sm-4 col-form-label text-sm-end">Keluar karena:</label>
+                        <div class="col-sm-8">
+                            <select name="status" class="form-select" required>
+                                <option value="">-- Pilih Alasan --</option>
+                                <option value="Pensiun">Pensiun</option>
+                                <option value="Resign/Mengundurkan Diri">Resign/Mengundurkan Diri</option>
+                                <option value="Mutasi/Pindah Tugas">Mutasi/Pindah Tugas</option>
+                                <option value="Diberhentikan">Diberhentikan</option>
+                                <option value="Meninggal Dunia">Meninggal Dunia</option>
+                                <option value="Tugas Belajar">Tugas Belajar</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="mb-3 row">
+                        <label class="col-sm-4 col-form-label text-sm-end">Tanggal keluar:</label>
+                        <div class="col-sm-8">
+                            <input type="date" name="tanggal_keluar" class="form-control" value="{{ date('Y-m-d') }}" required>
+                        </div>
+                    </div>
+
+                    <div class="mb-3 row">
+                        <label class="col-sm-4 col-form-label text-sm-end">Keterangan:</label>
+                        <div class="col-sm-8">
+                            <textarea name="alasan" class="form-control" rows="3" placeholder="Contoh: Pindah tugas ke sekolah luar daerah atau SK Pensiun No.xxx"></textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-danger">
+                        <i class="bx bx-save me-1"></i> Simpan Data Keluar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 @endsection
 
 @push('scripts')
@@ -151,7 +219,32 @@
         const rowCheckboxes = document.querySelectorAll('.row-checkbox');
         const viewSelectedBtn = document.getElementById('viewSelectedBtn');
         const exportSelectedLink = document.getElementById('exportSelectedLink');
+// Inisialisasi Modal
+const modalRegisterKeluarGTK = new bootstrap.Modal(document.getElementById('modalRegisterKeluarGTK'));
+const formRegisterKeluarGTK = document.getElementById('formRegisterKeluarGTK');
+const namaGTKModal = document.getElementById('namaGTKModal');
+const btnRegisterKeluarGTK = document.querySelectorAll('.btnRegisterKeluarGTK');
 
+btnRegisterKeluarGTK.forEach(btn => {
+    btn.addEventListener('click', function() {
+        const id = this.getAttribute('data-id');
+        const nama = this.getAttribute('data-nama');
+        const url = this.getAttribute('data-url');
+
+        // Update UI Modal
+        namaGTKModal.innerText = nama;
+
+        // Set action URL ke route GTK (gunakan data-url jika tersedia)
+        if (url) {
+            formRegisterKeluarGTK.action = url;
+        } else {
+            // fallback ke path yang benar
+            formRegisterKeluarGTK.action = `/admin/kepegawaian/gtk/${id}/register-keluar`;
+        }
+
+        modalRegisterKeluarGTK.show();
+    });
+});
         function handleCheckboxChange() {
             const checkedCheckboxes = document.querySelectorAll('.row-checkbox:checked');
             

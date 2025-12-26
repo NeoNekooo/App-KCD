@@ -14,6 +14,8 @@ class Gtk extends Model
     /**
      * Relasi ke banyak tugas pegawai (riwayat tugas).
      */
+   protected $fillable = ['status'];
+   
     public function riwayatTugas()
     {
        return $this->hasMany(TugasPegawai::class, 'pegawai_id', 'ptk_id');
@@ -26,4 +28,38 @@ class Gtk extends Model
     {
         return $this->hasOne(Rombel::class, 'ptk_id', 'ptk_id');
     }
+<<<<<<< HEAD
 }
+=======
+
+    /**
+     * Relasi ke pengguna (akun) berdasarkan ptk_id.
+     */
+    public function pengguna()
+    {
+        return $this->hasOne(Pengguna::class, 'ptk_id', 'ptk_id');
+    }
+
+    public function mutasiKeluar()
+{
+    return $this->morphOne(MutasiKeluar::class, 'keluarable');
+}
+
+    /**
+     * Ambil email dari tabel pengguna bila tersedia, fallback ke attribute lokal.
+     */
+    public function getEmailAttribute($value)
+    {
+        // Jika hubungan telah eager-loaded gunakan itu (hindari N+1), kalau belum ambil langsung dari pengguna
+        return $this->relationLoaded('pengguna') ? ($this->pengguna?->email ?? $value) : ($this->pengguna()->value('email') ?? $value);
+    }
+
+    /**
+     * Ambil no_hp dari tabel pengguna bila tersedia, fallback ke attribute lokal.
+     */
+    public function getNoHpAttribute($value)
+    {
+        return $this->relationLoaded('pengguna') ? ($this->pengguna?->no_hp ?? $value) : ($this->pengguna()->value('no_hp') ?? $value);
+    }
+}
+>>>>>>> 8d227de (regris keluar buat gtk)

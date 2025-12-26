@@ -4,30 +4,29 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class AddQrTokenToGtksTable extends Migration
+return new class extends Migration
 {
     /**
      * Run the migrations.
-     *
-     * @return void
      */
-    public function up()
+    public function up(): void
     {
         Schema::table('gtks', function (Blueprint $table) {
-            // Menambahkan kolom setelah 'nip' (Anda bisa sesuaikan posisinya)
-            $table->string('qr_token')->nullable()->unique()->after('nip');
+            if (!Schema::hasColumn('gtks', 'status')) {
+                $table->string('status', 100)->default('Aktif')->after('nama');
+            }
         });
     }
 
     /**
      * Reverse the migrations.
-     *
-     * @return void
      */
-    public function down()
+    public function down(): void
     {
         Schema::table('gtks', function (Blueprint $table) {
-            $table->dropColumn('qr_token');
+            if (Schema::hasColumn('gtks', 'status')) {
+                $table->dropColumn('status');
+            }
         });
     }
-}
+};

@@ -170,6 +170,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
             Route::get('/', 'indexTendik')->name('index');
             Route::get('/export/excel', 'exportTendikExcel')->name('export.excel');
         });
+ Route::patch('gtk/{id}/register-keluar', [GtkController::class, 'registerKeluar'])->name('gtk.register-keluar');
+
 
         // Route untuk detail multi-GTK
         Route::get('/gtk/show-multiple', [GtkController::class, 'showMultiple'])->name('gtk.show-multiple');

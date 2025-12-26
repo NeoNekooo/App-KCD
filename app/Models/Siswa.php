@@ -137,6 +137,11 @@ class Siswa extends Model
         return $query->where('status', 'Aktif');
     }
 
+    public function mutasiKeluar()
+{
+    return $this->morphOne(MutasiKeluar::class, 'keluarable');
+}
+
     // --- Relasi Keuangan ---
     public function tagihans() { return $this->hasMany(Tagihan::class); }
     public function tunggakans() { return $this->hasMany(Tunggakan::class); }

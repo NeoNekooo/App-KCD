@@ -20,7 +20,10 @@ class GtkController extends Controller
 
     public function indexGuru(Request $request)
     {
-        $query = Gtk::query()->where('jenis_ptk_id_str', 'Guru');
+      $query = Gtk::query()
+        ->with('pengguna')
+        ->where('jenis_ptk_id_str', 'Guru')
+        ->where('status', 'Aktif'); // <--- Filter hanya yang aktif
 
         $query->when($request->search, function ($q, $search) {
             return $q->where(function ($sub) use ($search) {
@@ -31,41 +34,44 @@ class GtkController extends Controller
         });
 
         // --- LOGIKA PAGINATION DINAMIS ---
-        $perPage = $request->input('per_page', 15); 
+        $perPage = $request->input('per_page', 15);
 
         if ($perPage === 'all') {
-            $perPage = $query->count(); 
-            if ($perPage == 0) $perPage = 15; 
+            $perPage = $query->count();
+            if ($perPage == 0) $perPage = 15;
         }
 
         $gurus = $query->latest()->paginate($perPage)->appends($request->all());
-        
+
         return view('admin.kepegawaian.gtk.index_guru', compact('gurus'));
     }
 
     public function indexTendik(Request $request)
     {
         // 1. Filter Data (Gabungkan Kepsek (91) & Tendik (93))
-        $query = Gtk::query()->whereIn('jenis_ptk_id', ['91', '93']);
-        
+       $query = Gtk::query()
+        ->with('pengguna')
+        ->whereIn('jenis_ptk_id', ['91', '93'])
+        ->where('status', 'Aktif'); // <--- Filter hanya yang aktif
+
         $query->when($request->search, function ($q, $search) {
             return $q->where(function ($sub) use ($search) {
                 $sub->where('nama', 'like', "%{$search}%")
                     ->orWhere('nip', 'like', "%{$search}%")
-                    ->orWhere('nik', 'like', "%{$search}%"); 
+                    ->orWhere('nik', 'like', "%{$search}%");
             });
         });
 
         // 2. LOGIKA PAGINATION DINAMIS
-        $perPage = $request->input('per_page', 15); 
+        $perPage = $request->input('per_page', 15);
 
         if ($perPage === 'all') {
-            $perPage = $query->count(); 
+            $perPage = $query->count();
             if ($perPage == 0) $perPage = 15;
         }
 
         $tendiks = $query->latest()->paginate($perPage)->appends($request->all());
-        
+
         return view('admin.kepegawaian.gtk.index_tendik', compact('tendiks'));
     }
 
@@ -87,7 +93,7 @@ class GtkController extends Controller
             });
         }
 
-        $query->latest(); 
+        $query->latest();
         $fileName = 'Data_Guru_Sekull.xlsx';
         return Excel::download(new GtkExport($query), $fileName);
     }
@@ -107,7 +113,7 @@ class GtkController extends Controller
                     ->orWhere('nik', 'like', "%{$search}%");
             });
         }
-        
+
         $query->latest();
         $fileName = 'Data_Tendik_Sekull.xlsx';
         return Excel::download(new GtkExport($query), $fileName);
@@ -128,13 +134,13 @@ class GtkController extends Controller
         $qrCodeData = "Nama: " . $gtk->nama . "\nNUPTK: " . ($gtk->nuptk ?? '-');
         $rombelWali = Rombel::where('ptk_id', $gtk->ptk_id)->first();
         $rombelMengajar = Rombel::whereJsonContains('pembelajaran', ['ptk_id' => $gtk->ptk_id])->get();
-        
+
         $tugasTerbaru = TugasPegawai::where('pegawai_id', $gtk->ptk_id)->orderBy('tmt', 'desc')->first();
 
         $pdf = Pdf::loadView('admin.kepegawaian.gtk.gtk_pdf', compact(
             'gtk', 'sekolah', 'qrCodeData', 'rombelWali', 'rombelMengajar', 'tugasTerbaru'
         ));
-        
+
         $fileName = 'Profil GTK - ' . $gtk->nama . '.pdf';
         return $pdf->stream($fileName);
     }
@@ -143,10 +149,10 @@ class GtkController extends Controller
     {
         $request->validate(['ids' => 'required|string']);
         $ids = explode(',', $request->input('ids'));
-        $gtks = Gtk::find($ids); 
+        $gtks = Gtk::find($ids);
         $sekolah = Sekolah::first();
-        
-        $rombelMengajar = Rombel::all(); 
+
+        $rombelMengajar = Rombel::all();
 
         $pdf = Pdf::loadView('admin.kepegawaian.gtk.gtk_pdf_multiple', compact('gtks', 'sekolah', 'rombelMengajar'));
         $fileName = 'Kumpulan_Profil_GTK.pdf';
@@ -180,7 +186,7 @@ class GtkController extends Controller
     public function uploadMedia(Request $request, $id)
     {
         $request->validate([
-            'foto' => 'nullable|image|mimes:jpeg,png,jpg|max:2048', 
+            'foto' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
             'tandatangan' => 'nullable|image|mimes:png|max:1024',
         ]);
 
@@ -227,9 +233,58 @@ class GtkController extends Controller
         }
 
         $gtks = $query->orderBy('nama', 'asc')->paginate(10);
-        $sekolah = Sekolah::first(); 
+        $sekolah = Sekolah::first();
 
         return view('admin.kepegawaian.gtk.index_cetak_kartu', compact('gtks', 'sekolah'));
+    }
+
+    // --- MENU: GTK Non-Aktif ---
+    public function inactive(Request $request)
+    {
+        // Ambil GTK yang statusnya bukan 'Aktif'
+        $query = Gtk::query()->where('status', '!=', 'Aktif');
+
+        $query->when($request->search, function ($q, $search) {
+            return $q->where(function ($sub) use ($search) {
+                $sub->where('nama', 'like', "%{$search}%")
+                    ->orWhere('nip', 'like', "%{$search}%")
+                    ->orWhere('nik', 'like', "%{$search}%");
+            });
+        });
+
+        // --- LOGIKA PAGINATION DINAMIS ---
+        $perPage = $request->input('per_page', 15);
+
+        if ($perPage === 'all') {
+            $perPage = $query->count();
+            if ($perPage == 0) $perPage = 15;
+        }
+
+        $gtks = $query->orderBy('nama', 'asc')->paginate($perPage)->appends($request->all());
+        $sekolah = Sekolah::first();
+
+        return view('admin.kepegawaian.gtk.index_nonaktif', compact('gtks', 'sekolah'));
+    }
+
+    public function exportInactiveExcel(Request $request)
+    {
+        $query = Gtk::query()->with('pengguna')->where('status', '!=', 'Aktif');
+
+        if ($request->has('ids')) {
+            $ids = explode(',', $request->input('ids'));
+            $query->whereIn('id', $ids);
+        } elseif ($request->has('search')) {
+            $search = $request->search;
+            $query->where(function ($sub) use ($search) {
+                $sub->where('nama', 'like', "%{$search}%")
+                    ->orWhere('nip', 'like', "%{$search}%")
+                    ->orWhere('nik', 'like', "%{$search}%");
+            });
+        }
+
+        $query->latest();
+        $fileName = 'Data_GTK_Nonaktif.xlsx';
+        return Excel::download(new GtkExport($query), $fileName);
     }
 
     public function cetakSemua(Request $request)
@@ -268,7 +323,7 @@ class GtkController extends Controller
     public function uploadBackgroundKartu(Request $request)
     {
         $request->validate([
-            'background_kartu' => 'required|image|mimes:jpeg,png,jpg|max:2048', 
+            'background_kartu' => 'required|image|mimes:jpeg,png,jpg|max:2048',
         ]);
 
         $sekolah = Sekolah::firstOrCreate(['id' => 1]);
@@ -337,4 +392,30 @@ class GtkController extends Controller
             'guruList'        => collect(), // biar blade gak error
         ]);
     }
+public function registerKeluar(Request $request, $id)
+{
+    $request->validate([
+        'status' => 'required', // misal: Pensiun, Resign, Diberhentikan
+        'tanggal_keluar' => 'required|date',
+        'alasan' => 'nullable|string',
+    ]);
+
+    $gtk = Gtk::findOrFail($id);
+
+    // 1. Simpan ke tabel mutasi_keluar (Logika Anda yang lama)
+    $gtk->mutasiKeluar()->create([
+        'status' => $request->status,
+        'tanggal_keluar' => $request->tanggal_keluar,
+        'keterangan' => $request->alasan,
+    ]);
+    $gtk->status = $request->status;
+    $gtk->save(); // <--- INI YANG PENTING
+    if ($gtk->pengguna) {
+        // $gtk->pengguna->update(['status' => 0]);
+    }
+
+    return redirect()->back()
+                     ->with('success', 'Data keluar GTK ' . $gtk->nama . ' berhasil dicatat dan status diperbarui.');
+}
+
 }
