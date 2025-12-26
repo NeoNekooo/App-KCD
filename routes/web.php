@@ -290,11 +290,11 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
 
     // --- PERBAIKAN GALERI (Hanya Bagian Ini yang Diubah) ---
     // Hapus duplikasi route galeri lama Anda, ganti dengan blok ini saja:
-    
+
     // 1. Resource Utama (Album)
     // Ini akan membuat route admin.landing.galeri.index, show, store, update, destroy
     Route::resource('/landing/galeri', GaleriController::class, ['as' => 'landing']);
-    
+
     // 2. Route Tambahan (Upload & Hapus Item Anak)
     // Ini manual route untuk fitur upload banyak foto
     Route::post('/landing/galeri/{id}/upload', [GaleriController::class, 'storeItem'])->name('landing.galeri.item.store');
@@ -382,7 +382,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
 
         // Testimoni
         Route::get('/testimoni', [AdminAlumniController::class, 'indexTestimoni'])->name('testimoni.index');
-        
+
         // --- PERHATIKAN BARIS INI (Route Toggle) ---
         Route::post('/testimoni/{id}/toggle', [AdminAlumniController::class, 'toggleTestimoni'])->name('testimoni.toggle');
 
