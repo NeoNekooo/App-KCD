@@ -370,7 +370,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
         Route::get('show-multiple', [AlumniController::class, 'showMultiple'])
             ->name('show-multiple');
 
-        Route::get('/rekapDataAlumni', [AlumniController::class,'rekapDataAlumni']);
+        Route::get('/rekapDataAlumni', [AlumniController::class,'rekapDataAlumni'])->name('rekapDataAlumni');
 
         // Halaman index + filter kelas
         Route::get('/pelulusan', [AlumniController::class, 'lulus'])->name('pelulusan');

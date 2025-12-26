@@ -1,8 +1,19 @@
 @extends('layouts.admin')
 
 @section('content')
-<h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Akademik /</span> Pelulusan Siswa</h4>
+<h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Akademik /</span> Penetapan Kelulusan Siswa</h4>
 
+@if($tapelAktif->semester !== 'Genap')
+    <div class="alert alert-warning d-flex align-items-center" role="alert">
+        <i class="bx bx-error-circle me-2 fs-4"></i>
+        <div>
+            <strong>Belum Semester Genap.</strong><br>
+            Proses penetapan kelulusan hanya dapat dilakukan pada semester genap.
+        </div>
+    </div>
+@endif
+
+@if($tapelAktif->semester === 'Genap')
 <div class="card">
     <div class="card-header d-flex justify-content-between align-items-center">
         <h5 class="mb-0">Luluskan Siswa Kelas XII</h5>
@@ -30,7 +41,13 @@
                             <th>NO</th>
                             <th>NISN</th>
                             <th>NAMA SISWA</th>
-                            <th><input type="checkbox" id="checkAll"></th>
+                            <th class="text-center">
+                                @if($siswa->where('status', '!=', 'Lulus')->count())
+                                    <input type="checkbox" id="checkAll">
+                                @else
+                                    <span class="text-muted">—</span>
+                                @endif
+                            </th>
                         </tr>
                     </thead>
                     <tbody>
@@ -39,8 +56,16 @@
                             <td>{{ $i + 1 }}</td>
                             <td>{{ $s->nisn }}</td>
                             <td>{{ $s->nama }}</td>
-                            <td>
-                                <input type="checkbox" class="check-item" name="siswa_id[]" value="{{ $s->id }}">
+                            <td class="text-center">
+                                @if($s->status === 'Lulus')
+                                    <span class="badge bg-success">Sudah Lulus</span>
+                                @else
+                                    <input
+                                        type="checkbox"
+                                        class="check-item"
+                                        name="siswa_id[]"
+                                        value="{{ $s->id }}">
+                                @endif
                             </td>
                         </tr>
                         @empty
@@ -61,7 +86,9 @@
         </div>
     </form>
 </div>
+@endif
 
+@if($tapelAktif->semester === 'Genap')
 <script>
     const checkAll = document.getElementById('checkAll');
     const items = document.querySelectorAll('.check-item');
@@ -79,5 +106,6 @@
 
     items.forEach(i => i.addEventListener('change', updateButton));
 </script>
+@endif
 
 @endsection
