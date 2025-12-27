@@ -46,6 +46,7 @@ use App\Http\Controllers\Admin\Ppdb\TahunPpdbController;
 
 // Controller Alumni
 use App\Http\Controllers\Admin\Alumni\AlumniController;
+use App\Http\Controllers\Admin\Alumni\AdminAlumniController;
 
 // Controller Indisipliner
 use App\Http\Controllers\Admin\Indisipliner\IndisiplinerGtkController;
@@ -69,6 +70,16 @@ use App\Http\Controllers\Admin\Rombel\RombelWaliController;
 // Controller Landing
 use App\Http\Controllers\Admin\Landing\PpdbController;
 use App\Http\Controllers\Admin\Landing\LandingSliderController;
+use App\Http\Controllers\Admin\Landing\SambutanController;
+use App\Http\Controllers\Admin\Landing\FasilitasController;
+use App\Http\Controllers\Admin\Landing\JurusanController as LandingJurusanController;
+use App\Http\Controllers\Admin\Landing\BeritaController;
+use App\Http\Controllers\Admin\Landing\PrestasiController;
+use App\Http\Controllers\Admin\Landing\GaleriController; // Pastikan ini diimport
+use App\Http\Controllers\Admin\Landing\MitraController;
+use App\Http\Controllers\Admin\Landing\TestimoniController;
+use App\Http\Controllers\Admin\Landing\EkstrakurikulerController;
+use App\Http\Controllers\Admin\Landing\AgendaController;
 
 // Controller Keuangan
 use App\Http\Controllers\Bendahara\Keuangan\IuranController;
@@ -99,37 +110,12 @@ Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])
          ->name('logout');
 
 // Halaman Depan
-Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::get('/', function () {
+        return view('auth.login-custom');
+    });
 
 Route::get('/scan/{id}', [PublicScanController::class, 'showVerificationPage'])->name('scan.page');
 Route::post('/scan/verify', [PublicScanController::class, 'processVerification'])->name('scan.verify');
-
-// Rute Detail Public
-Route::get('/sambutan-kepala-sekolah', [HomeController::class, 'sambutanLengkap'])->name('sambutan.lengkap');
-Route::get('/jurusan/{id}', [\App\Http\Controllers\HomeController::class, 'showJurusan'])->name('jurusan.show');
-Route::get('/prestasi/{id}', [\App\Http\Controllers\HomeController::class, 'showPrestasi'])->name('prestasi.show');
-Route::get('/fasilitas-sekolah', [\App\Http\Controllers\HomeController::class, 'fasilitasSemua'])->name('fasilitas.semua');
-Route::get('/berita/{id}', [\App\Http\Controllers\HomeController::class, 'showBerita'])->name('berita.show');
-
-// Tambahkan baris ini di dalam Rute Web Utama (Frontend Public)
-Route::get('/profil-sekolah', [HomeController::class, 'profilSekolah'])->name('profil.sekolah');
-
-// Di bagian Rute Web Utama (Frontend Public)
-Route::get('/kontak', [HomeController::class, 'kontak'])->name('kontak');
-
-// [BARU] Route Galeri Lengkap
-Route::get('/galeri', [\App\Http\Controllers\HomeController::class, 'galeriLengkap'])->name('galeri.index');
-
-Route::get('/program-keahlian', [HomeController::class, 'jurusanIndex'])->name('jurusan.index');
-
-// Tambahkan baris ini di grup Rute Web Utama (Frontend Public)
-Route::get('/program-keahlian', [HomeController::class, 'jurusanLengkap'])->name('jurusan.lengkap');
-
-// --- Rute Pengecekan Jadwal PPDB ---
-Route::get('/cek-status-ppdb', [HomeController::class, 'cekStatusPpdb'])->name('ppdb.cek_status');
-Route::get('/ppdb-tutup', [HomeController::class, 'halamanTutup'])->name('ppdb.tutup');
-
-Route::post('/testimoni-kirim', [HomeController::class, 'storeTestimoni'])->name('testimoni.store');
 
 /*
 |--------------------------------------------------------------------------
@@ -289,22 +275,32 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
     // --- GRUP MANAJEMEN LANDING PAGE ---
     Route::resource('/landing/slider', LandingSliderController::class, ['as' => 'landing']);
 
-    Route::get('/landing/sambutan', [App\Http\Controllers\Admin\Landing\SambutanController::class, 'index'])->name('landing.sambutan.index');
-    Route::post('/landing/sambutan', [App\Http\Controllers\Admin\Landing\SambutanController::class, 'update'])->name('landing.sambutan.update');
+    Route::get('/landing/sambutan', [SambutanController::class, 'index'])->name('landing.sambutan.index');
+    Route::post('/landing/sambutan', [SambutanController::class, 'update'])->name('landing.sambutan.update');
 
-    Route::resource('/landing/fasilitas', \App\Http\Controllers\Admin\Landing\FasilitasController::class, ['as' => 'landing'])->except(['create', 'edit', 'show']);
-    Route::resource('/landing/jurusan', \App\Http\Controllers\Admin\Landing\JurusanController::class, ['as' => 'landing'])->except(['create', 'edit', 'show']);
-    Route::resource('/landing/berita', \App\Http\Controllers\Admin\Landing\BeritaController::class, ['as' => 'landing'])->except(['create', 'edit', 'show']);
-    Route::resource('/landing/prestasi', \App\Http\Controllers\Admin\Landing\PrestasiController::class, ['as' => 'landing'])->except(['create', 'edit', 'show']);
-    Route::resource('/landing/galeri', \App\Http\Controllers\Admin\Landing\GaleriController::class, ['as' => 'landing'])->except(['create', 'edit', 'show']);
-    Route::resource('/landing/mitra', \App\Http\Controllers\Admin\Landing\MitraController::class, ['as' => 'landing'])->except(['create', 'edit', 'show']);
+    Route::resource('/landing/fasilitas', FasilitasController::class, ['as' => 'landing'])->except(['create', 'edit', 'show']);
+    Route::resource('/landing/jurusan', LandingJurusanController::class, ['as' => 'landing'])->except(['create', 'edit', 'show']);
+    Route::resource('/landing/berita', BeritaController::class, ['as' => 'landing'])->except(['create', 'edit', 'show']);
+    Route::resource('/landing/prestasi', PrestasiController::class, ['as' => 'landing'])->except(['create', 'edit', 'show']);
+    Route::resource('/landing/mitra', MitraController::class, ['as' => 'landing'])->except(['create', 'edit', 'show']);
+    Route::resource('/landing/ekstrakurikuler', EkstrakurikulerController::class, ['as' => 'landing'])->except(['create', 'edit', 'show']);
+    Route::resource('/landing/agenda', AgendaController::class, ['as' => 'landing'])->except(['create', 'edit', 'show']);
 
-    Route::put('/landing/testimoni/{id}/toggle', [\App\Http\Controllers\Admin\Landing\TestimoniController::class, 'toggleStatus'])->name('landing.testimoni.toggle');
-    Route::resource('/landing/testimoni', \App\Http\Controllers\Admin\Landing\TestimoniController::class, ['as' => 'landing'])->except(['create', 'edit', 'show']);
+    // --- PERBAIKAN GALERI (Hanya Bagian Ini yang Diubah) ---
+    // Hapus duplikasi route galeri lama Anda, ganti dengan blok ini saja:
+    
+    // 1. Resource Utama (Album)
+    // Ini akan membuat route admin.landing.galeri.index, show, store, update, destroy
+    Route::resource('/landing/galeri', GaleriController::class, ['as' => 'landing']);
+    
+    // 2. Route Tambahan (Upload & Hapus Item Anak)
+    // Ini manual route untuk fitur upload banyak foto
+    Route::post('/landing/galeri/{id}/upload', [GaleriController::class, 'storeItem'])->name('landing.galeri.item.store');
+    Route::delete('/landing/galeri/item/{id}', [GaleriController::class, 'destroyItem'])->name('landing.galeri.item.destroy');
 
-    Route::resource('/landing/ekstrakurikuler', \App\Http\Controllers\Admin\Landing\EkstrakurikulerController::class, ['as' => 'landing'])->except(['create', 'edit', 'show']);
-    Route::resource('/landing/agenda', \App\Http\Controllers\Admin\Landing\AgendaController::class, ['as' => 'landing'])->except(['create', 'edit', 'show']);
 
+    Route::put('/landing/testimoni/{id}/toggle', [TestimoniController::class, 'toggleStatus'])->name('landing.testimoni.toggle');
+    Route::resource('/landing/testimoni', TestimoniController::class, ['as' => 'landing'])->except(['create', 'edit', 'show']);
     /*
     |--------------------------------------------------------------------------
     | (PPDB)
@@ -377,6 +373,19 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
 
         // Proses pelulusan
         Route::post('/process', [AlumniController::class, 'process'])->name('process');
+
+        // Input Manual
+        Route::get('/input-data', [AdminAlumniController::class, 'create'])->name('create');
+        Route::post('/store', [AdminAlumniController::class, 'store'])->name('store');
+
+        // Testimoni
+        Route::get('/testimoni', [AdminAlumniController::class, 'indexTestimoni'])->name('testimoni.index');
+        
+        // --- PERHATIKAN BARIS INI (Route Toggle) ---
+        Route::post('/testimoni/{id}/toggle', [AdminAlumniController::class, 'toggleTestimoni'])->name('testimoni.toggle');
+
+        // Tracer
+        Route::get('/tracer', [AdminAlumniController::class, 'indexTracer'])->name('tracer.index');
     });
 
     // --- GRUP INDISIPLINER ---
