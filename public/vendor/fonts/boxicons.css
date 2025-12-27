@@ -6504,12 +6504,10 @@
 
 @font-face {
   font-family: "boxicons";
-  font-weight: normal;
-  font-style: normal;
-  src: 
-    url("../boxicons/boxicons.eot") format("embedded-opentype"),
-    url("../boxicons/boxicons.woff2") format("woff2"),
-    url("../boxicons/boxicons.woff") format("woff"),
-    url("../boxicons/boxicons.ttf") format("truetype"),
-    url("../boxicons/boxicons.svg?#boxicons") format("svg");
+  src:
+    url("boxicons/boxicons.eot"),
+    url("boxicons/boxicons.woff2") format("woff2"),
+    url("boxicons/boxicons.woff") format("woff"),
+    url("boxicons/boxicons.ttf") format("truetype"),
+    url("boxicons/boxicons.svg?#boxicons") format("svg");
 }
