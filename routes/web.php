@@ -96,6 +96,8 @@ use App\Http\Controllers\Admin\Administrasi\TipeSuratController;
 use App\Http\Controllers\Admin\Administrasi\SuratKeluarSiswaController;
 use App\Http\Controllers\Admin\Administrasi\SuratKeluarGuruController; // Controller Baru
 use App\Http\Controllers\Admin\Administrasi\SuratMasukController;
+use App\Http\Controllers\Controller;
+
 
 /*
 |--------------------------------------------------------------------------
