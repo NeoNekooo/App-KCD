@@ -12,8 +12,6 @@ use Illuminate\Support\Str;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\SiswaExport;
-use App\Models\PelanggaranSanksi;
-use App\Models\PelanggaranNilai;
 
 class SiswaController extends Controller
 {
@@ -22,7 +20,7 @@ class SiswaController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Siswa::with('rombel');
+        $query = Siswa::with('rombel')->where('status', 'Aktif');
 
         // 1. FILTER KELAS (Aman dari Error JSON)
         if ($request->filled('rombel_id')) {
@@ -130,6 +128,71 @@ class SiswaController extends Controller
 
         return view('admin.kesiswaan.siswa.show', compact('siswas'));
     }
+
+    /**
+     * Halaman Buku Induk - Pilih Kelas lalu tampilkan siswa per kelas
+     */
+    public function bukuIndukIndex(Request $request)
+    {
+        $rombels = Rombel::select('id','nama','anggota_rombel')
+                         ->orderBy('nama', 'asc')
+                         ->get()
+                         ->unique('nama');
+
+        $siswas = collect();
+        $selectedRombel = null;
+
+        if ($request->filled('rombel_id')) {
+            $rombel = Rombel::find($request->rombel_id);
+            if ($rombel) {
+                $anggotaData = is_array($rombel->anggota_rombel)
+                    ? $rombel->anggota_rombel
+                    : json_decode($rombel->anggota_rombel, true);
+
+                $pesertaIds = !empty($anggotaData) ? array_column($anggotaData, 'peserta_didik_id') : [];
+
+                $siswas = Siswa::whereIn('peserta_didik_id', $pesertaIds)
+                                ->orderBy('nama', 'asc')
+                                ->get();
+                $selectedRombel = $rombel;
+            }
+        }
+
+        return view('admin.kesiswaan.siswa.buku_induk_index', compact('rombels','siswas','selectedRombel'));
+    }
+
+    /**
+     * Tampilkan siswa untuk rombel tertentu (link dari daftar rombel)
+     */
+    public function bukuIndukRombel(Rombel $rombel)
+    {
+        $anggotaData = is_array($rombel->anggota_rombel)
+            ? $rombel->anggota_rombel
+            : json_decode($rombel->anggota_rombel, true);
+
+        $pesertaIds = !empty($anggotaData) ? array_column($anggotaData, 'peserta_didik_id') : [];
+
+        $siswas = Siswa::whereIn('peserta_didik_id', $pesertaIds)
+                        ->orderBy('nama', 'asc')
+                        ->get();
+
+        $rombels = Rombel::select('id','nama','anggota_rombel')
+                         ->orderBy('nama', 'asc')
+                         ->get()
+                         ->unique('nama');
+
+        return view('admin.kesiswaan.siswa.buku_induk_index', compact('rombels','siswas','rombel'));
+    }
+
+    /**
+     * Cetak Buku Induk per siswa (re-use cetakPdf)
+     */
+    public function cetakBukuInduk($id)
+    {
+        // Reuse existing biodata PDF as Buku Induk (same format)
+        return $this->cetakPdf($id);
+    }
+
     public function edit($id)
     {
         // Redirect ke show karena kita pakai One Page Edit
@@ -236,7 +299,7 @@ class SiswaController extends Controller
         return view('admin.kesiswaan.siswa.cetak_massal_index', compact('rombels'));
     }
 
-    public function cetakKartuMassal(Rombel $rombel)
+      public function cetakKartuMassal(Rombel $rombel)
     {
         $anggotaData = is_array($rombel->anggota_rombel)
             ? $rombel->anggota_rombel
@@ -471,22 +534,29 @@ class SiswaController extends Controller
 public function registerKeluar(Request $request, $id)
 {
     $request->validate([
-        'status' => 'required',
+        'status' => 'required', // Value contoh: 'Lulus', 'Mutasi', 'Dikeluarkan'
         'tanggal_keluar' => 'required|date',
         'alasan' => 'nullable|string',
     ]);
 
     $siswa = Siswa::findOrFail($id);
 
-    // Simpan ke tabel mutasi_keluar melalui relasi
+    // 1. Simpan Log (Ini kode lama Anda, sudah benar)
     $siswa->mutasiKeluar()->create([
         'status' => $request->status,
         'tanggal_keluar' => $request->tanggal_keluar,
         'keterangan' => $request->alasan,
     ]);
 
+    // 2. [TAMBAHAN WAJIB] Update Status di Tabel Induk Siswa
+    $siswa->status = $request->status;
+
+    // (Opsional) Hapus rombel_id jika Anda menggunakan relasi foreign key
+    // $siswa->rombel_id = null;
+
+    $siswa->save(); // <--- SIMPAN PERUBAHAN KE DATABASE
 
     return redirect()->route('admin.kesiswaan.siswa.index')
-                     ->with('success', 'Status keluar siswa ' . $siswa->nama . ' berhasil dicatat.');
+                     ->with('success', 'Status keluar siswa ' . $siswa->nama . ' berhasil diperbarui menjadi ' . $request->status);
 }
 }
