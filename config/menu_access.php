@@ -362,7 +362,7 @@ return [
                         ['title' => 'KiosK Scanner', 'route' => 'admin.absensi.siswa.show_scanner', 'target' => '_blank', 'is_active' => 'request()->routeIs("admin.absensi.siswa.show_scanner")'],
                         ['title' => 'Jam & Aturan', 'route' => 'admin.pengaturan.absensi.edit', 'is_active' => 'request()->is("admin/pengaturan/absensi*")'],
                         ['title' => 'Manajemen Hari Libur', 'route' => 'admin.pengaturan.hari-libur.index', 'is_active' => 'request()->is("admin/pengaturan/hari-libur*")'],
-                        ['title' => 'Jam & Aturan', 'route' => 'admin.absensi.izin-siswa', 'is_active' => 'request()->routeIs("admin.absensi.izin-siswa")'],
+                        ['title' => 'Izin Siswa', 'route' => 'admin.absensi.izin-siswa', 'is_active' => 'request()->routeIs("admin.absensi.izin-siswa")'],
                     ]
                 ],
                 // Submenu Guru & GTK
