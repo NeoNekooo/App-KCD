@@ -355,11 +355,13 @@ return [
                     'title' => 'Siswa',
                     'slug' => 'absensi-siswa',
                     'is_toggle' => true,
-                    'is_open' => 'request()->routeIs("admin.absensi.siswa.*") || request()->routeIs("admin.absensi.mapel.*")',
+                    'is_open' => 'request()->routeIs("admin.absensi.siswa.*") || request()->routeIs("admin.absensi.mapel.* || request()->is("admin/pengaturan/absensi*") || request()->is("admin/pengaturan/hari-libur*")")',
                     'submenu' => [
                         ['title' => 'Absensi Harian', 'route' => 'admin.absensi.siswa.index', 'is_active' => 'request()->routeIs("admin.absensi.siswa.index")'],
                         ['title' => 'Absensi Mapel', 'route' => 'admin.absensi.mapel.index', 'is_active' => 'request()->routeIs("admin.absensi.mapel.index")'],
                         ['title' => 'KiosK Scanner', 'route' => 'admin.absensi.siswa.show_scanner', 'target' => '_blank', 'is_active' => 'request()->routeIs("admin.absensi.siswa.show_scanner")'],
+                        ['title' => 'Jam & Aturan', 'route' => 'admin.pengaturan.absensi.edit', 'is_active' => 'request()->is("admin/pengaturan/absensi*")'],
+                        ['title' => 'Manajemen Hari Libur', 'route' => 'admin.pengaturan.hari-libur.index', 'is_active' => 'request()->is("admin/pengaturan/hari-libur*")'],
                     ]
                 ],
                 // Submenu Guru & GTK
@@ -566,17 +568,6 @@ return [
                 ['title' => 'Pengguna', 'route' => 'admin.underConstructions', 'is_active' => 'false'],
                 ['title' => 'Backup Data', 'route' => 'admin.underConstructions', 'is_active' => 'false'],
                 ['title' => 'Umum', 'route' => 'admin.underConstructions', 'is_active' => 'false'],
-            ]
-        ],
-        [
-            'title' => 'Pengaturan Absensi',
-            'slug' => 'pengaturan-absensi',
-            'icon' => 'bx bx-time',
-            'is_toggle' => true,
-            'is_open' => 'request()->is("admin/pengaturan/absensi*") || request()->is("admin/pengaturan/hari-libur*")',
-            'submenu' => [
-                ['title' => 'Jam & Aturan', 'route' => 'admin.pengaturan.absensi.edit', 'is_active' => 'request()->is("admin/pengaturan/absensi*")'],
-                ['title' => 'Manajemen Hari Libur', 'route' => 'admin.pengaturan.hari-libur.index', 'is_active' => 'request()->is("admin/pengaturan/hari-libur*")'],
             ]
         ],
 
