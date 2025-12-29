@@ -31,7 +31,7 @@
     <div class="card-body">
         <form action="{{ route('admin.kepegawaian.guru.index') }}" method="GET">
             <input type="hidden" name="per_page" value="{{ request('per_page', 15) }}">
-            
+
             <div class="input-group input-group-merge">
                 <span class="input-group-text"><i class="bx bx-search"></i></span>
                 <input type="text" name="search" class="form-control" placeholder="Cari berdasarkan Nama, NIP, atau NIK..." value="{{ request('search') }}">
@@ -39,7 +39,7 @@
             </div>
         </form>
     </div>
-    
+
     <div class="table-responsive text-nowrap">
         <table class="table table-hover">
             <thead>
@@ -55,20 +55,21 @@
                     <th>Jabatan</th>
                     <th>NUPTK</th>
                     <th>Tgl Surat Tugas</th>
+                    <th width="5%">Aksi</th>
                 </tr>
             </thead>
             <tbody class="table-border-bottom-0">
                 @forelse ($gurus as $gtk)
                 <tr>
                     <td><input class="form-check-input row-checkbox" type="checkbox" value="{{ $gtk->id }}"></td>
-                    
+
                     {{-- PERBAIKAN: Non -> Non-Induk --}}
                     <td>
                         <span class="badge bg-label-{{ $gtk->ptk_induk == 1 ? 'success' : 'secondary' }}">
                             {{ $gtk->ptk_induk == 1 ? 'Induk' : 'Non-Induk' }}
                         </span>
                     </td>
-                    
+
                     <td style="min-width: 250px;">
                         <div class="d-flex justify-content-start align-items-center">
                             <div class="avatar-wrapper me-3">
@@ -90,7 +91,7 @@
                             </div>
                         </div>
                     </td>
-                    
+
                     <td>{{ $gtk->nik ?? '-' }}</td>
                     <td>{{ ($gtk->jenis_kelamin == 'L' || $gtk->jenis_kelamin == 'Laki-laki') ? 'L' : 'P' }}</td>
                     <td>{{ $gtk->tanggal_lahir ? \Carbon\Carbon::parse($gtk->tanggal_lahir)->format('d-m-Y') : '-' }}</td>
@@ -99,10 +100,20 @@
                     <td>{{ $gtk->jabatan_ptk_id_str ?? '-' }}</td>
                     <td>{{ $gtk->nuptk ?? '-' }}</td>
                     <td>{{ $gtk->tanggal_surat_tugas ? \Carbon\Carbon::parse($gtk->tanggal_surat_tugas)->format('d-m-Y') : '-' }}</td>
+                    <td class="text-nowrap">
+                        <button type="button"
+                            class="btn btn-sm btn-outline-danger btnRegisterKeluarGTK"
+                            data-id="{{ $gtk->id }}"
+                            data-nama="{{ $gtk->nama }}"
+                            data-url="{{ route('admin.kepegawaian.gtk.register-keluar', $gtk->id) }}"
+                        >
+                            <i class="bx bx-log-out-circle me-1"></i> Register Keluar
+                        </button>
+                    </td>
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="11" class="text-center py-5">
+                    <td colspan="12" class="text-center py-5">
                         <div class="d-flex flex-column align-items-center justify-content-center">
                             <i class="bx bx-user-x bx-lg text-muted mb-2"></i>
                             <h6 class="text-muted">Tidak ada data guru ditemukan.</h6>
@@ -132,14 +143,72 @@
             </div>
             <div class="col-md-6 d-flex justify-content-md-end justify-content-center">
                 @if(request('per_page') != 'all')
-                    {{ $gurus->appends(request()->query())->links() }} 
+                    {{ $gurus->appends(request()->query())->links() }}
                 @endif
             </div>
         </div>
     </div>
 </div>
-@endsection
 
+<!-- Modal register keluar GTK (digunakan juga pada tendik) -->
+<div class="modal fade" id="modalRegisterKeluarGTK" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <form id="formRegisterKeluarGTK" method="POST">
+                @csrf
+                @method('PATCH')
+                <div class="modal-header border-bottom">
+                    <h5 class="modal-title">Register Keluar GTK: <span id="namaGTKModal" class="fw-bold"></span></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="bg-light p-3 rounded mb-3" style="border-left: 4px solid #ffab00;">
+                        <small class="text-dark">
+                            <i class="bx bx-info-circle me-1"></i>
+                            Pastikan data penugasan dan hak akses GTK yang bersangkutan telah diselesaikan sebelum melakukan proses ini.
+                        </small>
+                    </div>
+
+                    <div class="mb-3 row">
+                        <label class="col-sm-4 col-form-label text-sm-end">Keluar karena:</label>
+                        <div class="col-sm-8">
+                            <select name="status" class="form-select" required>
+                                <option value="">-- Pilih Alasan --</option>
+                                <option value="Pensiun">Pensiun</option>
+                                <option value="Resign/Mengundurkan Diri">Resign/Mengundurkan Diri</option>
+                                <option value="Mutasi/Pindah Tugas">Mutasi/Pindah Tugas</option>
+                                <option value="Diberhentikan">Diberhentikan</option>
+                                <option value="Meninggal Dunia">Meninggal Dunia</option>
+                                <option value="Tugas Belajar">Tugas Belajar</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="mb-3 row">
+                        <label class="col-sm-4 col-form-label text-sm-end">Tanggal keluar:</label>
+                        <div class="col-sm-8">
+                            <input type="date" name="tanggal_keluar" class="form-control" value="{{ date('Y-m-d') }}" required>
+                        </div>
+                    </div>
+
+                    <div class="mb-3 row">
+                        <label class="col-sm-4 col-form-label text-sm-end">Keterangan:</label>
+                        <div class="col-sm-8">
+                            <textarea name="alasan" class="form-control" rows="3" placeholder="Contoh: Pindah tugas ke sekolah luar daerah atau SK Pensiun No.xxx"></textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-danger">
+                        <i class="bx bx-save me-1"></i> Simpan Data Keluar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+@endsection
 @push('scripts')
 <script>
     document.addEventListener('DOMContentLoaded', function() {
@@ -148,9 +217,35 @@
         const viewSelectedBtn = document.getElementById('viewSelectedBtn');
         const exportSelectedLink = document.getElementById('exportSelectedLink');
 
+        const modalRegisterKeluarGTK = new bootstrap.Modal(document.getElementById('modalRegisterKeluarGTK'));
+        const formRegisterKeluarGTK = document.getElementById('formRegisterKeluarGTK');
+        const namaGTKModal = document.getElementById('namaGTKModal');
+        const btnRegisterKeluarGTK = document.querySelectorAll('.btnRegisterKeluarGTK');
+
+        btnRegisterKeluarGTK.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const id = this.getAttribute('data-id');
+                const nama = this.getAttribute('data-nama');
+                const url = this.getAttribute('data-url');
+
+                // Update UI Modal
+                namaGTKModal.innerText = nama;
+
+                // Set action URL ke route GTK (gunakan data-url jika tersedia)
+                if (url) {
+                    formRegisterKeluarGTK.action = url;
+                } else {
+                    // fallback ke path yang benar
+                    formRegisterKeluarGTK.action = `/admin/kepegawaian/gtk/${id}/register-keluar`;
+                }
+
+                modalRegisterKeluarGTK.show();
+            });
+        });
+
         function handleCheckboxChange() {
             const checkedCheckboxes = document.querySelectorAll('.row-checkbox:checked');
-            
+
             if (checkedCheckboxes.length > 0) {
                 viewSelectedBtn.style.display = 'inline-block';
                 exportSelectedLink.classList.remove('disabled');
@@ -177,7 +272,7 @@
             viewSelectedBtn.addEventListener('click', function(e) {
                 e.preventDefault();
                 const checkedCheckboxes = document.querySelectorAll('.row-checkbox:checked');
-                
+
                 if (checkedCheckboxes.length > 0) {
                     const selectedIds = Array.from(checkedCheckboxes).map(cb => cb.value).join(',');
                     let url = `{{ route('admin.kepegawaian.gtk.show-multiple') }}?ids=${selectedIds}`;
@@ -196,12 +291,12 @@
                     let url = `{{ route('admin.kepegawaian.guru.export.excel') }}?ids=${selectedIds}`;
                     const currentUrl = new URL(window.location.href);
                     currentUrl.searchParams.delete('ids');
-                    
+
                     let finalUrl = url;
                     if(currentUrl.search) {
                          finalUrl += '&' + currentUrl.search.substring(1);
                     }
-                    
+
                     window.location.href = finalUrl;
                 }
             });

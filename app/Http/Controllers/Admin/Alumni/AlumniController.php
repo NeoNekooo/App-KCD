@@ -6,17 +6,28 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Siswa;
 use App\Models\Sekolah;
+use App\Models\Tapel;
+use Illuminate\Support\Facades\DB;
 
 class AlumniController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-        public function index(Request $request)
+    public function index(Request $request)
 {
-    $query = Siswa::where('status', 'Lulus'); // KUNCI alumni
+    // 1. Ambil tapel aktif
+    $tapelAktif = Tapel::where('is_active', 1)->first();
 
-    // PENCARIAN
+    if (!$tapelAktif) {
+        abort(500, 'Tapel aktif tidak ditemukan');
+    }
+
+    // 2. Query dasar alumni + semester aktif
+    $query = Siswa::where('status', 'Lulus')
+        ->where('semester_id', $tapelAktif->kode_tapel);
+
+    // 3. Pencarian
     if ($request->filled('search')) {
         $search = $request->search;
         $query->where(function ($q) use ($search) {
@@ -26,7 +37,7 @@ class AlumniController extends Controller
         });
     }
 
-    // PAGINASI
+    // 4. Pagination
     $perPage = $request->input('per_page', 15);
     $siswas = ($perPage === 'all')
         ? $query->orderBy('nama')->paginate(9999)
@@ -34,6 +45,7 @@ class AlumniController extends Controller
 
     return view('admin.alumni.index', compact('siswas'));
 }
+
 
     public function store(Request $request)
     {
@@ -137,26 +149,41 @@ public function showMultiple(Request $request)
         return view('admin.alumni.show', compact('siswas'));
     }
 
-    public function lulus(Request $request)
-    {
-        // Ambil kelas XII, urutkan
-        $kelas = Siswa::where('nama_rombel', 'LIKE', 'XII%')
-                    ->select('nama_rombel')
-                    ->distinct()
-                    ->orderBy('nama_rombel')
-                    ->get();
+public function lulus(Request $request)
+{
+    // 1. Ambil tapel aktif (APAPUN semesternya)
+    $tapelAktif = Tapel::where('is_active', 1)->first();
 
-        // Ambil siswa berdasarkan kelas + urutkan nama A-Z
-        $siswa = collect();
-
-        if ($request->kelas) {
-            $siswa = Siswa::where('nama_rombel', $request->kelas)
-                        ->orderBy('nama')   // ← ini yang wajib
-                        ->get();
-        }
-
-        return view('admin.alumni.lulus', compact('kelas', 'siswa'));
+    // 2. Kalau BUKAN semester genap → tetap masuk halaman, tapi dikunci
+    if ($tapelAktif->semester !== 'Genap') {
+        return view('admin.alumni.lulus', [
+            'kelas' => collect(),
+            'siswa' => collect(),
+            'tapelAktif' => $tapelAktif,
+        ])->with('warning', 'Belum semester genap, siswa belum bisa diluluskan.');
     }
+
+    // 3. Semester GENAP → ambil kelas XII
+    $kelas = Siswa::where('semester_id', $tapelAktif->kode_tapel)
+        ->where('nama_rombel', 'LIKE', 'XII%')
+        ->select('nama_rombel')
+        ->distinct()
+        ->orderBy('nama_rombel')
+        ->get();
+
+    $siswa = collect();
+
+    if ($request->filled('kelas')) {
+        $siswa = Siswa::where('semester_id', $tapelAktif->kode_tapel)
+            ->where('nama_rombel', $request->kelas)
+            ->orderBy('nama')
+            ->get();
+    }
+
+    return view('admin.alumni.lulus', compact('kelas', 'siswa', 'tapelAktif'));
+}
+
+
 
 
 
@@ -201,4 +228,26 @@ public function showMultiple(Request $request)
         return Excel::download(new SiswaExport($ids), $fileName);
     }
 
+    public function rekapDataAlumni()
+{
+    $tapelAktif = Tapel::where('is_active', 1)->firstOrFail();
+
+    $data = DB::table('rombels as r')
+        ->select(
+            'r.jurusan_id_str as jurusan',
+            DB::raw("COUNT(DISTINCT CASE WHEN s.jenis_kelamin = 'L' THEN s.id END) as laki_laki"),
+            DB::raw("COUNT(DISTINCT CASE WHEN s.jenis_kelamin = 'P' THEN s.id END) as perempuan"),
+            DB::raw("COUNT(DISTINCT s.id) as total")
+        )
+        ->leftJoin('siswas as s', function ($join) use ($tapelAktif) {
+            $join->on('s.nama_rombel', '=', 'r.nama')
+                 ->where('s.status', 'Lulus')
+                 ->where('s.semester_id', $tapelAktif->kode_tapel);
+        })
+        ->groupBy('r.jurusan_id_str')
+        ->orderBy('r.jurusan_id_str')
+        ->get();
+
+    return view('admin.alumni.rekapDataAlumni', compact('data'));
+}
 }

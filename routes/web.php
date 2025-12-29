@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 
 // --- Controller Utama & Auth ---
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\PublicScanController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 
 // --- Controller dari V1 ---
@@ -16,13 +17,15 @@ use App\Http\Controllers\Admin\Kepegawaian\TempalateSuratSkController;
 // Controller Akademik
 use App\Http\Controllers\Admin\Akademik\TapelController;
 use App\Http\Controllers\Admin\Akademik\JurusanController;
-use App\Http\Controllers\Admin\Akademik\MapelController; 
+use App\Http\Controllers\Admin\Akademik\MapelController;
 use App\Http\Controllers\Admin\Akademik\DaftarEkstrakurikulerController;
-use App\Http\Controllers\Admin\Akademik\JadwalPelajaranController;
+
+// kurikulum
+use App\Http\Controllers\Admin\Kurikulum\JamPelajaranController;
+use App\Http\Controllers\Admin\Kurikulum\JadwalPelajaranController;
 
 // Controller Kesiswaan
 use App\Http\Controllers\Admin\Kesiswaan\SiswaController;
-
 // Controller ppdb
 
 // Controller Ppdb
@@ -43,11 +46,12 @@ use App\Http\Controllers\Admin\Ppdb\TahunPpdbController;
 
 // Controller Alumni
 use App\Http\Controllers\Admin\Alumni\AlumniController;
+use App\Http\Controllers\Admin\Alumni\AdminAlumniController;
 
 // Controller Indisipliner
 use App\Http\Controllers\Admin\Indisipliner\IndisiplinerGtkController;
 use App\Http\Controllers\Admin\Indisipliner\IndisiplinerSiswaController;
-    
+
 // Controller Absensi
 use App\Http\Controllers\Admin\Absensi\AbsensiSiswaController;
 use App\Http\Controllers\Admin\Absensi\AbsensiGtkController;
@@ -66,6 +70,16 @@ use App\Http\Controllers\Admin\Rombel\RombelWaliController;
 // Controller Landing
 use App\Http\Controllers\Admin\Landing\PpdbController;
 use App\Http\Controllers\Admin\Landing\LandingSliderController;
+use App\Http\Controllers\Admin\Landing\SambutanController;
+use App\Http\Controllers\Admin\Landing\FasilitasController;
+use App\Http\Controllers\Admin\Landing\JurusanController as LandingJurusanController;
+use App\Http\Controllers\Admin\Landing\BeritaController;
+use App\Http\Controllers\Admin\Landing\PrestasiController;
+use App\Http\Controllers\Admin\Landing\GaleriController; // Pastikan ini diimport
+use App\Http\Controllers\Admin\Landing\MitraController;
+use App\Http\Controllers\Admin\Landing\TestimoniController;
+use App\Http\Controllers\Admin\Landing\EkstrakurikulerController;
+use App\Http\Controllers\Admin\Landing\AgendaController;
 
 // Controller Keuangan
 use App\Http\Controllers\Bendahara\Keuangan\IuranController;
@@ -82,7 +96,7 @@ use App\Http\Controllers\Admin\Administrasi\TipeSuratController;
 use App\Http\Controllers\Admin\Administrasi\SuratKeluarSiswaController;
 use App\Http\Controllers\Admin\Administrasi\SuratKeluarGuruController; // Controller Baru
 use App\Http\Controllers\Admin\Administrasi\SuratMasukController;
-        
+
 /*
 |--------------------------------------------------------------------------
 | Rute Web Utama
@@ -91,32 +105,17 @@ use App\Http\Controllers\Admin\Administrasi\SuratMasukController;
 
 // Menggunakan 'welcome' dari V2
 // Halaman Depan
-Route::get('/', [HomeController::class, 'index'])->name('home');
-
-// Rute Detail Public
-Route::get('/sambutan-kepala-sekolah', [HomeController::class, 'sambutanLengkap'])->name('sambutan.lengkap');
-Route::get('/jurusan/{id}', [\App\Http\Controllers\HomeController::class, 'showJurusan'])->name('jurusan.show');
-Route::get('/prestasi/{id}', [\App\Http\Controllers\HomeController::class, 'showPrestasi'])->name('prestasi.show');
-Route::get('/fasilitas-sekolah', [\App\Http\Controllers\HomeController::class, 'fasilitasSemua'])->name('fasilitas.semua');
-Route::get('/berita/{id}', [\App\Http\Controllers\HomeController::class, 'showBerita'])->name('berita.show');
-
-// Tambahkan baris ini di dalam Rute Web Utama (Frontend Public)
-Route::get('/profil-sekolah', [HomeController::class, 'profilSekolah'])->name('profil.sekolah');
-
-// Di bagian Rute Web Utama (Frontend Public)
-Route::get('/kontak', [HomeController::class, 'kontak'])->name('kontak');
-
-// [BARU] Route Galeri Lengkap
-Route::get('/galeri', [\App\Http\Controllers\HomeController::class, 'galeriLengkap'])->name('galeri.index');
-
-// --- Rute Pengecekan Jadwal PPDB ---
-Route::get('/cek-status-ppdb', [HomeController::class, 'cekStatusPpdb'])->name('ppdb.cek_status');
-Route::get('/ppdb-tutup', [HomeController::class, 'halamanTutup'])->name('ppdb.tutup');
-
 Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])
          ->middleware('auth')
          ->name('logout');
 
+// Halaman Depan
+Route::get('/', function () {
+        return view('auth.login-custom');
+    });
+
+Route::get('/scan/{id}', [PublicScanController::class, 'showVerificationPage'])->name('scan.page');
+Route::post('/scan/verify', [PublicScanController::class, 'processVerification'])->name('scan.verify');
 
 /*
 |--------------------------------------------------------------------------
@@ -153,13 +152,13 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
         Route::get('/webservice', [ApiSettingsController::class, 'index'])->name('webservice.index');
         Route::put('/webservice', [ApiSettingsController::class, 'update'])->name('webservice.update');
     });
-    
+
     // --- GRUP KEPEGAWAIAN --- (Struktur dari V1)
     Route::prefix('kepegawaian')->name('kepegawaian.')->group(function () {
         // === PERBAIKAN: HAPUS ->names([...]) ===
         // Otomatis menjadi: admin.kepegawaian.TemplateSk.index, dll
         Route::resource('TemplateSk', TempalateSuratSkController::class);
-        
+
         // Route untuk Guru
         Route::prefix('guru')->name('guru.')->controller(GtkController::class)->group(function () {
             Route::get('/', 'indexGuru')->name('index');
@@ -171,6 +170,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
             Route::get('/', 'indexTendik')->name('index');
             Route::get('/export/excel', 'exportTendikExcel')->name('export.excel');
         });
+ Route::patch('gtk/{id}/register-keluar', [GtkController::class, 'registerKeluar'])->name('gtk.register-keluar');
+
 
         // Route untuk detail multi-GTK
         Route::get('/gtk/show-multiple', [GtkController::class, 'showMultiple'])->name('gtk.show-multiple');
@@ -203,7 +204,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
 
     // 2. --- GRUP AKADEMIK ---
     Route::prefix('akademik')->name('akademik.')->group(function () {
-        
+
         // Tapel (Tahun Pelajaran)
         Route::controller(TapelController::class)->group(function () {
             Route::get('tapel', 'index')->name('tapel.index');
@@ -212,17 +213,36 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
 
         // Jurusan (Hanya Index)
         Route::resource('jurusan', JurusanController::class)->only(['index']);
-        
+
         // Mata Pelajaran
-        Route::get('mapel', [MapelController::class, 'index'])->name('mapel.index'); 
-        
+        Route::get('mapel', [MapelController::class, 'index'])->name('mapel.index');
+
         // Ekstrakurikuler (Kecuali Show, Create, Edit karena mungkin pakai Modal/Ajax)
         Route::resource('daftar-ekstrakurikuler', DaftarEkstrakurikulerController::class)
-             ->except(['show', 'create', 'edit']); 
+             ->except(['show', 'create', 'edit']);
 
+    });
 
-        Route::resource('jadwal-pelajaran', JadwalPelajaranController::class);
+    // --- GRUP KURIKULUM ---
+    Route::prefix('kurikulum')->name('kurikulum.')->group(function () {
+
+        // 1. Master Jam Pelajaran
+        Route::resource('jam-pelajaran', JamPelajaranController::class);
+
+        // Route Rekap & PDF (Taruh disini agar "rekap" tidak dianggap sebagai ID)
+        Route::get('jadwal-pelajaran/rekap', [JadwalPelajaranController::class, 'rekap'])->name('jadwal-pelajaran.rekap');
+        Route::get('jadwal-pelajaran/cetak-pdf', [JadwalPelajaranController::class, 'cetakPdf'])->name('jadwal-pelajaran.cetak-pdf');
+
+        // Route Ajax Helper
         Route::get('jadwal-pelajaran/{id}/json', [JadwalPelajaranController::class, 'getJadwalJson'])->name('jadwal-pelajaran.json');
+        Route::post('jadwal-pelajaran/update', [JadwalPelajaranController::class, 'updateJadwal'])->name('jadwal-pelajaran.update-ajax');
+        Route::post('jadwal-pelajaran/sync', [JadwalPelajaranController::class, 'syncMapel'])->name('jadwal-pelajaran.sync');
+
+        // -----------------------------------------------------------------
+        // 2. Route Resource Jadwal (Generic) - TARUH PALING BAWAH
+        // -----------------------------------------------------------------
+        // Pastikan ini JadwalPelajaranController, BUKAN JamPelajaranController
+        Route::resource('jadwal-pelajaran', JadwalPelajaranController::class);
     });
 
     /*
@@ -234,9 +254,9 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
         // 1. ROUTE SPESIFIK (JANGAN PAKAI {id} DISINI) - WAJIB DI ATAS RESOURCE
     Route::get('siswa/export/excel', [SiswaController::class, 'exportExcel'])->name('siswa.export.excel');
     Route::get('siswa/show-multiple', [SiswaController::class, 'showMultiple'])->name('siswa.show-multiple');
-    
+
     // INI YANG TADI ERROR, SEKARANG PINDAH KE ATAS:
-    Route::get('siswa/cetak-pdf-multiple', [SiswaController::class, 'cetakPdfMultiple'])->name('siswa.cetak_pdf_multiple'); 
+    Route::get('siswa/cetak-pdf-multiple', [SiswaController::class, 'cetakPdfMultiple'])->name('siswa.cetak_pdf_multiple');
 
     // 2. ROUTE CETAK MASSAL (Beda prefix, jadi aman di mana saja, tapi simpan di atas biar rapi)
     Route::get('/cetak-kartu-massal', [SiswaController::class, 'showCetakMassalIndex'])->name('siswa.cetak_massal_index');
@@ -256,23 +276,33 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
 
     // --- GRUP MANAJEMEN LANDING PAGE ---
     Route::resource('/landing/slider', LandingSliderController::class, ['as' => 'landing']);
+
+    Route::get('/landing/sambutan', [SambutanController::class, 'index'])->name('landing.sambutan.index');
+    Route::post('/landing/sambutan', [SambutanController::class, 'update'])->name('landing.sambutan.update');
+
+    Route::resource('/landing/fasilitas', FasilitasController::class, ['as' => 'landing'])->except(['create', 'edit', 'show']);
+    Route::resource('/landing/jurusan', LandingJurusanController::class, ['as' => 'landing'])->except(['create', 'edit', 'show']);
+    Route::resource('/landing/berita', BeritaController::class, ['as' => 'landing'])->except(['create', 'edit', 'show']);
+    Route::resource('/landing/prestasi', PrestasiController::class, ['as' => 'landing'])->except(['create', 'edit', 'show']);
+    Route::resource('/landing/mitra', MitraController::class, ['as' => 'landing'])->except(['create', 'edit', 'show']);
+    Route::resource('/landing/ekstrakurikuler', EkstrakurikulerController::class, ['as' => 'landing'])->except(['create', 'edit', 'show']);
+    Route::resource('/landing/agenda', AgendaController::class, ['as' => 'landing'])->except(['create', 'edit', 'show']);
+
+    // --- PERBAIKAN GALERI (Hanya Bagian Ini yang Diubah) ---
+    // Hapus duplikasi route galeri lama Anda, ganti dengan blok ini saja:
     
-    Route::get('/landing/sambutan', [App\Http\Controllers\Admin\Landing\SambutanController::class, 'index'])->name('landing.sambutan.index');
-    Route::post('/landing/sambutan', [App\Http\Controllers\Admin\Landing\SambutanController::class, 'update'])->name('landing.sambutan.update');
+    // 1. Resource Utama (Album)
+    // Ini akan membuat route admin.landing.galeri.index, show, store, update, destroy
+    Route::resource('/landing/galeri', GaleriController::class, ['as' => 'landing']);
+    
+    // 2. Route Tambahan (Upload & Hapus Item Anak)
+    // Ini manual route untuk fitur upload banyak foto
+    Route::post('/landing/galeri/{id}/upload', [GaleriController::class, 'storeItem'])->name('landing.galeri.item.store');
+    Route::delete('/landing/galeri/item/{id}', [GaleriController::class, 'destroyItem'])->name('landing.galeri.item.destroy');
 
-    Route::resource('/landing/fasilitas', \App\Http\Controllers\Admin\Landing\FasilitasController::class, ['as' => 'landing'])->except(['create', 'edit', 'show']);
-    Route::resource('/landing/jurusan', \App\Http\Controllers\Admin\Landing\JurusanController::class, ['as' => 'landing'])->except(['create', 'edit', 'show']);
-    Route::resource('/landing/berita', \App\Http\Controllers\Admin\Landing\BeritaController::class, ['as' => 'landing'])->except(['create', 'edit', 'show']);
-    Route::resource('/landing/prestasi', \App\Http\Controllers\Admin\Landing\PrestasiController::class, ['as' => 'landing'])->except(['create', 'edit', 'show']);
-    Route::resource('/landing/galeri', \App\Http\Controllers\Admin\Landing\GaleriController::class, ['as' => 'landing'])->except(['create', 'edit', 'show']);
-    Route::resource('/landing/mitra', \App\Http\Controllers\Admin\Landing\MitraController::class, ['as' => 'landing'])->except(['create', 'edit', 'show']);
 
-    Route::put('/landing/testimoni/{id}/toggle', [\App\Http\Controllers\Admin\Landing\TestimoniController::class, 'toggleStatus'])->name('landing.testimoni.toggle');
-    Route::resource('/landing/testimoni', \App\Http\Controllers\Admin\Landing\TestimoniController::class, ['as' => 'landing'])->except(['create', 'edit', 'show']);
-
-    Route::resource('/landing/ekstrakurikuler', \App\Http\Controllers\Admin\Landing\EkstrakurikulerController::class, ['as' => 'landing'])->except(['create', 'edit', 'show']);
-    Route::resource('/landing/agenda', \App\Http\Controllers\Admin\Landing\AgendaController::class, ['as' => 'landing'])->except(['create', 'edit', 'show']);
-
+    Route::put('/landing/testimoni/{id}/toggle', [TestimoniController::class, 'toggleStatus'])->name('landing.testimoni.toggle');
+    Route::resource('/landing/testimoni', TestimoniController::class, ['as' => 'landing'])->except(['create', 'edit', 'show']);
     /*
     |--------------------------------------------------------------------------
     | (PPDB)
@@ -302,7 +332,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
         Route::get('/get-syarat/{jalurId}', [SyaratController::class, 'getByJalur'])->name('ppdb.get-syarat');
         Route::patch('update-status/{id}', [FormulirPendaftaranController::class, 'updateStatus'])->name('updateStatus');
         // Pemberian NIS
-        Route::get('pemberian-nis/generate', 
+        Route::get('pemberian-nis/generate',
             [PemberianNisController::class, 'generate']
         )->name('pemberian-nis.generate');
         Route::resource('pemberian-nis', PemberianNisController::class);
@@ -312,7 +342,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
         Route::resource('daftar-peserta-didik-baru', DaftarPesertaDidikBaruController::class);
         // Penempatan Kelas
         Route::resource('penempatan-kelas', PenempatanKelasController::class);
-        Route::post('penempatan-kelas/update-kelas', 
+        Route::post('penempatan-kelas/update-kelas',
             [PenempatanKelasController::class, 'updateKelas']
         )->name('penempatan-kelas.update-kelas');
         // Laporan
@@ -331,20 +361,33 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
     |--------------------------------------------------------------------------
     */
     Route::prefix('alumni')->name('alumni.')->group(function() {
-        
+
         Route::resource('dataAlumni', AlumniController::class)
         ->only(['index', 'show', 'update']);
 
         Route::get('show-multiple', [AlumniController::class, 'showMultiple'])
             ->name('show-multiple');
 
-        Route::get('/rekapDataAlumni', [AlumniController::class,'rekapDataAlumni']);
+        Route::get('/rekapDataAlumni', [AlumniController::class,'rekapDataAlumni'])->name('rekapDataAlumni');
 
         // Halaman index + filter kelas
         Route::get('/pelulusan', [AlumniController::class, 'lulus'])->name('pelulusan');
 
         // Proses pelulusan
         Route::post('/process', [AlumniController::class, 'process'])->name('process');
+
+        // Input Manual
+        Route::get('/input-data', [AdminAlumniController::class, 'create'])->name('create');
+        Route::post('/store', [AdminAlumniController::class, 'store'])->name('store');
+
+        // Testimoni
+        Route::get('/testimoni', [AdminAlumniController::class, 'indexTestimoni'])->name('testimoni.index');
+        
+        // --- PERHATIKAN BARIS INI (Route Toggle) ---
+        Route::post('/testimoni/{id}/toggle', [AdminAlumniController::class, 'toggleTestimoni'])->name('testimoni.toggle');
+
+        // Tracer
+        Route::get('/tracer', [AdminAlumniController::class, 'indexTracer'])->name('tracer.index');
     });
 
     // --- GRUP INDISIPLINER ---
@@ -355,22 +398,22 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
             Route::get('/daftar', [IndisiplinerGtkController::class, 'daftarIndex'])->name('daftar.index');
             Route::post('/daftar', [IndisiplinerGtkController::class, 'store'])->name('daftar.store');
             Route::delete('/daftar/{pelanggaran}', [IndisiplinerGtkController::class, 'destroy'])->name('daftar.destroy');
-        
+
             Route::get('/pengaturan', [IndisiplinerGtkController::class, 'pengaturanIndex'])->name('pengaturan.index');
             Route::post('/pengaturan/kategori', [IndisiplinerGtkController::class, 'storeKategori'])->name('pengaturan.kategori.store');
             Route::post('/pengaturan/poin', [IndisiplinerGtkController::class, 'storePoin'])->name('pengaturan.poin.store');
             Route::put('/pengaturan/poin/{id}', [IndisiplinerGtkController::class, 'updatePoin'])->name('pengaturan.poin.update');
             Route::delete('/pengaturan/poin/{id}', [IndisiplinerGtkController::class, 'destroyPoin'])->name('pengaturan.poin.destroy');
-        
+
             Route::post('/pengaturan/sanksi', [IndisiplinerGtkController::class, 'storeSanksi'])->name('pengaturan.sanksi.store');
             Route::put('/pengaturan/sanksi/{id}', [IndisiplinerGtkController::class, 'updateSanksi'])->name('pengaturan.sanksi.update');
             Route::delete('/pengaturan/sanksi/{id}', [IndisiplinerGtkController::class, 'destroySanksi'])->name('pengaturan.sanksi.destroy');
-        
+
             Route::get('/rekapitulasi', [IndisiplinerGtkController::class, 'rekapitulasiIndex'])->name('rekapitulasi.index');
             Route::get('/rekapitulasi/cetak/semua', [IndisiplinerGtkController::class, 'cetakSemua'])->name('rekapitulasi.cetak.semua');
             Route::get('/rekapitulasi/cetak/{namaGuru}', [IndisiplinerGtkController::class, 'cetakIndividu'])->name('rekapitulasi.cetak.individu');
             Route::get('/rekapitulasi/cetak-surat/{namaGuru}', [IndisiplinerGtkController::class, 'cetakSurat'])->name('rekapitulasi.cetak.surat');
-        
+
         });
 
 
@@ -438,7 +481,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
     |--------------------------------------------------------------------------
     */
     Route::prefix('absensi')->name('absensi.')->group(function () {
-        
+
         Route::prefix('gtk')->name('gtk.')->group(function() {
             // --- Route KiosK (Sudah ada) ---
             Route::get('scanner', [AbsensiGtkController::class, 'showScanner'])->name('scanner');
@@ -458,23 +501,23 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
             Route::get('/todays-scans', [AbsensiSiswaController::class, 'getTodaysScans'])->name('get_todays_scans');
             Route::get('/get-recent-scans', [AbsensiSiswaController::class, 'getRecentScans'])->name('get_recent_scans');
             Route::get('/absensi/get-unscanned-data', [AbsensiSiswaController::class, 'getUnscannedData'])->name('get_unscanned_data');
-            
+
             // Rute untuk menampilkan halaman PILIH KELAS
             // URL: /admin/absensi/siswa
             Route::get('/', [AbsensiSiswaController::class, 'index'])->name('index');
-        
+
             // Rute untuk menampilkan FORM ABSENSI untuk kelas & tanggal tertentu
             // URL: /admin/absensi/siswa/form?rombel_id=...&tanggal=...
             Route::get('/form', [AbsensiSiswaController::class, 'show'])->name('show_form');
-        
+
             // Rute untuk MENYIMPAN data absensi dari form
             // URL: /admin/absensi/siswa (Method: POST)
             Route::post('/', [AbsensiSiswaController::class, 'store'])->name('store');
-            
+
             // Rute untuk scanner QR Code
             // URL: /admin/absensi/siswa/scanner
             Route::get('/scanner', [AbsensiSiswaController::class, 'showScanner'])->name('show_scanner');
-            
+
             // Rute untuk menangani data dari scanner
             // URL: /admin/absensi/siswa/handle-scan (Method: POST)
             Route::post('/handle-scan', [AbsensiSiswaController::class, 'handleScan'])->name('handle_scan');
@@ -534,7 +577,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
     |--------------------------------------------------------------------------
     */
     Route::prefix('pengaturan')->name('pengaturan.')->group(function() {
-        
+
         Route::get('absensi', [PengaturanAbsensiController::class, 'edit'])->name('absensi.edit');
         Route::put('absensi', [PengaturanAbsensiController::class, 'update'])->name('absensi.update');
 
@@ -562,8 +605,6 @@ Route::prefix('bendahara')->name('bendahara.')->group(function () {
         Route::post('tagihan/generate', [TagihanController::class, 'store'])->name('tagihan.store');
     });
 });
-
-Route::post('/testimoni-kirim', [HomeController::class, 'storeTestimoni'])->name('testimoni.store');
 
 
 // Menggunakan file auth standar dari V2

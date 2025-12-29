@@ -11,7 +11,6 @@ class SambutanController extends Controller
 {
     public function index()
     {
-        // Ambil data pertama, atau kosong jika belum ada
         $sambutan = SambutanKepalaSekolah::first();
         return view('admin.landing.sambutan.index', compact('sambutan'));
     }
@@ -22,39 +21,56 @@ class SambutanController extends Controller
             'nama_kepala_sekolah' => 'required|string|max:255',
             'judul_sambutan'      => 'required|string|max:255',
             'isi_sambutan'        => 'required|string',
-            'foto'                => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
-            'visi'                => 'nullable|string', // Baru
-            'misi'                => 'nullable|string', // Baru
-            'program_kerja'       => 'nullable|string', // Baru
+            'foto'                => 'nullable|image|mimes:jpeg,png,jpg|max:2048', // Foto Kepsek
+            
+            // Validasi Tambahan
+            'sejarah'             => 'nullable|string',
+            'foto_gedung'         => 'nullable|image|mimes:jpeg,png,jpg|max:2048', // Foto Gedung
+            'visi'                => 'nullable|string',
+            'misi'                => 'nullable|string',
+            'program_kerja'       => 'nullable|string',
         ]);
 
         // Cek apakah data sudah ada
         $sambutan = SambutanKepalaSekolah::first();
 
-        $data = $request->except(['_token', 'foto']);
+        // Ambil semua data input kecuali token dan file
+        $data = $request->except(['_token', 'foto', 'foto_gedung']);
 
-        // Logic Upload Foto
+        // 1. Logic Upload Foto Kepala Sekolah
         if ($request->hasFile('foto')) {
-            // 1. Hapus foto lama jika ada
             if ($sambutan && $sambutan->foto) {
                 if (Storage::disk('public')->exists('sambutan/' . $sambutan->foto)) {
                     Storage::disk('public')->delete('sambutan/' . $sambutan->foto);
                 }
             }
-
-            // 2. Simpan Foto Baru
             $image = $request->file('foto');
             $image->storeAs('sambutan', $image->hashName(), 'public');
-            
             $data['foto'] = $image->hashName();
         }
 
-        // Update atau Buat Baru (ID selalu 1 karena single data)
+        // 2. Logic Upload Foto Gedung / Sejarah (BARU)
+        if ($request->hasFile('foto_gedung')) {
+            // Hapus foto gedung lama jika ada
+            if ($sambutan && $sambutan->foto_gedung) {
+                if (Storage::disk('public')->exists('sambutan/' . $sambutan->foto_gedung)) {
+                    Storage::disk('public')->delete('sambutan/' . $sambutan->foto_gedung);
+                }
+            }
+            // Simpan foto gedung baru
+            $imageGedung = $request->file('foto_gedung');
+            // Kita simpan di folder yang sama 'sambutan' atau bisa buat folder baru 'sekolah'
+            $imageGedung->storeAs('sambutan', $imageGedung->hashName(), 'public');
+            
+            $data['foto_gedung'] = $imageGedung->hashName();
+        }
+
+        // Update atau Buat Baru (ID selalu 1)
         SambutanKepalaSekolah::updateOrCreate(
-            ['id' => 1], // Kunci pencarian
-            $data        // Data yang disimpan
+            ['id' => 1], 
+            $data
         );
 
-        return redirect()->back()->with('success', 'Data Profil Sekolah berhasil diperbarui!');
+        return redirect()->back()->with('success', 'Data Profil & Sejarah Sekolah berhasil diperbarui!');
     }
 }
