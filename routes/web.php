@@ -567,16 +567,37 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
         Route::get('/wali', [RombelWaliController::class, 'index'])->name('wali.index');
     });
 
-    // 3. --- GRUP ADMINISTRASI (FITUR SURAT BARU) ---
+    // --- GRUP ADMINISTRASI ---
     Route::prefix('administrasi')->name('administrasi.')->group(function () {
         Route::resource('tipe-surat', TipeSuratController::class);
-        Route::resource('surat-keluar-siswa', SuratKeluarSiswaController::class);
-        Route::get('get-siswa-by-kelas/{nama_rombel}', [SuratKeluarSiswaController::class, 'getSiswaByKelas'])
-             ->name('get-siswa-by-kelas');
-        Route::get('surat-keluar-guru', [SuratKeluarGuruController::class, 'index'])->name('surat-keluar-guru.index');
-        Route::post('surat-keluar-guru/store', [SuratKeluarGuruController::class, 'store'])->name('surat-keluar-guru.store');
+
+        // Surat Keluar Siswa
+        Route::controller(SuratKeluarSiswaController::class)->group(function () {
+            Route::get('surat-keluar-siswa', 'index')->name('surat-keluar-siswa.index');
+            Route::post('surat-keluar-siswa/store', 'store')->name('surat-keluar-siswa.store'); // Preview
+            Route::post('surat-keluar-siswa/cetak', 'cetak')->name('surat-keluar-siswa.cetak'); // Registrasi & Print
+            Route::post('surat-keluar-siswa/pdf', 'downloadPdf')->name('surat-keluar-siswa.pdf'); // Download PDF
+            Route::get('get-siswa-by-kelas/{nama_rombel}', 'getSiswaByKelas')->name('get-siswa-by-kelas');
+        });
+
+        // Surat Keluar Guru
+        Route::controller(SuratKeluarGuruController::class)->group(function () {
+            Route::get('surat-keluar-guru', 'index')->name('surat-keluar-guru.index');
+            Route::post('surat-keluar-guru/store', 'store')->name('surat-keluar-guru.store');
+            Route::post('surat-keluar-guru/cetak', 'cetak')->name('surat-keluar-guru.cetak');
+            Route::post('surat-keluar-guru/pdf', 'downloadPdf')->name('surat-keluar-guru.pdf');
+        });
+        
         Route::resource('surat-masuk', SuratMasukController::class);
 
+        // Pengaturan Nomor
+        Route::controller(NomorSuratSettingController::class)->prefix('pengaturan-nomor')->name('pengaturan-nomor.')->group(function() {
+            Route::get('/', 'index')->name('index');
+            Route::post('/', 'store')->name('store');
+            Route::put('/{id}', 'update')->name('update');
+            Route::delete('/{id}', 'destroy')->name('destroy');
+            Route::post('/reset/{id}', 'resetCounter')->name('reset');
+        });
     });
 
 
