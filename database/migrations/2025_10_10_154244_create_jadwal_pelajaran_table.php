@@ -8,56 +8,28 @@ return new class extends Migration
 {
     /**
      * Run the migrations.
-     *
-     * @return void
      */
-    public function up()
+    public function up(): void
     {
-        Schema::create('jadwal_pelajarans', function (Blueprint $table) {
-            $table->id();
-
-            // 1. RELASI UTAMA (CORE)
-            // Relasi ke Tahun Ajaran (Table: tapel)
-            $table->unsignedBigInteger('tahun_ajaran_id');
-
-            // Relasi ke Rombel (Table: rombels)
-            $table->unsignedBigInteger('rombel_id');
-
-            // Relasi ke Master Jam (Table: jam_pelajarans)
-            // Menentukan Hari & Jam secara otomatis
-            $table->foreignId('jam_pelajaran_id')
-                  ->constrained('jam_pelajarans')
-                  ->onDelete('cascade');
-
-            // Relasi ke Master Pembelajaran (Table: pembelajarans)
-            // Menentukan Guru & Mapel
-            $table->foreignId('pembelajaran_id')
-                  ->nullable() // Nullable: Jika null berarti slot waktu kosong
-                  ->constrained('pembelajarans')
-                  ->onDelete('cascade');
-
-            // 2. DATA TAMBAHAN
-            $table->integer('semester_id')->nullable(); // 1: Ganjil, 2: Genap
-
-            // 3. KOLOM LEGACY / LAMA (Opsional)
-            // Kita buat nullable semua agar jika ada kode lama yang memanggil kolom ini tidak error
-            $table->string('mata_pelajaran')->nullable();
-            $table->string('ptk_id')->nullable();
-            $table->string('hari')->nullable();
-            $table->time('jam_mulai')->nullable();
-            $table->time('jam_selesai')->nullable();
-
+        Schema::create('jadwal_pelajaran', function (Blueprint $table) {
+            $table->bigIncrements('id');
+            $table->unsignedBigInteger('rombel_id')->index('jadwal_pelajaran_rombel_id_foreign');
+            $table->string('ptk_id');
+            $table->string('mata_pelajaran');
+            $table->enum('hari', ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu']);
+            $table->time('jam_mulai');
+            $table->time('jam_selesai');
+            $table->string('tahun_ajaran_id');
+            $table->string('semester_id');
             $table->timestamps();
         });
     }
 
     /**
      * Reverse the migrations.
-     *
-     * @return void
      */
-    public function down()
+    public function down(): void
     {
-        Schema::dropIfExists('jadwal_pelajarans');
+        Schema::dropIfExists('jadwal_pelajaran');
     }
 };
