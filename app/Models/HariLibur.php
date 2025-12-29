@@ -1,29 +1,29 @@
 <?php
-
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Carbon\Carbon;
 
 class HariLibur extends Model
 {
-    use HasFactory;
-
-    /**
-     * Nama tabel yang terhubung dengan model ini.
-     * Ini akan memberitahu Eloquent untuk tidak mencari 'hari_liburs'.
-     *
-     * @var string
-     */
     protected $table = 'hari_libur';
+    protected $fillable = ['keterangan', 'tanggal_mulai', 'tanggal_selesai', 'tipe'];
 
-    /**
-     * Atribut yang bisa diisi secara massal (untuk method store).
-     *
-     * @var array<int, string>
-     */
-    protected $fillable = [
-        'tanggal',
-        'keterangan',
-    ];
+    // Relasi ke Rombel
+    public function rombels()
+    {
+        return $this->belongsToMany(Rombel::class, 'hari_libur_rombel', 'hari_libur_id', 'rombel_id');
+    }
+
+    // Accessor untuk menampilkan tanggal dengan rapi
+    public function getPeriodeAttribute()
+    {
+        $start = Carbon::parse($this->tanggal_mulai);
+        $end = Carbon::parse($this->tanggal_selesai);
+
+        if ($start->equalTo($end)) {
+            return $start->isoFormat('D MMMM Y');
+        }
+        return $start->isoFormat('D MMMM') . ' - ' . $end->isoFormat('D MMMM Y');
+    }
 }

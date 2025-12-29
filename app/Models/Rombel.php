@@ -152,5 +152,10 @@ class Rombel extends Model
 
         return Siswa::whereIn('peserta_didik_id', $ids)->get();
     }
+
+    public function hariLibur()
+    {
+        return $this->belongsToMany(HariLibur::class, 'hari_libur_rombel');
+    }
 }
 // Other code in the file
