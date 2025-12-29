@@ -434,8 +434,8 @@ return [
             'is_open' => 'request()->is("admin/administrasi*")',
             'submenu' => [
                 ['title' => 'Pengaturan Nomor', 'route' => 'admin.administrasi.pengaturan-nomor.index', 'is_active' => 'request()->routeIs("admin.administrasi.pengaturan-nomor.*")'],
-                ['title' => 'Surat Masuk', 'route' => 'admin.administrasi.surat-masuk.index', 'is_active' => 'request()->routeIs("admin.administrasi.surat-masuk.*")'],
                 ['title' => 'Template Surat', 'route' => 'admin.administrasi.tipe-surat.index', 'is_active' => 'request()->routeIs("admin.administrasi.tipe-surat.*")'],
+                ['title' => 'Surat Masuk', 'route' => 'admin.administrasi.surat-masuk.index', 'is_active' => 'request()->routeIs("admin.administrasi.surat-masuk.*")'],
                 ['title' => 'Surat Keluar (Siswa)', 'route' => 'admin.administrasi.surat-keluar-siswa.index', 'is_active' => 'request()->routeIs("admin.administrasi.surat-keluar-siswa.*")'],
                 ['title' => 'Surat Keluar (Guru)', 'route' => 'admin.administrasi.surat-keluar-guru.index', 'is_active' => 'request()->routeIs("admin.administrasi.surat-keluar-guru.*")'],
             ]
