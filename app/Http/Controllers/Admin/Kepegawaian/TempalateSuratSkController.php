@@ -11,8 +11,7 @@ class TempalateSuratSkController extends Controller
 {
     public function index()
     {
-        $templates = TipeSurat::with('tapel')
-            ->where('kategori', 'sk')
+        $templates = TipeSurat::where('kategori', 'sk')
             ->latest()
             ->get();
 
@@ -39,14 +38,17 @@ class TempalateSuratSkController extends Controller
             'kategori'      => 'sk',
             'template_isi'  => $request->template_isi,
             'ukuran_kertas' => $request->ukuran_kertas,
-
-            // --- PERBAIKAN: TAMBAHKAN INI ---
             'use_kop'       => $request->has('use_kop') ? 1 : 0,
+            // Tambahkan baris di bawah ini agar margin tersimpan
+            'margin_top'    => $request->margin_top ?? 20,
+            'margin_left'   => $request->margin_left ?? 25,
+            'margin_right'  => $request->margin_right ?? 25,
+            'margin_bottom' => $request->margin_bottom ?? 20,
         ]);
 
         return redirect()
             ->route('admin.kepegawaian.TemplateSk.index')
-            ->with('success', 'Template SK berhasil disimpan pada Tahun Ajaran Aktif!');
+            ->with('success', 'Template SK berhasil disimpan!');
     }
 
     public function edit($id)
@@ -54,9 +56,7 @@ class TempalateSuratSkController extends Controller
         $template = TipeSurat::findOrFail($id);
 
         if ($template->kategori !== 'sk') {
-            return redirect()
-                ->route('admin.kepegawaian.TemplateSk.index')
-                ->with('error', 'Bukan template SK.');
+            return redirect()->route('admin.kepegawaian.TemplateSk.index');
         }
 
         $templates = TipeSurat::where('kategori', 'sk')->latest()->get();
@@ -74,18 +74,19 @@ class TempalateSuratSkController extends Controller
         ]);
 
         $tipeSurat = TipeSurat::findOrFail($id);
-
         $tapelAktif = Tapel::where('is_active', 1)->first();
-        $tapelId = $tapelAktif ? $tapelAktif->id : null;
 
         $tipeSurat->update([
             'judul_surat'   => $request->judul_surat,
-            'tapel_id'      => $tapelId,
+            'tapel_id'      => $tapelAktif ? $tapelAktif->id : $tipeSurat->tapel_id,
             'template_isi'  => $request->template_isi,
             'ukuran_kertas' => $request->ukuran_kertas,
-
-            // --- PERBAIKAN: TAMBAHKAN INI JUGA ---
             'use_kop'       => $request->has('use_kop') ? 1 : 0,
+            // Tambahkan baris di bawah ini agar margin terupdate
+            'margin_top'    => $request->margin_top,
+            'margin_left'   => $request->margin_left,
+            'margin_right'  => $request->margin_right,
+            'margin_bottom' => $request->margin_bottom,
         ]);
 
         return redirect()
@@ -95,11 +96,7 @@ class TempalateSuratSkController extends Controller
 
     public function destroy($id)
     {
-        $tipeSurat = TipeSurat::findOrFail($id);
-        $tipeSurat->delete();
-
-        return redirect()
-            ->route('admin.kepegawaian.TemplateSk.index')
-            ->with('success', 'Template SK berhasil dihapus.');
+        TipeSurat::findOrFail($id)->delete();
+        return redirect()->back()->with('success', 'Template SK berhasil dihapus.');
     }
 }
