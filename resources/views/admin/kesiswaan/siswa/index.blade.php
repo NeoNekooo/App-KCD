@@ -204,7 +204,6 @@
                         <div class="col-sm-8">
                             <select name="status" class="form-select" required>
                                 <option value="">-- Pilih Alasan --</option>
-                                <option value="Lulus">Lulus</option>
                                 <option value="Mutasi">Mutasi</option>
                                 <option value="Dikeluarkan">Dikeluarkan</option>
                                 <option value="Putus Sekolah">Putus Sekolah</option>

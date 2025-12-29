@@ -26,7 +26,7 @@ class RombelWaliController extends Controller
         // 2. Gunakan whereNotNull('wali_id') untuk memfilter HANYA rombel yang sudah punya wali kelas.
         // 3. Gunakan with() untuk mengambil data relasi yang diperlukan saja ('wali' dan 'jurusan').
         $rombels = Rombel::whereNotNull('ptk_id')
-                            ->with(['wali', 'jurusan']) // <-- Disesuaikan. Hanya mengambil relasi yg diperlukan.
+                            ->with(['wali']) // <-- Tidak menggunakan tabel jurusan, gunakan kolom di rombels
                             ->latest()
                             ->paginate(10);
 

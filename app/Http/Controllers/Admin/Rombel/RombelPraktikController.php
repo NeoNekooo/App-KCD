@@ -27,7 +27,7 @@ class RombelPraktikController extends Controller
 
         // PERBAIKAN: Menambahkan 'siswa' ke with() untuk Eager Loading
         // Ini agar kita bisa menampilkan "Jumlah Siswa" di view tanpa N+1 problem.
-        $rombels = Rombel::with(['wali', 'jurusan', 'kurikulum', 'siswa'])
+        $rombels = Rombel::with(['wali', 'kurikulum', 'siswa'])
                            // Toleran terhadap case dan spasi di nilai impor. Terima varian 'praktik' dan 'praktikum'
                            ->whereRaw("LOWER(TRIM(jenis_rombel_str)) IN (?, ?)", ['praktik', 'praktikum'])
                            ->latest()
