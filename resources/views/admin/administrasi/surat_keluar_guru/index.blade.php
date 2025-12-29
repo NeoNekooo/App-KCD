@@ -1,279 +1,113 @@
 @extends('layouts.admin')
 
 @section('content')
-    {{-- 1. CSS Quill & Styling Kertas --}}
-    <link href="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.snow.css" rel="stylesheet">
-
-    <style>
-        /* =========================================
-               1. DEFINISI FONT HELPER
-               ========================================= */
-        .ql-font-times-new-roman {
-            font-family: 'Times New Roman', Times, serif !important;
-        }
-
-        .ql-font-arial {
-            font-family: Arial, Helvetica, sans-serif !important;
-        }
-
-        .ql-font-courier-new {
-            font-family: 'Courier New', Courier, monospace !important;
-        }
-
-        .ql-font-calibri {
-            font-family: 'Calibri', sans-serif !important;
-        }
-
-        .ql-font-verdana {
-            font-family: Verdana, Geneva, sans-serif !important;
-        }
-
-        .ql-font-tahoma {
-            font-family: Tahoma, Geneva, sans-serif !important;
-        }
-
-        .ql-font-georgia {
-            font-family: Georgia, serif !important;
-        }
-
-        /* =========================================
-               2. SETTING KERTAS UTAMA
-               ========================================= */
-        .ql-editor {
-            /* Font Default */
-            font-family: 'Times New Roman', Times, serif !important;
-            font-size: 12px;
-            line-height: 1.42;
-            color: #000;
-
-            /* Padding Kertas */
-            padding: 0.5cm 2.54cm 0.5cm 2.54cm !important;
-
-            background: white;
-            height: 100%;
-
-            /* PERBAIKAN SCROLLBAR: */
-            border: none !important;
-            overflow: hidden !important;
-            /* HIDE SEMUA SCROLLBAR */
-            width: 100% !important;
-            box-sizing: border-box;
-        }
-
-        /* RESET FONT ELEMENT (Agar Inline Style Menang) */
-        .ql-editor h1,
-        .ql-editor h2,
-        .ql-editor h3,
-        .ql-editor h4,
-        .ql-editor h5,
-        .ql-editor h6,
-        .ql-editor p,
-        .ql-editor div,
-        .ql-editor li {
-            font-family: unset !important;
-        }
-
-        /* Pastikan strong/bold tetap tebal */
-        .ql-editor strong,
-        .ql-editor b {
-            font-weight: bold !important;
-        }
-
-        /* =========================================
-               3. SISTEM PREVIEW
-               ========================================= */
-        #preview-wrapper-bg {
+    <style id="preview-styles">
+        /* === STYLE PREVIEW LAYAR === */
+        .preview-desk {
             background-color: #525659;
-            padding: 40px 0;
+            padding: 50px 0;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 30px;
-            overflow-x: auto;
-            /* Scroll hanya di background abu-abu, bukan di kertas */
-            width: 100%;
-            min-height: 600px;
-            border-radius: 8px;
-            border: 1px solid #444;
+            min-height: 100vh;
+            overflow-y: auto;
         }
 
-        .page-instance {
-            background: white;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            margin-bottom: 0;
-            transition: all 0.3s;
-            overflow: hidden !important;
-            /* Potong konten yang keluar kertas */
-            box-sizing: border-box;
-        }
-
-        /* UKURAN KERTAS */
-        .page-instance.paper-A4 {
+        .paper-sheet {
+            background-color: white;
             width: 210mm;
-            height: 297mm;
+            min-height: 297mm;
+            padding: 2cm;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+            color: #000;
+            font-family: 'Times New Roman', serif;
+            font-size: 12pt;
+            line-height: 1.5;
+            text-align: justify;
+            box-sizing: border-box;
+            position: relative;
+            background-image: repeating-linear-gradient(to bottom, #ffffff 0mm, #ffffff 297mm, #525659 297mm, #525659 307mm);
         }
 
-        .page-instance.paper-F4 {
-            width: 215mm;
-            height: 330mm;
+        .paper-sheet p {
+            margin-top: 0;
+            margin-bottom: 1rem;
         }
 
-        .page-instance.paper-Legal {
-            width: 216mm;
-            height: 356mm;
-        }
-
-        .page-instance.paper-Letter {
-            width: 216mm;
-            height: 279mm;
-        }
-
-        /* LOGIKA KOP SURAT */
-        .page-instance.has-kop:first-child .ql-editor {
-            padding-top: 3.5cm !important;
-            padding-bottom: 0cm !important;
-        }
-
-        /* =========================================
-               4. TABLE FIXES (ANTI-SCROLL & NO BORDER)
-               ========================================= */
-        .ql-editor table {
-            table-layout: fixed !important;
-            width: 100% !important;
-            /* Paksa tabel selebar kertas, jangan lebih */
-            max-width: 100% !important;
+        .paper-sheet table {
             border-collapse: collapse;
-            margin-bottom: 1em;
-            border: none !important;
+            width: 100%;
+            margin-bottom: 10px;
         }
 
-        .ql-editor td {
-            padding: 2px 4px;
+        .paper-sheet td,
+        .paper-sheet th {
+            padding: 3px;
+            border: 1px solid #000;
             vertical-align: top;
-            border: none !important;
-            /* Hapus border */
-            word-wrap: break-word;
-            /* Paksa teks turun ke bawah jika kepanjangan */
-            white-space: normal !important;
-            /* Jangan biarkan teks memanjang ke samping */
-            overflow-wrap: break-word;
         }
 
-        /* =========================================
-               5. MEDIA PRINT (HILANGKAN SCROLLBAR SAAT CETAK)
-               ========================================= */
-        @media print {
-            body * {
-                visibility: hidden;
-            }
+        .paper-sheet table[border="0"] td,
+        .paper-sheet table[style*="border-width: 0"] td {
+            border: 1px dotted #ccc;
+        }
 
-            #preview-wrapper-bg,
-            #preview-wrapper-bg * {
-                visibility: visible;
-            }
+        .paper-sheet .mce-pagebreak {
+            display: block;
+            border-top: 1px dashed #999;
+            background: #525659;
+            height: 10mm;
+            margin: 20px -2cm;
+            page-break-after: always;
+            position: relative;
+            color: #fff;
+            text-align: center;
+            line-height: 10mm;
+            font-size: 10px;
+        }
 
-            #preview-wrapper-bg {
-                position: absolute;
-                left: 0;
-                top: 0;
-                width: 100%;
-                margin: 0;
-                padding: 0;
-                background: white;
-                border: none;
-                z-index: 99999;
-                overflow: hidden !important;
-                /* KUNCI: Matikan scrollbar saat print */
-            }
-
-            .page-instance {
-                box-shadow: none;
-                margin: 0;
-                width: 100% !important;
-                height: 100% !important;
-                page-break-after: always;
-                break-after: page;
-                border: none;
-                overflow: hidden !important;
-                /* KUNCI: Matikan scrollbar kertas */
-            }
-
-            .ql-editor {
-                overflow: hidden !important;
-                /* KUNCI: Matikan scrollbar editor */
-                width: 100% !important;
-            }
-
-            .page-instance:last-child {
-                page-break-after: auto;
-            }
-
-            @page {
-                size: auto;
-                margin: 0mm;
-            }
-
-            .btn,
-            .card-header,
-            .alert,
-            form,
-            .layout-navbar,
-            .layout-menu,
-            nav,
-            header,
-            footer {
-                display: none !important;
-            }
-
-            /* Sembunyikan scrollbar browser (Chrome/Safari) */
-            ::-webkit-scrollbar {
-                display: none;
-            }
+        .paper-sheet .mce-pagebreak::after {
+            content: "--- BATAS HALAMAN BARU (PAGE BREAK) ---";
         }
     </style>
 
     <div class="container-xxl flex-grow-1 container-p-y">
-        <div class="card shadow-sm border-0">
-            <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center">
-                <h5 class="mb-0 fw-bold">Formulir Cetak Surat Guru</h5>
-                <button type="submit" form="formSurat" class="btn btn-primary">
-                    <i class="bx bx-search-alt"></i> Tampilkan
-                </button>
-            </div>
+        <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Administrasi /</span> Cetak Surat Guru</h4>
 
-            <div class="card-body">
-                {{-- 2. FORM FILTER --}}
-                <form id="formSurat" action="{{ route('admin.administrasi.surat-keluar-guru.store') }}" method="POST">
+        {{-- 1. FORM FILTER (Hanya Tombol Preview) --}}
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-white border-bottom py-3">
+                <h5 class="mb-0 fw-bold text-primary"><i class="bx bx-filter-alt me-2"></i> Filter Data Surat</h5>
+            </div>
+            <div class="card-body mt-4">
+                <form id="formSuratGuru" action="{{ route('admin.administrasi.surat-keluar-guru.store') }}" method="POST">
                     @csrf
                     <input type="hidden" name="tanggal_surat" value="{{ date('Y-m-d') }}">
+                    <textarea name="html_content" style="display:none;"></textarea>
 
-                    <div class="row g-3">
+                    <div class="row g-3 mb-3">
                         <div class="col-md-6">
                             <label class="form-label fw-bold">Tahun Pelajaran</label>
-                            <input type="text" class="form-control"
-                                value="{{ isset($tapelAktif) && $tapelAktif ? $tapelAktif->tahun_ajaran : '-' }}" readonly>
-                            <input type="hidden" name="tapel_id"
-                                value="{{ isset($tapelAktif) && $tapelAktif ? $tapelAktif->id : '' }}">
+                            <input type="text" class="form-control bg-light"
+                                value="{{ $tapelAktif ? $tapelAktif->tahun_ajaran : '-' }}" readonly>
                         </div>
-
                         <div class="col-md-6">
-                            <label class="form-label fw-bold">Jenis Surat</label>
+                            <label class="form-label fw-bold">Jenis Template Surat</label>
                             <select name="tipe_surat_id" class="form-select" required>
-                                <option value="">- Pilih Surat -</option>
+                                <option value="">- Pilih Template -</option>
                                 @foreach ($tipeSurats as $tipe)
                                     <option value="{{ $tipe->id }}"
-                                        {{ old('tipe_surat_id') == $tipe->id ? 'selected' : '' }}>
-                                        {{ $tipe->judul_surat }}
+                                        {{ old('tipe_surat_id') == $tipe->id ? 'selected' : '' }}>{{ $tipe->judul_surat }}
                                     </option>
                                 @endforeach
                             </select>
                         </div>
+                    </div>
 
+                    <div class="row g-3">
                         <div class="col-md-12">
-                            <label class="form-label fw-bold">Guru / GTK</label>
+                            <label class="form-label fw-bold">Nama Guru / GTK</label>
                             <select name="gtk_id" class="form-select" required>
                                 <option value="">- Pilih Guru -</option>
                                 @foreach ($guruList as $g)
@@ -284,104 +118,154 @@
                             </select>
                         </div>
                     </div>
-                </form>
 
-                <div class="alert alert-info mt-4 mb-0" style="background:#00BFF3;color:white;">
-                    <i class="bx bx-info-circle me-1"></i> Silahkan pilih data lalu klik tombol **Tampilkan**.
-                </div>
-
-                {{-- 3. AREA PREVIEW SURAT --}}
-                @if (session('preview_surat'))
-                    @php
-                        $setting = session('template_setting');
-                        $kertasDB = $setting->ukuran_kertas ?? 'A4';
-                        $useKop = $setting->use_kop ?? 0;
-                        $isiSuratRaw = session('preview_surat');
-                        // Bersihkan entities font
-                        $isiSuratRaw = str_replace('&quot;', "'", $isiSuratRaw);
-                    @endphp
-
-                    <hr class="my-4">
-
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <div>
-                            <h5 class="fw-bold mb-1 text-primary"><i class="bx bx-file"></i> Preview Surat</h5>
-                            <small class="text-muted">
-                                Kertas: <b>{{ $kertasDB }}</b> |
-                                Mode Kop: <b>{{ $useKop == 1 ? 'Aktif (Jarak 3.5cm)' : 'Non-Aktif' }}</b>
-                            </small>
-                        </div>
-                        <button onclick="window.print()" class="btn btn-success">
-                            <i class="bx bx-printer me-1"></i> Cetak / PDF
+                    <div class="mt-4 text-end">
+                        <button type="submit" class="btn btn-primary shadow-sm px-4">
+                            <i class='bx bx-show me-1'></i> Tampilkan Preview
                         </button>
                     </div>
-
-                    {{-- Wrapper Visual --}}
-                    <div id="preview-wrapper-bg"></div>
-
-                    {{-- Data Hidden untuk JS --}}
-                    <textarea id="raw_html_content" style="display:none;">{!! $isiSuratRaw !!}</textarea>
-                    <input type="hidden" id="paper_size_val" value="{{ $kertasDB }}">
-                    <input type="hidden" id="use_kop_val" value="{{ $useKop }}">
-                @endif
+                </form>
             </div>
         </div>
+
+        {{-- 2. AREA PREVIEW & TOMBOL CETAK RESMI --}}
+        @if (session('preview_surat'))
+            @php
+                $setting = session('template_setting');
+                $mt = $setting->margin_top ?? 20;
+                $mr = $setting->margin_right ?? 25;
+                $mb = $setting->margin_bottom ?? 20;
+                $ml = $setting->margin_left ?? 25;
+
+                $w = '210mm';
+                $h = 297;
+                if (($setting->ukuran_kertas ?? 'A4') == 'F4') {
+                    $w = '215mm';
+                    $h = 330;
+                }
+                if (($setting->ukuran_kertas ?? 'A4') == 'Legal') {
+                    $w = '216mm';
+                    $h = 356;
+                }
+                if (($setting->ukuran_kertas ?? 'A4') == 'Letter') {
+                    $w = '216mm';
+                    $h = 279;
+                }
+            @endphp
+
+            <div class="card shadow-sm border-0" id="previewSection">
+                <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center sticky-top"
+                    style="top: 70px; z-index: 100">
+                    <div>
+                        <h5 class="fw-bold mb-0 text-primary">Hasil Preview Surat</h5>
+                        <small class="text-muted">Klik Cetak Resmi untuk mendaftarkan nomor surat.</small>
+                    </div>
+
+                    {{-- TOMBOL CETAK RESMI DISINI --}}
+                    <form action="{{ route('admin.administrasi.surat-keluar-guru.cetak') }}" method="POST"
+                        onsubmit="return copyPreview(this)">
+                        @csrf
+                        <input type="hidden" name="tipe_surat_id" value="{{ old('tipe_surat_id') }}">
+                        <input type="hidden" name="gtk_id" value="{{ old('gtk_id') }}">
+                        <input type="hidden" name="tanggal_surat" value="{{ old('tanggal_surat') }}">
+                        <textarea name="html_content" style="display:none;"></textarea>
+
+                        <button type="submit" class="btn btn-success shadow-sm px-4">
+                            <i class='bx bx-printer me-1'></i> Cetak Resmi
+                        </button>
+                    </form>
+                </div>
+
+                <div class="card-body p-0">
+                    <div class="preview-desk">
+                        <div class="paper-sheet" id="paperContent"
+                            style="padding: {{ $mt }}mm {{ $mr }}mm {{ $mb }}mm {{ $ml }}mm; width: {{ $w }}; min-height: {{ $h }}mm;">
+                            {!! session('preview_surat') !!}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        @endif
     </div>
 
-    {{-- 4. JAVASCRIPT --}}
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.js"></script>
-
-    <script>
-        $(document).ready(function() {
-            const rawContent = $('#raw_html_content').val();
-            const paperSize = $('#paper_size_val').val();
-            const useKop = $('#use_kop_val').val();
-            const wrapper = document.getElementById('preview-wrapper-bg');
-            const pageDivider = '<div class="page-break-divider"></div>';
-
-            if (rawContent) {
-                let pages = [];
-                if (rawContent.includes('page-break-divider')) {
-                    pages = rawContent.split(pageDivider);
-                } else {
-                    pages = [rawContent];
+    @push('scripts')
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script>
+            // Ambil HTML dari preview untuk dikirim ke controller cetak
+            function copyPreview(formEl) {
+                const paperDiv = document.getElementById('paperContent');
+                const textarea = formEl.querySelector('textarea[name="html_content"]');
+                if (paperDiv && textarea) {
+                    textarea.value = paperDiv.innerHTML;
                 }
-
-                pages.forEach((pageHtml, index) => {
-                    if (pageHtml.trim() === '') return;
-
-                    const pageDiv = document.createElement('div');
-                    pageDiv.className = `page-instance paper-${paperSize}`;
-
-                    if (index === 0 && useKop == '1') {
-                        pageDiv.classList.add('has-kop');
-                    }
-
-                    const contentDiv = `<div class="ql-editor">${pageHtml}</div>`;
-                    pageDiv.innerHTML = contentDiv;
-                    wrapper.appendChild(pageDiv);
-
-                    setTimeout(() => {
-                        restoreTableWidthsInPreview(pageDiv);
-                    }, 50);
-                });
+                return true;
             }
 
-            function restoreTableWidthsInPreview(container) {
-                const tables = container.querySelectorAll('table');
-                tables.forEach(table => {
-                    table.style.tableLayout = 'fixed';
-                    table.style.width = '100%'; // Pastikan tabel selalu 100%
-                    const firstRow = table.querySelector('tr');
-                    if (firstRow) {
-                        Array.from(firstRow.cells).forEach(cell => {
-                            const w = cell.style.width || cell.getAttribute('width');
-                            if (w) cell.style.width = w;
-                        });
-                    }
+            // === SCRIPT AUTO PRINT ===
+            @if (session('auto_print_content') && session('print_margins'))
+                window.onload = function() {
+                    var rawContent = {!! json_encode(session('auto_print_content')) !!};
+                    var margins = {!! json_encode(session('print_margins')) !!};
+                    var marginHalamanDua = '5mm';
+
+                    var fullHtml = `
+                        <!DOCTYPE html>
+                        <html>
+                        <head>
+                            <title>Cetak Surat</title>
+                            <style>
+                                * { margin: 0; padding: 0; box-sizing: border-box; }
+                                @media print {
+                                    @page {
+                                        size: ` + margins.paper + `; 
+                                        margin-top: ` + marginHalamanDua + `;
+                                        margin-bottom: ` + marginHalamanDua + `;
+                                        margin-left: ` + margins.left + `mm;
+                                        margin-right: ` + margins.right + `mm;
+                                    }
+                                    @page :first {
+                                        margin-top: ` + margins.top + `mm;
+                                        margin-bottom: ` + margins.bottom + `mm;
+                                    }
+                                    html, body { margin: 0 !important; padding: 0 !important; width: 100%; height: 100%; }
+                                }
+                                body { font-family: 'Times New Roman', serif; font-size: 12pt; line-height: 1.5; color: #000; }
+                                p { margin-top: 0; margin-bottom: 1rem; }
+                                table { width: 100%; border-collapse: collapse; margin-bottom: 5px; }
+                                td, th { border: 1px solid black; padding: 3px; vertical-align: top; }
+                                table[border="0"] td, table[border="0"] th, 
+                                table[style*="border: 0"] td, table[style*="border: 0"] th,
+                                table[style*="border-width: 0"] td, table[style*="border-width: 0"] th,
+                                td[style*="border-width: 0"], th[style*="border-width: 0"] { 
+                                    border: none !important; 
+                                }
+                                .mce-pagebreak { 
+                                    page-break-after: always; height: 0 !important; margin: 0 !important; 
+                                    padding: 0 !important; line-height: 0 !important; display: block; 
+                                    visibility: hidden; border: none;
+                                }
+                            </style>
+                        </head>
+                        <body>` + rawContent + `</body>
+                        </html>
+                    `;
+
+                    var printWindow = window.open('', '_blank', 'height=800,width=1000');
+                    printWindow.document.write(fullHtml);
+                    printWindow.document.close();
+
+                    setTimeout(function() {
+                        printWindow.focus();
+                        printWindow.print();
+                    }, 1000);
+                };
+            @endif
+
+            @if (session('preview_surat'))
+                document.getElementById("previewSection").scrollIntoView({
+                    behavior: "smooth"
                 });
-            }
-        });
-    </script>
+            @endif
+        </script>
+    @endpush
 @endsection
