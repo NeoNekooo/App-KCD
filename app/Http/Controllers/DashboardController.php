@@ -11,8 +11,6 @@ use App\Models\Rombel;
 use App\Models\Sekolah;
 use App\Http\Controllers\Controller;
 
-
-
 class DashboardController extends Controller
 {
     public function index()
