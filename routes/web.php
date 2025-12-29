@@ -110,7 +110,9 @@ Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])
          ->name('logout');
 
 // Halaman Depan
- Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+Route::get('/', function () {
+        return view('auth.login-custom');
+    });
 
 Route::get('/scan/{id}', [PublicScanController::class, 'showVerificationPage'])->name('scan.page');
 Route::post('/scan/verify', [PublicScanController::class, 'processVerification'])->name('scan.verify');
@@ -123,10 +125,7 @@ Route::post('/scan/verify', [PublicScanController::class, 'processVerification']
 Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () {
 
     // Dashboard (dari V1)
-    Route::get('/dashboard', function () {
-        return view('admin.dashboard');
-    })->name('dashboard');
-
+ Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     /*
     |--------------------------------------------------------------------------
     | Personal
