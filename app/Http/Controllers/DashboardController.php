@@ -5,8 +5,6 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
-
-// Import Model-model kamu
 use App\Models\Siswa;
 use App\Models\Gtk;
 use App\Models\Rombel;

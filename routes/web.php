@@ -110,9 +110,7 @@ Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])
          ->name('logout');
 
 // Halaman Depan
-Route::get('/', function () {
-        return view('auth.login-custom');
-    });
+ Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
 Route::get('/scan/{id}', [PublicScanController::class, 'showVerificationPage'])->name('scan.page');
 Route::post('/scan/verify', [PublicScanController::class, 'processVerification'])->name('scan.verify');
