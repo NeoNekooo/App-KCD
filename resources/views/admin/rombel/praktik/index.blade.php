@@ -12,14 +12,14 @@
     <div class="card-header">
         <div class="d-flex flex-wrap justify-content-between align-items-center">
             <h5 class="card-title mb-2 mb-md-0">Data Rombel Praktik</h5>
-            
+
             {{-- Tombol-tombol aksi sudah dihapus --}}
             {{-- <small class="text-muted">Menampilkan data rombel yang ditarik dari server.</small> --}}
         </div>
     </div>
-    
+
     {{-- Div untuk tabel responsif --}}
-    <div class="table-responsive text-nowrap"> 
+    <div class="table-responsive text-nowrap">
         <table class="table table-hover">
             <thead>
                 <tr>
@@ -41,15 +41,15 @@
                         <td>
                             <input class="form-check-input row-checkbox" type="checkbox" value="{{ $rombel->id }}">
                         </td>
-                        <td><strong>{{ $rombel->nama_rombel }}</strong></td>
+                        <td><strong><a href="{{ route('admin.kesiswaan.buku_induk.rombel_show', $rombel->id) }}">{{ $rombel->nama_rombel }}</a></strong></td>
                         <td>{{ $rombel->tingkat }}</td>
                         <td>{{ $rombel->tahun_ajaran }}</td> {{-- <-- DATA BARU --}}
-                        
+
                         {{-- Menggunakan operator null coalescing untuk relasi yang mungkin null --}}
-                        <td>{{ $rombel->jurusan->nama_jurusan ?? 'N/A' }}</td>
-                        <td>{{ $rombel->kurikulum->nama_kurikulum ?? 'N/A' }}</td>
-                        <td>{{ $rombel->wali->nama ?? 'Belum ada' }}</td>
-                        <td>{{ $rombel->ruang ?? '-' }}</td>
+                        <td>{{ $rombel->jurusan_name ?? 'N/A' }}</td>
+                        <td>{{ $rombel->kurikulum_name ?? 'N/A' }}</td>
+                        <td>{{ $rombel->wali_name ?? 'Belum ada' }}</td>
+                        <td>{{ $rombel->ruang_name ?? '-' }}</td>
                         <td>
                             @if ($rombel->is_moving_class)
                                 <span class="badge bg-label-success">Ya</span>
@@ -75,7 +75,7 @@
             </tbody>
         </table>
     </div>
-    
+
     {{-- Paginasi (Sesuai dengan kode Anda) --}}
     <div class="card-footer">
         {{ $rombels->links('pagination::simple-bootstrap-5') }}

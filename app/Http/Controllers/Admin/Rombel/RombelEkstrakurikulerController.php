@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Admin\Rombel;
 use App\Http\Controllers\Controller;
 use App\Models\Ekstrakurikuler;
 use App\Models\DaftarEkstrakurikuler;
-use App\Models\Gtk; 
+use App\Models\Gtk;
 use Illuminate\Http\Request;
 
 class RombelEkstrakurikulerController extends Controller
@@ -22,7 +22,7 @@ class RombelEkstrakurikulerController extends Controller
         // Data ini wajib ada agar dropdown di Modal Create/Edit bisa muncul
         $daftarEkskul = DaftarEkstrakurikuler::orderBy('nama')->get();
         $pembinas = Gtk::orderBy('nama')->get();
-        
+
         // 3. Kirim semua variabel ke view
         return view('admin.rombel.ekstrakurikuler.index', compact('ekskul', 'daftarEkskul', 'pembinas'));
     }
@@ -33,15 +33,20 @@ class RombelEkstrakurikulerController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            // Validasi input ID, pastikan tabel daftar_ekstrakurikuler ada isinya
-            'daftar_ekstrakurikuler_id' => 'required|exists:daftar_ekstrakurikuler,id',
-            'pembina_id'                => 'nullable|exists:gtks,id',
-            'prasarana'                 => 'nullable|string|max:255',
+            // Terima nama ekskul sebagai teks. Kami akan mencari atau membuat record master jika belum ada.
+            'nama'       => 'required|string|max:255',
+            'pembina_id'  => 'nullable|exists:gtks,id',
+            'prasarana'   => 'nullable|string|max:255',
         ]);
 
+        // Cari atau buat master daftar ekstrakurikuler berdasarkan nama (hindari duplikat)
+        $daftar = DaftarEkstrakurikuler::firstOrCreate(
+            ['nama' => trim($validated['nama'])]
+        );
+
         Ekstrakurikuler::create([
-            'daftar_ekstrakurikuler_id' => $validated['daftar_ekstrakurikuler_id'],
-            'pembina_id'                => $validated['pembina_id'],
+            'daftar_ekstrakurikuler_id' => $daftar->id,
+            'pembina_id'                => $validated['pembina_id'] ?? null,
             'prasarana'                 => $validated['prasarana'] ?? null,
         ]);
 
@@ -55,14 +60,18 @@ class RombelEkstrakurikulerController extends Controller
     public function update(Request $request, Ekstrakurikuler $ekstrakurikuler)
     {
         $validated = $request->validate([
-            'daftar_ekstrakurikuler_id' => 'required|exists:daftar_ekstrakurikuler,id',
-            'pembina_id'                => 'nullable|exists:gtks,id',
-            'prasarana'                 => 'nullable|string|max:255',
+            'nama'        => 'required|string|max:255',
+            'pembina_id'  => 'nullable|exists:gtks,id',
+            'prasarana'   => 'nullable|string|max:255',
         ]);
 
+        $daftar = DaftarEkstrakurikuler::firstOrCreate(
+            ['nama' => trim($validated['nama'])]
+        );
+
         $ekstrakurikuler->update([
-            'daftar_ekstrakurikuler_id' => $validated['daftar_ekstrakurikuler_id'],
-            'pembina_id'                => $validated['pembina_id'],
+            'daftar_ekstrakurikuler_id' => $daftar->id,
+            'pembina_id'                => $validated['pembina_id'] ?? null,
             'prasarana'                 => $validated['prasarana'] ?? null,
         ]);
 
@@ -80,4 +89,9 @@ class RombelEkstrakurikulerController extends Controller
         return redirect()->route('admin.rombel.ekstrakurikuler.index')
                          ->with('success', 'Ekstrakurikuler berhasil dihapus.');
     }
+
+    /**
+     * Menyimpan data ke database.
+     */
+
 }

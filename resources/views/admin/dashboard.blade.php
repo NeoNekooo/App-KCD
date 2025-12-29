@@ -1,3 +1,4 @@
+
 @extends('layouts.admin')
 
 @section('content')
@@ -12,10 +13,25 @@
                             <h4 class="hero-title text-white mb-1">Selamat Datang di Dashboard Sekolah 🎓</h4>
                             <p class="hero-subtitle mb-0">Sistem Informasi Akademik - Tahun Pelajaran 2025/2026</p>
                         </div>
-                        <div class="d-flex align-items-center">
-                            <img src="../assets/img/illustrations/man-with-laptop-light.png" alt="School" height="88"
-                                class="hero-img" />
-                        </div>
+                      <div class="d-flex align-items-center">
+
+                {{-- LOGIC GAMBAR DINAMIS --}}
+                @if(!empty($sekolah->logo) && Storage::disk('public')->exists($sekolah->logo))
+                    {{-- Tampilkan Logo Sekolah --}}
+                    <img src="{{ Storage::url($sekolah->logo) }}"
+                         alt="Logo Sekolah"
+                         height="40"
+                         class="hero-img rounded" {{-- rounded agar sedikit melengkung --}}
+                         style="background: rgba(255,255,255,0.2); padding: 5px;" />
+                @else
+                    {{-- Fallback: Tampilkan Gambar Ilustrasi Default jika logo belum diupload --}}
+                    <img src="../assets/img/illustrations/man-with-laptop-light.png"
+                         alt="School"
+                         height="88"
+                         class="hero-img" />
+                @endif
+
+            </div>
                     </div>
                 </div>
             </div>
@@ -23,60 +39,70 @@
 
         {{-- Ringkasan Data --}}
         <div class="row g-3 mb-4">
-            <div class="col-lg-3 col-md-6 col-12">
-                <div class="card stat-card">
-                    <div class="card-body">
-                        <div class="d-flex align-items-start justify-content-between">
-                            <div class="icon-circle icon-blue"><i class="bx bx-user fs-4"></i></div>
-                        </div>
-                        <span class="fw-semibold d-block mb-1">Jumlah Siswa</span>
-                        <h3 class="stat-number mb-1">1,256</h3>
-                        <small class="text-success fw-semibold">Aktif</small>
-                    </div>
+    {{-- CARD 1: SISWA --}}
+    <div class="col-lg-3 col-md-6 col-12">
+        <div class="card stat-card">
+            <div class="card-body">
+                <div class="d-flex align-items-start justify-content-between">
+                    <div class="icon-circle icon-blue"><i class="bx bx-user fs-4"></i></div>
                 </div>
+                <span class="fw-semibold d-block mb-1">Jumlah Siswa</span>
+                {{-- Mengambil $totalSiswa dari Controller --}}
+                <h3 class="stat-number mb-1">{{ number_format($totalSiswa) }}</h3>
+                <small class="text-success fw-semibold">Aktif</small>
             </div>
+        </div>
+    </div>
 
-            <div class="col-lg-3 col-md-6 col-12">
-                <div class="card stat-card">
-                    <div class="card-body">
-                        <div class="d-flex align-items-start justify-content-between">
-                            <div class="icon-circle icon-teal"><i class="bx bx-chalkboard fs-4"></i></div>
-                        </div>
-                        <span class="fw-semibold d-block mb-1">Jumlah Guru</span>
-                        <h3 class="stat-number mb-1">78</h3>
-                        <small class="text-muted">Tetap & Honorer</small>
-                    </div>
+    {{-- CARD 2: GURU / GTK --}}
+    <div class="col-lg-3 col-md-6 col-12">
+        <div class="card stat-card">
+            <div class="card-body">
+                <div class="d-flex align-items-start justify-content-between">
+                    <div class="icon-circle icon-teal"><i class="bx bx-chalkboard fs-4"></i></div>
                 </div>
+                <span class="fw-semibold d-block mb-1">Jumlah Guru</span>
+                {{-- Mengambil $totalGuru dari Controller --}}
+                <h3 class="stat-number mb-1">{{ number_format($totalGuru) }}</h3>
+                <small class="text-muted">Tetap & Honorer</small>
             </div>
+        </div>
+    </div>
 
-            <div class="col-lg-3 col-md-6 col-12">
-                <div class="card stat-card">
-                    <div class="card-body">
-                        <div class="d-flex align-items-start justify-content-between">
-                            <div class="icon-circle icon-green"><i class="bx bx-building fs-4"></i></div>
-                        </div>
-                        <span class="fw-semibold d-block mb-1">Jumlah Kelas</span>
-                        <h3 class="stat-number mb-1">36</h3>
-                        <small class="text-muted">X - XII</small>
-                    </div>
+    {{-- CARD 3: KELAS / ROMBEL --}}
+    <div class="col-lg-3 col-md-6 col-12">
+        <div class="card stat-card">
+            <div class="card-body">
+                <div class="d-flex align-items-start justify-content-between">
+                    <div class="icon-circle icon-green"><i class="bx bx-building fs-4"></i></div>
                 </div>
+                <span class="fw-semibold d-block mb-1">Jumlah Kelas</span>
+                {{-- Mengambil $totalKelas dari Controller --}}
+                <h3 class="stat-number mb-1">{{ number_format($totalKelas) }}</h3>
+                <small class="text-muted">Rombel Aktif</small>
             </div>
+        </div>
+    </div>
 
-            <div class="col-lg-3 col-md-6 col-12">
+   <div class="col-lg-3 col-md-6 col-12">
                 <div class="card stat-card">
                     <div class="card-body">
                         <div class="d-flex align-items-start justify-content-between">
                             <div class="icon-circle icon-yellow"><i class="bx bx-book fs-4"></i></div>
                         </div>
                         <span class="fw-semibold d-block mb-1">Mata Pelajaran</span>
-                        <h3 class="stat-number mb-1">52</h3>
+                        <h3 class="stat-number mb-1">
+                            {{ number_format($totalMapel) }}
+                            @if(!empty($mapelSample))
+                                <i class="bx bx-info-circle text-muted ms-2" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ e(implode(', ', $mapelSample)) }}"></i>
+                            @endif
+                        </h3>
                         <small class="text-muted">Produktif & Umum</small>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-
+</div>
     </div>
 @endsection
 
@@ -110,10 +136,14 @@
             background: radial-gradient(circle at top right, rgba(255, 255, 255, 0.2), transparent 70%);
         }
 
-        .hero-img {
-            opacity: 1;
-            filter: drop-shadow(0 6px 14px rgba(0, 0, 0, .08));
-        }
+      .hero-img {
+    opacity: 1;
+    filter: drop-shadow(0 6px 14px rgba(0, 0, 0, .08));
+    /* Tambahkan atau ubah baris ini: */
+    height: 100px; /* Ubah angka ini sesuai keinginan */    p
+    width: auto;  /* Agar proporsi gambar tetap terjaga */
+
+}
 
         /* Stat cards */
         .stat-card {
@@ -280,6 +310,10 @@
             };
             var chart = new ApexCharts(document.querySelector("#chartSiswa"), options);
             chart.render();
+
+            // Inisialisasi Bootstrap tooltips untuk seluruh halaman
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            tooltipTriggerList.map(function (el) { return new bootstrap.Tooltip(el); });
         });
     </script>
 @endpush

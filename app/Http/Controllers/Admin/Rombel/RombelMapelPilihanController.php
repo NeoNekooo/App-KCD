@@ -25,10 +25,11 @@ class RombelMapelPilihanController extends Controller
         // Mengambil data dari tabel 'rombels' dan memfilternya
         // hanya untuk yang jenisnya 'Mapel Pilihan'.
         $rombels = Rombel::with(['wali', 'jurusan', 'kurikulum'])
-                         ->where('jenis_rombel', 'Mapel Pilihan')
+                         // Toleran terhadap varian 'Matapelajaran Pilihan' atau 'Mapel Pilihan'
+                         ->whereRaw("LOWER(TRIM(jenis_rombel_str)) IN (?, ?)", ['matapelajaran pilihan', 'mapel pilihan'])
                          ->latest()
                          ->paginate(10);
-        
+
         return view('admin.rombel.mapel-pilihan.index', compact('rombels'));
     }
 }

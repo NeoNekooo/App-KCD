@@ -9,13 +9,12 @@
     <div class="card-header">
         <div class="d-flex flex-wrap justify-content-between align-items-center">
             <h5 class="card-title mb-2 mb-md-0">Data Rombel Mapel Pilihan</h5>
-            
             {{-- Tombol-tombol aksi sudah dihapus --}}
             <small class="text-muted">Menampilkan data rombel dari server.</small>
         </div>
     </div>
-    
-    <div class="table-responsive text-nowrap"> 
+
+    <div class="table-responsive text-nowrap">
         <table class="table table-hover">
             <thead>
                 <tr>
@@ -39,14 +38,14 @@
                         <td><strong>{{ $rombel->nama_rombel }}</strong></td>
                         <td>{{ $rombel->tingkat }}</td>
                         <td>{{ $rombel->tahun_ajaran }}</td> {{-- <-- DATA BARU --}}
-                        
+
                         {{-- Data dari controller 'with('siswa')' --}}
                         <td>{{ $rombel->siswa->count() }} Siswa</td> {{-- <-- DATA BARU --}}
 
-                        <td>{{ $rombel->jurusan->nama_jurusan ?? 'N/A' }}</td>
-                        <td>{{ $rombel->kurikulum->nama_kurikulum ?? 'N/A' }}</td>
-                        <td>{{ $rombel->wali->nama ?? 'Belum ada wali' }}</td>
-                        <td>{{ $rombel->ruang ?? '-' }}</td>
+                        <td>{{ $rombel->jurusan_name ?? 'N/A' }}</td>
+                        <td>{{ $rombel->kurikulum_name ?? 'N/A' }}</td>
+                        <td>{{ $rombel->wali_name ?? 'Belum ada wali' }}</td>
+                        <td>{{ $rombel->ruang_name ?? '-' }}</td>
                     </tr>
                 @empty
                     <tr>
@@ -57,7 +56,6 @@
             </tbody>
         </table>
     </div>
-    
     {{-- Paginasi --}}
     <div class="card-footer">
         {{ $rombels->links('pagination::simple-bootstrap-5') }}

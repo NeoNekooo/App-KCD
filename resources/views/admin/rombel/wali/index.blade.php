@@ -10,13 +10,12 @@
     <div class="card-header">
         <div class="d-flex flex-wrap justify-content-between align-items-center">
             <h5 class="card-title mb-2 mb-md-0">Data Wali Kelas</h5>
-            
             {{-- Tombol-tombol aksi sudah dihapus --}}
             {{-- <small class="text-muted">Menampilkan data rombel dari server.</small> --}}
         </div>
     </div>
 
-    <div class="table-responsive text-nowrap"> 
+    <div class="table-responsive text-nowrap">
         <table class="table table-hover">
             <thead>
                 <tr>
@@ -35,17 +34,17 @@
                             <input class="form-check-input row-checkbox" type="checkbox" value="{{ $rombel->id }}">
                         </td>
                         <td><strong>{{ $rombel->nama_rombel }}</strong></td>
-                        
+
                         {{-- Data dari relasi 'wali' --}}
-                        <td>{{ $rombel->wali->nama ?? 'Data Wali Hilang' }}</td>
+                        <td>{{ $rombel->wali_name ?? 'Data Wali Hilang' }}</td>
 
                         {{-- Data dari relasi 'jurusan' (sudah diambil di controller) --}}
-                        <td>{{ $rombel->jurusan->nama_jurusan ?? 'N/A' }}</td>
+                        <td>{{ $rombel->jurusan_name ?? 'N/A' }}</td>
 
                         {{-- Data dari kolom 'tahun_ajaran' (sesuai migrasi) --}}
-                        <td>{{ $rombel->tahun_ajaran }}</td>
+                        <td>{{ $rombel->tahun_ajaran ?? '-' }}</td>
 
-                        <td>{{ $rombel->ruang ?? '-' }}</td>
+                        <td>{{ $rombel->ruang_name ?? '-' }}</td>
                     </tr>
                 @empty
                     <tr>
