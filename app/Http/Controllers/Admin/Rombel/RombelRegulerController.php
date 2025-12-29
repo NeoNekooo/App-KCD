@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Admin\Rombel;
 
 use App\Http\Controllers\Controller;
-use App\Models\Rombel;
+use App\Models\Rombel; 
 use Illuminate\Http\Request;
 
 class RombelRegulerController extends Controller

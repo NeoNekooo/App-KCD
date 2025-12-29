@@ -11,13 +11,13 @@
     </h4>
 
     <div class="d-flex gap-2 align-items-center flex-wrap">
-        
+
         @if($siswas->isNotEmpty())
-            
+
             {{-- [BARU] TOMBOL CETAK SEMUA PDF --}}
             {{-- Menggunakan parameter 'ids' dari URL jika ada, atau mengambil list ID yang sedang tampil --}}
-            <a href="{{ route('admin.kesiswaan.siswa.cetak_pdf_multiple', ['ids' => request('ids') ?? $siswas->pluck('id')->implode(',')]) }}" 
-   target="_blank" 
+            <a href="{{ route('admin.kesiswaan.siswa.cetak_pdf_multiple', ['ids' => request('ids') ?? $siswas->pluck('id')->implode(',')]) }}"
+   target="_blank"
    class="btn btn-primary btn-sm shadow-sm">
     <i class="bx bxs-file-pdf me-1"></i> Cetak Semua ({{ $siswas->count() }})
 </a>
@@ -31,7 +31,7 @@
             <a href="{{ route('admin.kesiswaan.siswa.cetak_kartu', $siswas->first()->id) }}" target="_blank" class="btn btn-info btn-sm shadow-sm" id="header-btn-kartu">
                 <i class="bx bx-id-card me-1"></i> Kartu Pelajar
             </a>
-            
+
             {{-- 3. DROPDOWN PILIH SISWA --}}
             <div class="dropdown">
                 <button class="btn btn-outline-primary dropdown-toggle btn-sm" type="button" id="siswaDropdown" data-bs-toggle="dropdown" aria-expanded="false">
@@ -47,8 +47,8 @@
                     <div id="siswaListContainer">
                         @foreach($siswas as $listSiswa)
                             <li>
-                                <a class="dropdown-item rounded mb-1 {{ $loop->first ? 'active' : '' }}" 
-                                   href="javascript:void(0);" 
+                                <a class="dropdown-item rounded mb-1 {{ $loop->first ? 'active' : '' }}"
+                                   href="javascript:void(0);"
                                    onclick="switchSiswa('{{ $listSiswa->id }}', this)"
                                    data-name="{{ strtolower($listSiswa->nama) }}">
                                     <div class="d-flex align-items-center">
@@ -78,9 +78,9 @@
     @foreach($siswas as $siswa)
 
     @php
-        $namaKelas = $siswa->nama_rombel; 
+        $namaKelas = $siswa->nama_rombel;
         if (empty($namaKelas)) {
-            $namaKelas = $siswa->rombel->nama ?? null; 
+            $namaKelas = $siswa->rombel->nama ?? null;
         }
         if (empty($namaKelas) && $siswa->peserta_didik_id) {
             $rombelJson = \App\Models\Rombel::where('anggota_rombel', 'like', '%'.$siswa->peserta_didik_id.'%')->first();
@@ -91,11 +91,11 @@
 
     {{-- WRAPPER PER SISWA --}}
     <div class="siswa-view-wrapper fade-in-animation" id="view-{{ $siswa->id }}" style="{{ !$loop->first ? 'display: none;' : '' }}">
-        
+
         <div class="card shadow-sm overflow-hidden">
             <div class="card-body p-0">
                 <div class="row g-0">
-                    
+
                     {{-- SIDEBAR KIRI --}}
                     <div class="col-lg-3 border-end d-flex flex-column align-items-center text-center py-4 px-3 bg-light-gray">
                         {{-- Form Foto --}}
@@ -127,7 +127,7 @@
                                 {{ strtoupper($siswa->status ?? 'AKTIF') }}
                             </span>
                         </div>
-                        
+
                         {{-- TOMBOL DI SINI SUDAH DIHAPUS (DIPINDAH KE HEADER) --}}
                     </div>
 
@@ -224,7 +224,7 @@
                                     <div class="row-clean"><label>Tahun Lahir <i class="bx bx-pencil ms-1 text-primary small"></i></label><div class="sep">:</div><div class="inp"><input type="text" name="tahun_lahir_ayah" class="clean-input editable-field" value="{{ $siswa->tahun_lahir_ayah }}" readonly></div></div>
                                     <div class="row-clean"><label>Pendidikan <i class="bx bx-pencil ms-1 text-primary small"></i></label><div class="sep">:</div><div class="inp"><input type="text" name="pendidikan_ayah_id_str" class="clean-input editable-field" value="{{ $siswa->pendidikan_ayah_id_str }}" readonly></div></div>
                                     <div class="row-clean"><label>Penghasilan <i class="bx bx-pencil ms-1 text-primary small"></i></label><div class="sep">:</div><div class="inp"><input type="text" name="penghasilan_ayah_id_str" class="clean-input editable-field" value="{{ $siswa->penghasilan_ayah_id_str }}" readonly></div></div>
-                                    
+
                                     <hr class="my-2 border-dashed">
                                     <h6 class="small fw-bold text-uppercase text-dark mb-2">Ibu</h6>
                                     <div class="row-clean"><label>Nama Ibu <i class="bx bx-lock-alt ms-1 text-muted small"></i></label><div class="sep">:</div><div class="inp locked-dapodik">{{ $siswa->nama_ibu ?? '-' }}</div></div>
@@ -232,7 +232,7 @@
                                     <div class="row-clean"><label>Tahun Lahir <i class="bx bx-pencil ms-1 text-primary small"></i></label><div class="sep">:</div><div class="inp"><input type="text" name="tahun_lahir_ibu" class="clean-input editable-field" value="{{ $siswa->tahun_lahir_ibu }}" readonly></div></div>
                                     <div class="row-clean"><label>Pendidikan <i class="bx bx-pencil ms-1 text-primary small"></i></label><div class="sep">:</div><div class="inp"><input type="text" name="pendidikan_ibu_id_str" class="clean-input editable-field" value="{{ $siswa->pendidikan_ibu_id_str }}" readonly></div></div>
                                     <div class="row-clean"><label>Penghasilan <i class="bx bx-pencil ms-1 text-primary small"></i></label><div class="sep">:</div><div class="inp"><input type="text" name="penghasilan_ibu_id_str" class="clean-input editable-field" value="{{ $siswa->penghasilan_ibu_id_str }}" readonly></div></div>
-                                    
+
                                     <hr class="my-2 border-dashed">
                                     {{-- <h6 class="small fw-bold text-uppercase text-dark mb-2">Wali (Editable)</h6> --}}
                                     <div class="row-clean"><label>Nama Wali <i class="bx bx-lock-alt ms-1 text-muted small"></i></label><div class="sep">:</div><div class="inp locked-dapodik">{{ $siswa->nama_wali ?? '-' }}</div></div>
@@ -293,11 +293,39 @@
     .row-clean .inp { width: 62%; }
 
     /* Base Input */
-    .clean-input { width: 100%; background: transparent !important; border: none !important; padding: 0; margin: 0; outline: none !important; box-shadow: none !important; font-size: 0.9375rem; font-family: inherit; color: #697a8d; pointer-events: none; }
+.clean-input {
+        width: 100%;
+        background: transparent !important;
+        border: 1px solid transparent !important; /* Ubah jadi transparent border biar layout gak lompat */
+        padding: 2px 5px; /* Tambah padding dikit */
+        margin: 0;
+        outline: none !important;
+        box-shadow: none !important;
+        font-size: 0.9375rem;
+        font-family: inherit;
+        color: #697a8d;
+        pointer-events: none;
+        transition: all 0.3s ease-in-out; /* Animasi transisi halus */
+        border-radius: 4px;
+    }
+
 
     /* Editing Mode */
-    .clean-input.editing { pointer-events: auto; color: #333; cursor: text; border: none !important; }
-    .clean-input.editing:focus { border: none !important; outline: none !important; }
+
+  .clean-input.editing {
+        pointer-events: auto;
+        cursor: text;
+        color: #333;
+
+        /* Ubah Background jadi Kuning Muda/Abu terang supaya kontras */
+        background-color: #fff8e1 !important; /* Kuning muda soft */
+        border: 1px dashed #ffc107 !important; /* Garis putus-putus kuning/orange */
+    }
+    .clean-input.editing:focus {
+        background-color: #ffffff !important; /* Putih saat mengetik */
+        border: 1px solid #696cff !important; /* Border biru solid (warna tema) */
+        box-shadow: 0 0 0 2px rgba(105, 108, 255, 0.2) !important; /* Efek glow biru */
+    }
     .clean-input::placeholder { color: #b4bdc6; font-style: italic; opacity: 0; }
     .clean-input.editing::placeholder { opacity: 1; }
 
@@ -323,7 +351,7 @@
         const target = document.getElementById('view-' + id);
         target.style.display = 'block';
         target.classList.remove('fade-in-animation');
-        void target.offsetWidth; 
+        void target.offsetWidth;
         target.classList.add('fade-in-animation');
 
         document.querySelectorAll('.dropdown-item').forEach(el => el.classList.remove('active'));
@@ -331,7 +359,7 @@
 
         const btnPdf = document.getElementById('header-btn-pdf');
         const btnKartu = document.getElementById('header-btn-kartu');
-        
+
         if(btnPdf) btnPdf.href = `/admin/kesiswaan/siswa/${id}/cetak-pdf`;
         if(btnKartu) btnKartu.href = `/admin/kesiswaan/siswa/${id}/cetak-kartu`;
     };
@@ -352,7 +380,7 @@
         // Handle Tombol Batal
         document.querySelectorAll('.btn-cancel-edit').forEach(btn => {
             btn.addEventListener('click', function() {
-                location.reload(); 
+                location.reload();
             });
         });
 
@@ -363,10 +391,10 @@
                 const form = document.getElementById('form-siswa-' + id);
                 const actionBtns = document.getElementById('action-buttons-' + id);
                 const editBtn = document.getElementById('btn-edit-' + id);
-                
-                editBtn.classList.add('d-none'); 
-                actionBtns.classList.remove('d-none'); 
-                actionBtns.classList.add('d-flex'); 
+
+                editBtn.classList.add('d-none');
+                actionBtns.classList.remove('d-none');
+                actionBtns.classList.add('d-flex');
 
                 // LOGIKA: Aktifkan input yang boleh diedit
                 form.querySelectorAll('.clean-input').forEach(input => {
@@ -374,7 +402,7 @@
                         input.removeAttribute('readonly');
                         input.removeAttribute('disabled');
                         input.classList.add('editing');
-                        
+
                         // Placeholder trick
                         if(input.value.trim() === '-') {
                             input.value = '';

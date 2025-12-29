@@ -27,11 +27,11 @@
 
         /* SECTIONS */
         .section-title { font-size: 12px; font-weight: bold; margin: 15px 0 5px 0; background-color: #f0f0f0; padding: 5px; border-left: 4px solid #333; }
-        
+
         /* TABEL UMUM */
         .data-table { width: 100%; border-collapse: collapse; margin-bottom: 10px; }
         .data-table td, .data-table th { padding: 4px 6px; vertical-align: top; }
-        
+
         /* Tabel Polos (Identitas) */
         .table-clean td { border: none; }
         .label { width: 28%; font-weight: bold; color: #444; }
@@ -62,7 +62,7 @@
         .bold { font-weight: bold; }
         .page-break { page-break-after: always; }
         .text-muted { color: #777; font-style: italic; }
-        
+
         footer { position: fixed; bottom: 0; left: 0; right: 0; height: 30px; font-size: 9px; text-align: right; border-top: 1px solid #ddd; padding-top: 5px; color: #888; }
     </style>
 </head>
@@ -84,7 +84,7 @@
                 <div class="kop-h1">DINAS PENDIDIKAN</div>
                 <div class="kop-h2">{{ strtoupper($sekolah->nama ?? 'NAMA SEKOLAH') }}</div>
                 <div class="kop-address">
-                    {{ $sekolah->alamat_jalan ?? 'Alamat Sekolah' }} 
+                    {{ $sekolah->alamat_jalan ?? 'Alamat Sekolah' }}
                     @if($sekolah->nomor_telepon) | Telp: {{ $sekolah->nomor_telepon }} @endif
                     @if($sekolah->email) | Email: {{ $sekolah->email }} @endif
                 </div>
@@ -142,12 +142,12 @@
 
     {{-- C. KEPEGAWAIAN (DENGAN LOGIKA SK OTOMATIS) --}}
     <div class="section-title">C. DATA KEPEGAWAIAN</div>
-    
+
     @php
         // --- LOGIKA PENGAMBILAN DATA SK (Priority: Utama -> Riwayat Pangkat) ---
         $skPdf = $gtk->sk_pengangkatan;
         $tmtPdf = $gtk->tmt_pengangkatan;
-        
+
         // Jika data utama kosong, cek riwayat kepangkatan
         if (empty($skPdf)) {
             $hist = json_decode($gtk->rwy_kepangkatan, true);
@@ -264,7 +264,7 @@
     {{-- ================================================================= --}}
     {{-- HALAMAN 2: LAMPIRAN PEMBELAJARAN (ROMBEL) --}}
     {{-- ================================================================= --}}
-    
+
     <div class="page-break"></div>
 
     <div class="page-title" style="margin-top: 20px;">LAMPIRAN REKAPITULASI PEMBELAJARAN</div>
@@ -280,39 +280,44 @@
             </tr>
         </thead>
         <tbody>
-            @php 
-                $totalJam = 0; 
-                $no = 1; 
+            @php
+                $totalJam = 0;
+                $no = 1;
                 $adaJadwal = false;
             @endphp
 
-            @forelse ($rombelMengajar as $rombel)
-                @if (isset($rombel->pembelajaran) && is_array($rombel->pembelajaran))
-                    @foreach ($rombel->pembelajaran as $mapel)
-                        @if (isset($mapel['ptk_id']) && $mapel['ptk_id'] == $gtk->ptk_id)
-                            @php 
-                                $jam = (int) ($mapel['jam_mengajar_per_minggu'] ?? 0);
-                                $totalJam += $jam;
-                                $adaJadwal = true;
-                            @endphp
-                            <tr>
-                                <td class="text-center">{{ $no++ }}</td>
-                                <td>
-                                    <strong>{{ $rombel->nama ?? '-' }}</strong> <br>
-                                    <span class="text-muted" style="font-size: 9px;">
-                                        {{ $rombel->jenis_rombel_str ?? 'Kelas' }} - Tk. {{ $rombel->tingkat_pendidikan_id ?? '-' }} <br>
-                                        {{ $rombel->kurikulum_id_str ?? '-' }}
-                                    </span>
-                                </td>
-                                <td>{{ $mapel['nama_mata_pelajaran'] ?? '-' }}</td>
-                                <td class="text-center">{{ $jam }}</td>
-                            </tr>
-                        @endif
-                    @endforeach
-                @endif
-            @empty
-                {{-- Loop Kosong (Tidak ada rombel) --}}
-            @endforelse
+          @forelse ($rombelMengajar as $rombel)
+    @php
+        // Pastikan pembelajaran adalah array
+        $pembelajaran = is_array($rombel->pembelajaran) ? $rombel->pembelajaran : json_decode($rombel->pembelajaran, true);
+    @endphp
+
+    @if ($pembelajaran)
+        @foreach ($pembelajaran as $mapel)
+            {{-- Bandingkan ptk_id dengan memaksanya menjadi string agar identik --}}
+            @if (isset($mapel['ptk_id']) && (string)$mapel['ptk_id'] === (string)$gtk->ptk_id)
+                @php
+                    $jam = (int) ($mapel['jam_mengajar_per_minggu'] ?? 0);
+                    $totalJam += $jam;
+                    $adaJadwal = true;
+                @endphp
+                <tr>
+                    <td class="text-center">{{ $no++ }}</td>
+                    <td>
+                        <strong>{{ $rombel->nama_rombel ?? $rombel->nama }}</strong> <br>
+                        <span class="text-muted" style="font-size: 9px;">
+                            {{ $rombel->jenis_rombel_str ?? 'Kelas' }} - Tk. {{ $rombel->tingkat_pendidikan_id ?? '-' }} <br>
+                            {{ $rombel->kurikulum_id_str ?? '-' }}
+                        </span>
+                    </td>
+                    <td>{{ $mapel['nama_mata_pelajaran'] ?? '-' }}</td>
+                    <td class="text-center">{{ $jam }}</td>
+                </tr>
+            @endif
+        @endforeach
+    @endif
+@empty
+@endforelse
 
             @if(!$adaJadwal)
                 <tr><td colspan="4" class="text-center text-muted" style="padding: 10px;">Tidak ada data jam mengajar yang ditemukan.</td></tr>
@@ -331,7 +336,7 @@
         <div class="signature-box">
             <p>Cianjur, {{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}</p>
             <p>Yang Bersangkutan,</p>
-            
+
             <div style="height: 60px; margin: 10px auto;">
                 @if($gtk->tandatangan && file_exists(storage_path('app/public/' . $gtk->tandatangan)))
                     <img src="{{ public_path('storage/' . $gtk->tandatangan) }}" style="max-height: 60px; max-width: 150px;">

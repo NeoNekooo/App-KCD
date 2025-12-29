@@ -3,165 +3,203 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cetak Kartu - {{ $siswa->nama }}</title>
+    <title>Cetak Kartu Siswa</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+
     <style>
-        :root {
-            --card-width: 60mm;
-            --card-height: 95mm;
-        }
-
+        /* --- RESET & BASIC --- */
+        * { box-sizing: border-box; }
         body {
-            background-color: #e9e9e9;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
+            font-family: 'Public Sans', sans-serif;
+            background-color: #555;
             margin: 0;
-            padding: 20px;
-            box-sizing: border-box;
-            flex-direction: column;
+            padding: 0;
         }
 
-        .id-card {
-            width: var(--card-width);
-            height: var(--card-height);
+        /* --- TOOLBAR --- */
+        .toolbar {
+            width: 210mm;
+            margin: 20px auto;
+            background: white;
+            padding: 15px 20px;
             border-radius: 8px;
-            overflow: hidden;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
             display: flex;
-            flex-direction: column;
-            background-color: white;
-            border: 1px solid #eee;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            justify-content: space-between;
+            align-items: center;
         }
-        
-        .id-card-header {
-            padding: 10px 12px;
+
+        .btn-print {
+            padding: 10px 25px;
+            background: #696cff;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
             display: flex;
             align-items: center;
             gap: 8px;
-            font-size: 10px;
-            font-weight: bold;
-            color: #333;
+            text-decoration: none;
+        }
+
+        /* --- SIMULASI KERTAS A4 --- */
+        .a4-sheet {
+            width: 210mm;
+            min-height: 297mm;
+            background: white;
+            margin: 0 auto 20px auto;
+            padding: 10mm;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            gap: 8mm;
+            justify-items: center;
+            align-items: center;
+            page-break-after: always;
+        }
+
+        /* --- CONTAINER KARTU --- */
+        .id-card-container {
+            width: 54mm;
+            height: 86mm;
+            background-color: #fff;
+            border-radius: 8px;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid #eee;
+            display: flex;
+            flex-direction: column;
+            background-image: radial-gradient(#696cff 0.5px, transparent 0.5px), radial-gradient(#696cff 0.5px, #fff 0.5px);
+            background-size: 15px 15px;
+        }
+
+        .header-section {
+            width: 100%;
+            padding: 0 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: white !important;
+            border-bottom: 0.5px solid #eee;
+            height: 38px;
             flex-shrink: 0;
         }
-        
-        .school-logo {
-            width: 24px;
-            height: 24px;
-        }
 
-        .card-photo-area {
+        .header-logo { width: 26px; height: 26px; object-fit: contain; }
+        .header-text { font-size: 11px; font-weight: 900; color: #002b5c; text-transform: uppercase; line-height: 1.1; }
+
+        .content-wrapper {
             flex-grow: 1;
-            position: relative;
-            background-size: cover;
-            background-position: center;
-        }
-        
-        /* PERUBAHAN: Selector .card-overlay dihapus dari CSS */
-
-        .card-content {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            padding: 0 12px 95px 12px;
-            box-sizing: border-box;
-            z-index: 2;
-            color: white;
-        }
-
-        .student-info .nama {
-            font-size: 15px;
-            font-weight: bold;
-            text-transform: uppercase;
-            margin-bottom: 2px;
-            /* Bayangan dipertegas untuk keterbacaan */
-            text-shadow: 1px 1px 5px rgba(0,0,0,1); 
-        }
-        
-        /* PERUBAHAN: Latar belakang NISN dihapus dan diganti text-shadow */
-        .student-info .nisn {
-            font-size: 11px;
-            background-color: transparent; /* Latar dihilangkan */
-            padding: 2px 0; /* Padding disesuaikan */
-            display: inline-block;
-            text-shadow: 1px 1px 3px rgba(0,0,0,1); /* Ditambah bayangan */
-        }
-
-        .qr-code {
-            position: absolute;
-            bottom: 15px;
-            right: 15px;
-            z-index: 2;
-        }
-        
-        .qr-code svg {
-            width: 22mm;
-            height: 22mm;
-            display: block;
-        }
-
-        .print-button {
-            margin-top: 25px;
-            min-width: var(--card-width);
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 8px;
+            padding: 5px;
+            text-align: center;
+        }
+
+        .profile-img {
+            width: 75px; height: 75px;
+            border-radius: 50%; border: 3px solid white;
+            object-fit: cover;
+            margin-bottom: 8px;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+            background: #f0f0f0;
+        }
+
+        .user-name {
+            font-size: 13px; font-weight: 800; color: #ffffff;
+            text-transform: uppercase; margin-bottom: 2px; line-height: 1.2;
+            text-shadow: 0 1px 4px rgba(0,0,0,0.9);
+            padding: 0 5px;
+            display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+        }
+
+        .id-text {
+            font-size: 10px; color: #ffffff; font-weight: 600;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.9); opacity: 0.9;
+            margin-bottom: 8px;
+        }
+
+        .qr-box {
+            padding: 3px; background: white; border-radius: 4px;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.3); line-height: 0;
         }
 
         @media print {
-            body {
-                background-color: white;
-                display: block;
-                padding: 0;
-            }
-            .id-card {
-                margin: 0;
-                box-shadow: none;
-                border: 1px dashed #999;
-                border-radius: 0;
-            }
-            .no-print {
-                display: none;
-            }
+            body { background: white; padding: 0; }
+            .toolbar { display: none; }
+            .a4-sheet { margin: 0; box-shadow: none; padding: 10mm; }
+            .id-card-container { -webkit-print-color-adjust: exact; print-color-adjust: exact; border: 1px solid #ddd; }
         }
     </style>
 </head>
 <body>
 
-    <div class="id-card">
-        <div class="id-card-header">
-            <img src="{{ asset('path/ke/logo_sekolah.png') }}" alt="Logo" class="school-logo">
-            <span>KARTU PESERTA DIDIK</span>
-        </div>
-        
-        <div class="card-photo-area" style="background-image: url('{{ $siswa->foto ? asset('storage/' . $siswa->foto) : 'https://via.placeholder.com/400x600' }}');">
-            <div class="card-content">
-                <div class="student-info">
-                    <div class="nama">{{ $siswa->nama }}</div>
-                    <div class="nisn">{{ $siswa->nisn }}</div>
-                </div>
-            </div>
+    {{-- LOGIKA DETEKSI DATA --}}
+    @php
+        // Jika yang dikirim rute adalah satu siswa ($siswa), ubah jadi collection agar loop tidak error
+        if(isset($siswa) && !isset($siswas)) {
+            $dataSiswa = collect([$siswa]);
+        } else {
+            $dataSiswa = $siswas ?? collect();
+        }
 
-            <div class="qr-code">
-                @php
-                    $svg = QrCode::size(150)->generate($siswa->qr_token);
-                    $svg = preg_replace('/<rect.*?fill="#ffffff".*?\/>/', '', $svg);
-                    $svg = str_replace('fill="#000000"', 'fill="#ffffff"', $svg);
-                @endphp
-                
-                {!! $svg !!}
-            </div>
+        $jumlahSiswa = count($dataSiswa);
+    @endphp
+
+    <div class="toolbar">
+        <div>
+            <h4 style="margin:0">Cetak Kartu Peserta Didik</h4>
+            <small>Data ditemukan: {{ $jumlahSiswa }} Siswa</small>
         </div>
+        <button onclick="window.print()" class="btn-print">
+            <i class='bx bx-printer'></i> Cetak Kartu
+        </button>
     </div>
 
-    <button onclick="window.print()" class="btn btn-primary no-print print-button">
-        <i class='bx bx-printer'></i>
-        <span>Cetak Kartu</span>
-    </button>
+    @forelse ($dataSiswa->chunk(9) as $chunk)
+        <div class="a4-sheet">
+            @foreach ($chunk as $s)
+            <div class="id-card-container"
+                @if(isset($sekolah) && $sekolah->background_kartu)
+                    style="background-image: url('{{ asset('storage/' . $sekolah->background_kartu) }}'); background-size: cover; background-position: center;"
+                @endif
+            >
+                <div class="header-section">
+                    <img src="{{ asset('logo.png') }}" class="header-logo" alt="Logo">
+                    <div class="header-text">KARTU PESERTA DIDIK</div>
+                </div>
+
+                <div class="content-wrapper">
+                    @if(!empty($s->foto))
+                        <img src="{{ asset('storage/' . $s->foto) }}" class="profile-img" alt="Foto">
+                    @else
+                        <div class="profile-img" style="display: flex; align-items: center; justify-content: center;">
+                            <i class='bx bxs-user' style="font-size: 40px; color: #ccc;"></i>
+                        </div>
+                    @endif
+
+                    <div class="user-name">{{ $s->nama }}</div>
+                    <div class="id-text">NISN: {{ $s->nisn }}</div>
+
+                    <div class="qr-box">
+                        {!! QrCode::size(70)->generate($s->qr_token ?? $s->nisn) !!}
+                    </div>
+                </div>
+            </div>
+            @endforeach
+        </div>
+    @empty
+        <div style="text-align: center; background: white; padding: 50px; width: 210mm; margin: 20px auto; border-radius: 8px;">
+            <p>Data siswa tidak ditemukan.</p>
+        </div>
+    @endforelse
 
 </body>
 </html>

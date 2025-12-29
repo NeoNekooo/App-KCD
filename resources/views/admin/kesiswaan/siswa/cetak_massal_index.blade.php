@@ -59,7 +59,7 @@
 
             rombelRows.forEach(row => {
                 const rombelName = row.getAttribute('data-nama-rombel');
-                
+
                 // Jika nama kelas mengandung kata kunci pencarian, tampilkan barisnya.
                 // Jika tidak, sembunyikan.
                 if (rombelName.includes(searchTerm)) {

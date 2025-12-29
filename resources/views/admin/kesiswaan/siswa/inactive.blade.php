@@ -1,7 +1,7 @@
-@extends('layouts.admin')
+ @extends('layouts.admin')
 
 @section('content')
-<h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Kesiswaan /</span> Data Siswa</h4>
+<h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Kesiswaan /</span> Data Siswa Tidak Aktif/Lulus</h4>
 
 <div class="card">
     {{-- HEADER: JUDUL & TOMBOL AKSI --}}
@@ -68,8 +68,7 @@
                     <th>L/P</th>
                     <th>NISN</th>
                     <th>TTL</th>
-                    <th>Kelas</th>
-                    <th width="5%">Aksi</th>
+                    <th>Status</th>
                 </tr>
             </thead>
             <tbody class="table-border-bottom-0">
@@ -118,29 +117,11 @@
 
                     {{-- Badge Rombel --}}
                     <td>
-                        @php
-                            $namaKelas = $siswa->rombel->nama ?? null;
-                            if (!$namaKelas && isset($siswaRombelMap) && isset($siswaRombelMap[$siswa->peserta_didik_id])) {
-                                $namaKelas = $siswaRombelMap[$siswa->peserta_didik_id];
-                            }
-                        @endphp
-
-                        @if($namaKelas)
                             <span class="badge bg-label-primary">
-                                {{ $namaKelas }}
+                                {{ $siswa->status}}
                             </span>
-                        @else
-                            <span class="badge bg-label-secondary">Belum Masuk Kelas</span>
-                        @endif
+
                     </td>
-                    <td>
-    <button type="button"
-            class="btn btn-sm btn-outline-danger btn-register-keluar"
-            data-id="{{ $siswa->id }}"
-            data-nama="{{ $siswa->nama }}">
-        <i class="bx bx-log-out-circle me-1"></i> Register Keluar
-    </button>
-</td>
                 </tr>
                 @empty
                 <tr>
@@ -181,62 +162,6 @@
         </div>
     </div>
 </div>
-
-<div class="modal fade" id="modalRegisterKeluar" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <form id="formRegisterKeluar" method="POST">
-                @csrf
-                @method('PATCH')
-                <div class="modal-header border-bottom">
-                    <h5 class="modal-title">Register Keluar Siswa: <span id="namaSiswaModal" class="fw-bold"></span></h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="bg-light p-3 rounded mb-3" style="border-left: 4px solid #ffab00;">
-                        <small class="text-dark">
-                            <span class="text-danger fw-bold">* )</span> Peserta didik yang bisa diluluskan hanyalah peserta didik yang berada pada rombongan belajar tingkat akhir (TK B, Kelas 6, Kelas 9, Kelas 12/13, Paket A Tingkatan 2 Kelas 6, Paket B Tingkatan 4 Kelas 9 dan Paket C Tingkatan 6 Kelas 12)
-                        </small>
-                    </div>
-
-                    <div class="mb-3 row">
-                        <label class="col-sm-4 col-form-label text-sm-end">Keluar karena:</label>
-                        <div class="col-sm-8">
-                            <select name="status" class="form-select" required>
-                                <option value="">-- Pilih Alasan --</option>
-                                <option value="Lulus">Lulus</option>
-                                <option value="Mutasi">Mutasi</option>
-                                <option value="Dikeluarkan">Dikeluarkan</option>
-                                <option value="Putus Sekolah">Putus Sekolah</option>
-                                <option value="Meninggal Dunia">Meninggal Dunia</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="mb-3 row">
-                        <label class="col-sm-4 col-form-label text-sm-end">Tanggal keluar:</label>
-                        <div class="col-sm-8">
-                            <input type="date" name="tanggal_keluar" class="form-control" value="{{ date('Y-m-d') }}" required>
-                        </div>
-                    </div>
-
-                    <div class="mb-3 row">
-                        <label class="col-sm-4 col-form-label text-sm-end">Alasan:</label>
-                        <div class="col-sm-8">
-                            <textarea name="alasan" class="form-control" rows="3" placeholder="Contoh: Lulus Tahun Ajaran 2024/2025"></textarea>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer bg-light">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-primary" style="background-color: #233446;">
-                        <i class="bx bx-save me-1"></i> Simpan dan Tutup
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
 @endsection
 
 @push('scripts')
@@ -246,26 +171,7 @@
         const rowCheckboxes = document.querySelectorAll('.row-checkbox');
         const viewSelectedBtn = document.getElementById('viewSelectedBtn');
         const exportSelectedLink = document.getElementById('exportSelectedLink');
-        const btnRegisterKeluar = document.querySelectorAll('.btn-register-keluar');
-const modalRegisterKeluar = new bootstrap.Modal(document.getElementById('modalRegisterKeluar'));
-const formRegisterKeluar = document.getElementById('formRegisterKeluar');
-const namaSiswaModal = document.getElementById('namaSiswaModal');
 
-btnRegisterKeluar.forEach(btn => {
-    btn.addEventListener('click', function() {
-        const id = this.getAttribute('data-id');
-        const nama = this.getAttribute('data-nama');
-
-        // Update Modal UI
-        namaSiswaModal.innerText = nama;
-
-        // Set dynamic form action URL
-        // Make sure this matches your route name in web.php
-        formRegisterKeluar.action = `/admin/kesiswaan/siswa/${id}/register-keluar`;
-
-        modalRegisterKeluar.show();
-    });
-});
         function handleCheckboxChange() {
             const checkedCheckboxes = document.querySelectorAll('.row-checkbox:checked');
 

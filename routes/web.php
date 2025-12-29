@@ -26,6 +26,7 @@ use App\Http\Controllers\Admin\Kurikulum\JadwalPelajaranController;
 
 // Controller Kesiswaan
 use App\Http\Controllers\Admin\Kesiswaan\SiswaController;
+use App\Http\Controllers\Admin\Kesiswaan\LaporanController;
 // Controller ppdb
 
 // Controller Ppdb
@@ -170,8 +171,10 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
             Route::get('/', 'indexTendik')->name('index');
             Route::get('/export/excel', 'exportTendikExcel')->name('export.excel');
         });
- Route::patch('gtk/{id}/register-keluar', [GtkController::class, 'registerKeluar'])->name('gtk.register-keluar');
+        Route::patch('gtk/{id}/register-keluar', [GtkController::class, 'registerKeluar'])->name('gtk.register-keluar');
 
+  Route::get('gtk/inactive', [GtkController::class, 'inactive'])->name('gtk.inactive');
+        Route::get('gtk/inactive/export/excel', [GtkController::class, 'exportInactiveExcel'])->name('gtk.inactive.export.excel');
 
         // Route untuk detail multi-GTK
         Route::get('/gtk/show-multiple', [GtkController::class, 'showMultiple'])->name('gtk.show-multiple');
@@ -264,7 +267,13 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
 
     // 3. ROUTE RESOURCE (Standar CRUD: index, create, store, show {id}, edit {id}, update {id}, destroy {id})
     // Route ini menangkap pola 'siswa/{id}'
+    Route::get('siswa/inactive', [SiswaController::class, 'inactive'])->name('siswa.inactive');
+
     Route::resource('siswa', SiswaController::class);
+
+        Route::get('buku-induk', [SiswaController::class, 'bukuIndukIndex'])->name('buku_induk.index');
+    Route::get('buku-induk/rombel/{rombel}', [SiswaController::class, 'bukuIndukRombel'])->name('buku_induk.rombel_show');
+    Route::get('buku-induk/{id}/cetak', [SiswaController::class, 'cetakBukuInduk'])->name('buku_induk.cetak');
 
     // 4. ROUTE DENGAN ID TAPI ADA TAMBAHAN URL (Ini aman di bawah resource)
     // Pola: siswa/{id}/sesuatu

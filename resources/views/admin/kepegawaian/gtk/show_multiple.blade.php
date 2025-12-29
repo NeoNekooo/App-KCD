@@ -11,11 +11,11 @@
     </h4>
 
     <div class="d-flex gap-2 align-items-center">
-        
+
         {{-- TOMBOL CETAK SEMUA (Tampil jika ada data) --}}
         @if($gtks->isNotEmpty())
-            <a href="{{ route('admin.kepegawaian.gtk.cetak_pdf_multiple', ['ids' => $gtks->pluck('id')->implode(',')]) }}" 
-               class="btn btn-primary btn-sm shadow-sm" 
+            <a href="{{ route('admin.kepegawaian.gtk.cetak_pdf_multiple', ['ids' => $gtks->pluck('id')->implode(',')]) }}"
+               class="btn btn-primary btn-sm shadow-sm"
                target="_blank">
                 <i class="bx bxs-file-pdf me-1"></i> Cetak Semua ({{ $gtks->count() }})
             </a>
@@ -35,8 +35,8 @@
                     <div id="gtkListContainer">
                         @foreach($gtks as $listGtk)
                             <li>
-                                <a class="dropdown-item rounded mb-1 {{ $loop->first ? 'active' : '' }}" 
-                                   href="javascript:void(0);" 
+                                <a class="dropdown-item rounded mb-1 {{ $loop->first ? 'active' : '' }}"
+                                   href="javascript:void(0);"
                                    onclick="switchGtk('{{ $listGtk->id }}', this)"
                                    data-name="{{ strtolower($listGtk->nama) }}">
                                     <div class="d-flex align-items-center">
@@ -66,11 +66,11 @@
 @if($gtks->isNotEmpty())
     @foreach ($gtks as $gtk)
     <div class="gtk-view-wrapper fade-in-animation" id="view-{{ $gtk->id }}" style="{{ !$loop->first ? 'display: none;' : '' }}">
-        
+
         <div class="card shadow-sm overflow-hidden">
             <div class="card-body p-0">
                 <div class="row g-0">
-                    
+
                     {{-- 1. SIDEBAR KIRI --}}
                     <div class="col-lg-3 border-end d-flex flex-column align-items-center text-center py-4 px-3" style="background-color: #f5f5f9;">
                         <form action="{{ route('admin.kepegawaian.gtk.upload_media', $gtk->id) }}" method="POST" enctype="multipart/form-data" class="w-100">
@@ -92,15 +92,16 @@
                             </div>
 
                             <h6 class="fw-bold text-dark mb-2">{{ $gtk->nama }}</h6>
-                            
+
                             @if($gtk->jabatan_ptk_id_str)
-                                <span class="badge mb-3 d-inline-block shadow-sm" 
-                                      style="background-color: #e7e7ff !important; color: #696cff !important; border: 1px solid rgba(105, 108, 255, 0.2);">
+                                <span class="badge mb-3 d-inline-block shadow-sm lh-3"
+                                      style="background-color: #e7e7ff margin-4 paddings-2 !important; color: #696cff !important; border: 1px solid rgba(105, 108, 255, 0.2);">
                                     {{ $gtk->jabatan_ptk_id_str }}
                                 </span>
                             @else
                                 <div class="mb-3 text-muted small">-</div>
-                            @endif
+                            @endif                            <div class="mb-3"></div>
+
 
                             <div class="d-flex justify-content-center gap-2 mb-4">
                                 <span class="badge bg-label-{{ $gtk->ptk_induk == 1 ? 'success' : 'warning' }}" style="font-size: 0.7rem;">
@@ -136,7 +137,7 @@
                     <div class="col-lg-9 p-4 d-flex flex-column bg-white">
                         <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
                             <h6 class="mb-0 text-primary fw-bold"><i class="bx bx-id-card me-2"></i>Informasi Lengkap</h6>
-                            
+
                             <div class="action-button-container">
                                 <button type="button" class="btn btn-sm btn-label-primary btn-edit-toggle" id="btn-edit-{{ $gtk->id }}" data-id="{{ $gtk->id }}">
                                     <i class="bx bx-edit-alt me-1"></i> Edit Data
@@ -165,7 +166,7 @@
                             </ul>
 
                             <div class="tab-content p-0 mt-2">
-                                
+
                                 {{-- TAB 1: IDENTITAS --}}
                                 <div class="tab-pane fade show active" id="tab-identitas-{{ $gtk->id }}">
                                     <div class="row-clean">
@@ -242,7 +243,7 @@
 
                                 {{-- TAB 3: KEPEGAWAIAN (DENGAN LOGIKA SK OTOMATIS) --}}
                                 <div class="tab-pane fade" id="tab-kepegawaian-{{ $gtk->id }}">
-                                    
+
                                     {{-- LOGIKA SK OTOMATIS: Priority DB Utama -> DB Riwayat --}}
                                     @php
                                         $skTampil = $gtk->sk_pengangkatan;
@@ -270,7 +271,7 @@
                                     <div class="row-clean"><label>NIY / NIGK <i class="bx bx-lock-alt text-muted small ms-1"></i></label><div class="sep">:</div><div class="inp"><input type="text" name="niy_nigk" class="clean-input locked-dapodik" value="{{ $gtk->niy_nigk ?: '-' }}" readonly></div></div>
                                     <div class="row-clean"><label>NUPTK <i class="bx bx-lock-alt text-muted small ms-1"></i></label><div class="sep">:</div><div class="inp"><input type="text" name="nuptk" class="clean-input locked-dapodik" value="{{ $gtk->nuptk ?: '-' }}" readonly></div></div>
                                     <div class="row-clean"><label>NRG <i class="bx bx-lock-alt text-muted small ms-1"></i></label><div class="sep">:</div><div class="inp"><input type="text" name="nrg" class="clean-input locked-dapodik" value="{{ $gtk->nrg ?: '-' }}" readonly></div></div>
-                                    
+
                                     {{-- FIELD SK & TMT (OTOMATIS TERISI DARI RIWAYAT JIKA KOSONG) --}}
                                     <div class="row-clean">
                                         <label>SK Pengangkatan <i class="bx bx-lock-alt text-muted small ms-1"></i></label>
@@ -284,11 +285,11 @@
                                     </div>
 
                                     <div class="row-clean"><label>Lembaga <i class="bx bx-lock-alt text-muted small ms-1"></i></label><div class="sep">:</div><div class="inp"><input type="text" name="lembaga_pengangkat" class="clean-input locked-dapodik" value="{{ $gtk->lembaga_pengangkat ?: '-' }}" readonly></div></div>
-                                    
+
                                     <div class="row-clean"><label>SK CPNS <i class="bx bx-lock-alt text-muted small ms-1"></i></label><div class="sep">:</div><div class="inp"><input type="text" name="sk_cpns" class="clean-input locked-dapodik" value="{{ $gtk->sk_cpns ?: '-' }}" readonly></div></div>
                                     <div class="row-clean"><label>TMT CPNS <i class="bx bx-lock-alt text-muted small ms-1"></i></label><div class="sep">:</div><div class="inp"><input type="date" name="tmt_cpns" class="clean-input locked-dapodik" value="{{ $gtk->tmt_cpns }}" readonly></div></div>
                                     <div class="row-clean"><label>TMT PNS <i class="bx bx-lock-alt text-muted small ms-1"></i></label><div class="sep">:</div><div class="inp"><input type="date" name="tmt_pns" class="clean-input locked-dapodik" value="{{ $gtk->tmt_pns }}" readonly></div></div>
-                                    
+
                                     <div class="row-clean">
                                         <label>Pangkat Akhir <i class="bx bx-lock-alt text-muted small ms-1"></i></label>
                                         <div class="sep">:</div>
@@ -323,7 +324,7 @@
                                 <div class="tab-pane fade" id="tab-pendidikan-{{ $gtk->id }}">
                                     <div class="row-clean"><label>Pend. Terakhir <i class="bx bx-lock-alt text-muted small ms-1"></i></label><div class="sep">:</div><div class="inp"><input type="text" name="pendidikan_terakhir" class="clean-input locked-dapodik" value="{{ $gtk->pendidikan_terakhir ?: '-' }}" readonly></div></div>
                                     <div class="row-clean"><label>Bidang Studi <i class="bx bx-lock-alt text-muted small ms-1"></i></label><div class="sep">:</div><div class="inp"><input type="text" name="bidang_studi_terakhir" class="clean-input locked-dapodik" value="{{ $gtk->bidang_studi_terakhir ?: '-' }}" readonly></div></div>
-                                    
+
                                     <div class="mt-3">
                                         <div class="small fw-bold text-muted text-uppercase mb-2">Riwayat Pendidikan Formal (Dapodik)</div>
                                         <div class="table-responsive border rounded-3">
@@ -387,7 +388,7 @@
     /* Styling Khusus untuk Input Terkunci */
     .clean-input.locked-dapodik {
         cursor: not-allowed;
-        color: #697a8d; 
+        color: #697a8d;
     }
     .clean-input.locked-dapodik.editing {
         border-bottom: none !important;
@@ -399,7 +400,7 @@
         display: flex;
         align-items: flex-start;
         padding: 4px 0;
-        border-bottom: 1px solid transparent; 
+        border-bottom: 1px solid transparent;
         line-height: 1.5;
     }
     .row-clean label {
@@ -434,13 +435,13 @@
         pointer-events: auto;
         color: #333;
         cursor: text;
-        border: none !important; 
+        border: none !important;
     }
     .clean-input.editing:focus {
-         border: none !important; 
+         border: none !important;
          outline: none !important;
     }
-    
+
     /* Placeholder Logic */
     .clean-input::placeholder { color: #b4bdc6; font-style: italic; opacity: 0; }
     .clean-input.editing::placeholder { opacity: 1; }
@@ -473,7 +474,7 @@
         const target = document.getElementById('view-' + id);
         target.style.display = 'block';
         target.classList.remove('fade-in-animation');
-        void target.offsetWidth; 
+        void target.offsetWidth;
         target.classList.add('fade-in-animation');
 
         document.querySelectorAll('.dropdown-item').forEach(el => el.classList.remove('active'));
@@ -495,7 +496,7 @@
         // Handle Tombol Batal
         document.querySelectorAll('.btn-cancel-edit').forEach(btn => {
             btn.addEventListener('click', function() {
-                location.reload(); 
+                location.reload();
             });
         });
 
@@ -506,20 +507,20 @@
                 const form = document.getElementById('form-data-' + id);
                 const actionBtns = document.getElementById('action-buttons-' + id);
                 const editBtn = document.getElementById('btn-edit-' + id);
-                
-                editBtn.classList.add('d-none'); 
-                actionBtns.classList.remove('d-none'); 
-                actionBtns.classList.add('d-flex'); 
+
+                editBtn.classList.add('d-none');
+                actionBtns.classList.remove('d-none');
+                actionBtns.classList.add('d-flex');
 
                 // LOGIKA PENTING: Hanya aktifkan yang BUKAN locked-dapodik
                 form.querySelectorAll('.clean-input').forEach(input => {
-                    
+
                     // Cek apakah input ini dikunci (Dapodik)?
                     if (!input.classList.contains('locked-dapodik')) {
                         input.removeAttribute('readonly');
                         input.removeAttribute('disabled');
                         input.classList.add('editing');
-                        
+
                         // Munculkan placeholder hanya di kolom yang bisa diedit
                         if(input.value.trim() === '-') {
                             input.value = '';
