@@ -14,6 +14,8 @@ class Gtk extends Model
     /**
      * Relasi ke banyak tugas pegawai (riwayat tugas).
      */
+    public $incrementing = false;
+protected $keyType = 'string';
    protected $fillable = ['status'];
 
     public function riwayatTugas()

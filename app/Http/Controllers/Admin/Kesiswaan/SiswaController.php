@@ -334,29 +334,33 @@ class SiswaController extends Controller
         return view('admin.kesiswaan.siswa.cetak_massal_index', compact('rombels', 'sekolah'));
     }
 
-      public function cetakKartuMassal(Rombel $rombel)
-    {
-        $anggotaData = is_array($rombel->anggota_rombel)
-            ? $rombel->anggota_rombel
-            : json_decode($rombel->anggota_rombel, true);
+   public function cetakKartuMassal(Rombel $rombel)
+{
+    $anggotaData = is_array($rombel->anggota_rombel)
+        ? $rombel->anggota_rombel
+        : json_decode($rombel->anggota_rombel, true);
 
-        $siswaIds = [];
-        if (!empty($anggotaData)) {
-             $anggotaPdIds = array_column($anggotaData, 'peserta_didik_id');
-             $siswaIds = Siswa::whereIn('peserta_didik_id', $anggotaPdIds)->pluck('id');
-        }
-
-        $siswas = Siswa::whereIn('id', $siswaIds)->orderBy('nama', 'asc')->get();
-
-        foreach ($siswas as $siswa) {
-            if (empty($siswa->qr_token)) {
-                $siswa->qr_token = Str::uuid()->toString();
-                $siswa->save();
-            }
-        }
-
-        return view('admin.kesiswaan.siswa.kartu_massal', compact('siswas', 'rombel'));
+    $siswaIds = [];
+    if (!empty($anggotaData)) {
+         $anggotaPdIds = array_column($anggotaData, 'peserta_didik_id');
+         $siswaIds = Siswa::whereIn('peserta_didik_id', $anggotaPdIds)->pluck('id');
     }
+
+    $siswas = Siswa::whereIn('id', $siswaIds)->orderBy('nama', 'asc')->get();
+
+    // --- TAMBAHKAN BARIS INI ---
+    $sekolah = Sekolah::first();
+
+    foreach ($siswas as $siswa) {
+        if (empty($siswa->qr_token)) {
+            $siswa->qr_token = Str::uuid()->toString();
+            $siswa->save();
+        }
+    }
+
+    // Pastikan 'sekolah' dimasukkan ke compact
+    return view('admin.kesiswaan.siswa.kartu_massal', compact('siswas', 'rombel', 'sekolah'));
+}
 
     /**
      * Upload/Compress Foto Siswa (dipanggil dari modal/upload khusus)
