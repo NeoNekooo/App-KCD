@@ -167,10 +167,15 @@
         <div class="a4-sheet">
             @foreach ($chunk as $s)
             <div class="id-card-container"
-                @if(isset($sekolah) && $sekolah->background_kartu)
-                    style="background-image: url('{{ asset('storage/' . $sekolah->background_kartu) }}'); background-size: cover; background-position: center;"
-                @endif
-            >
+    style="
+        @if(isset($sekolah) && $sekolah->background_kartu)
+            background-image: url('{{ asset('storage/' . $sekolah->background_kartu) }}') !important;
+            background-size: cover !important;
+            background-position: center !important;
+        @endif
+    "
+>
+    </div>
                 <div class="header-section">
                     @if(isset($sekolah) && $sekolah->logo)
                         <img src="{{ asset('storage/' . $sekolah->logo) }}" class="header-logo" alt="Logo">
