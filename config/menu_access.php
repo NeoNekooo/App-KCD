@@ -159,10 +159,10 @@ return [
          'submenu' => [
                 ['title' => 'Data Guru', 'route' => 'admin.kepegawaian.guru.index', 'is_active' => 'request()->routeIs("admin.kepegawaian.guru.*")'],
                 ['title' => 'Tenaga Kependidikan', 'route' => 'admin.kepegawaian.tendik.index', 'is_active' => 'request()->routeIs("admin.kepegawaian.tendik.*")'],
-                ['title' => 'GTK Nonaktif', 'route' => 'admin.kepegawaian.gtk.inactive', 'is_active' => 'request()->is("admin/kepegawaian/gtk/inactive*")'],
                 ['title' => 'Template Surat SK', 'route' => 'admin.kepegawaian.TemplateSk.index', 'is_active' => 'request()->is("admin.kepegawaian.TemplateSk.*")'],
                 ['title' => 'Tugas Pegawai', 'route' => 'admin.kepegawaian.tugas-pegawai.index', 'is_active' => 'request()->is("admin/kepegawaian/tugas-pegawai*")'],
                 ['title' => 'Cetak Kartu ID', 'route' => 'admin.kepegawaian.gtk.index-cetak-kartu', 'is_active' => 'request()->routeIs("gtk.index-cetak-kartu")'],
+                ['title' => 'GTK Nonaktif', 'route' => 'admin.kepegawaian.gtk.inactive', 'is_active' => 'request()->is("admin/kepegawaian/gtk/inactive*")'],
             ]
         ],
         // --- KURIKULUM ---
@@ -196,10 +196,10 @@ return [
             'is_open' => 'request()->is("admin/kesiswaan*")',
                 'submenu' => [
                 ['title' => 'Data Siswa', 'route' => 'admin.kesiswaan.siswa.index', 'is_active' => 'request()->is("admin/kesiswaan/siswa*")'],
-                ['title' => 'PD Nonaktif', 'route' => 'admin.kesiswaan.siswa.inactive', 'is_active' => 'request()->is("admin/kesiswaan/siswa/inactive*")'],
                 ['title' => 'Rekap Jumlah Siswa', 'route' => 'admin.laporan.rekap_siswa', 'is_active' => 'request()->is("admin/laporan/rekap-siswa*")'],
                 ['title' => 'Cetak Kartu Massal', 'route' => 'admin.kesiswaan.siswa.cetak_massal_index', 'is_active' => 'request()->routeIs("admin.kesiswaan.siswa.cetak_massal_index")'],
                 ['title' => 'Buku Induk', 'route' => 'admin.kesiswaan.buku_induk.index', 'is_active' => 'request()->is("admin/kesiswaan/buku-induk*")'],
+                ['title' => 'PD Nonaktif', 'route' => 'admin.kesiswaan.siswa.inactive', 'is_active' => 'request()->is("admin/kesiswaan/siswa/inactive*")'],
             ]
         ],
         // --- PPDB ---
