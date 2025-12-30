@@ -10,11 +10,13 @@ class SambutanKepalaSekolah extends Model
 
     protected $fillable = [
         'nama_kepala_sekolah',
-        'foto',
+        'foto',             // Foto Kepala Sekolah
+        'foto_gedung',      // Foto Gedung / Sejarah (BARU)
         'judul_sambutan',
         'isi_sambutan',
-        'visi',           // Baru
-        'misi',           // Baru
-        'program_kerja',  // Baru
+        'sejarah',          // Sejarah (BARU)
+        'visi',
+        'misi',
+        'program_kerja',
     ];
 }
