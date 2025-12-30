@@ -48,7 +48,7 @@
                 </div>
                 <span class="fw-semibold d-block mb-1">Jumlah Siswa</span>
                 {{-- Mengambil $totalSiswa dari Controller --}}
-                {{-- <h3 class="stat-number mb-1">{{ number_format($totalSiswa) }}</h3> --}}
+                <h3 class="stat-number mb-1">{{ number_format($totalSiswa) }}</h3>
                 <small class="text-success fw-semibold">Aktif</small>
             </div>
         </div>
