@@ -333,13 +333,13 @@ return [
             'is_toggle' => true,
             'is_open' => 'request()->routeIs("bendahara.keuangan*")',
             'submenu' => [
+                ['title' => 'Pengaturan Iuran', 'route' => 'bendahara.keuangan.iuran.index', 'is_active' => 'request()->routeIs("bendahara.keuangan.iuran.index")'],
+                ['title' => 'Manajemen Beasiswa', 'route' => 'bendahara.keuangan.voucher.index', 'is_active' => 'request()->routeIs("bendahara.keuangan.voucher.index")'],
                 ['title' => 'Penerimaan', 'route' => 'bendahara.keuangan.penerimaan.index', 'is_active' => 'request()->routeIs("bendahara.keuangan.penerimaan.index")'],
                 ['title' => 'Pengeluaran', 'route' => 'bendahara.keuangan.pengeluaran.index', 'is_active' => 'request()->routeIs("bendahara.keuangan.pengeluaran.index")'],
                 ['title' => 'Buku Kas', 'route' => 'bendahara.keuangan.kas.index', 'is_active' => 'request()->routeIs("bendahara.keuangan.kas.index")'],
-                ['title' => 'Pengaturan Iuran', 'route' => 'bendahara.keuangan.iuran.index', 'is_active' => 'request()->routeIs("bendahara.keuangan.iuran.index")'],
                 ['title' => 'Tagihan', 'route' => 'bendahara.keuangan.tagihan.create', 'is_active' => 'request()->routeIs("bendahara.keuangan.tagihan.create")'],
                 ['title' => 'Master kas', 'route' => 'bendahara.keuangan.kas-master.index', 'is_active' => 'request()->routeIs("bendahara.keuangan.kas-master.index")'],
-                ['title' => 'Manajemen Beasiswa', 'route' => 'bendahara.keuangan.voucher.index', 'is_active' => 'request()->routeIs("bendahara.keuangan.voucher.index")'],
             ]
         ],
         // --- KEHADIRAN (ABSENSI) ---
