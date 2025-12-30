@@ -19,7 +19,6 @@ use App\Http\Controllers\Admin\Akademik\TapelController;
 use App\Http\Controllers\Admin\Akademik\JurusanController;
 use App\Http\Controllers\Admin\Akademik\MapelController;
 use App\Http\Controllers\Admin\Akademik\DaftarEkstrakurikulerController;
-use App\Http\Controllers\Admin\Akademik\RombelController;
 
 // kurikulum
 use App\Http\Controllers\Admin\Kurikulum\JamPelajaranController;
@@ -68,6 +67,7 @@ use App\Http\Controllers\Admin\Rombel\RombelPraktikController;
 use App\Http\Controllers\Admin\Rombel\RombelEkstrakurikulerController;
 use App\Http\Controllers\Admin\Rombel\RombelMapelPilihanController;
 use App\Http\Controllers\Admin\Rombel\RombelWaliController;
+use App\Http\Controllers\Admin\Rombel\RombelController;
 
 // Controller Landing
 use App\Http\Controllers\Admin\Landing\PpdbController;
