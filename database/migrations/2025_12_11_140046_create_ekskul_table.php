@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up()
 {
-    Schema::create('ekstrakurikulers', function (Blueprint $table) {
+    Schema::create('ekskul', function (Blueprint $table) {
         $table->id();
         $table->string('nama_ekskul');  // Contoh: Futsal
         $table->string('pembina')->nullable(); // Nama Guru Pembina

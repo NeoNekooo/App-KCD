@@ -80,7 +80,7 @@ use App\Http\Controllers\Admin\Landing\PrestasiController;
 use App\Http\Controllers\Admin\Landing\GaleriController; // Pastikan ini diimport
 use App\Http\Controllers\Admin\Landing\MitraController;
 use App\Http\Controllers\Admin\Landing\TestimoniController;
-use App\Http\Controllers\Admin\Landing\EkstrakurikulerController;
+use App\Http\Controllers\Admin\Landing\EkskulController;
 use App\Http\Controllers\Admin\Landing\AgendaController;
 
 // Controller Keuangan
@@ -302,7 +302,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
     Route::resource('/landing/berita', BeritaController::class, ['as' => 'landing'])->except(['create', 'edit', 'show']);
     Route::resource('/landing/prestasi', PrestasiController::class, ['as' => 'landing'])->except(['create', 'edit', 'show']);
     Route::resource('/landing/mitra', MitraController::class, ['as' => 'landing'])->except(['create', 'edit', 'show']);
-    Route::resource('/landing/ekstrakurikuler', EkstrakurikulerController::class, ['as' => 'landing'])->except(['create', 'edit', 'show']);
+    Route::resource('/landing/ekstrakurikuler', EkskulController::class, ['as' => 'landing'])->except(['create', 'edit', 'show']);
     Route::resource('/landing/agenda', AgendaController::class, ['as' => 'landing'])->except(['create', 'edit', 'show']);
 
     // --- PERBAIKAN GALERI (Hanya Bagian Ini yang Diubah) ---

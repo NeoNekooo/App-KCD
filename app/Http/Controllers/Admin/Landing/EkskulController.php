@@ -3,15 +3,15 @@
 namespace App\Http\Controllers\Admin\Landing;
 
 use App\Http\Controllers\Controller;
-use App\Models\Ekstrakurikuler;
+use App\Models\Ekskul;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
-class EkstrakurikulerController extends Controller
+class EkskulController extends Controller
 {
     public function index()
     {
-        $ekskuls = Ekstrakurikuler::latest()->paginate(9);
+        $ekskuls = Ekskul::latest()->paginate(9);
         return view('admin.landing.ekstrakurikuler.index', compact('ekskuls'));
     }
 
@@ -37,14 +37,14 @@ class EkstrakurikulerController extends Controller
             $data['foto'] = $image->hashName();
         }
 
-        Ekstrakurikuler::create($data);
+        Ekskul::create($data);
 
         return redirect()->back()->with('success', 'Ekstrakurikuler berhasil ditambahkan!');
     }
 
     public function update(Request $request, $id)
     {
-        $ekskul = Ekstrakurikuler::findOrFail($id);
+        $ekskul = Ekskul::findOrFail($id);
 
         $request->validate([
             'nama_ekskul' => 'required|string|max:255',
@@ -74,7 +74,7 @@ class EkstrakurikulerController extends Controller
 
     public function destroy($id)
     {
-        $ekskul = Ekstrakurikuler::findOrFail($id);
+        $ekskul = Ekskul::findOrFail($id);
         
         // PERBAIKAN: Hapus foto fisik pakai disk public
         if ($ekskul->foto && Storage::disk('public')->exists('ekstrakurikulers/' . $ekskul->foto)) {
