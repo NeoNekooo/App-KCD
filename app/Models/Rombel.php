@@ -149,5 +149,10 @@ class Rombel extends Model
 
         return Siswa::whereIn('peserta_didik_id', $ids)->get();
     }
+
+    public function waliKelas()
+    {
+        return $this->belongsTo(Gtk::class, 'ptk_id_str', 'nama');
+    }
 }
 // Other code in the file
