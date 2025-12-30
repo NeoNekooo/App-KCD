@@ -226,6 +226,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
         // Ekstrakurikuler (Kecuali Show, Create, Edit karena mungkin pakai Modal/Ajax)
         Route::resource('daftar-ekstrakurikuler', DaftarEkstrakurikulerController::class)
              ->except(['show', 'create', 'edit']);
+ Route::patch('rombel/{rombel}/update-core', [RombelController::class, 'updateCore'])->name('rombel.update_core');
 
     });
 
@@ -243,7 +244,6 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
         Route::get('jadwal-pelajaran/{id}/json', [JadwalPelajaranController::class, 'getJadwalJson'])->name('jadwal-pelajaran.json');
         Route::post('jadwal-pelajaran/update', [JadwalPelajaranController::class, 'updateJadwal'])->name('jadwal-pelajaran.update-ajax');
         Route::post('jadwal-pelajaran/sync', [JadwalPelajaranController::class, 'syncMapel'])->name('jadwal-pelajaran.sync');
- Route::patch('rombel/{rombel}/update-core', [RombelController::class, 'updateCore'])->name('rombel.update_core');
         // -----------------------------------------------------------------
         // 2. Route Resource Jadwal (Generic) - TARUH PALING BAWAH
         // -----------------------------------------------------------------
