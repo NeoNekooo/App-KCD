@@ -10,10 +10,16 @@ class Galeri extends Model
         'judul',
         'tanggal',
         'deskripsi',
-        'foto',
+        'foto', // Ini berfungsi sebagai Cover Album
     ];
 
     protected $casts = [
         'tanggal' => 'date',
     ];
+
+    // Relasi: Satu album punya banyak item
+    public function items()
+    {
+        return $this->hasMany(GaleriItem::class);
+    }
 }
