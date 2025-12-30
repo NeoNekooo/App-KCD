@@ -219,28 +219,36 @@
 
         <!-- Row 4: Media Sosial -->
         <hr class="my-4">
-        <h5 class="fw-bold mb-3">Media Sosial</h5>
-        <div id="medsos-wrapper" class="row">
-            @foreach($medsos ?? [] as $item)
-            <div class="col-md-3 mb-3 medsos-card">
-                <div class="card p-2">
-                  <input type="hidden" name="id_medsos[]" value="{{ $item->id ?? '' }}">
-                  <input type="hidden" name="delete_medsos[]" value="0" class="delete-medsos-flag">
-                  <select name="icon_class_medsos[]" class="form-control icon-select mb-2" data-value="{{ $item->icon_class }}"></select>
-                  <input type="text" name="link_medsos[]" class="form-control mb-2" placeholder="Link / URL" value="{{ $item->link }}">
-                  <div class="icon-preview text-center mb-2">
-                    <i class="{{ $item->icon_class ?? '' }} fa-2x"></i>
-                  </div>
-                  <button type="button" class="btn btn-sm btn-danger w-100 remove-medsos">Hapus</button>
-                </div>
+<h5 class="fw-bold mb-3">Media Sosial</h5>
+
+<div id="medsos-wrapper" class="row">
+@foreach($medsos ?? [] as $item)
+    <div class="col-md-3 mb-3 medsos-card">
+        <div class="card p-2">
+            <input type="hidden" name="id_medsos[]" value="{{ $item->id }}">
+            <input type="hidden" name="delete_medsos[]" value="0" class="delete-medsos-flag">
+            <input type="hidden" name="icon_class_medsos[]" class="icon-class" value="{{ $item->icon_class }}">
+
+            <input type="text"
+                   name="link_medsos[]"
+                   class="form-control mb-2 link-medsos"
+                   placeholder="Link / URL"
+                   value="{{ $item->link }}">
+
+            <div class="icon-preview text-center mb-2">
+                <i class="{{ $item->icon_class }} fa-2x"></i>
             </div>
-            @endforeach
+
+            <button type="button" class="btn btn-sm btn-danger w-100 remove-medsos">Hapus</button>
         </div>
-        <div class="d-flex justify-content-between mt-3">
-            <button type="button" id="add-medsos" class="btn btn-outline-primary">
-                <i class="bx bx-plus"></i> Tambah Media Sosial
-            </button>
-        </div>
+    </div>
+@endforeach
+</div>
+
+<button type="button" id="add-medsos" class="btn btn-outline-primary mt-3">
+    <i class="bx bx-plus"></i> Tambah Media Sosial
+</button>
+
 
       </div>
 
@@ -361,88 +369,162 @@
 
 </script>
 
-
 <script>
-    // ===== Load Font Awesome Brands dari JSON =====
-    let faBrands = [];
-    fetch('{{ asset('assets/js/fa-brands.json') }}')
-        .then(res => res.json())
-        .then(data => {
-            faBrands = data;
-            console.log('faBrands', faBrands); // <--- pastikan array terisi
-            initializeExistingMedsos();
-        })
-        .catch(err => console.error('Gagal load fa-brands.json', err));
+/* =========================
+   LOAD FA BRANDS JSON
+========================= */
+let faBrands = [];
 
-    function initializeExistingMedsos() {
-        document.querySelectorAll('.icon-select').forEach(select => {
-            const selectedValue = select.dataset.value; // ambil dari Blade
-            const ts = new TomSelect(select, {
-                options: faBrands.map(c => ({value: c, text: c})),
-                create: false,
-                onChange: function(value) {
-                    const preview = select.closest('.card').querySelector('.icon-preview');
-                    preview.innerHTML = `<i class="${value} fa-2x"></i>`;
-                }
-            });
-            if(selectedValue){
-                ts.setValue(selectedValue); // set value awal
-            }
-        });
+fetch('{{ asset('assets/js/fa-brands.json') }}')
+    .then(res => res.json())
+    .then(data => {
+        faBrands = data;
+        initExistingCards();
+    })
+    .catch(err => console.error('Gagal load fa-brands.json', err));
+
+
+/* =========================
+   WHITELIST (ANTI MISS)
+========================= */
+const whitelist = [
+    { match: ['tiktok.com', 'vt.tiktok.com', 'vm.tiktok.com'], icon: 'fa-brands fa-tiktok' },
+    { match: ['instagram.com'], icon: 'fa-brands fa-instagram' },
+    { match: ['facebook.com', 'fb.com'], icon: 'fa-brands fa-facebook' },
+    { match: ['youtube.com', 'youtu.be'], icon: 'fa-brands fa-youtube' },
+    { match: ['x.com', 'twitter.com'], icon: 'fa-brands fa-x-twitter' },
+    { match: ['wa.me', 'whatsapp.com'], icon: 'fa-brands fa-whatsapp' },
+    { match: ['telegram.me', 't.me'], icon: 'fa-brands fa-telegram' },
+    { match: ['linkedin.com'], icon: 'fa-brands fa-linkedin' },
+    { match: ['github.com'], icon: 'fa-brands fa-github' },
+];
+
+
+/* =========================
+   HELPER FUNCTIONS
+========================= */
+
+// "fab fa-facebook-square" -> "facebook"
+function extractBrand(iconClass) {
+    const match = iconClass.match(/fa-([a-z0-9\-]+)/i);
+    if (!match) return null;
+
+    return match[1]
+        .replace('-square', '')
+        .replace('-f', '')
+        .replace('-b', '');
+}
+
+// 🔥 HYBRID DETECTOR
+function detectIconFromUrl(url) {
+    if (!url) return 'fa-solid fa-link';
+
+    let full = '';
+    try {
+        const u = new URL(url);
+        full = (u.hostname + u.pathname).toLowerCase();
+    } catch {
+        return 'fa-solid fa-link';
     }
 
+    /* 1️⃣ WHITELIST */
+    for (const item of whitelist) {
+        if (item.match.some(m => full.includes(m))) {
+            return item.icon;
+        }
+    }
 
-    // ===== Tambah Media Sosial =====
-    document.getElementById('add-medsos').addEventListener('click', function() {
-        const wrapper = document.getElementById('medsos-wrapper');
-        const card = document.createElement('div');
-        card.classList.add('col-md-3', 'mb-3', 'medsos-card');
-        card.innerHTML = `
-            <div class="card p-2">
-              <select name="icon_class_medsos[]" class="form-control icon-select mb-2" placeholder="Pilih Icon..."></select>
-                <input type="text" name="link_medsos[]" class="form-control mb-2" placeholder="Link / URL">
-                <div class="icon-preview text-center mb-2"></div>
-                <button type="button" class="btn btn-sm btn-danger w-100 remove-medsos">Hapus</button>
+    /* 2️⃣ FALLBACK FA-BRANDS.JSON */
+    const found = faBrands.find(icon => {
+        const brand = extractBrand(icon);
+        return brand && full.includes(brand);
+    });
+
+    return found || 'fa-solid fa-link';
+}
+
+// 🔧 SET ICON (SATU SUMBER KEBENARAN)
+function setIcon(preview, iconInput, icon) {
+    iconInput.value = icon;
+    preview.innerHTML = `<i class="${icon} fa-2x"></i>`;
+}
+
+
+/* =========================
+   BIND INPUT KE CARD
+========================= */
+function bindLinkListener(card) {
+    const input = card.querySelector('.link-medsos');
+    const iconInput = card.querySelector('.icon-class');
+    const preview = card.querySelector('.icon-preview');
+
+    // ✅ STATE AWAL (DEFAULT / DATA LAMA)
+    const initialIcon = detectIconFromUrl(input.value || '');
+    setIcon(preview, iconInput, initialIcon);
+
+    input.addEventListener('input', () => {
+        const icon = detectIconFromUrl(input.value);
+        setIcon(preview, iconInput, icon);
+    });
+}
+
+
+/* =========================
+   INIT EXISTING DATA
+========================= */
+function initExistingCards() {
+    document.querySelectorAll('.medsos-card').forEach(card => {
+        bindLinkListener(card);
+    });
+}
+
+
+/* =========================
+   TAMBAH MEDSOS
+========================= */
+document.getElementById('add-medsos').addEventListener('click', () => {
+    const wrapper = document.getElementById('medsos-wrapper');
+
+    const card = document.createElement('div');
+    card.className = 'col-md-3 mb-3 medsos-card';
+
+    card.innerHTML = `
+        <div class="card p-2">
+            <input type="hidden" name="icon_class_medsos[]" class="icon-class">
+            <input type="text"
+                   name="link_medsos[]"
+                   class="form-control mb-2 link-medsos"
+                   placeholder="Link / URL">
+            <div class="icon-preview text-center mb-2">
+                <i class="fa-solid fa-link fa-2x"></i>
             </div>
-        `;
-        wrapper.appendChild(card);
+            <button type="button" class="btn btn-sm btn-danger w-100 remove-medsos">
+                Hapus
+            </button>
+        </div>
+    `;
 
-        const select = card.querySelector('.icon-select');
-        new TomSelect(select, {
-            options: faBrands.map(c => ({value: c, text: c})),
-            create: false,
-            onChange: function(value) {
-                const preview = card.querySelector('.icon-preview');
-                preview.innerHTML = `<i class="${value} fa-2x"></i>`;
-            }
-        });
+    wrapper.appendChild(card);
+    bindLinkListener(card);
+});
 
-        card.querySelector('.remove-medsos').addEventListener('click', function() {
-            card.remove();
-        });
-    });
 
-    // ===== Hapus Media Sosial =====
-    document.querySelectorAll('.remove-medsos').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const card = this.closest('.medsos-card');
-            const flag = card.querySelector('.delete-medsos-flag');
-            if(flag){
-                flag.value = 1;
-                card.style.display = 'none';
-            } else {
-                card.remove();
-            }
-        });
-    });
+/* =========================
+   HAPUS (SOFT & HARD)
+========================= */
+document.addEventListener('click', function(e) {
+    if (!e.target.classList.contains('remove-medsos')) return;
 
-    // ===== Live Update Maps =====
-    const alamatInput = document.getElementById('alamatInput');
-    const alamatMap = document.getElementById('alamatMap');
-    alamatInput.addEventListener('input', () => {
-        const alamat = encodeURIComponent(alamatInput.value);
-        alamatMap.src = `https://maps.google.com/maps?q=${alamat}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
-    });
+    const card = e.target.closest('.medsos-card');
+    const flag = card.querySelector('.delete-medsos-flag');
+
+    if (flag) {
+        flag.value = 1;
+        card.style.display = 'none';
+    } else {
+        card.remove();
+    }
+});
 </script>
 
 <link href="https://cdn.jsdelivr.net/npm/tom-select/dist/css/tom-select.css" rel="stylesheet">
