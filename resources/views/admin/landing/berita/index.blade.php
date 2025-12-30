@@ -90,7 +90,7 @@
                 <h5 class="modal-title">Tulis Berita Baru</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form action="{{ route('admin.landing.berita.store') }}" method="POST" enctype="multipart/form-data">
+            <form id="formCreate" action="{{ route('admin.landing.berita.store') }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 <div class="modal-body">
                     <div class="row mb-3">
@@ -109,7 +109,7 @@
                     
                     <div class="mb-3">
                         <label class="form-label">Isi Berita <span class="text-danger">*</span></label>
-                        <textarea class="form-control" name="isi" rows="8" placeholder="Tulis isi berita lengkap di sini..." required></textarea>
+                        <textarea class="form-control" id="editor-berita-create" name="isi" rows="8" placeholder="Tulis isi berita lengkap di sini..."></textarea>
                     </div>
 
                     <div class="mb-3">
@@ -158,7 +158,7 @@
                     
                     <div class="mb-3">
                         <label class="form-label">Isi Berita</label>
-                        <textarea class="form-control" id="editIsi" name="isi" rows="8" required></textarea>
+                        <textarea class="form-control" id="editor-berita-edit" name="isi" rows="8" required></textarea>
                     </div>
 
                     <div class="mb-3">
@@ -197,8 +197,97 @@
 @endpush
 
 @push('scripts')
+<script src="https://cdn.ckeditor.com/ckeditor5/39.0.1/classic/ckeditor.js"></script>
 <script>
+    let editorBeritaCreate = null;
+    let editorBeritaEdit = null;
+
     document.addEventListener('DOMContentLoaded', function() {
+        console.log('Initializing CKEditor...');
+
+        // Inisialisasi CKEditor untuk modal create
+        if (document.querySelector('#editor-berita-create')) {
+            ClassicEditor
+                .create(document.querySelector('#editor-berita-create'), {
+                    toolbar: ['heading', '|', 'bold', 'italic', 'link', 'bulletedList', 'numberedList', 'blockQuote', 'insertTable', 'undo', 'redo']
+                })
+                .then(editor => {
+                    editorBeritaCreate = editor;
+                    console.log('CKEditor Create initialized');
+                })
+                .catch(error => {
+                    console.error('Error CKEditor Create:', error);
+                });
+        }
+
+        // Inisialisasi CKEditor untuk modal edit
+        if (document.querySelector('#editor-berita-edit')) {
+            ClassicEditor
+                .create(document.querySelector('#editor-berita-edit'), {
+                    toolbar: ['heading', '|', 'bold', 'italic', 'link', 'bulletedList', 'numberedList', 'blockQuote', 'insertTable', 'undo', 'redo']
+                })
+                .then(editor => {
+                    editorBeritaEdit = editor;
+                    console.log('CKEditor Edit initialized');
+                })
+                .catch(error => {
+                    console.error('Error CKEditor Edit:', error);
+                });
+        }
+
+        // Handle form submit untuk Modal Create
+        const formCreate = document.querySelector('#formCreate');
+        if (formCreate) {
+            formCreate.addEventListener('submit', function(e) {
+                e.preventDefault();
+                console.log('Form Create submitted');
+                
+                // Validasi CKEditor Create
+                if (editorBeritaCreate) {
+                    const isiBerita = editorBeritaCreate.getData();
+                    console.log('CKEditor data:', isiBerita);
+                    
+                    if (isiBerita.trim() === '') {
+                        alert('Isi berita tidak boleh kosong!');
+                        return false;
+                    }
+                    
+                    // Set value ke textarea asli
+                    document.querySelector('#editor-berita-create').value = isiBerita;
+                }
+                
+                // Submit form
+                this.submit();
+            });
+        }
+
+        // Handle form submit untuk Modal Edit
+        const formEdit = document.querySelector('#formEdit');
+        if (formEdit) {
+            formEdit.addEventListener('submit', function(e) {
+                e.preventDefault();
+                console.log('Form Edit submitted');
+                
+                // Validasi CKEditor Edit
+                if (editorBeritaEdit) {
+                    const isiBerita = editorBeritaEdit.getData();
+                    console.log('CKEditor edit data:', isiBerita);
+                    
+                    if (isiBerita.trim() === '') {
+                        alert('Isi berita tidak boleh kosong!');
+                        return false;
+                    }
+                    
+                    // Set value ke textarea asli
+                    document.querySelector('#editor-berita-edit').value = isiBerita;
+                }
+                
+                // Submit form
+                this.submit();
+            });
+        }
+
+        // Script Modal Edit - Populate form saat button diklik
         const editButtons = document.querySelectorAll('.btn-edit-action');
         editButtons.forEach(btn => {
             btn.addEventListener('click', function() {
@@ -209,7 +298,14 @@
                 const fotoUrl = this.dataset.gambar;
 
                 document.getElementById('editJudul').value = judul;
-                document.getElementById('editIsi').value = isi;
+                
+                // Tunggu editor ready sebelum set data
+                if (editorBeritaEdit) {
+                    editorBeritaEdit.setData(isi);
+                } else {
+                    console.warn('Editor Edit belum ready');
+                }
+                
                 document.getElementById('editStatus').value = status;
                 document.getElementById('previewEditImg').src = fotoUrl;
 
