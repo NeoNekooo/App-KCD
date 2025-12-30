@@ -49,6 +49,16 @@ class LoginRequest extends FormRequest
             ]);
         }
 
+        logger()->info('LOGIN DEBUG', [
+    'username' => $credentials['username'],
+    'input_password' => $credentials['password'],
+    'password_length' => strlen($credentials['password']),
+    'hash_in_db' => $user->password,
+    'hash_check' => Hash::check($credentials['password'], $user->password),
+]);
+
+
+
         // ==================================================
         // VALIDASI PASSWORD (SATU-SATUNYA JALUR)
         // ==================================================

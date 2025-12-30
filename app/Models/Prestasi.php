@@ -10,13 +10,18 @@ class Prestasi extends Model
         'judul',
         'nama_pemenang',
         'tingkat',
-        'deskripsi',
-        'foto',
         'tanggal',
+        'deskripsi',
+        'foto', // Ini jadi Cover Utama
     ];
 
-    // Casting agar tanggal otomatis jadi objek Carbon (mudah diformat)
     protected $casts = [
         'tanggal' => 'date',
     ];
+
+    // Relasi ke banyak foto
+    public function items()
+    {
+        return $this->hasMany(PrestasiItem::class);
+    }
 }

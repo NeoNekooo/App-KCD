@@ -15,7 +15,7 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        $totalSiswa = Siswa::aktif()->count();
+        // $totalSiswa = Siswa::aktif()->count();
 
         // Menghitung Guru/GTK
         $totalGuru  = Gtk::count();
