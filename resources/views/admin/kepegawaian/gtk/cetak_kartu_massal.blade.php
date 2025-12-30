@@ -12,7 +12,7 @@
         * { box-sizing: border-box; }
         body {
             font-family: 'Public Sans', sans-serif;
-            background-color: #555; 
+            background-color: #555;
             margin: 0;
             padding: 0;
             display: flex;
@@ -33,7 +33,7 @@
             justify-content: space-between;
             align-items: center;
         }
-        
+
         .btn-print {
             padding: 10px 25px;
             background: #696cff;
@@ -65,46 +65,46 @@
         /* --- CONTAINER KARTU (UKURAN ID-1) --- */
         .id-card-container {
             width: 54mm;
-            height: 86mm; 
+            height: 86mm;
             background-color: #fff;
             border-radius: 8px;
             position: relative;
             overflow: hidden;
             border: 1px dashed #ccc;
-            break-inside: avoid; 
+            break-inside: avoid;
             page-break-inside: avoid;
             display: flex;
             flex-direction: column;
-            background-image: radial-gradient(#696cff 0.5px, transparent 0.5px), radial-gradient(#696cff 0.5px, #fff 0.5px);
+            background-image: white;
             background-size: 15px 15px;
         }
 
         /* --- HEADER (DIPERBAIKI) --- */
         .header-section {
             width: 100%;
-            padding: 0 8px; 
+            padding: 0 8px;
             display: flex;
-            align-items: center; 
-            gap: 6px; 
-            background: white !important; 
-            border-bottom: 0.5px solid #eee; 
-            z-index: 5; 
+            align-items: center;
+            gap: 6px;
+            background: white !important;
+            border-bottom: 0.5px solid #eee;
+            z-index: 5;
             /* Tinggi dikurangi sedikit agar lebih compact */
-            height: 38px; 
-            flex-shrink: 0; 
+            height: 38px;
+            flex-shrink: 0;
         }
 
         .header-logo { width: 28px; height: 28px; object-fit: contain; }
-        
-        .header-text { 
-            flex: 1; 
+
+        .header-text {
+            flex: 1;
             /* Font diperbesar lagi */
-            font-size: 13px; 
-            font-weight: 900; 
-            color: #002b5c; 
-            text-transform: uppercase; 
-            line-height: 1; 
-            text-align: left; 
+            font-size: 13px;
+            font-weight: 900;
+            color: #002b5c;
+            text-transform: uppercase;
+            line-height: 1;
+            text-align: left;
             /* Agar teks tidak mepet ke atas/bawah */
             display: flex;
             align-items: center;
@@ -116,24 +116,24 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center; 
+            justify-content: center;
             padding: 5px;
             z-index: 2;
-            margin-top: -2px; 
+            margin-top: -2px;
         }
 
         /* FOTO */
         .profile-img {
-            width: 78px; height: 78px; 
-            border-radius: 50%; border: 3px solid white; 
-            object-fit: cover; 
-            margin-bottom: 6px; 
+            width: 78px; height: 78px;
+            border-radius: 50%; border: 3px solid white;
+            object-fit: cover;
+            margin-bottom: 6px;
             box-shadow: 0 3px 6px rgba(0,0,0,0.2); background: #fff;
         }
 
         /* NAMA */
         .user-name {
-            font-size: 13px; font-weight: 800; color: #ffffff; 
+            font-size: 13px; font-weight: 800; color: #ffffff;
             text-transform: uppercase; margin-bottom: 3px; line-height: 1.1;
             text-shadow: 0 1px 3px rgba(0,0,0,0.9);
             text-align: center;
@@ -145,15 +145,15 @@
         .nip-text {
             font-size: 9px; color: #ffffff; font-weight: 600; margin-top: 0;
             text-shadow: 0 1px 3px rgba(0,0,0,0.9); opacity: 0.9;
-            margin-bottom: 6px; 
+            margin-bottom: 6px;
             text-align: center;
         }
 
         /* QR CODE BOX (BORDER DIKURANGI) */
         .qr-box {
             /* Padding dikurangi dari 4px jadi 2px */
-            padding: 2px; 
-            background: white; 
+            padding: 2px;
+            background: white;
             border-radius: 4px; /* Radius dikecilkan dikit biar pas */
             box-shadow: 0 3px 6px rgba(0,0,0,0.3);
             display: block; line-height: 0;
@@ -182,12 +182,12 @@
 
     <div class="a4-page">
         @foreach($gtks as $gtk)
-        <div class="id-card-container" 
+        <div class="id-card-container"
             @if(isset($sekolah) && $sekolah->background_kartu)
                 style="background-image: url('{{ asset('storage/' . $sekolah->background_kartu) }}'); background-size: cover; background-position: center;"
             @endif
         >
-            
+
             {{-- HEADER --}}
             <div class="header-section">
                 @if($sekolah && $sekolah->logo)
@@ -195,7 +195,7 @@
                 @else
                     <img src="https://via.placeholder.com/20" class="header-logo" alt="Logo">
                 @endif
-                
+
                 <div class="header-text">
                     @if($gtk->jenis_ptk_id == 91 || str_contains(strtolower($gtk->jenis_ptk_id_str ?? ''), 'kepala sekolah'))
                         KARTU KEPALA SEKOLAH
@@ -209,7 +209,7 @@
 
             {{-- KONTEN UTAMA --}}
             <div class="content-wrapper">
-                
+
                 {{-- FOTO --}}
                 @if(!empty($gtk->foto))
                     <img src="{{ asset('storage/' . $gtk->foto) }}" class="profile-img" alt="Foto">
@@ -221,7 +221,7 @@
 
                 {{-- NAMA --}}
                 <div class="user-name">{{ $gtk->nama }}</div>
-                
+
                 {{-- ID (NIP/NUPTK/NIK) --}}
                 @if(!empty($gtk->nip) && trim($gtk->nip) != '-')
                     <div class="nip-text">NIP: {{ $gtk->nip }}</div>
@@ -249,4 +249,4 @@
     </div>
 
 </body>
-</html> 
+</html>

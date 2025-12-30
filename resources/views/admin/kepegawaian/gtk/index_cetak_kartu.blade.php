@@ -297,12 +297,22 @@
             btnCetakTerpilih.disabled = !anyChecked;
         }
 
-        btnCetakTerpilih.addEventListener('click', function () {
-            const selectedIds = Array.from(checkItems).filter(item => item.checked).map(item => item.value);
-            if (selectedIds.length > 0) {
-                window.open("{{ route('admin.kepegawaian.gtk.print-all') }}?ids=" + selectedIds.join(','), '_blank');
-            }
-        });
+        
+   btnCetakTerpilih.addEventListener('click', function () {
+        const ids = Array.from(
+            document.querySelectorAll('.checkItem:checked')
+        ).map(i => i.value);
+
+        if (ids.length === 0) {
+            alert('Pilih minimal satu pegawai.');
+            return;
+        }
+
+        const url = "{{ route('admin.kepegawaian.gtk.print-all') }}"
+            + "?ids=" + ids.join(',');
+
+        window.open(url, '_blank');
+    });
     });
     </script>
     @endpush
