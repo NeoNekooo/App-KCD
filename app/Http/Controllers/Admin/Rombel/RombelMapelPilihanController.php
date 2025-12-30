@@ -24,7 +24,7 @@ class RombelMapelPilihanController extends Controller
     {
         // Mengambil data dari tabel 'rombels' dan memfilternya
         // hanya untuk yang jenisnya 'Mapel Pilihan'.
-        $rombels = Rombel::with(['wali', 'kurikulum'])
+        $rombels = Rombel::with(['wali'])
                          // Toleran terhadap varian 'Matapelajaran Pilihan' atau 'Mapel Pilihan'
                          ->whereRaw("LOWER(TRIM(jenis_rombel_str)) IN (?, ?)", ['matapelajaran pilihan', 'mapel pilihan'])
                          ->latest()

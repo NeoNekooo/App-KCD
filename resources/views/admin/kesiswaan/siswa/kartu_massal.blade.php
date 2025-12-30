@@ -214,6 +214,13 @@
             </div>
 
             {{-- KONTEN UTAMA --}}
+
+            {{-- TOMBOL: Upload Foto (Hanya di layar, tidak ikut cetak) --}}
+            <div style="position:absolute; right:8px; bottom:8px; z-index:10;">
+                <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modalUploadFotoSiswa" data-id="{{ $siswa->id }}" data-nama="{{ $siswa->nama }}" style="display:inline-block;">
+                    <i class="bx bx-upload"></i> Upload Foto
+                </button>
+            </div>
             <div class="content-wrapper">
 
                 {{-- FOTO --}}
@@ -238,6 +245,73 @@
                 </div>
 
             </div>
+
+
+        @endforeach
+    </div>
+
+    {{-- MODAL UPLOAD FOTO SISWA --}}
+    <div class="modal fade" id="modalUploadFotoSiswa" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <form id="formUploadFotoSiswa" method="POST" enctype="multipart/form-data">
+                    @csrf
+                    <div class="modal-header">
+                        <h5 class="modal-title">Upload Foto Siswa</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label">Nama Siswa</label>
+                            <input type="text" id="target_nama_siswa" class="form-control" readonly style="background-color: #f5f5f5;">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Pilih File Foto</label>
+                            <input class="form-control" type="file" name="foto" id="fotoInputSiswa" accept="image/*" required>
+                            <div class="text-center mt-2">
+                                <img id="photoPreviewSiswa" alt="Preview" style="max-width: 100%; max-height: 200px; display:none; border-radius: 8px;">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-primary">Simpan Foto</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Saat modal tampil, isi nama dan set action form
+        const modalUploadFotoSiswa = document.getElementById('modalUploadFotoSiswa');
+        modalUploadFotoSiswa.addEventListener('show.bs.modal', function(event) {
+            const button = event.relatedTarget;
+            const id = button.getAttribute('data-id');
+            const nama = button.getAttribute('data-nama');
+
+            document.getElementById('target_nama_siswa').value = nama;
+
+            let urlAction = "{{ route('admin.kesiswaan.siswa.upload_media', ':id') }}";
+            const form = document.getElementById('formUploadFotoSiswa');
+            form.setAttribute('action', urlAction.replace(':id', id));
+
+            // Reset preview
+            document.getElementById('fotoInputSiswa').value = '';
+            document.getElementById('photoPreviewSiswa').style.display = 'none';
+        });
+
+        document.getElementById('fotoInputSiswa').onchange = function (evt) {
+            const [file] = this.files;
+            if (file) {
+                const preview = document.getElementById('photoPreviewSiswa');
+                preview.src = URL.createObjectURL(file);
+                preview.style.display = 'block';
+            }
+        };
+    </script>
+</body>
+</html>
 
         </div>
         @endforeach

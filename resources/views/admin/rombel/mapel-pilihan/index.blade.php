@@ -35,7 +35,46 @@
                         <td>
                             <input class="form-check-input row-checkbox" type="checkbox" value="{{ $rombel->id }}">
                         </td>
-                        <td><strong>{{ $rombel->nama_rombel }}</strong></td>
+                        <td>
+    <strong>{{ $rombel->nama_rombel }}</strong>
+    <div class="mt-1">
+        <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#editRombelModal-{{ $rombel->id }}">Edit</button>
+    </div>
+
+    {{-- Modal Edit --}}
+    <div class="modal fade" id="editRombelModal-{{ $rombel->id }}" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <form method="POST" action="{{ route('admin.akademik.rombel.update_core', $rombel->id) }}">
+            @csrf
+            @method('PATCH')
+            <div class="modal-header">
+              <h5 class="modal-title">Edit Rombel: {{ $rombel->nama_rombel }}</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <div class="mb-3">
+                <label class="form-label">Nama Rombel</label>
+                <input type="text" name="nama_rombel" class="form-control" value="{{ $rombel->nama_rombel }}">
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Jurusan (isi dengan teks/kompetensi)</label>
+                <input type="text" name="jurusan_id_str" class="form-control" value="{{ $rombel->jurusan_id_str }}">
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Kurikulum (isi dengan teks)</label>
+                <input type="text" name="kurikulum_id_str" class="form-control" value="{{ $rombel->kurikulum_id_str }}">
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
+              <button type="submit" class="btn btn-primary">Simpan</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+</td>
                         <td>{{ $rombel->tingkat }}</td>
                         <td>{{ $rombel->tahun_ajaran }}</td> {{-- <-- DATA BARU --}}
 

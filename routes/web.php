@@ -269,7 +269,9 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
     // 3. ROUTE RESOURCE (Standar CRUD: index, create, store, show {id}, edit {id}, update {id}, destroy {id})
     // Route ini menangkap pola 'siswa/{id}'
     Route::get('siswa/inactive', [SiswaController::class, 'inactive'])->name('siswa.inactive');
-
+ Route::post('siswa/upload-background', [SiswaController::class, 'uploadBackgroundKartu'])->name('siswa.upload-background-kartu');
+ Route::patch('siswa/{id}/register-keluar', [SiswaController::class, 'registerKeluar'])
+    ->name('siswa.register-keluar');
     Route::resource('siswa', SiswaController::class);
 
         Route::get('buku-induk', [SiswaController::class, 'bukuIndukIndex'])->name('buku_induk.index');
@@ -588,7 +590,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
             Route::post('surat-keluar-guru/cetak', 'cetak')->name('surat-keluar-guru.cetak');
             Route::post('surat-keluar-guru/pdf', 'downloadPdf')->name('surat-keluar-guru.pdf');
         });
-        
+
         Route::resource('surat-masuk', SuratMasukController::class);
 
         // Pengaturan Nomor

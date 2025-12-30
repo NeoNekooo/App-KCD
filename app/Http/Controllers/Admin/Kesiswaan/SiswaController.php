@@ -12,6 +12,8 @@ use Illuminate\Support\Str;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\SiswaExport;
+use Intervention\Image\ImageManager;
+use Intervention\Image\Drivers\Gd\Driver;
 
 class SiswaController extends Controller
 {
@@ -89,9 +91,24 @@ class SiswaController extends Controller
     {
         $request->validate(['nama_lengkap' => 'required|string|max:255']);
         $data = $request->except(['foto']);
+
         if ($request->hasFile('foto')) {
-            $data['foto'] = $request->file('foto')->store('siswa/foto', 'public');
+            $request->validate(['foto' => 'image|mimes:jpeg,png,jpg|max:5120']); // 5MB
+
+            $file = $request->file('foto');
+            $fileName = time() . '_' . Str::slug($request->nama_lengkap) . '.jpg';
+            $path = 'siswa/foto/' . $fileName;
+
+            // Compress using Intervention Image and save as jpg with quality 70
+            $manager = new ImageManager(new Driver());
+            $image = $manager->read($file);
+            $image->scale(width: 400);
+            $encoded = $image->toJpeg(70);
+            Storage::disk('public')->put($path, (string) $encoded);
+
+            $data['foto'] = $path;
         }
+
         Siswa::create($data);
         return redirect()->route('admin.kesiswaan.siswa.index')->with('success', 'Data siswa berhasil ditambahkan.');
     }
@@ -240,13 +257,26 @@ class SiswaController extends Controller
             'email', 'nomor_telepon_seluler', 'agama_id_str', 'kewarganegaraan'
         ]);
 
-        // 2. Handle Foto
+        // 2. Handle Foto (kompres sama seperti GTK)
         if ($request->hasFile('foto')) {
-            $request->validate(['foto' => 'image|max:2048']);
+            $request->validate(['foto' => 'image|mimes:jpeg,png,jpg|max:5120']); // 5MB
+
+            // Hapus foto lama
             if ($siswa->foto && Storage::disk('public')->exists($siswa->foto)) {
                 Storage::disk('public')->delete($siswa->foto);
             }
-            $dataToUpdate['foto'] = $request->file('foto')->store('siswa/foto', 'public');
+
+            $file = $request->file('foto');
+            $fileName = time() . '_' . Str::slug($siswa->nama) . '.jpg';
+            $path = 'siswa/foto/' . $fileName;
+
+            $manager = new ImageManager(new Driver());
+            $image = $manager->read($file);
+            $image->scale(width: 400);
+            $encoded = $image->toJpeg(70);
+            Storage::disk('public')->put($path, (string) $encoded);
+
+            $dataToUpdate['foto'] = $path;
         }
 
         // 3. Simpan
@@ -296,7 +326,8 @@ class SiswaController extends Controller
     public function showCetakMassalIndex()
     {
         $rombels = Rombel::orderBy('nama', 'asc')->get()->unique('nama');
-        return view('admin.kesiswaan.siswa.cetak_massal_index', compact('rombels'));
+        $sekolah = Sekolah::first();
+        return view('admin.kesiswaan.siswa.cetak_massal_index', compact('rombels', 'sekolah'));
     }
 
       public function cetakKartuMassal(Rombel $rombel)
@@ -321,6 +352,66 @@ class SiswaController extends Controller
         }
 
         return view('admin.kesiswaan.siswa.kartu_massal', compact('siswas', 'rombel'));
+    }
+
+    /**
+     * Upload/Compress Foto Siswa (dipanggil dari modal/upload khusus)
+     */
+    public function uploadMedia(Request $request, $id)
+    {
+        $request->validate([
+            'foto' => 'required|image|mimes:jpeg,png,jpg|max:5120'
+        ]);
+
+        $siswa = Siswa::findOrFail($id);
+
+        // Hapus foto lama jika ada
+        if ($siswa->foto && Storage::disk('public')->exists($siswa->foto)) {
+            Storage::disk('public')->delete($siswa->foto);
+        }
+
+        $file = $request->file('foto');
+        $fileName = time() . '_' . Str::slug($siswa->nama) . '.jpg';
+        $path = 'siswa/foto/' . $fileName;
+
+        $manager = new ImageManager(new Driver());
+        $image = $manager->read($file);
+        $image->scale(width: 400);
+        $encoded = $image->toJpeg(70);
+        Storage::disk('public')->put($path, (string) $encoded);
+
+        $siswa->foto = $path;
+        $siswa->save();
+
+        return back()->with('success', 'Foto ' . $siswa->nama . ' berhasil dikompres dan disimpan!');
+    }
+
+    /**
+     * Upload Background untuk Kartu Siswa (sama seperti GTK)
+     */
+    public function uploadBackgroundKartu(Request $request)
+    {
+        $request->validate([
+            'background_kartu' => 'required|image|mimes:jpeg,png,jpg|max:2048',
+        ]);
+
+        $sekolah = Sekolah::first();
+        if (!$sekolah) {
+            $sekolah = new Sekolah();
+        }
+
+        if ($request->hasFile('background_kartu')) {
+            // Hapus file lama jika ada
+            if ($sekolah->background_kartu && Storage::disk('public')->exists($sekolah->background_kartu)) {
+                Storage::disk('public')->delete($sekolah->background_kartu);
+            }
+
+            $path = $request->file('background_kartu')->store('sekolah_media/background', 'public');
+            $sekolah->background_kartu = $path;
+            $sekolah->save();
+        }
+
+        return back()->with('success', 'Background kartu siswa berhasil diupdate!');
     }
 
     // --- FITUR CETAK BIODATA PDF (BARU) ---

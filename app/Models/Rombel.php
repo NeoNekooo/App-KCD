@@ -21,7 +21,11 @@ class Rombel extends Model
         'nama_rombel',
         'jenis_rombel',
         'kurikulum_id',
+        'kurikulum_id_str', // prefer storing kurikulum as imported string
+        'kurikulum', // legacy / explicit field if present
         'jurusan_id',
+        'jurusan_id_str', // prefer storing jurusan as imported string
+        'jurusan', // legacy / explicit field if present
         'wali_id', // Ini untuk Wali Kelas (dari tabel ptk)
         'tingkat',
         'ruang',
@@ -63,41 +67,34 @@ class Rombel extends Model
         return $this->belongsTo(Ptk::class, 'wali_id');
     }
 
-    /**
-     * Relasi ke Jurusan
-     * Satu Rombel punya SATU Jurusan
-     */
-    public function jurusan()
-    {
-        // 'jurusan_id' adalah foreign key
-        return $this->belongsTo(Jurusan::class, 'jurusan_id');
-    }
+    // NOTE: We intentionally no longer define a `jurusan()` relation to a separate `jurusan` table.
+    // The preferred source of truth for jurusan in a Rombel is the imported string field
+    // `jurusan_id_str` (or legacy `jurusan`/`jurusan_id`). This simplifies schema and avoids
+    // requiring a separate `jurusan` master table for basic display and filtering.
 
-    /**
-     * Relasi ke Kurikulum
-     * Satu Rombel punya SATU Kurikulum
-     */
-    public function kurikulum()
-    {
-        // 'kurikulum_id' adalah foreign key
-        return $this->belongsTo(Kurikulum::class, 'kurikulum_id');
-    }
+    // NOTE: We intentionally no longer define a `kurikulum()` relation to a separate `kurikulum` table.
+    // Kurikulum is taken directly from Rombel fields (e.g. `kurikulum_id_str`), so we avoid
+    // depending on a master `kurikulum` table for basic display/filtering.
 
     // Compatibility accessors for imported fields and relations
     public function getJurusanNameAttribute()
     {
-        if ($this->relationLoaded('jurusan') && $this->jurusan) {
-            return $this->jurusan->nama_jurusan;
-        }
-        return $this->attributes['jurusan_id_str'] ?? null;
+        // Prefer the imported string column `jurusan_id_str`, then fallback to other available
+        // fields. We no longer rely on a `jurusan` relation.
+        return $this->attributes['jurusan_id_str']
+               ?? $this->attributes['jurusan']
+               ?? $this->attributes['jurusan_id']
+               ?? null;
     }
 
     public function getKurikulumNameAttribute()
     {
-        if ($this->relationLoaded('kurikulum') && $this->kurikulum) {
-            return $this->kurikulum->nama_kurikulum;
-        }
-        return $this->attributes['kurikulum_id_str'] ?? null;
+        // Prefer the imported string column `kurikulum_id_str`, then fallback to other available
+        // fields. We no longer rely on a `kurikulum` relation.
+        return $this->attributes['kurikulum_id_str']
+               ?? $this->attributes['kurikulum']
+               ?? $this->attributes['kurikulum_id']
+               ?? null;
     }
 
     public function getWaliNameAttribute()
@@ -151,11 +148,6 @@ class Rombel extends Model
         }
 
         return Siswa::whereIn('peserta_didik_id', $ids)->get();
-    }
-
-    public function hariLibur()
-    {
-        return $this->belongsToMany(HariLibur::class, 'hari_libur_rombel');
     }
 }
 // Other code in the file

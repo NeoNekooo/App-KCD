@@ -180,69 +180,7 @@
         </tr>
     </table>
 
-    {{-- D. RIWAYAT KEPANGKATAN --}}
-    <div class="section-title">D. RIWAYAT KEPANGKATAN</div>
-    <table class="data-table table-bordered">
-        <thead>
-            <tr>
-                <th width="5%">No</th>
-                <th>Pangkat / Golongan</th>
-                <th>Nomor SK</th>
-                <th>Tanggal SK</th>
-                <th>TMT Pangkat</th>
-                <th>Masa Kerja</th>
-            </tr>
-        </thead>
-        <tbody>
-            @php $pangkat = json_decode($gtk->rwy_kepangkatan); @endphp
-            @if(!empty($pangkat) && is_array($pangkat))
-                @foreach($pangkat as $index => $rw)
-                <tr>
-                    <td class="text-center">{{ $index + 1 }}</td>
-                    <td class="text-center">{{ $rw->pangkat_golongan_id_str ?? '-' }}</td>
-                    <td>{{ $rw->nomor_sk ?? '-' }}</td>
-                    <td class="text-center">{{ isset($rw->tanggal_sk) ? \Carbon\Carbon::parse($rw->tanggal_sk)->format('d-m-Y') : '-' }}</td>
-                    <td class="text-center">{{ isset($rw->tmt_pangkat) ? \Carbon\Carbon::parse($rw->tmt_pangkat)->format('d-m-Y') : '-' }}</td>
-                    <td class="text-center">{{ $rw->masa_kerja_gol_tahun ?? 0 }} Thn {{ $rw->masa_kerja_gol_bulan ?? 0 }} Bln</td>
-                </tr>
-                @endforeach
-            @else
-                <tr><td colspan="6" class="text-center text-muted">Tidak ada data riwayat kepangkatan.</td></tr>
-            @endif
-        </tbody>
-    </table>
 
-    {{-- E. RIWAYAT PENDIDIKAN --}}
-    <div class="section-title">E. RIWAYAT PENDIDIKAN FORMAL</div>
-    <table class="data-table table-bordered">
-        <thead>
-            <tr>
-                <th width="5%">No</th>
-                <th>Jenjang</th>
-                <th>Nama Satuan Pendidikan</th>
-                <th>Tahun Masuk</th>
-                <th>Tahun Lulus</th>
-                <th>IPK</th>
-            </tr>
-        </thead>
-        <tbody>
-            @php $pendidikan = json_decode($gtk->rwy_pend_formal); @endphp
-            @if(!empty($pendidikan) && is_array($pendidikan))
-                @foreach($pendidikan as $index => $rw)
-                <tr>
-                    <td class="text-center">{{ $index + 1 }}</td>
-                    <td class="text-center">{{ $rw->jenjang_pendidikan_id_str ?? '-' }}</td>
-                    <td>{{ $rw->satuan_pendidikan_formal ?? '-' }}</td>
-                    <td class="text-center">{{ $rw->tahun_masuk ?? '-' }}</td>
-                    <td class="text-center">{{ $rw->tahun_lulus ?? '-' }}</td>
-                    <td class="text-center">{{ $rw->ipk ?? '-' }}</td>
-                </tr>
-                @endforeach
-            @else
-                <tr><td colspan="6" class="text-center text-muted">Tidak ada data riwayat pendidikan.</td></tr>
-            @endif
-        </tbody>
-    </table>
 
     {{-- F. KOMPETENSI --}}
     <div class="section-title">F. KOMPETENSI & KEAHLIAN</div>

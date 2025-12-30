@@ -93,7 +93,7 @@
     {{-- Pagination --}}
     <div class="card-footer d-flex justify-content-end">
         {{ $ekskul->links() }}
-    </div> --}}
+    </div>
 </div>
 
 {{-- ============== MODAL TAMBAH (CREATE) ============== --}}

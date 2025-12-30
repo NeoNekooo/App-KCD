@@ -3,26 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-    <title>Cetak Biodata Siswa</title> 
-    
+    <title>Cetak Biodata Siswa</title>
+
     <style>
         /* Margin Halaman (Atas Kanan Bawah Kiri) - Bawah agak lebar buat Footer */
         @page { margin: 1cm 2cm 1.5cm 2cm; }
-        
+
         body {
             font-family: Arial, Helvetica, sans-serif;
             font-size: 11px;
             color: #000;
             line-height: 1.3;
         }
-
-        /* WRAPPER PER SISWA (PENTING BUAT MULTI-PAGE) */
+      /* WRAPPER PER SISWA (PENTING BUAT MULTI-PAGE) */
         .page-container {
             display: block;
             width: 100%;
             page-break-after: always; /* Paksa ganti halaman setelah div ini selesai */
             position: relative;
         }
+
         /* Hapus break di halaman terakhir agar tidak ada halaman kosong */
         .page-container:last-child {
             page-break-after: auto;
@@ -32,7 +32,7 @@
         .header-table { width: 100%; border-bottom: 3px solid #000; margin-bottom: 10px; padding-bottom: 5px; }
         .header-table td { vertical-align: middle; text-align: center; }
         .logo { width: 75px; height: auto; object-fit: contain; }
-        
+
         .kop-text { text-align: center; padding: 0 10px; }
         .kop-h1 { font-size: 14px; font-weight: bold; margin: 0; text-transform: uppercase; }
         .kop-h2 { font-size: 16px; font-weight: bold; margin: 2px 0; text-transform: uppercase; }
@@ -49,7 +49,7 @@
         /* TABEL */
         .data-table { width: 100%; border-collapse: collapse; margin-bottom: 5px; }
         .data-table td { padding: 2px 0; vertical-align: top; }
-        
+
         /* Lebar Kolom Standar */
         .label { width: 30%; font-weight: bold; }
         .sep { width: 3%; text-align: center; }
@@ -63,17 +63,38 @@
         /* FOTO & TTD */
         .photo-wrapper { text-align: center; vertical-align: top; padding-top: 5px; }
         .photo-container { width: 3cm; height: 4cm; border: 1px solid #000; padding: 2px; object-fit: cover; display: inline-block; }
-        
-        /* Tanda Tangan Wrapper - Pastikan tidak pecah */
-        .signature-wrapper { 
-            margin-top: 30px; 
-            page-break-inside: avoid; /* Jangan potong tanda tangan ke halaman lain */
+/* Tambahkan ini di dalam tag <style> */
+    /* Tanda Tangan Wrapper - Pastikan tidak pecah */
+    .signature-wrapper {
+        margin-top: 30px;
+        page-break-inside: avoid; /* Jangan potong tanda tangan ke halaman lain */
             width: 100%;
         }
         .signature-box { text-align: center; width: 250px; float: right; margin-right: 10px; }
 
         /* Footer Fixed di Bawah Setiap Halaman */
         footer { position: fixed; bottom: 0; left: 0; right: 0; height: 20px; font-size: 8px; text-align: right; border-top: 1px solid #ccc; padding-top: 2px; color: #555; }
+        .keep-together {
+            page-break-inside: avoid;
+            break-inside: avoid;
+            display: block;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+        .dotted-line {
+            border-bottom: 1px dotted #000;
+            width: 100%;
+            height: 20px;
+            margin-bottom: 5px;
+        }
+        .dots { border-bottom: 1px dotted #000; display: inline-block; min-width: 100px; height: 12px; }
+.indent-item { padding-left: 20px; }
+  .section-wrapper {
+    page-break-inside: avoid;
+    margin-bottom: 15px;
+    display: block;
+    width: 100%;
+}
     </style>
 </head>
 <body>
@@ -84,10 +105,10 @@
     {{-- LOOPING UTAMA --}}
     @foreach($siswas as $siswa)
     <div class="page-container">
-        
+
         {{-- LOGIC KELAS --}}
         @php
-            $namaKelas = $siswa->nama_rombel; 
+            $namaKelas = $siswa->nama_rombel;
             if (empty($namaKelas)) $namaKelas = optional($siswa->rombel)->nama;
             if (empty($namaKelas) && $siswa->peserta_didik_id) {
                 $rombelJson = \App\Models\Rombel::where('anggota_rombel', 'like', '%'.$siswa->peserta_didik_id.'%')->first();
@@ -104,7 +125,7 @@
                         <img src="{{ public_path('storage/' . $sekolah->logo) }}" class="logo">
                     @else
                         {{-- Placeholder Logo --}}
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/9/9c/Logo_Tut_Wuri_Handayani.png" class="logo" style="opacity: 0.6"> 
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/9/9c/Logo_Tut_Wuri_Handayani.png" class="logo" style="opacity: 0.6">
                     @endif
                 </td>
                 <td class="kop-text" style="width: 70%;">
@@ -112,7 +133,7 @@
                     <div class="kop-h1">DINAS PENDIDIKAN</div>
                     <div class="kop-h2">{{ strtoupper($sekolah->nama ?? 'SMK MERDEKA BANDUNG') }}</div>
                     <div class="kop-address">
-                        {{ $sekolah->alamat_jalan ?? 'Jl. Pahlawan No. 123' }} 
+                        {{ $sekolah->alamat_jalan ?? 'Jl. Pahlawan No. 123' }}
                         {{ isset($sekolah->kecamatan) ? ', Kec. '.$sekolah->kecamatan : '' }}
                         {{ isset($sekolah->kabupaten_kota) ? ', '.$sekolah->kabupaten_kota : '' }}
                         <br>
@@ -197,13 +218,13 @@
                 </td>
             </tr>
         </table>
-        
+
         @if(!empty($siswa->nama_wali))
         <table class="data-table" style="margin-top: 5px;">
             <tr>
                 <td style="width: 100%;">
                     <div class="sub-header">WALI</div>
-                    <table class="data-table" style="width: 50%;"> 
+                    <table class="data-table" style="width: 50%;">
                         <tr><td class="label-half">Nama Wali</td><td class="sep-half">:</td><td class="val-half">{{ $siswa->nama_wali }}</td></tr>
                         <tr><td class="label-half">Tahun Lahir</td><td class="sep-half">:</td><td class="val-half">{{ $siswa->tahun_lahir_wali ?? '-' }}</td></tr>
                         <tr><td class="label-half">Pekerjaan</td><td class="sep-half">:</td><td class="val-half">{{ $siswa->pekerjaan_wali_id_str ?? '-' }}</td></tr>
@@ -225,10 +246,81 @@
             <tr><td class="label">Tanggal Masuk</td><td class="sep">:</td><td class="val">{{ $siswa->tanggal_masuk_sekolah ? \Carbon\Carbon::parse($siswa->tanggal_masuk_sekolah)->translatedFormat('d F Y') : '-' }}</td></tr>
             <tr><td class="label">Status Siswa</td><td class="sep">:</td><td class="val">{{ $siswa->status ?? 'Aktif' }}</td></tr>
             <tr><td class="label">Penerima Bantuan</td><td class="sep">:</td><td class="val">
-                KIP: {{ $siswa->penerima_kip ?? 'Tidak' }} ({{ $siswa->no_kip ?? '-' }}) | 
+                KIP: {{ $siswa->penerima_kip ?? 'Tidak' }} ({{ $siswa->no_kip ?? '-' }}) |
                 PIP: {{ $siswa->layak_pip ?? 'Tidak' }}
             </td></tr>
         </table>
+{{-- I. MENINGGALKAN SEKOLAH --}}
+<div class="keep-together">
+
+<div class="section-title">I. MENINGGALKAN SEKOLAH</div>
+<table class="data-table">
+    <tr>
+        <td style="width: 30%;">29. Tamat Belajar</td>
+        <td class="sep">:</td>
+        <td class="val">
+            Tanggal: {{ $siswa->status == 'Lulus' ? \Carbon\Carbon::parse($siswa->tanggal_keluar)->translatedFormat('d F Y') : '.................' }}
+            No. Ijazah: {{ $siswa->no_ijazah_keluar ?? '.................' }}
+        </td>
+    </tr>
+    <tr>
+        <td class="indent-item">Melanjutkan sekolah ke</td>
+        <td class="sep">:</td>
+        <td class="val">{{ $siswa->lanjut_ke ?? '-' }}</td>
+    </tr>
+    <tr>
+        <td class="indent-item">Alamat</td>
+        <td class="sep">:</td>
+        <td class="val">{{ $siswa->alamat_lanjut ?? '-' }}</td>
+    </tr>
+
+    <tr>
+        <td style="padding-top: 10px;">30. Pindah sekolah ke</td>
+        <td class="sep" style="padding-top: 10px;">:</td>
+        <td class="val" style="padding-top: 10px;">{{ $siswa->status == 'Mutasi' || $siswa->status == 'Pindah' ? ($siswa->pindah_ke ?? '-') : '-' }}</td>
+    </tr>
+    <tr>
+        <td class="indent-item">Tanggal pindah</td>
+        <td class="sep">:</td>
+        <td class="val">
+            Tanggal: {{ ($siswa->status == 'Mutasi' || $siswa->status == 'Pindah') && $siswa->tanggal_keluar ? \Carbon\Carbon::parse($siswa->tanggal_keluar)->translatedFormat('d F Y') : '.................' }}
+            dari kelas: {{ $namaKelas }}
+        </td>
+    </tr>
+    <tr>
+        <td class="indent-item">Alamat sekolah</td>
+        <td class="sep">:</td>
+        <td class="val">{{ $siswa->alamat_sekolah_pindah ?? '-' }}</td>
+    </tr>
+    <tr>
+        <td class="indent-item">Alamat pindah</td>
+        <td class="sep">:</td>
+        <td class="val">{{ $siswa->alamat_rumah_pindah ?? '-' }}</td>
+    </tr>
+
+    <tr>
+        <td style="padding-top: 10px;">31. Putus sekolah</td>
+        <td class="sep" style="padding-top: 10px;">:</td>
+        <td class="val" style="padding-top: 10px;">
+            Tanggal: {{ $siswa->status == 'Putus Sekolah' ? \Carbon\Carbon::parse($siswa->tanggal_keluar)->translatedFormat('d F Y') : '.................' }}
+            Alasan: {{ $siswa->status == 'Putus Sekolah' ? ($siswa->alasan_keluar ?? '.................') : '.................' }}
+        </td>
+    </tr>
+</table>
+</div>
+<div class="section-wrapper">
+    <div class="section-title">J. LAIN-LAIN</div>
+    <div style="padding: 5px 0;">
+        <strong>32. Catatan penting selama siswa belajar di sekolah ini:</strong>
+        <div style="margin-top: 10px;">
+            <div class="dotted-line"></div>
+            <div class="dotted-line"></div>
+            <div class="dotted-line"></div>
+            <div class="dotted-line"></div>
+            <div class="dotted-line"></div>
+        </div>
+    </div>
+</div>
 
         {{-- TANDA TANGAN --}}
         <div class="signature-wrapper">
