@@ -177,6 +177,7 @@
                                     <hr class="my-3 border-dashed">
                                     <div class="row-clean"><label>Email <i class="bx bx-lock-alt ms-1 text-muted small"></i></label><div class="sep">:</div><div class="inp locked-dapodik">{{ $siswa->email ?? '-' }}</div></div>
                                     <div class="row-clean"><label>No. HP <i class="bx bx-lock-alt ms-1 text-muted small"></i></label><div class="sep">:</div><div class="inp locked-dapodik">{{ $siswa->nomor_telepon_seluler ?? '-' }}</div></div>
+                                    <div class="row-clean"><label>No. WA <i class="bx bx-pencil ms-1 text-primary small"></i></label><div class="sep">:</div><div class="inp"><input type="text" name="no_wa" class="clean-input editable-field" value="{{ $siswa->no_wa }}" readonly></div></div>
                                 </div>
 
                                 {{-- TAB 2: KESEJAHTERAAN --}}

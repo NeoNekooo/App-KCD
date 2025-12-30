@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-    <title>Kumpulan Profil GTK</title> 
-    
+    <title>Kumpulan Profil GTK</title>
+
     <style>
         @page { margin: 1cm 2cm; }
         body {
@@ -28,11 +28,11 @@
 
         /* SECTIONS */
         .section-title { font-size: 12px; font-weight: bold; margin: 15px 0 5px 0; background-color: #f0f0f0; padding: 5px; border-left: 4px solid #333; }
-        
+
         /* TABEL UMUM */
         .data-table { width: 100%; border-collapse: collapse; margin-bottom: 10px; }
         .data-table td, .data-table th { padding: 4px 6px; vertical-align: top; }
-        
+
         /* Tabel Polos (Identitas) */
         .table-clean td { border: none; }
         .label { width: 28%; font-weight: bold; color: #444; }
@@ -64,7 +64,7 @@
         .bold { font-weight: bold; }
         .page-break { page-break-after: always; }
         .text-muted { color: #777; font-style: italic; }
-        
+
         footer { position: fixed; bottom: 0; left: 0; right: 0; height: 30px; font-size: 9px; text-align: right; border-top: 1px solid #ddd; padding-top: 5px; color: #888; }
     </style>
 </head>
@@ -74,7 +74,7 @@
     </footer>
 
     @foreach($gtks as $gtk)
-    
+
         {{-- ========================================================= --}}
         {{-- HALAMAN 1: BIODATA --}}
         {{-- ========================================================= --}}
@@ -92,7 +92,7 @@
                     <div class="kop-h1">DINAS PENDIDIKAN</div>
                     <div class="kop-h2">{{ strtoupper($sekolah->nama ?? 'NAMA SEKOLAH') }}</div>
                     <div class="kop-address">
-                        {{ $sekolah->alamat_jalan ?? 'Alamat Sekolah' }} 
+                        {{ $sekolah->alamat_jalan ?? 'Alamat Sekolah' }}
                         @if($sekolah->nomor_telepon) | Telp: {{ $sekolah->nomor_telepon }} @endif
                         @if($sekolah->email) | Email: {{ $sekolah->email }} @endif
                     </div>
@@ -149,11 +149,11 @@
 
         {{-- C. KEPEGAWAIAN (DENGAN LOGIKA SK OTOMATIS) --}}
         <div class="section-title">C. DATA KEPEGAWAIAN</div>
-        
+
         @php
             $skPdf = $gtk->sk_pengangkatan;
             $tmtPdf = $gtk->tmt_pengangkatan;
-            
+
             if (empty($skPdf)) {
                 $hist = json_decode($gtk->rwy_kepangkatan, true);
                 if (!empty($hist) && isset($hist[0])) {
@@ -184,69 +184,7 @@
             </tr>
         </table>
 
-        {{-- D. RIWAYAT KEPANGKATAN --}}
-        <div class="section-title">D. RIWAYAT KEPANGKATAN</div>
-        <table class="data-table table-bordered">
-            <thead>
-                <tr>
-                    <th width="5%">No</th>
-                    <th>Pangkat / Golongan</th>
-                    <th>Nomor SK</th>
-                    <th>Tanggal SK</th>
-                    <th>TMT Pangkat</th>
-                    <th>Masa Kerja</th>
-                </tr>
-            </thead>
-            <tbody>
-                @php $pangkat = json_decode($gtk->rwy_kepangkatan); @endphp
-                @if(!empty($pangkat) && is_array($pangkat))
-                    @foreach($pangkat as $index => $rw)
-                    <tr>
-                        <td class="text-center">{{ $index + 1 }}</td>
-                        <td class="text-center">{{ $rw->pangkat_golongan_id_str ?? '-' }}</td>
-                        <td>{{ $rw->nomor_sk ?? '-' }}</td>
-                        <td class="text-center">{{ isset($rw->tanggal_sk) ? \Carbon\Carbon::parse($rw->tanggal_sk)->format('d-m-Y') : '-' }}</td>
-                        <td class="text-center">{{ isset($rw->tmt_pangkat) ? \Carbon\Carbon::parse($rw->tmt_pangkat)->format('d-m-Y') : '-' }}</td>
-                        <td class="text-center">{{ $rw->masa_kerja_gol_tahun ?? 0 }} Thn {{ $rw->masa_kerja_gol_bulan ?? 0 }} Bln</td>
-                    </tr>
-                    @endforeach
-                @else
-                    <tr><td colspan="6" class="text-center text-muted">Tidak ada data riwayat kepangkatan.</td></tr>
-                @endif
-            </tbody>
-        </table>
-
-        {{-- E. RIWAYAT PENDIDIKAN --}}
-        <div class="section-title">E. RIWAYAT PENDIDIKAN FORMAL</div>
-        <table class="data-table table-bordered">
-            <thead>
-                <tr>
-                    <th width="5%">No</th>
-                    <th>Jenjang</th>
-                    <th>Nama Satuan Pendidikan</th>
-                    <th>Tahun Masuk</th>
-                    <th>Tahun Lulus</th>
-                    <th>IPK</th>
-                </tr>
-            </thead>
-            <tbody>
-                @php $pendidikan = json_decode($gtk->rwy_pend_formal); @endphp
-                @if(!empty($pendidikan) && is_array($pendidikan))
-                    @foreach($pendidikan as $index => $rw)
-                    <tr>
-                        <td class="text-center">{{ $index + 1 }}</td>
-                        <td class="text-center">{{ $rw->jenjang_pendidikan_id_str ?? '-' }}</td>
-                        <td>{{ $rw->satuan_pendidikan_formal ?? '-' }}</td>
-                        <td class="text-center">{{ $rw->tahun_masuk ?? '-' }}</td>
-                        <td class="text-center">{{ $rw->tahun_lulus ?? '-' }}</td>
-                        <td class="text-center">{{ $rw->ipk ?? '-' }}</td>
-                    </tr>
-                    @endforeach
-                @else
-                    <tr><td colspan="6" class="text-center text-muted">Tidak ada data riwayat pendidikan.</td></tr>
-                @endif
-            </tbody>
-        </table>
+       
 
         {{-- F. KOMPETENSI --}}
         <div class="section-title">F. KOMPETENSI & KEAHLIAN</div>
@@ -268,7 +206,7 @@
         {{-- ========================================================= --}}
         {{-- HALAMAN 2: LAMPIRAN PEMBELAJARAN (ROMBEL) --}}
         {{-- ========================================================= --}}
-        
+
         <div class="page-break"></div>
 
         <div class="page-title" style="margin-top: 20px;">LAMPIRAN REKAPITULASI PEMBELAJARAN</div>
@@ -284,16 +222,16 @@
                 </tr>
             </thead>
             <tbody>
-                @php 
-                    $totalJam = 0; 
-                    $no = 1; 
+                @php
+                    $totalJam = 0;
+                    $no = 1;
                     $adaJadwal = false;
 
                     // QUERY LANGSUNG UNTUK MENGAMBIL JADWAL MENGAJAR GURU INI
                     // Kita ambil semua rombel, lalu filter di PHP (sama seperti logika sebelumnya)
-                    // Atau lebih efisien: Ambil Rombel dimana ptk_id = $gtk->ptk_id (Wali Kelas) 
+                    // Atau lebih efisien: Ambil Rombel dimana ptk_id = $gtk->ptk_id (Wali Kelas)
                     // ATAU rombel yang di kolom 'pembelajaran'-nya ada ID guru ini.
-                    
+
                     // Karena struktur JSON ada di kolom 'pembelajaran', kita ambil semua rombel dulu
                     // (Catatan: Ini mungkin agak berat jika data rombel ribuan, tapi untuk sekedar cetak masih oke)
                     $semuaRombel = \App\Models\Rombel::where('semester_id', 20251)->get(); // Sesuaikan semester jika perlu
@@ -302,12 +240,12 @@
                 @foreach ($semuaRombel as $rombel)
                     @if (isset($rombel->pembelajaran) && !empty($rombel->pembelajaran))
                         @php $pembelajaran = is_string($rombel->pembelajaran) ? json_decode($rombel->pembelajaran, true) : $rombel->pembelajaran; @endphp
-                        
+
                         @if(is_array($pembelajaran))
                             @foreach ($pembelajaran as $mapel)
                                 {{-- CEK APAKAH GURU INI YANG MENGAJAR --}}
                                 @if (isset($mapel['ptk_id']) && $mapel['ptk_id'] == $gtk->ptk_id)
-                                    @php 
+                                    @php
                                         $jam = (int) ($mapel['jam_mengajar_per_minggu'] ?? 0);
                                         $totalJam += $jam;
                                         $adaJadwal = true;
@@ -347,7 +285,7 @@
             <div class="signature-box">
                 <p>Cianjur, {{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}</p>
                 <p>Yang Bersangkutan,</p>
-                
+
                 <div style="height: 60px; margin: 10px auto;">
                     @if($gtk->tandatangan && file_exists(storage_path('app/public/' . $gtk->tandatangan)))
                         <img src="{{ public_path('storage/' . $gtk->tandatangan) }}" style="max-height: 60px; max-width: 150px;">

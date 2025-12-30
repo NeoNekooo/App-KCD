@@ -19,6 +19,7 @@ use App\Http\Controllers\Admin\Akademik\TapelController;
 use App\Http\Controllers\Admin\Akademik\JurusanController;
 use App\Http\Controllers\Admin\Akademik\MapelController;
 use App\Http\Controllers\Admin\Akademik\DaftarEkstrakurikulerController;
+use App\Http\Controllers\Admin\Akademik\RombelController;
 
 // kurikulum
 use App\Http\Controllers\Admin\Kurikulum\JamPelajaranController;
@@ -99,6 +100,7 @@ use App\Http\Controllers\Admin\Administrasi\SuratKeluarGuruController;
 use App\Http\Controllers\Admin\Administrasi\SuratMasukController;
 use App\Http\Controllers\Admin\Administrasi\NomorSuratSettingController;
 
+
 use App\Http\Controllers\DashboardController;
 
 
@@ -176,7 +178,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
 
   Route::get('gtk/inactive', [GtkController::class, 'inactive'])->name('gtk.inactive');
         Route::get('gtk/inactive/export/excel', [GtkController::class, 'exportInactiveExcel'])->name('gtk.inactive.export.excel');
-
+   Route::patch('gtk/{id}/unregister-keluar', [GtkController::class, 'unregisterKeluar'])->name('gtk.unregister-keluar');
         // Route untuk detail multi-GTK
         Route::get('/gtk/show-multiple', [GtkController::class, 'showMultiple'])->name('gtk.show-multiple');
         Route::get('gtk/cetak-pdf/{id}', [GtkController::class, 'cetakPdf'])->name('gtk.cetak_pdf');
@@ -241,7 +243,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
         Route::get('jadwal-pelajaran/{id}/json', [JadwalPelajaranController::class, 'getJadwalJson'])->name('jadwal-pelajaran.json');
         Route::post('jadwal-pelajaran/update', [JadwalPelajaranController::class, 'updateJadwal'])->name('jadwal-pelajaran.update-ajax');
         Route::post('jadwal-pelajaran/sync', [JadwalPelajaranController::class, 'syncMapel'])->name('jadwal-pelajaran.sync');
-
+ Route::patch('rombel/{rombel}/update-core', [RombelController::class, 'updateCore'])->name('rombel.update_core');
         // -----------------------------------------------------------------
         // 2. Route Resource Jadwal (Generic) - TARUH PALING BAWAH
         // -----------------------------------------------------------------
@@ -272,7 +274,10 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
  Route::post('siswa/upload-background', [SiswaController::class, 'uploadBackgroundKartu'])->name('siswa.upload-background-kartu');
  Route::patch('siswa/{id}/register-keluar', [SiswaController::class, 'registerKeluar'])
     ->name('siswa.register-keluar');
+
     Route::resource('siswa', SiswaController::class);
+      Route::patch('siswa/{id}/unregister-keluar', [SiswaController::class, 'unregisterKeluar'])
+        ->name('siswa.unregister-keluar');
 
         Route::get('buku-induk', [SiswaController::class, 'bukuIndukIndex'])->name('buku_induk.index');
     Route::get('buku-induk/rombel/{rombel}', [SiswaController::class, 'bukuIndukRombel'])->name('buku_induk.rombel_show');

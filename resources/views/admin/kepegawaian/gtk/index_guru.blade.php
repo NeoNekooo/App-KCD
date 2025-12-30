@@ -101,14 +101,20 @@
                     <td>{{ $gtk->nuptk ?? '-' }}</td>
                     <td>{{ $gtk->tanggal_surat_tugas ? \Carbon\Carbon::parse($gtk->tanggal_surat_tugas)->format('d-m-Y') : '-' }}</td>
                     <td class="text-nowrap">
-                        <button type="button"
-                            class="btn btn-sm btn-outline-danger btnRegisterKeluarGTK"
-                            data-id="{{ $gtk->id }}"
-                            data-nama="{{ $gtk->nama }}"
-                            data-url="{{ route('admin.kepegawaian.gtk.register-keluar', $gtk->id) }}"
-                        >
-                            <i class="bx bx-log-out-circle me-1"></i> Register Keluar
-                        </button>
+                        @if($gtk->status != 'Aktif')
+                            <button type="button" class="btn btn-sm btn-outline-warning btn-unregister-keluar-gtk" data-id="{{ $gtk->id }}" data-nama="{{ $gtk->nama }}">
+                                <i class="bx bx-undo me-1"></i> Batalkan Keluar
+                            </button>
+                        @else
+                            <button type="button"
+                                class="btn btn-sm btn-outline-danger btnRegisterKeluarGTK"
+                                data-id="{{ $gtk->id }}"
+                                data-nama="{{ $gtk->nama }}"
+                                data-url="{{ route('admin.kepegawaian.gtk.register-keluar', $gtk->id) }}"
+                            >
+                                <i class="bx bx-log-out-circle me-1"></i> Register Keluar
+                            </button>
+                        @endif
                     </td>
                 </tr>
                 @empty
@@ -208,7 +214,28 @@
         </div>
     </div>
 </div>
-@endsection
+<!-- Modal: Unregister Keluar GTK -->
+<div class="modal fade" id="modalUnregisterKeluarGTK" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <form id="formUnregisterKeluarGTK" method="POST">
+                @csrf
+                @method('PATCH')
+                <div class="modal-header border-bottom">
+                    <h5 class="modal-title">Batalkan Register Keluar GTK: <span id="namaGTKUnregModal" class="fw-bold"></span></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Anda yakin ingin membatalkan pencatatan keluar untuk GTK <strong><span id="namaGTKUnregModal2"></span></strong>? Tindakan ini akan mengembalikan status menjadi <strong>Aktif</strong>.</p>
+                </div>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-warning"><i class="bx bx-undo me-1"></i> Batalkan Keluar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>@endsection
 @push('scripts')
 <script>
     document.addEventListener('DOMContentLoaded', function() {
@@ -240,6 +267,26 @@
                 }
 
                 modalRegisterKeluarGTK.show();
+            });
+        });
+
+        // Unregister GTK (undo register keluar)
+        const btnUnregisterKeluarGTK = document.querySelectorAll('.btn-unregister-keluar-gtk');
+        const modalUnregisterKeluarGTK = new bootstrap.Modal(document.getElementById('modalUnregisterKeluarGTK'));
+        const formUnregisterKeluarGTK = document.getElementById('formUnregisterKeluarGTK');
+        const namaGTKUnregModal = document.getElementById('namaGTKUnregModal');
+        const namaGTKUnregModal2 = document.getElementById('namaGTKUnregModal2');
+
+        btnUnregisterKeluarGTK.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const id = this.getAttribute('data-id');
+                const nama = this.getAttribute('data-nama');
+
+                namaGTKUnregModal.innerText = nama;
+                namaGTKUnregModal2.innerText = nama;
+
+                formUnregisterKeluarGTK.action = `/admin/kepegawaian/gtk/${id}/unregister-keluar`;
+                modalUnregisterKeluarGTK.show();
             });
         });
 

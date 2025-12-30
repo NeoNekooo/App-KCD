@@ -11,9 +11,9 @@
     </h4>
 
     <div class="d-flex gap-2 align-items-center flex-wrap">
-        
+
         @if($siswas->isNotEmpty())
-            
+
             {{-- 3. DROPDOWN PILIH SISWA --}}
             <div class="dropdown">
                 <button class="btn btn-outline-primary dropdown-toggle btn-sm" type="button" id="siswaDropdown" data-bs-toggle="dropdown" aria-expanded="false">
@@ -29,8 +29,8 @@
                     <div id="siswaListContainer">
                         @foreach($siswas as $listSiswa)
                             <li>
-                                <a class="dropdown-item rounded mb-1 {{ $loop->first ? 'active' : '' }}" 
-                                   href="javascript:void(0);" 
+                                <a class="dropdown-item rounded mb-1 {{ $loop->first ? 'active' : '' }}"
+                                   href="javascript:void(0);"
                                    onclick="switchSiswa('{{ $listSiswa->id }}', this)"
                                    data-name="{{ strtolower($listSiswa->nama) }}">
                                     <div class="d-flex align-items-center">
@@ -60,9 +60,9 @@
     @foreach($siswas as $siswa)
 
     @php
-        $namaKelas = $siswa->nama_rombel; 
+        $namaKelas = $siswa->nama_rombel;
         if (empty($namaKelas)) {
-            $namaKelas = $siswa->rombel->nama ?? null; 
+            $namaKelas = $siswa->rombel->nama ?? null;
         }
         if (empty($namaKelas) && $siswa->peserta_didik_id) {
             $rombelJson = \App\Models\Rombel::where('anggota_rombel', 'like', '%'.$siswa->peserta_didik_id.'%')->first();
@@ -73,11 +73,11 @@
 
     {{-- WRAPPER PER SISWA --}}
     <div class="siswa-view-wrapper fade-in-animation" id="view-{{ $siswa->id }}" style="{{ !$loop->first ? 'display: none;' : '' }}">
-        
+
         <div class="card shadow-sm overflow-hidden">
             <div class="card-body p-0">
                 <div class="row g-0">
-                    
+
                     {{-- SIDEBAR KIRI --}}
                     <div class="col-lg-3 border-end d-flex flex-column align-items-center text-center py-4 px-3 bg-light-gray">
                         {{-- Form Foto --}}
@@ -109,7 +109,7 @@
                                 {{ strtoupper($siswa->status ?? 'AKTIF') }}
                             </span>
                         </div>
-                        
+
                         {{-- TOMBOL DI SINI SUDAH DIHAPUS (DIPINDAH KE HEADER) --}}
                     </div>
 
@@ -159,6 +159,7 @@
                                     <hr class="my-3 border-dashed">
                                     <div class="row-clean"><label>Email <i class="bx bx-lock-alt ms-1 text-muted small"></i></label><div class="sep">:</div><div class="inp locked-dapodik">{{ $siswa->email ?? '-' }}</div></div>
                                     <div class="row-clean"><label>No. HP <i class="bx bx-lock-alt ms-1 text-muted small"></i></label><div class="sep">:</div><div class="inp locked-dapodik">{{ $siswa->nomor_telepon_seluler ?? '-' }}</div></div>
+                                    <div class="row-clean"><label>No. WA <i class="bx bx-pencil ms-1 text-primary small"></i></label><div class="sep">:</div><div class="inp"><input type="text" name="no_wa" class="clean-input editable-field" value="{{ $siswa->no_wa }}" readonly></div></div>
                                 </div>
 
                                 {{-- TAB 2: KESEJAHTERAAN --}}
@@ -206,7 +207,7 @@
                                     <div class="row-clean"><label>Tahun Lahir <i class="bx bx-pencil ms-1 text-primary small"></i></label><div class="sep">:</div><div class="inp"><input type="text" name="tahun_lahir_ayah" class="clean-input editable-field" value="{{ $siswa->tahun_lahir_ayah }}" readonly></div></div>
                                     <div class="row-clean"><label>Pendidikan <i class="bx bx-pencil ms-1 text-primary small"></i></label><div class="sep">:</div><div class="inp"><input type="text" name="pendidikan_ayah_id_str" class="clean-input editable-field" value="{{ $siswa->pendidikan_ayah_id_str }}" readonly></div></div>
                                     <div class="row-clean"><label>Penghasilan <i class="bx bx-pencil ms-1 text-primary small"></i></label><div class="sep">:</div><div class="inp"><input type="text" name="penghasilan_ayah_id_str" class="clean-input editable-field" value="{{ $siswa->penghasilan_ayah_id_str }}" readonly></div></div>
-                                    
+
                                     <hr class="my-2 border-dashed">
                                     <h6 class="small fw-bold text-uppercase text-dark mb-2">Ibu</h6>
                                     <div class="row-clean"><label>Nama Ibu <i class="bx bx-lock-alt ms-1 text-muted small"></i></label><div class="sep">:</div><div class="inp locked-dapodik">{{ $siswa->nama_ibu ?? '-' }}</div></div>
@@ -214,7 +215,7 @@
                                     <div class="row-clean"><label>Tahun Lahir <i class="bx bx-pencil ms-1 text-primary small"></i></label><div class="sep">:</div><div class="inp"><input type="text" name="tahun_lahir_ibu" class="clean-input editable-field" value="{{ $siswa->tahun_lahir_ibu }}" readonly></div></div>
                                     <div class="row-clean"><label>Pendidikan <i class="bx bx-pencil ms-1 text-primary small"></i></label><div class="sep">:</div><div class="inp"><input type="text" name="pendidikan_ibu_id_str" class="clean-input editable-field" value="{{ $siswa->pendidikan_ibu_id_str }}" readonly></div></div>
                                     <div class="row-clean"><label>Penghasilan <i class="bx bx-pencil ms-1 text-primary small"></i></label><div class="sep">:</div><div class="inp"><input type="text" name="penghasilan_ibu_id_str" class="clean-input editable-field" value="{{ $siswa->penghasilan_ibu_id_str }}" readonly></div></div>
-                                    
+
                                     <hr class="my-2 border-dashed">
                                     {{-- <h6 class="small fw-bold text-uppercase text-dark mb-2">Wali (Editable)</h6> --}}
                                     <div class="row-clean"><label>Nama Wali <i class="bx bx-lock-alt ms-1 text-muted small"></i></label><div class="sep">:</div><div class="inp locked-dapodik">{{ $siswa->nama_wali ?? '-' }}</div></div>
@@ -305,7 +306,7 @@
         const target = document.getElementById('view-' + id);
         target.style.display = 'block';
         target.classList.remove('fade-in-animation');
-        void target.offsetWidth; 
+        void target.offsetWidth;
         target.classList.add('fade-in-animation');
 
         document.querySelectorAll('.dropdown-item').forEach(el => el.classList.remove('active'));
@@ -313,7 +314,7 @@
 
         const btnPdf = document.getElementById('header-btn-pdf');
         const btnKartu = document.getElementById('header-btn-kartu');
-        
+
         if(btnPdf) btnPdf.href = `/admin/kesiswaan/siswa/${id}/cetak-pdf`;
         if(btnKartu) btnKartu.href = `/admin/kesiswaan/siswa/${id}/cetak-kartu`;
     };
@@ -334,7 +335,7 @@
         // Handle Tombol Batal
         document.querySelectorAll('.btn-cancel-edit').forEach(btn => {
             btn.addEventListener('click', function() {
-                location.reload(); 
+                location.reload();
             });
         });
 
@@ -345,10 +346,10 @@
                 const form = document.getElementById('form-siswa-' + id);
                 const actionBtns = document.getElementById('action-buttons-' + id);
                 const editBtn = document.getElementById('btn-edit-' + id);
-                
-                editBtn.classList.add('d-none'); 
-                actionBtns.classList.remove('d-none'); 
-                actionBtns.classList.add('d-flex'); 
+
+                editBtn.classList.add('d-none');
+                actionBtns.classList.remove('d-none');
+                actionBtns.classList.add('d-flex');
 
                 // LOGIKA: Aktifkan input yang boleh diedit
                 form.querySelectorAll('.clean-input').forEach(input => {
@@ -356,7 +357,7 @@
                         input.removeAttribute('readonly');
                         input.removeAttribute('disabled');
                         input.classList.add('editing');
-                        
+
                         // Placeholder trick
                         if(input.value.trim() === '-') {
                             input.value = '';

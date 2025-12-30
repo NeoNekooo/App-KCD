@@ -31,41 +31,42 @@ class Siswa extends Model
     protected $fillable = [
         // ID & Kunci Utama
         'id', 'peserta_didik_id', 'registrasi_id', 'qr_token',
-        
+
         // Identitas Pribadi
-        'nama', 
+        'nama',
         'nipd', // Database pakai nipd, bukan nis
-        'nisn', 
-        'nik', 
+        'nisn',
+        'nik',
         'jenis_kelamin',
-        'tempat_lahir', 
-        'tanggal_lahir', 
-        'agama_id', 
+        'tempat_lahir',
+        'tanggal_lahir',
+        'agama_id',
         'agama_id_str',
         // 'kewarganegaraan', // (Hapus komentar jika kolom ini nanti ditambahkan ke DB, saat ini di SQL tidak ada)
-        'email', 
-        'nomor_telepon_rumah', 
+        'email',
+        'nomor_telepon_rumah',
         'nomor_telepon_seluler',
-        'tinggi_badan', 
-        'berat_badan', 
-        'kebutuhan_khusus', 
-        
+        'no_wa',
+        'tinggi_badan',
+        'berat_badan',
+        'kebutuhan_khusus',
+
         // [PERBAIKAN 2] Penulisan kolom ini salah di model lama
         'anak_keberapa', // SEBELUMNYA: anak_ke_berapa (Salah)
-        
+
         // Alamat (Lengkap sesuai SQL)
-        'alamat_jalan', 
-        'rt', 
-        'rw', 
+        'alamat_jalan',
+        'rt',
+        'rw',
         'nama_dusun', // Kadang dapodik pakai ini
         'dusun',      // Kadang pakai ini, kita masukkan dua-duanya biar aman
-        'desa_kelurahan', 
-        'kecamatan', 
-        'kabupaten_kota', 
-        'provinsi', 
+        'desa_kelurahan',
+        'kecamatan',
+        'kabupaten_kota',
+        'provinsi',
         'kode_pos',
-        'lintang', 
-        'bujur', 
+        'lintang',
+        'bujur',
         'kode_wilayah',
 
         // Data Orang Tua & Wali
@@ -74,19 +75,19 @@ class Siswa extends Model
         'nama_wali', 'pekerjaan_wali_id', 'pekerjaan_wali_id_str',
 
         // Data Akademik & Sekolah
-        'sekolah_asal', 
+        'sekolah_asal',
         'tanggal_masuk_sekolah',
-        'jenis_pendaftaran_id', 
+        'jenis_pendaftaran_id',
         'jenis_pendaftaran_id_str',
-        'semester_id', 
-        'anggota_rombel_id', 
+        'semester_id',
+        'anggota_rombel_id',
         'rombongan_belajar_id',
-        'tingkat_pendidikan_id', 
+        'tingkat_pendidikan_id',
         'nama_rombel',
-        'kurikulum_id', 
-        'kurikulum_id_str', 
-        'status', 
-        
+        'kurikulum_id',
+        'kurikulum_id_str',
+        'status',
+
         // File Foto
         'foto',
 
@@ -129,7 +130,7 @@ class Siswa extends Model
             return Storage::disk('public')->url($this->foto);
         }
         // Pastikan path image default benar
-        return asset('assets/img/avatars/default.png'); 
+        return asset('assets/img/avatars/default.png');
     }
 
     public function scopeAktif($query)
@@ -147,4 +148,15 @@ class Siswa extends Model
     public function tunggakans() { return $this->hasMany(Tunggakan::class); }
     public function pembayarans() { return $this->hasMany(Pembayaran::class); }
     public function vouchers() { return $this->hasMany(Voucher::class); }
+
+    /**
+     * Relasi many-to-many ke Rombel melalui tabel pivot `anggota_rombel`.
+     */
+    public function rombels()
+    {
+        return $this->belongsToMany(Rombel::class, 'anggota_rombel', 'siswa_id', 'rombel_id')
+                    ->withPivot(['peserta_didik_id','anggota_rombel_id','jenis_pendaftaran_id'])
+                    ->withTimestamps();
+    }
 }
+

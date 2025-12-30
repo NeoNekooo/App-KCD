@@ -168,6 +168,7 @@
                             {{ $siswa->kabupaten_kota ?? '-' }} - {{ $siswa->kode_pos ?? '-' }}
                         </td></tr>
                         <tr><td class="label">No. Handphone</td><td class="sep">:</td><td class="val">{{ $siswa->nomor_telepon_seluler ?? '-' }}</td></tr>
+                        <tr><td class="label">No. WA</td><td class="sep">:</td><td class="val">{{ $siswa->no_wa ?? '-' }}</td></tr>
                         <tr><td class="label">Email</td><td class="sep">:</td><td class="val">{{ $siswa->email ?? '-' }}</td></tr>
                     </table>
                 </td>

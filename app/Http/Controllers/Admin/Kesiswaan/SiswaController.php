@@ -89,7 +89,10 @@ class SiswaController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate(['nama_lengkap' => 'required|string|max:255']);
+        $request->validate([
+            'nama_lengkap' => 'required|string|max:255',
+            'no_wa' => 'nullable|string|max:32',
+        ]);
         $data = $request->except(['foto']);
 
         if ($request->hasFile('foto')) {
@@ -650,4 +653,39 @@ public function registerKeluar(Request $request, $id)
     return redirect()->route('admin.kesiswaan.siswa.index')
                      ->with('success', 'Status keluar siswa ' . $siswa->nama . ' berhasil diperbarui menjadi ' . $request->status);
 }
+
+    /**
+     * Undo a register-keluar action by deleting the related mutasi record
+     * and setting the student's status back to 'Aktif'. This is intended
+     * for accidental registrations and is a safe reversal.
+     */
+    public function unregisterKeluar(Request $request, $id)
+    {
+        $siswa = Siswa::findOrFail($id);
+
+        $mutasi = $siswa->mutasiKeluar;
+        if (!$mutasi) {
+            return redirect()->route('admin.kesiswaan.siswa.index')
+                             ->with('error', 'Tidak ditemukan catatan keluar yang bisa dibatalkan untuk siswa ini.');
+        }
+
+        // Delete the mutasi record and restore status
+        try {
+            $mutasi->delete();
+            $siswa->status = 'Aktif';
+
+            // If there are any tanggal_keluar on siswa record, try to clear it
+            if (isset($siswa->tanggal_keluar)) {
+                $siswa->tanggal_keluar = null;
+            }
+            $siswa->save();
+
+            return redirect()->route('admin.kesiswaan.siswa.index')
+                             ->with('success', 'Pencatatan keluar siswa untuk ' . $siswa->nama . ' berhasil dibatalkan.');
+        } catch (\Exception $e) {
+            return redirect()->route('admin.kesiswaan.siswa.index')
+                             ->with('error', 'Gagal membatalkan pencatatan keluar: ' . $e->getMessage());
+        }
+    }
 }
+

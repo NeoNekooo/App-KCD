@@ -67,6 +67,7 @@
                     <th>Nama Siswa</th>
                     <th>L/P</th>
                     <th>NISN</th>
+                    <th>WA</th>
                     <th>TTL</th>
                     <th>Kelas</th>
                     <th width="5%">Aksi</th>
@@ -111,6 +112,7 @@
 
                     <td>{{ ($siswa->jenis_kelamin == 'L' || $siswa->jenis_kelamin == 'Laki-laki') ? 'L' : 'P' }}</td>
                     <td>{{ $siswa->nisn ?? '-' }}</td>
+                    <td>{{ $siswa->no_wa ?? '-' }}</td>
                     <td>
                         {{ $siswa->tempat_lahir ?? '' }},
                         {{ $siswa->tanggal_lahir ? \Carbon\Carbon::parse($siswa->tanggal_lahir)->format('d M Y') : '-' }}
@@ -134,12 +136,18 @@
                         @endif
                     </td>
                     <td>
-    <button type="button"
-            class="btn btn-sm btn-outline-danger btn-register-keluar"
-            data-id="{{ $siswa->id }}"
-            data-nama="{{ $siswa->nama }}">
-        <i class="bx bx-log-out-circle me-1"></i> Register Keluar
-    </button>
+    @if($siswa->status != 'Aktif')
+        <button type="button" class="btn btn-sm btn-outline-warning btn-unregister-keluar" data-id="{{ $siswa->id }}" data-nama="{{ $siswa->nama }}">
+            <i class="bx bx-undo me-1"></i> Batalkan Keluar
+        </button>
+    @else
+        <button type="button"
+                class="btn btn-sm btn-outline-danger btn-register-keluar"
+                data-id="{{ $siswa->id }}"
+                data-nama="{{ $siswa->nama }}">
+            <i class="bx bx-log-out-circle me-1"></i> Register Keluar
+        </button>
+    @endif
 </td>
                 </tr>
                 @empty
@@ -237,6 +245,29 @@
         </div>
     </div>
 </div>
+
+<div class="modal fade" id="modalUnregisterKeluar" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <form id="formUnregisterKeluar" method="POST">
+                @csrf
+                @method('PATCH')
+                <div class="modal-header border-bottom">
+                    <h5 class="modal-title">Batalkan Register Keluar Siswa: <span id="namaSiswaUnregModal" class="fw-bold"></span></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Anda yakin ingin membatalkan pencatatan keluar untuk siswa <strong><span id="namaSiswaUnregModal2"></span></strong>? Tindakan ini akan mengembalikan status siswa menjadi <strong>Aktif</strong>.</p>
+                </div>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-warning"><i class="bx bx-undo me-1"></i> Batalkan Keluar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 @endsection
 
 @push('scripts')
@@ -264,6 +295,26 @@ btnRegisterKeluar.forEach(btn => {
         formRegisterKeluar.action = `/admin/kesiswaan/siswa/${id}/register-keluar`;
 
         modalRegisterKeluar.show();
+    });
+});
+
+// Unregister (undo) button handling
+const btnUnregisterKeluar = document.querySelectorAll('.btn-unregister-keluar');
+const modalUnregisterKeluar = new bootstrap.Modal(document.getElementById('modalUnregisterKeluar'));
+const formUnregisterKeluar = document.getElementById('formUnregisterKeluar');
+const namaSiswaUnregModal = document.getElementById('namaSiswaUnregModal');
+const namaSiswaUnregModal2 = document.getElementById('namaSiswaUnregModal2');
+
+btnUnregisterKeluar.forEach(btn => {
+    btn.addEventListener('click', function() {
+        const id = this.getAttribute('data-id');
+        const nama = this.getAttribute('data-nama');
+
+        namaSiswaUnregModal.innerText = nama;
+        namaSiswaUnregModal2.innerText = nama;
+        formUnregisterKeluar.action = `/admin/kesiswaan/siswa/${id}/unregister-keluar`;
+
+        modalUnregisterKeluar.show();
     });
 });
         function handleCheckboxChange() {
