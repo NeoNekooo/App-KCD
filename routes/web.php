@@ -490,6 +490,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
         Route::get('absensi/export', [LaporanAbsensiController::class, 'export'])->name('absensi.export');
             Route::get('absensi/tanpa-pulang', [LaporanAbsensiController::class, 'laporanTanpaPulang'])->name('absensi.tanpa_pulang');
             Route::get('absensi/bulanan', [LaporanAbsensiController::class, 'laporanBulanan'])->name('absensi.bulanan');
+            Route::get('/rekap-siswa', [LaporanController::class, 'rekapSiswa'])->name('rekap_siswa');
     });
 
     /*
