@@ -274,7 +274,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
  Route::post('siswa/upload-background', [SiswaController::class, 'uploadBackgroundKartu'])->name('siswa.upload-background-kartu');
  Route::patch('siswa/{id}/register-keluar', [SiswaController::class, 'registerKeluar'])
     ->name('siswa.register-keluar');
-
+    Route::post('siswa/{id}/upload-media', [SiswaController::class, 'uploadMedia'])->name('siswa.upload_media');
     Route::resource('siswa', SiswaController::class);
       Route::patch('siswa/{id}/unregister-keluar', [SiswaController::class, 'unregisterKeluar'])
         ->name('siswa.unregister-keluar');

@@ -253,58 +253,56 @@
         </table>
 {{-- I. MENINGGALKAN SEKOLAH --}}
 <div class="keep-together">
-
 <div class="section-title">I. MENINGGALKAN SEKOLAH</div>
 <table class="data-table">
+    {{-- Ambil data mutasi sekali saja agar lebih efisien --}}
+    @php $mutasi = $siswa->mutasiKeluar; @endphp
+
     <tr>
-        <td style="width: 30%;">29. Tamat Belajar</td>
+        <td style="width: 30%;" style="font-weight: bold;"<strong></strong>Tamat Belajar</td>
         <td class="sep">:</td>
         <td class="val">
-            Tanggal: {{ $siswa->status == 'Lulus' ? \Carbon\Carbon::parse($siswa->tanggal_keluar)->translatedFormat('d F Y') : '.................' }}
-            No. Ijazah: {{ $siswa->no_ijazah_keluar ?? '.................' }}
+            Tanggal: {{ ($siswa->status == 'Lulus' && $mutasi) ? \Carbon\Carbon::parse($mutasi->tanggal_keluar)->translatedFormat('d F Y') : '.................' }}
+            {{-- Catatan: Pastikan kolom no_ijazah_keluar ada di tabel mutasi_keluar atau siswas --}}
+            No. Ijazah: {{ $mutasi->no_ijazah_keluar ?? '.................' }}
         </td>
     </tr>
     <tr>
-        <td class="indent-item">Melanjutkan sekolah ke</td>
+        <td class="indent-item" style="font-weight: bold;">Melanjutkan sekolah ke</td>
         <td class="sep">:</td>
-        <td class="val">{{ $siswa->lanjut_ke ?? '-' }}</td>
+        <td class="val">{{ $mutasi->lanjut_ke ?? '-' }}</td>
     </tr>
     <tr>
-        <td class="indent-item">Alamat</td>
+        <td class="indent-item" style="font-weight: bold;">Alamat</td>
         <td class="sep">:</td>
-        <td class="val">{{ $siswa->alamat_lanjut ?? '-' }}</td>
+        <td class="val">{{ $mutasi->alamat_lanjut ?? '-' }}</td>
     </tr>
 
     <tr>
-        <td style="padding-top: 10px;">30. Pindah sekolah ke</td>
+        <td style="padding-top: 10px; font-weight: bold;">Pindah sekolah ke</td>
         <td class="sep" style="padding-top: 10px;">:</td>
-        <td class="val" style="padding-top: 10px;">{{ $siswa->status == 'Mutasi' || $siswa->status == 'Pindah' ? ($siswa->pindah_ke ?? '-') : '-' }}</td>
+        <td class="val" style="padding-top: 10px;">{{ ($siswa->status == 'Mutasi' || $siswa->status == 'Pindah') && $mutasi ? ($mutasi->pindah_ke ?? '-') : '-' }}</td>
     </tr>
     <tr>
-        <td class="indent-item">Tanggal pindah</td>
+        <td class="indent-item" style="font-weight: bold;">Tanggal pindah</td>
         <td class="sep">:</td>
         <td class="val">
-            Tanggal: {{ ($siswa->status == 'Mutasi' || $siswa->status == 'Pindah') && $siswa->tanggal_keluar ? \Carbon\Carbon::parse($siswa->tanggal_keluar)->translatedFormat('d F Y') : '.................' }}
+            Tanggal: {{ ($siswa->status == 'Mutasi' || $siswa->status == 'Pindah') && $mutasi ? \Carbon\Carbon::parse($mutasi->tanggal_keluar)->translatedFormat('d F Y') : '.................' }}
             dari kelas: {{ $namaKelas }}
         </td>
     </tr>
     <tr>
-        <td class="indent-item">Alamat sekolah</td>
+        <td class="indent-item" style="font-weight: bold;">Alamat sekolah</td>
         <td class="sep">:</td>
-        <td class="val">{{ $siswa->alamat_sekolah_pindah ?? '-' }}</td>
-    </tr>
-    <tr>
-        <td class="indent-item">Alamat pindah</td>
-        <td class="sep">:</td>
-        <td class="val">{{ $siswa->alamat_rumah_pindah ?? '-' }}</td>
+        <td class="val">{{ $mutasi->alamat_sekolah_pindah ?? '-' }}</td>
     </tr>
 
     <tr>
-        <td style="padding-top: 10px;">31. Putus sekolah</td>
+        <td style="padding-top: 10px; font-weight: bold;" >Putus sekolah</td>
         <td class="sep" style="padding-top: 10px;">:</td>
         <td class="val" style="padding-top: 10px;">
-            Tanggal: {{ $siswa->status == 'Putus Sekolah' ? \Carbon\Carbon::parse($siswa->tanggal_keluar)->translatedFormat('d F Y') : '.................' }}
-            Alasan: {{ $siswa->status == 'Putus Sekolah' ? ($siswa->alasan_keluar ?? '.................') : '.................' }}
+            Tanggal: {{ ($siswa->status == 'Putus Sekolah' && $mutasi) ? \Carbon\Carbon::parse($mutasi->tanggal_keluar)->translatedFormat('d F Y') : '.................' }}
+            Alasan: {{ $siswa->status == 'Putus Sekolah' && $mutasi ? ($mutasi->keterangan ?? '.................') : '.................' }}
         </td>
     </tr>
 </table>

@@ -208,6 +208,7 @@ class SiswaController extends Controller
      * Cetak Buku Induk per siswa (re-use cetakPdf)
      */
     public function cetakBukuInduk($id)
+
     {
         // Reuse existing biodata PDF as Buku Induk (same format)
         return $this->cetakPdf($id);
@@ -421,7 +422,7 @@ class SiswaController extends Controller
 
     public function cetakPdf($id)
     {
-        $siswa = Siswa::with('rombel')->findOrFail($id);
+     $siswa = Siswa::with(['rombel', 'mutasiKeluar'])->findOrFail($id);
         $sekolah = Sekolah::first();
 
         // WRAPPING: Bungkus jadi collection agar view bisa meloop
