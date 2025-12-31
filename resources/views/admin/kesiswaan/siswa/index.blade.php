@@ -87,7 +87,7 @@
                                 <a href="{{ route('admin.kesiswaan.siswa.show', $siswa->id) }}">
                                     <div class="avatar avatar-sm">
                                         @if(!empty($siswa->foto) && \Illuminate\Support\Facades\Storage::disk('public')->exists($siswa->foto))
-                                            <img src="{{ asset('storage/' . $siswa->foto) }}" alt="Avatar" class="rounded-circle" style="width: 100%; height: 100%; object-fit: cover;">
+                                            <img src="{{ asset('storage/' . $siswa->foto) }}" alt="Avatar" class="rounded-circle" style="width: 100%; height: 100%; object-fit: cover;object-position: 50% 20%;">
                                         @else
                                             <img src="https://ui-avatars.com/api/?name={{ urlencode($siswa->nama) }}&background=random&color=ffffff&size=100"
                                                  alt="Avatar"

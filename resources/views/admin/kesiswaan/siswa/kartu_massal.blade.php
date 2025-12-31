@@ -14,14 +14,18 @@
         * { box-sizing: border-box; }
         body {
             font-family: 'Public Sans', sans-serif;
-            background-color: #555;
+            background-color: #555; 
             margin: 0;
             padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
         /* --- TOOLBAR --- */
         .toolbar {
             width: 210mm;
+            max-width: 95%;
             margin: 20px auto;
             background: white;
             padding: 15px 20px;
@@ -49,7 +53,7 @@
         /* --- SIMULASI KERTAS A4 --- */
         .a4-sheet {
             width: 210mm;
-            min-height: 297mm;
+            min-height: 300mm;
             background: white;
             margin: 0 auto 20px auto;
             padding: 10mm;
@@ -65,20 +69,22 @@
 
         /* --- CONTAINER KARTU --- */
         .id-card-container {
-            width: 54mm;
-            height: 86mm;
+            width: 56mm;
+            height: 88mm; 
             background-color: #fff;
             border-radius: 8px;
             position: relative;
             overflow: hidden;
-            border: 1px solid #eee;
+            border: 1px dashed #ccc;
+            break-inside: avoid; 
+            page-break-inside: avoid;
             display: flex;
             flex-direction: column;
             background-image: radial-gradient(#696cff 0.5px, transparent 0.5px), radial-gradient(#696cff 0.5px, #fff 0.5px);
             background-size: 15px 15px;
         }
 
-        .header-section {
+        /*.header-section {
             width: 100%;
             padding: 0 8px;
             display: flex;
@@ -88,10 +94,10 @@
             border-bottom: 0.5px solid #eee;
             height: 38px;
             flex-shrink: 0;
-        }
+        }*/
 
-        .header-logo { width: 26px; height: 26px; object-fit: contain; }
-        .header-text { font-size: 11px; font-weight: 900; color: #002b5c; text-transform: uppercase; line-height: 1.1; }
+        .header-logo { width: 40px; height: 40px; object-fit: contain; margin-top :25px;margin-left :15px; margin-bottom:-20px; }
+        /*.header-text { font-size: 11px; font-weight: 900; color: #002b5c; text-transform: uppercase; line-height: 1.1; }*/
 
         .content-wrapper {
             flex-grow: 1;
@@ -104,12 +110,18 @@
         }
 
         .profile-img {
-            width: 75px; height: 75px;
-            border-radius: 50%; border: 3px solid white;
-            object-fit: cover;
-            margin-bottom: 8px;
-            box-shadow: 0 3px 6px rgba(0,0,0,0.2);
-            background: #f0f0f0;
+           width: 90px; 
+            height: 90px; 
+            border-radius: 50%; 
+            border: 3px solid #fff; 
+            object-fit: cover; 
+            
+            /* TAMBAHKAN BARIS INI */
+            object-position: 50% 20%; 
+            
+            margin-bottom: 6px; 
+            box-shadow: 0 4px 7px rgba(0,0,0,0.2); 
+            background: #fff;
         }
 
         .user-name {
@@ -167,22 +179,20 @@
         <div class="a4-sheet">
             @foreach ($chunk as $s)
             <div class="id-card-container"
-    style="
-        @if(isset($sekolah) && $sekolah->background_kartu)
+    style="@if(isset($sekolah) && $sekolah->background_kartu)
             background-image: url('{{ asset('storage/' . $sekolah->background_kartu) }}') !important;
             background-size: cover !important;
             background-position: center !important;
         @endif
-    "
->
-    </div>
+    ">
+    
                 <div class="header-section">
                     @if(isset($sekolah) && $sekolah->logo)
                         <img src="{{ asset('storage/' . $sekolah->logo) }}" class="header-logo" alt="Logo">
                     @else
                         <img src="{{ asset('logo.png') }}" class="header-logo" alt="Logo">
                     @endif
-                    <div class="header-text">KARTU PESERTA DIDIK</div>
+                    <!--<div class="header-text">KARTU PESERTA DIDIK</div>-->
                 </div>
 
                 <div class="content-wrapper">
@@ -205,6 +215,7 @@
                 </div>
             </div>
             @endforeach
+        </div>
         </div>
     @empty
         <div style="text-align: center; background: white; padding: 50px; width: 210mm; margin: 20px auto; border-radius: 8px;">
