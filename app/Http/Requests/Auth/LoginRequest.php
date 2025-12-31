@@ -50,17 +50,38 @@ class LoginRequest extends FormRequest
         }
 
         // ==================================================
-        // VALIDASI PASSWORD (SATU-SATUNYA JALUR)
+        // VALIDASI PASSWORD (DIPERBAIKI)
         // ==================================================
-        if (!Hash::check($credentials['password'], $user->password)) {
+        $isValid = false;
+        $hashedPassword = $user->password;
+
+        // 1. Cek apakah ini hash Bcrypt yang valid (biasanya diawali $2y$)
+        if (str_starts_with($hashedPassword, '$2y$')) {
+            try {
+                $isValid = Hash::check($credentials['password'], $hashedPassword);
+            } catch (\Exception $e) {
+                $isValid = false;
+            }
+        } 
+        
+        // 2. Jika gagal/bukan Bcrypt, coba cek sebagai Plain Text atau MD5
+        if (!$isValid) {
+            if ($credentials['password'] === $hashedPassword || md5($credentials['password']) === $hashedPassword) {
+                $isValid = true;
+            }
+        }
+
+        // Jika semua metode pengecekan gagal
+        if (!$isValid) {
             throw ValidationException::withMessages([
                 'username' => trans('auth.failed'),
             ]);
         }
 
         // ==================================================
-        // OPTIONAL: REHASH JIKA ALGORITMA BERUBAH
+        // OPTIONAL: REHASH JIKA ALGORITMA BUKAN BCRYPT
         // ==================================================
+        // Ini akan otomatis mengubah password plain/MD5 menjadi Bcrypt yang aman di DB
         if (Hash::needsRehash($user->password)) {
             $user->update([
                 'password' => Hash::make($credentials['password']),
@@ -68,36 +89,23 @@ class LoginRequest extends FormRequest
         }
 
         // ==================================================
-        // LOGIN
+        // LOGIN & SESSION (LANJUTAN KODE ANDA)
         // ==================================================
         Auth::login($user, $this->boolean('remember'));
 
-        // ==================================================
-        // ROLE & SESSION
-        // ==================================================
         $role               = $user->peran_id_str;
         $sub_role           = null;
         $peserta_didik_id   = null;
 
-        // === PTK ===
         if ($role === 'PTK' && $user->ptk_id) {
-            $gtk = DB::table('gtks')
-                ->where('ptk_id', $user->ptk_id)
-                ->first();
-
-            if ($gtk) {
-                $sub_role = $gtk->jenis_ptk_id_str;
-            }
+            $gtk = DB::table('gtks')->where('ptk_id', $user->ptk_id)->first();
+            if ($gtk) { $sub_role = $gtk->jenis_ptk_id_str; }
         }
 
-        // === PESERTA DIDIK ===
         if ($role === 'Peserta Didik' && $user->peserta_didik_id) {
             $peserta_didik_id = $user->peserta_didik_id;
         }
 
-        // ==================================================
-        // SET SESSION FINAL
-        // ==================================================
         session([
             'role'             => $role,
             'sub_role'         => $sub_role,
