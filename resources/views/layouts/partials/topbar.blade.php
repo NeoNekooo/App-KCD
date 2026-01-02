@@ -11,7 +11,7 @@
             $profile = Gtk::where('ptk_id', session('ptk_id'))->first();
             $profileType = 'gtk';
         } elseif (session('peserta_didik_id')) {
-            $profile = Siswa::find(session('peserta_didik_id'));
+            $profile = Siswa::where('peserta_didik_id', session('peserta_didik_id'))->first();
             $profileType = 'siswa';
         }
     }

@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Siswa;
 use App\Models\Rombel;
 use App\Models\Sekolah;
+use App\Models\PelanggaranNilai;
+use App\Models\PelanggaranSanksi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
