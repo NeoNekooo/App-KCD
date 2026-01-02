@@ -25,9 +25,6 @@
         <a href="{{ route('admin.kesiswaan.siswa.cetak_kartu', $siswa->id) }}" target="_blank" class="btn btn-info btn-sm shadow-sm">
             <i class="bx bx-id-card me-1"></i> Kartu Pelajar
         </a>
-        <a href="{{ route('admin.kesiswaan.siswa.index') }}" class="btn btn-secondary btn-sm shadow-sm">
-            <i class="bx bx-arrow-back me-1"></i> Kembali
-        </a>
     </div>
 </div>
 

@@ -288,11 +288,12 @@ class SiswaController extends Controller
         // 3. Simpan
         $siswa->update($dataToUpdate);
 
-        return redirect()->route('admin.kesiswaan.siswa.show', $siswa->id)
-                         ->with('success', 'Data siswa berhasil diperbarui.');
-
-        $siswa->update($dataToUpdate);
-
+        if (session()->has('peserta_didik_id')) {
+            return redirect()
+                ->route('admin.personal.siswa.profil')
+                ->with('success', 'Profil berhasil diperbarui.');
+        }
+        
         // LOGIC REDIRECT: Cek apakah sedang mode Multiple?
         if ($request->has('_ids_multiple')) {
             // Balik ke mode show-multiple di ID yang sama
