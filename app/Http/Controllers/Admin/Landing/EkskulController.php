@@ -21,6 +21,8 @@ class EkskulController extends Controller
             'nama_ekskul' => 'required|string|max:255',
             'pembina'     => 'nullable|string|max:255',
             'jadwal'      => 'nullable|string|max:255',
+            'tempat'      => 'nullable|string|max:255', // Validasi baru
+            'status'      => 'required|string|in:Aktif,Buka Pendaftaran,Penuh,Vakum', // Validasi baru
             'foto'        => 'required|image|mimes:jpeg,png,jpg,webp|max:2048',
         ]);
 
@@ -28,12 +30,7 @@ class EkskulController extends Controller
 
         if ($request->hasFile('foto')) {
             $image = $request->file('foto');
-            
-            // PERBAIKAN:
-            // 1. Path jadi 'ekstrakurikulers' (hapus 'public/' di depan)
-            // 2. Tambahkan parameter ke-3 'public'
             $image->storeAs('ekstrakurikulers', $image->hashName(), 'public');
-            
             $data['foto'] = $image->hashName();
         }
 
@@ -50,18 +47,17 @@ class EkskulController extends Controller
             'nama_ekskul' => 'required|string|max:255',
             'pembina'     => 'nullable|string|max:255',
             'jadwal'      => 'nullable|string|max:255',
+            'tempat'      => 'nullable|string|max:255',
+            'status'      => 'required|string|in:Aktif,Buka Pendaftaran,Penuh,Vakum',
             'foto'        => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
         ]);
 
         $data = $request->except(['_token', '_method']);
 
         if ($request->hasFile('foto')) {
-            // PERBAIKAN: Hapus foto lama pakai disk public
             if ($ekskul->foto && Storage::disk('public')->exists('ekstrakurikulers/' . $ekskul->foto)) {
                 Storage::disk('public')->delete('ekstrakurikulers/' . $ekskul->foto);
             }
-
-            // Upload foto baru
             $image = $request->file('foto');
             $image->storeAs('ekstrakurikulers', $image->hashName(), 'public');
             $data['foto'] = $image->hashName();
@@ -76,7 +72,6 @@ class EkskulController extends Controller
     {
         $ekskul = Ekskul::findOrFail($id);
         
-        // PERBAIKAN: Hapus foto fisik pakai disk public
         if ($ekskul->foto && Storage::disk('public')->exists('ekstrakurikulers/' . $ekskul->foto)) {
             Storage::disk('public')->delete('ekstrakurikulers/' . $ekskul->foto);
         }

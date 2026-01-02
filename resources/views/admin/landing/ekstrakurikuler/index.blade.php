@@ -12,11 +12,34 @@
         </button>
     </div>
 
+    {{-- Pesan Sukses --}}
+    @if(session('success'))
+        <div class="alert alert-success alert-dismissible" role="alert">
+            {{ session('success') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    @endif
+
     <div class="row g-4">
         @forelse($ekskuls as $item)
         <div class="col-md-6 col-lg-4">
             <div class="card h-100 shadow-sm border-0 position-relative overflow-hidden group-action-card">
                 
+                {{-- Badge Status --}}
+                @php
+                    $statusColor = match($item->status) {
+                        'Buka Pendaftaran' => 'bg-success',
+                        'Aktif' => 'bg-primary',
+                        'Penuh' => 'bg-warning',
+                        'Vakum' => 'bg-danger',
+                        default => 'bg-secondary',
+                    };
+                @endphp
+                <div class="position-absolute top-0 start-0 px-3 py-1 text-white text-xs font-bold rounded-bottom-end {{ $statusColor }}" style="z-index: 10;">
+                    {{ $item->status ?? 'Aktif' }}
+                </div>
+
+                {{-- Action Buttons --}}
                 <div class="position-absolute top-0 end-0 p-2" style="z-index: 10;">
                     <div class="d-flex gap-1">
                         <button type="button" 
@@ -27,13 +50,14 @@
                                 data-nama="{{ $item->nama_ekskul }}"
                                 data-pembina="{{ $item->pembina }}"
                                 data-jadwal="{{ $item->jadwal }}"
+                                data-tempat="{{ $item->tempat }}"
+                                data-status="{{ $item->status }}"
                                 data-foto="{{ asset('storage/ekstrakurikulers/'.$item->foto) }}">
                             <i class="bx bx-pencil text-warning"></i>
                         </button>
 
                         <form action="{{ route('admin.landing.ekstrakurikuler.destroy', $item->id) }}" method="POST" onsubmit="return confirm('Hapus ekskul ini?');">
-                            @csrf
-                            @method('DELETE')
+                            @csrf @method('DELETE')
                             <button type="submit" class="btn btn-sm btn-light btn-icon shadow-sm opacity-75 hover-100 text-danger">
                                 <i class="bx bx-trash"></i>
                             </button>
@@ -41,11 +65,12 @@
                     </div>
                 </div>
 
+                {{-- Image --}}
                 <div class="ekskul-img-wrapper bg-light">
                     <img src="{{ asset('storage/ekstrakurikulers/'.$item->foto) }}" 
                          class="card-img-top ekskul-img" 
                          alt="{{ $item->nama_ekskul }}" 
-                         onerror="this.onerror=null; this.src='https://via.placeholder.com/400x250?text=No+Image';">
+                         onerror="this.src='https://via.placeholder.com/400x250?text=No+Image';">
                 </div>
 
                 <div class="card-body p-3">
@@ -56,9 +81,14 @@
                         <span class="text-truncate">{{ $item->pembina ?? 'Belum ada pembina' }}</span>
                     </div>
                     
-                    <div class="d-flex align-items-center text-muted small">
+                    <div class="d-flex align-items-center text-muted small mb-1">
                         <i class="bx bx-time me-2"></i> 
                         <span class="text-truncate">{{ $item->jadwal ?? 'Jadwal menyusul' }}</span>
+                    </div>
+
+                    <div class="d-flex align-items-center text-muted small">
+                        <i class="bx bx-map me-2"></i> 
+                        <span class="text-truncate">{{ $item->tempat ?? 'Sekolah' }}</span>
                     </div>
                 </div>
             </div>
@@ -76,32 +106,48 @@
         @endforelse
     </div>
 
-    <div class="mt-4">
-        {{ $ekskuls->links() }}
-    </div>
+    <div class="mt-4">{{ $ekskuls->links() }}</div>
 </div>
 
+{{-- MODAL CREATE --}}
 <div class="modal fade" id="modalCreate" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">Tambah Ekskul</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <form action="{{ route('admin.landing.ekstrakurikuler.store') }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 <div class="modal-body">
                     <div class="mb-3">
                         <label class="form-label">Nama Ekstrakurikuler <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" name="nama_ekskul" placeholder="Contoh: Pramuka / Futsal" required>
+                        <input type="text" class="form-control" name="nama_ekskul" placeholder="Contoh: Pramuka" required>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label">Nama Pembina</label>
-                        <input type="text" class="form-control" name="pembina" placeholder="Nama Guru Pembina">
+                    <div class="row">
+                        <div class="col-6 mb-3">
+                            <label class="form-label">Nama Pembina</label>
+                            <input type="text" class="form-control" name="pembina" placeholder="Nama Guru">
+                        </div>
+                        <div class="col-6 mb-3">
+                            <label class="form-label">Status</label>
+                            <select class="form-select" name="status" required>
+                                <option value="Aktif">Aktif</option>
+                                <option value="Buka Pendaftaran">Buka Pendaftaran</option>
+                                <option value="Penuh">Penuh</option>
+                                <option value="Vakum">Vakum</option>
+                            </select>
+                        </div>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label">Jadwal Latihan</label>
-                        <input type="text" class="form-control" name="jadwal" placeholder="Contoh: Setiap Jumat Sore">
+                    <div class="row">
+                        <div class="col-6 mb-3">
+                            <label class="form-label">Jadwal Latihan</label>
+                            <input type="text" class="form-control" name="jadwal" placeholder="Contoh: Jumat Sore">
+                        </div>
+                        <div class="col-6 mb-3">
+                            <label class="form-label">Tempat Latihan</label>
+                            <input type="text" class="form-control" name="tempat" placeholder="Contoh: Lapangan Utama">
+                        </div>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Foto Kegiatan <span class="text-danger">*</span></label>
@@ -117,28 +163,45 @@
     </div>
 </div>
 
+{{-- MODAL EDIT --}}
 <div class="modal fade" id="modalEdit" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">Edit Ekskul</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <form id="formEdit" action="" method="POST" enctype="multipart/form-data">
-                @csrf
-                @method('PUT')
+                @csrf @method('PUT')
                 <div class="modal-body">
                     <div class="mb-3">
                         <label class="form-label">Nama Ekstrakurikuler</label>
                         <input type="text" class="form-control" id="editNama" name="nama_ekskul" required>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label">Nama Pembina</label>
-                        <input type="text" class="form-control" id="editPembina" name="pembina">
+                    <div class="row">
+                        <div class="col-6 mb-3">
+                            <label class="form-label">Nama Pembina</label>
+                            <input type="text" class="form-control" id="editPembina" name="pembina">
+                        </div>
+                        <div class="col-6 mb-3">
+                            <label class="form-label">Status</label>
+                            <select class="form-select" id="editStatus" name="status" required>
+                                <option value="Aktif">Aktif</option>
+                                <option value="Buka Pendaftaran">Buka Pendaftaran</option>
+                                <option value="Penuh">Penuh</option>
+                                <option value="Vakum">Vakum</option>
+                            </select>
+                        </div>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label">Jadwal Latihan</label>
-                        <input type="text" class="form-control" id="editJadwal" name="jadwal">
+                    <div class="row">
+                        <div class="col-6 mb-3">
+                            <label class="form-label">Jadwal Latihan</label>
+                            <input type="text" class="form-control" id="editJadwal" name="jadwal">
+                        </div>
+                        <div class="col-6 mb-3">
+                            <label class="form-label">Tempat Latihan</label>
+                            <input type="text" class="form-control" id="editTempat" name="tempat">
+                        </div>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Ganti Foto (Opsional)</label>
@@ -156,20 +219,9 @@
 
 @push('styles')
 <style>
-    .ekskul-img-wrapper {
-        position: relative;
-        height: 180px;
-        overflow: hidden;
-    }
-    .ekskul-img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        transition: transform 0.3s;
-    }
-    .group-action-card:hover .ekskul-img {
-        transform: scale(1.05);
-    }
+    .ekskul-img-wrapper { position: relative; height: 180px; overflow: hidden; }
+    .ekskul-img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s; }
+    .group-action-card:hover .ekskul-img { transform: scale(1.05); }
     .hover-100:hover { opacity: 1 !important; }
     .border-dashed { border: 2px dashed #d9dee3; }
 </style>
@@ -186,6 +238,8 @@
                 document.getElementById('editNama').value = this.dataset.nama;
                 document.getElementById('editPembina').value = this.dataset.pembina;
                 document.getElementById('editJadwal').value = this.dataset.jadwal;
+                document.getElementById('editTempat').value = this.dataset.tempat;
+                document.getElementById('editStatus').value = this.dataset.status;
 
                 let updateUrl = "{{ route('admin.landing.ekstrakurikuler.update', ':id') }}";
                 updateUrl = updateUrl.replace(':id', id);
