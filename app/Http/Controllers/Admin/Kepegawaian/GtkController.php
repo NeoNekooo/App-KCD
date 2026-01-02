@@ -15,7 +15,10 @@ use Illuminate\Support\Facades\Storage;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 use Intervention\Image\ImageManager;
 use Intervention\Image\Drivers\Gd\Driver;
+use App\Models\PelanggaranNilaiGtk;
+use App\Models\PelanggaranSanksiGtk;
 class GtkController extends Controller
+
 {
     // --- FUNGSI DAFTAR PEGAWAI (Data Guru & Tendik) ---
 

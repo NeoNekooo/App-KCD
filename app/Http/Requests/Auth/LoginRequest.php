@@ -41,7 +41,8 @@ class LoginRequest extends FormRequest
         // ==================================================
         // AMBIL USER
         // ==================================================
-        $user = Pengguna::where('username', $credentials['username'])->first();
+       $user = Pengguna::where('username', $credentials['username'])->first();
+
 
         if (!$user) {
             throw ValidationException::withMessages([
@@ -52,25 +53,20 @@ class LoginRequest extends FormRequest
         // ==================================================
         // VALIDASI PASSWORD (SATU-SATUNYA JALUR)
         // ==================================================
-        if (!Hash::check($credentials['password'], $user->password)) {
+        //dd('Input: ' . $credentials['password'], 'Database: ' . $user->password);
+        $hashedPassword = str_replace('$2b$', '$2y$', $user->password);
+        if (!Hash::check($credentials['password'], $hashedPassword)) {
             throw ValidationException::withMessages([
                 'username' => trans('auth.failed'),
             ]);
         }
 
-        // ==================================================
-        // OPTIONAL: REHASH JIKA ALGORITMA BERUBAH
-        // ==================================================
-        if (Hash::needsRehash($user->password)) {
-            $user->update([
-                'password' => Hash::make($credentials['password']),
-            ]);
-        }
+
 
         // ==================================================
         // LOGIN
         // ==================================================
-        Auth::login($user, $this->boolean('remember'));
+       Auth::login($user, $this->boolean('remember'));
 
         // ==================================================
         // ROLE & SESSION
