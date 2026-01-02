@@ -47,6 +47,7 @@ return [
     'sub_role_map' => [
         'Guru' => [
             'dashboard',
+            'profil-sekolah',
             'profil-guru',
             'pelanggaran-guru',
             'ppdb-formulir',
@@ -60,6 +61,7 @@ return [
         ],
         'Tenaga Kependidikan' => [
             'dashboard',
+            'profil-sekolah',
             'profil-guru',
             'pelanggaran-guru',
             'ppdb',

@@ -16,7 +16,16 @@ class SekolahController extends Controller
     {
         // Mengambil data sekolah pertama, atau membuat data kosong jika belum ada.
         $sekolah = Sekolah::firstOrCreate(['id' => 1]);
-        return view('admin.pengaturan.sekolah.index', compact('sekolah'));
+
+        // ===============================
+        // DETEKSI ROLE LOGIN
+        // ===============================
+        $isSiswa = session()->has('peserta_didik_id');
+        $isGtk = session()->has('ptk_id');
+        // Anggap admin = akses penuh (bisa refine kalau ada role table)
+        $isAdmin = auth()->check() && !$isSiswa && !$isGtk;
+
+        return view('admin.pengaturan.sekolah.index', compact('sekolah','isAdmin'));
     }
 
     /**
@@ -25,14 +34,14 @@ class SekolahController extends Controller
     public function update(Request $request)
     {
         $request->validate([
-            'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', 
-            'background_kartu' => 'nullable|image|mimes:jpeg,png,jpg|max:2048', 
+            'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'background_kartu' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
             'kode_sekolah' => 'nullable|string|max:50',
             'peta' => 'nullable|string',
 
             // --- VALIDASI BARU UNTUK DYNAMIC SOCIAL MEDIA ---
             // Kita menerima input array 'social_media'
-            'social_media' => 'nullable|array', 
+            'social_media' => 'nullable|array',
             'social_media.*.platform' => 'nullable|string', // Validasi tiap item di dalam array
             'social_media.*.url' => 'nullable|url',
             'social_media.*.username' => 'nullable|string',
@@ -41,7 +50,7 @@ class SekolahController extends Controller
 
         // Cari sekolah dengan ID 1.
         $sekolah = Sekolah::firstOrCreate(['id' => 1]);
-        
+
         // Update data text sederhana
         $sekolah->peta = $request->peta;
         $sekolah->kode_sekolah = $request->kode_sekolah;
@@ -68,7 +77,7 @@ class SekolahController extends Controller
         // Karena di Model sudah di-cast 'array', kita bisa langsung assign array dari request.
         // Jika null (kosong), kita simpan array kosong [].
         $sekolah->social_media = $request->social_media ?? [];
-        
+
         // Hapus properti lama (legacy) agar tidak error jika tidak sengaja terkirim
         // (Facebook_url dkk sudah tidak ada di DB)
         // -----------------------------------------

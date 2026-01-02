@@ -32,7 +32,7 @@
                 {{-- 1. SIDEBAR KIRI (LOGO & IDENTITAS) --}}
                 {{-- ========================================================== --}}
                 <div class="col-lg-3 border-end d-flex flex-column align-items-center text-center py-4 px-3 bg-light-gray">
-                    
+
                     {{-- Form Upload Logo --}}
                     <form action="{{ route('admin.pengaturan.sekolah.update') }}" method="POST" enctype="multipart/form-data" class="w-100">
                         @csrf
@@ -105,10 +105,12 @@
                         </h6>
 
                         <div class="action-button-container">
-                            {{-- Tombol Edit --}}
-                            <button type="button" class="btn btn-sm btn-label-primary btn-edit-toggle" id="btn-edit-data">
-                                <i class="bx bx-edit-alt me-1"></i> Edit Data
-                            </button>
+                            @if($isAdmin)
+                                {{-- Tombol Edit --}}
+                                <button type="button" class="btn btn-sm btn-label-primary btn-edit-toggle" id="btn-edit-data">
+                                    <i class="bx bx-edit-alt me-1"></i> Edit Data
+                                </button>
+                            @endif
                             
                             {{-- Group Tombol Simpan/Batal --}}
                             <div class="d-none align-items-center gap-2" id="action-buttons-group">
@@ -134,10 +136,10 @@
                         </ul>
 
                         <div class="tab-content p-0 mt-2">
-                            
+
                             {{-- TAB 1: INFORMASI UMUM --}}
                             <div class="tab-pane fade show active" id="tab-umum">
-                                
+
                                 <div class="row-clean">
                                     <label>Nama Sekolah <i class="bx bx-lock-alt text-muted small ms-1" title="Data Dapodik"></i></label>
                                     <div class="sep">:</div>
@@ -169,8 +171,8 @@
                                     <label>Kode Sekolah <i class="bx bx-pencil text-muted small ms-1" title="Dapat diedit"></i></label>
                                     <div class="sep">:</div>
                                     <div class="inp">
-                                        <input type="text" name="kode_sekolah" class="clean-input editable-field" 
-                                               value="{{ old('kode_sekolah', $sekolah->kode_sekolah) }}" 
+                                        <input type="text" name="kode_sekolah" class="clean-input editable-field"
+                                               value="{{ old('kode_sekolah', $sekolah->kode_sekolah) }}"
                                                readonly placeholder="Klik Edit Data...">
                                     </div>
                                 </div>
@@ -222,7 +224,7 @@
 
                             {{-- TAB 3: KONTAK & SOSMED (Dynamic) --}}
                             <div class="tab-pane fade" id="tab-kontak">
-                                
+
                                 {{-- Kontak Dasar --}}
                                 <div class="row-clean">
                                     <label>No. Telepon <i class="bx bx-lock-alt text-muted small ms-1"></i></label>
@@ -261,7 +263,7 @@
                                 <div id="social-media-container">
                                     @php
                                         $sosmeds = $sekolah->social_media ?? [];
-                                        
+
                                         // Definisi Map Icon
                                         $iconMap = [
                                             'facebook'  => ['icon' => 'bxl-facebook-circle', 'color' => 'text-primary'],
@@ -286,15 +288,15 @@
                                                 <i class='bx {{ $style['icon'] }} fs-4 me-2 social-icon {{ $style['color'] }}'></i>
                                                 <span class="social-label d-none d-sm-block">{{ ucfirst($sosmed['platform'] ?? 'Website') }}</span>
                                             </label>
-                                            
+
                                             <div class="sep">:</div>
-                                            
+
                                             <div class="inp d-flex align-items-center gap-2" style="width: 62%;">
-                                                <input type="text" 
-                                                       name="social_media[{{ $index }}][url]" 
-                                                       class="clean-input editable-field social-url-input" 
-                                                       value="{{ $sosmed['url'] ?? '' }}" 
-                                                       readonly 
+                                                <input type="text"
+                                                       name="social_media[{{ $index }}][url]"
+                                                       class="clean-input editable-field social-url-input"
+                                                       value="{{ $sosmed['url'] ?? '' }}"
+                                                       readonly
                                                        placeholder="https://..."
                                                        oninput="detectSocialMedia(this)">
 
@@ -317,13 +319,13 @@
                                 <label class="form-label fw-bold text-dark small text-uppercase mb-2">
                                     <i class='bx bx-code-alt me-1'></i> Embed Google Maps (Editable)
                                 </label>
-                                <textarea name="peta" 
-                                          class="form-control text-muted mb-3 editable-field" 
-                                          rows="4" 
-                                          placeholder='Paste kode <iframe src="..."></iframe> dari Google Maps di sini...' 
-                                          style="font-size: 13px; background-color: #fdfdfd; border-color: #eee;" 
+                                <textarea name="peta"
+                                          class="form-control text-muted mb-3 editable-field"
+                                          rows="4"
+                                          placeholder='Paste kode <iframe src="..."></iframe> dari Google Maps di sini...'
+                                          style="font-size: 13px; background-color: #fdfdfd; border-color: #eee;"
                                           readonly>{{ old('peta', $sekolah->peta) }}</textarea>
-                                
+
                                 <div class="alert alert-info py-2 px-3 small">
                                     <i class="bx bx-info-circle me-1"></i> Preview peta akan muncul di sidebar kiri setelah disimpan.
                                 </div>
@@ -344,7 +346,7 @@
         .bg-light-gray { background-color: #f5f5f9; }
         .ls-wide { letter-spacing: 0.5px; }
         .small-text { font-size: 0.75rem; }
-        
+
         /* --- 2. Row Clean System --- */
         .row-clean { display: flex; align-items: flex-start; padding: 4px 0; border-bottom: 1px solid transparent; line-height: 1.5; }
         .row-clean label { width: 35%; font-weight: 600; color: #566a7f; margin: 0; font-size: 0.9375rem; }
@@ -354,7 +356,7 @@
         /* --- 3. Clean Input Styling --- */
         .clean-input { width: 100%; background: transparent !important; border: none !important; padding: 0; margin: 0; outline: none !important; box-shadow: none !important; font-size: 0.9375rem; color: #697a8d; pointer-events: none; font-family: inherit; }
         .clean-input.locked-dapodik { cursor: not-allowed; color: #697a8d; }
-        
+
         /* --- 4. Edit Mode Styling --- */
         .clean-input.editing { pointer-events: auto; color: #333; cursor: text; border-bottom: 1px dashed #d9dee3 !important; }
         .clean-input.editing:focus { border-bottom: 1px solid #696cff !important; }
@@ -367,7 +369,7 @@
         .btn-upload-float { position: absolute; bottom: 0; right: 0; width: 28px; height: 28px; background: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #696cff; cursor: pointer; transition: 0.2s; }
         .btn-upload-float:hover { transform: scale(1.1); }
         .small-icon { font-size: 0.9rem; }
-        
+
         .custom-pills .nav-link { border-radius: 50rem; padding: 0.4rem 1rem; color: #697a8d; font-weight: 500; font-size: 0.85rem; border: 1px solid transparent; margin-right: 4px; margin-bottom: 4px; transition: all 0.2s; }
         .custom-pills .nav-link:hover { background-color: rgba(67, 89, 113, 0.05); color: #696cff; }
         .custom-pills .nav-link.active { background-color: #696cff; color: #fff; box-shadow: 0 2px 6px rgba(105, 108, 255, 0.4); }
@@ -375,7 +377,7 @@
         .signature-box { background-image: radial-gradient(#e2e2e2 1px, transparent 1px); background-size: 8px 8px; }
         .map-wrapper { height: 130px; display: flex; align-items: center; justify-content: center; }
         .map-iframe-box iframe { width: 100% !important; height: 100% !important; border: none; }
-        
+
         .fade-in-animation { animation: fadeIn 0.5s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
@@ -425,7 +427,7 @@
 
         // B. Tombol Batal
         btnBatal.addEventListener('click', function() {
-            location.reload(); 
+            location.reload();
         });
 
         // C. Tombol Tambah Sosmed
@@ -439,7 +441,7 @@
     // =========================================================================
     // 3. HELPER FUNCTIONS
     // =========================================================================
-    
+
     // Auto Detect Platform by URL
     window.detectSocialMedia = function(input) {
         const url = input.value.toLowerCase();
@@ -471,10 +473,10 @@
     function addSocialRow() {
         const container = document.getElementById('social-media-container');
         const emptyMsg = container.querySelector('.empty-sosmed-msg');
-        if(emptyMsg) emptyMsg.remove(); 
+        if(emptyMsg) emptyMsg.remove();
 
         rowCount++;
-        
+
         const newRow = `
             <div class="row-clean social-row align-items-center fade-in-animation mb-2">
                 <label class="d-flex align-items-center" style="width: 35%;">
@@ -483,15 +485,15 @@
                 </label>
                 <div class="sep">:</div>
                 <div class="inp d-flex align-items-center gap-2" style="width: 62%;">
-                    <input type="text" 
-                           name="social_media[${rowCount}][url]" 
-                           class="clean-input editing social-url-input" 
-                           placeholder="Paste link di sini..." 
+                    <input type="text"
+                           name="social_media[${rowCount}][url]"
+                           class="clean-input editing social-url-input"
+                           placeholder="Paste link di sini..."
                            oninput="detectSocialMedia(this)"
                            autofocus>
                     <input type="hidden" name="social_media[${rowCount}][platform]" class="social-platform-input" value="website">
                     <input type="hidden" name="social_media[${rowCount}][username]" class="social-username-input" value="">
-                    
+
                     <button type="button" class="btn btn-icon btn-xs btn-label-danger btn-remove-sosmed" onclick="removeSocialRow(this)">
                         <i class="bx bx-x"></i>
                     </button>
