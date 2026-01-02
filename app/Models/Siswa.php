@@ -9,6 +9,10 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Storage;
 
 
+use App\Models\AlumniTestimoni;
+use App\Models\TracerStudy;
+
+
 class Siswa extends Model
 {
     use HasFactory;
@@ -113,6 +117,25 @@ class Siswa extends Model
     ];
 
     // --- RELASI ---
+
+        // =================================================================
+    // RELASI ALUMNI
+    // =================================================================
+
+    public function tracer(): HasOne
+    {
+        return $this->hasOne(TracerStudy::class, 'siswa_id', 'id');
+    }
+
+    public function testimoni(): HasOne
+    {
+        return $this->hasOne(AlumniTestimoni::class, 'siswa_id', 'id');
+    }
+
+    public function isAlumni()
+    {
+        return strtolower($this->status) === 'lulus';
+    }
 
     public function rombel(): BelongsTo
     {

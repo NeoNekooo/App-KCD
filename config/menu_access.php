@@ -18,7 +18,6 @@ return [
             '!profil-siswa',
             '!pelanggaran-guru',
             '!pelanggaran-siswa',
-            '!input-data-alumni',
         ],
         'Operator Sekolah' => [
             '*',
@@ -39,7 +38,6 @@ return [
             'profil-sekolah',
             'profil-siswa',
             'pelanggaran-siswa',
-            'input-data-alumni',
         ],
     ],
 
@@ -129,13 +127,6 @@ return [
             'icon' => 'bx bxs-user-x',
             'route' => 'admin.personal.siswa.pelanggaran',
             'is_active' => 'request()->is("admin/personal/siswa/pelanggaran")',
-        ],
-        [
-            'title' => 'Input Data',
-            'slug' => 'input-data-alumni',
-            'icon' => 'bx bx-id-card',
-            'route' => 'admin.alumni.create',
-            'is_active' => 'request()->is("admin/alumni/create)',
         ],
         // --- AKADEMIK ---
         [
@@ -323,8 +314,6 @@ return [
                 ['title' => 'Penetapan Kelulusan', 'route' => 'admin.alumni.pelulusan', 'is_active' => 'false'],
                 ['title' => 'Data Alumni', 'route' => 'admin.alumni.dataAlumni.index', 'is_active' => 'false'],
                 ['title' => 'Rekap Data Alumni', 'route' => 'admin.alumni.rekapDataAlumni', 'is_active' => 'false'],
-                ['title' => 'Testimoni Alumni', 'route' => 'admin.alumni.testimoni.index', 'is_active' => 'false'],
-                ['title' => 'Penelusuran Kerja', 'route' => 'admin.alumni.tracer.index', 'is_active' => 'false'],
             ]
         ],
         // --- KEUANGAN ---
@@ -552,6 +541,26 @@ return [
                     'is_active' => 'request()->routeIs("admin.landing.agenda.index")',
                 ],
             ]
+        ],
+
+        [
+            'title' => 'Testimoni',
+            'slug' => 'testimoni',
+            'is_header' => true,
+        ],
+        [
+            'title' => 'Testimoni Masuk',
+            'slug' => 'testimoni-masuk',
+            'icon' => 'bx bx-chat',
+            'route' => 'admin.landing.testimoni.index',
+            'is_active' => 'request()->routeIs("admin.landing.testimoni.*")',
+        ],
+        [
+            'title' => 'Data Tracer Study',
+            'slug' => 'Data-Tracer-Study',
+            'icon' => 'bx bx-briefcase-alt-2',
+            'route' => 'admin.landing.tracer.index',
+            'is_active' => 'request()->routeIs("admin.landing.tracer.*")',
         ],
 
 
