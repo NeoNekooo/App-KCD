@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use App\Models\Siswa;
 use App\Models\Gtk;
-use App\Models\Rombel;
+use App\Models\Rombel; // Tetap dipakai untuk hitung total rombel se-wilayah
 use App\Models\Sekolah;
 use App\Http\Controllers\Controller;
 
@@ -15,68 +15,68 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        $totalSiswa = Siswa::aktif()->count();
+        // 1. IDENTITAS WILAYAH (KCD)
+        // Ambil data sekolah induk (atau KCD jika ada tabel khususnya)
+        $instansi = Sekolah::firstOrCreate(['id' => 1]); 
+        
+        // 2. STATISTIK UTAMA (KCD VIEW)
+        
+        // A. Total Satuan Pendidikan (Sekolah Binaan)
+        // Jika aplikasi ini menampung banyak sekolah, hitung jumlah row di tabel Sekolah.
+        // Jika aplikasi ini single-tenant tapi ingin terlihat KCD, kita hitung Rombel sebagai 'Kelompok Belajar'.
+        $totalSekolah = Sekolah::count(); 
 
-        // Menghitung Guru/GTK
-        $totalGuru  = Gtk::count();
+        // B. Total Peserta Didik (Se-Wilayah)
+        $totalSiswa = Siswa::where('status', 'Aktif')->count();
+        
+        // C. Total GTK (Se-Wilayah)
+        $totalGuru = Gtk::count();
 
-        // Menghitung Kelas dari model Rombel
-        $totalKelas = Rombel::count();
+        // D. Cakupan Wilayah (Kecamatan)
+        // Menghitung ada berapa kecamatan unik dari data domisili siswa
+        $totalKecamatan = Siswa::where('status', 'Aktif')
+            ->whereNotNull('kecamatan')
+            ->distinct('kecamatan')
+            ->count('kecamatan');
 
-        // Menghitung jumlah Mata Pelajaran unik berdasarkan data 'pembelajaran' di tabel rombels
-        $uniqueMapels = [];
-        $rombels = Rombel::select('pembelajaran')->get();
-        foreach ($rombels as $rombel) {
-            $pembelajaran_data = json_decode($rombel->pembelajaran, true);
-            if (is_array($pembelajaran_data)) {
-                foreach ($pembelajaran_data as $pembelajaran) {
-                    $mapel_id = $pembelajaran['mata_pelajaran_id'] ?? null;
-                    $mapel_nama = $pembelajaran['mata_pelajaran_id_str'] ?? ($pembelajaran['nama_mata_pelajaran'] ?? null);
+        // 3. STATISTIK RINCIAN
 
-                    if ($mapel_id) {
-                        $uniqueMapels[$mapel_id] = $mapel_nama ?? $mapel_id;
-                    } elseif (!empty($mapel_nama)) {
-                        // fallback jika tidak ada ID, gunakan nama sebagai key
-                        $uniqueMapels[$mapel_nama] = $mapel_nama;
-                    }
-                }
-            }
-        }
+        // Gender Parity (L/P)
+        $siswaLaki = Siswa::where('status', 'Aktif')->whereIn('jenis_kelamin', ['L', 'Laki-laki'])->count();
+        $siswaPerempuan = Siswa::where('status', 'Aktif')->whereIn('jenis_kelamin', ['P', 'Perempuan'])->count();
 
-        $totalMapel = count($uniqueMapels);
+        // Status Kepegawaian (ASN vs Non-ASN)
+        $guruASN = Gtk::where('status_kepegawaian_id_str', 'like', '%PNS%')
+                    ->orWhere('status_kepegawaian_id_str', 'like', '%PPPK%')
+                    ->count();
+        $guruNonASN = $totalGuru - $guruASN;
 
-        // Ambil beberapa contoh nama mapel untuk tooltip (maks 8)
-        $mapelSample = array_slice(array_values($uniqueMapels), 0, 8);
-
-        $siswaPerTahun = Siswa::select(
-                DB::raw('YEAR(tanggal_masuk_sekolah) as year'),
-                DB::raw('COUNT(*) as total')
-            )
-            ->whereNotNull('tanggal_masuk_sekolah') // Hindari data kosong
-            ->where('tanggal_masuk_sekolah', '>=', Carbon::now()->subYears(4)) // 4 tahun terakhir
-            ->groupBy('year')
-            ->orderBy('year', 'ASC')
+        // 4. CHART: SEBARAN SISWA PER KECAMATAN (Top 5)
+        // Ini lebih relevan buat KCD daripada "Siswa per Tahun"
+        $sebaranKecamatan = Siswa::select('kecamatan', DB::raw('count(*) as total'))
+            ->where('status', 'Aktif')
+            ->whereNotNull('kecamatan')
+            ->groupBy('kecamatan')
+            ->orderByDesc('total')
+            ->limit(5) // Ambil 5 kecamatan terbanyak
             ->get();
-$sekolah = Sekolah::firstOrCreate(['id' => 1]);
-        // Siapkan array untuk Chart
-        $chartCategories = $siswaPerTahun->pluck('year')->toArray();
-        $chartData       = $siswaPerTahun->pluck('total')->toArray();
 
-        // Fallback data dummy jika database masih kosong (agar dashboard tetap cantik)
-        if (empty($chartCategories)) {
-            $chartCategories = [date('Y')-3, date('Y')-2, date('Y')-1, date('Y')];
-            $chartData       = [0, 0, 0, 0];
-        }
+        $chartCategories = $sebaranKecamatan->pluck('kecamatan')->toArray();
+        $chartData = $sebaranKecamatan->pluck('total')->toArray();
+
+        // Tahun Ajaran Dinamis
+        $currMonth = date('n');
+        $currYear = date('Y');
+        $tahunAjaran = ($currMonth > 6) ? "$currYear/" . ($currYear + 1) : ($currYear - 1) . "/$currYear";
 
         return view('admin.dashboard', compact(
-            'totalSiswa',
-            'totalGuru',
-            'totalKelas',
-            'totalMapel',
-            'mapelSample',
-            'chartCategories',
-            'chartData',
-            'sekolah'
+            'instansi',
+            'totalSekolah',
+            'totalSiswa', 'siswaLaki', 'siswaPerempuan',
+            'totalGuru', 'guruASN', 'guruNonASN',
+            'totalKecamatan',
+            'chartCategories', 'chartData',
+            'tahunAjaran'
         ));
     }
 }

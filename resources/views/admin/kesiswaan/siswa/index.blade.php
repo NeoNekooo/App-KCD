@@ -1,56 +1,60 @@
 @extends('layouts.admin')
 
 @section('content')
-<h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Kesiswaan /</span> Data Siswa</h4>
+<h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Monitoring /</span> Data Siswa Wilayah</h4>
 
 <div class="card">
-    {{-- HEADER: JUDUL & TOMBOL AKSI --}}
+    {{-- HEADER --}}
     <div class="card-header">
         <div class="d-flex align-items-center justify-content-between">
-            <h5 class="card-title m-0 me-2">Daftar Siswa</h5>
-            <div class="d-flex gap-2">
-                {{-- Tombol Lihat Data (Muncul saat checkbox dipilih) --}}
+            <h5 class="card-title m-0 me-2">Data Sebaran Siswa</h5>
+            <div>
+                {{-- Tombol ini hanya muncul jika ada baris yang diceklis --}}
                 <a href="#" id="viewSelectedBtn" class="btn btn-info btn-sm" style="display: none;">
-                    <i class="bx bx-show-alt me-1"></i> Lihat Data
+                    <i class="bx bx-show-alt me-1"></i> Lihat Detail
                 </a>
-
-                {{-- Tombol Export --}}
-                <div class="dropdown">
-                    <button class="btn btn-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="bx bx-export me-1"></i> Export
-                    </button>
-                    <ul class="dropdown-menu dropdown-menu-end">
-                        <li><a class="dropdown-item" href="{{ route('admin.kesiswaan.siswa.export.excel', request()->query()) }}">Export Semua</a></li>
-                        <li><a class="dropdown-item disabled" href="javascript:void(0);" id="exportSelectedLink">Export yang Dipilih</a></li>
-                    </ul>
-                </div>
             </div>
         </div>
     </div>
 
-    {{-- BODY: FILTER & PENCARIAN --}}
+    {{-- FILTER WILAYAH --}}
     <div class="card-body">
         <form action="{{ route('admin.kesiswaan.siswa.index') }}" method="GET" id="filterForm">
             <input type="hidden" name="per_page" value="{{ request('per_page', 15) }}">
 
             <div class="row g-2">
-                {{-- Filter Rombel --}}
+                {{-- Filter Kabupaten --}}
                 <div class="col-md-3">
-                    <select name="rombel_id" class="form-select" onchange="this.form.submit()">
-                        <option value="">Semua Kelas</option>
-                        @foreach($rombels as $rombel)
-                            <option value="{{ $rombel->id }}" {{ request('rombel_id') == $rombel->id ? 'selected' : '' }}>
-                                {{ $rombel->nama }}
+                    <label class="form-label text-muted small">Kabupaten/Kota</label>
+                    <select name="kabupaten_kota" class="form-select" onchange="this.form.submit()">
+                        <option value="">- Semua Wilayah -</option>
+                        @foreach($listKabupaten as $kab)
+                            <option value="{{ $kab }}" {{ request('kabupaten_kota') == $kab ? 'selected' : '' }}>
+                                {{ $kab }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+
+                {{-- Filter Kecamatan --}}
+                <div class="col-md-3">
+                    <label class="form-label text-muted small">Kecamatan</label>
+                    <select name="kecamatan" class="form-select" onchange="this.form.submit()">
+                        <option value="">- Semua Kecamatan -</option>
+                        @foreach($listKecamatan as $kec)
+                            <option value="{{ $kec }}" {{ request('kecamatan') == $kec ? 'selected' : '' }}>
+                                {{ $kec }}
                             </option>
                         @endforeach
                     </select>
                 </div>
 
                 {{-- Pencarian --}}
-                <div class="col-md-9">
+                <div class="col-md-6">
+                    <label class="form-label text-muted small">Cari Siswa</label>
                     <div class="input-group input-group-merge">
                         <span class="input-group-text"><i class="bx bx-search"></i></span>
-                        <input type="text" name="search" class="form-control" placeholder="Cari Nama, NISN, atau NIK Siswa..." value="{{ request('search') }}">
+                        <input type="text" name="search" class="form-control" placeholder="Nama, NISN, atau NIK..." value="{{ request('search') }}">
                         <button type="submit" class="btn btn-primary">Cari</button>
                     </div>
                 </div>
@@ -58,67 +62,82 @@
         </form>
     </div>
 
-    {{-- TABLE: DATA SISWA --}}
+    {{-- TABEL DATA --}}
     <div class="table-responsive text-nowrap">
-        <table class="table table-hover">
-            <thead>
+        <table class="table table-hover table-striped">
+            <thead class="bg-light">
                 <tr>
                     <th width="1%"><input class="form-check-input" type="checkbox" id="selectAllCheckbox"></th>
-                    <th>Nama Siswa</th>
+                    <th>Identitas Siswa</th>
                     <th>L/P</th>
-                    <th>NISN</th>
-                    <th>WA</th>
+                    <th>Nomor Induk</th> {{-- Digabung NISN & NIK --}}
+                    <th>Domisili (Wilayah)</th> {{-- PENTING BUAT KCD --}}
                     <th>TTL</th>
                     <th>Kelas</th>
-                    <th width="5%">Aksi</th>
+                    <th width="5%" class="text-center">Detail</th>
                 </tr>
             </thead>
             <tbody class="table-border-bottom-0">
                 @forelse ($siswas as $siswa)
                 <tr>
-                    {{-- Checkbox Row --}}
+                    {{-- Checkbox --}}
                     <td><input class="form-check-input row-checkbox" type="checkbox" value="{{ $siswa->id }}"></td>
 
-                    {{-- KOLOM NAMA & FOTO (BISA DIKLIK) --}}
+                    {{-- NAMA & FOTO --}}
                     <td style="min-width: 250px;">
                         <div class="d-flex justify-content-start align-items-center">
-                            {{-- Avatar Wrapper --}}
                             <div class="avatar-wrapper me-3">
                                 <a href="{{ route('admin.kesiswaan.siswa.show', $siswa->id) }}">
                                     <div class="avatar avatar-sm">
                                         @if(!empty($siswa->foto) && \Illuminate\Support\Facades\Storage::disk('public')->exists($siswa->foto))
-                                            <img src="{{ asset('storage/' . $siswa->foto) }}" alt="Avatar" class="rounded-circle" style="width: 100%; height: 100%; object-fit: cover;object-position: 50% 20%;">
+                                            <img src="{{ asset('storage/' . $siswa->foto) }}" alt="Avatar" class="rounded-circle" style="object-fit: cover;">
                                         @else
-                                            <img src="https://ui-avatars.com/api/?name={{ urlencode($siswa->nama) }}&background=random&color=ffffff&size=100"
-                                                 alt="Avatar"
-                                                 class="rounded-circle"
-                                                 style="width: 100%; height: 100%; object-fit: cover;">
+                                            <img src="https://ui-avatars.com/api/?name={{ urlencode($siswa->nama) }}&background=random&color=ffffff&size=100" class="rounded-circle">
                                         @endif
                                     </div>
                                 </a>
                             </div>
-
-                            {{-- Nama Wrapper (Link ke Show) --}}
                             <div class="d-flex flex-column">
                                 <a href="{{ route('admin.kesiswaan.siswa.show', $siswa->id) }}" class="text-body text-truncate fw-semibold">
                                     {{ $siswa->nama }}
                                 </a>
-                                <small class="text-muted">
-                                    {{ $siswa->nis ? 'NIS: '.$siswa->nis : ($siswa->nik ? 'NIK: '.$siswa->nik : '-') }}
-                                </small>
+                                <small class="text-muted">NIS: {{ $siswa->nis ?? '-' }}</small>
                             </div>
                         </div>
                     </td>
 
+                    {{-- JENIS KELAMIN --}}
                     <td>{{ ($siswa->jenis_kelamin == 'L' || $siswa->jenis_kelamin == 'Laki-laki') ? 'L' : 'P' }}</td>
-                    <td>{{ $siswa->nisn ?? '-' }}</td>
-                    <td>{{ $siswa->no_wa ?? '-' }}</td>
+
+                    {{-- NISN & NIK (Digabung biar hemat tempat) --}}
                     <td>
-                        {{ $siswa->tempat_lahir ?? '' }},
-                        {{ $siswa->tanggal_lahir ? \Carbon\Carbon::parse($siswa->tanggal_lahir)->format('d M Y') : '-' }}
+                        <div class="d-flex flex-column">
+                            <span class="fw-bold small" title="NISN">{{ $siswa->nisn ?? '-' }}</span>
+                            <small class="text-muted" title="NIK">{{ $siswa->nik ?? '-' }}</small>
+                        </div>
                     </td>
 
-                    {{-- Badge Rombel --}}
+                    {{-- DOMISILI (Kecamatan & Kab/Kota) --}}
+                    <td>
+                        <div class="d-flex flex-column">
+                            <span class="text-dark fw-semibold" style="font-size: 0.9em;">
+                                Kec. {{ $siswa->kecamatan ?? '-' }}
+                            </span>
+                            <small class="text-muted">
+                                {{ $siswa->kabupaten_kota ?? '-' }}
+                            </small>
+                        </div>
+                    </td>
+
+                    {{-- TTL --}}
+                    <td>
+                        <div class="d-flex flex-column">
+                            <span>{{ $siswa->tempat_lahir ?? '' }}</span>
+                            <small class="text-muted">{{ $siswa->tanggal_lahir ? \Carbon\Carbon::parse($siswa->tanggal_lahir)->format('d M Y') : '-' }}</small>
+                        </div>
+                    </td>
+
+                    {{-- KELAS --}}
                     <td>
                         @php
                             $namaKelas = $siswa->rombel->nama ?? null;
@@ -128,34 +147,25 @@
                         @endphp
 
                         @if($namaKelas)
-                            <span class="badge bg-label-primary">
-                                {{ $namaKelas }}
-                            </span>
+                            <span class="badge bg-label-primary">{{ $namaKelas }}</span>
                         @else
                             <span class="badge bg-label-secondary">Belum Masuk Kelas</span>
                         @endif
                     </td>
-                    <td>
-    @if($siswa->status != 'Aktif')
-        <button type="button" class="btn btn-sm btn-outline-warning btn-unregister-keluar" data-id="{{ $siswa->id }}" data-nama="{{ $siswa->nama }}">
-            <i class="bx bx-undo me-1"></i> Batalkan Keluar
-        </button>
-    @else
-        <button type="button"
-                class="btn btn-sm btn-outline-danger btn-register-keluar"
-                data-id="{{ $siswa->id }}"
-                data-nama="{{ $siswa->nama }}">
-            <i class="bx bx-log-out-circle me-1"></i> Register Keluar
-        </button>
-    @endif
-</td>
+
+                    {{-- AKSI --}}
+                    <td class="text-center">
+                        <a href="{{ route('admin.kesiswaan.siswa.show', $siswa->id) }}" class="btn btn-sm btn-icon btn-label-info" title="Lihat Detail">
+                            <i class="bx bx-show-alt"></i>
+                        </a>
+                    </td>
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="6" class="text-center py-5">
+                    <td colspan="8" class="text-center py-5">
                         <div class="d-flex flex-column align-items-center justify-content-center">
-                            <i class="bx bx-user-x bx-lg text-muted mb-2"></i>
-                            <h6 class="text-muted">Tidak ada data siswa ditemukan.</h6>
+                            <i class="bx bx-map-alt bx-lg text-muted mb-2"></i>
+                            <h6 class="text-muted">Data siswa tidak ditemukan untuk wilayah/filter ini.</h6>
                         </div>
                     </td>
                 </tr>
@@ -164,22 +174,24 @@
         </table>
     </div>
 
-    {{-- FOOTER: PAGINATION & PER PAGE --}}
+    {{-- FOOTER PAGINATION --}}
     <div class="card-footer border-top">
         <div class="row align-items-center">
             <div class="col-md-6 d-flex align-items-center mb-2 mb-md-0">
-                <span class="text-muted me-2 small">Menampilkan</span>
+                <span class="text-muted me-2 small">Show:</span>
                 <form action="{{ route('admin.kesiswaan.siswa.index') }}" method="GET" class="d-inline-block">
                     <input type="hidden" name="search" value="{{ request('search') }}">
-                    <input type="hidden" name="rombel_id" value="{{ request('rombel_id') }}">
+                    <input type="hidden" name="kabupaten_kota" value="{{ request('kabupaten_kota') }}">
+                    <input type="hidden" name="kecamatan" value="{{ request('kecamatan') }}">
+
                     <select name="per_page" class="form-select form-select-sm d-inline-block w-auto" onchange="this.form.submit()">
                         <option value="15" {{ request('per_page') == '15' ? 'selected' : '' }}>15</option>
                         <option value="35" {{ request('per_page') == '35' ? 'selected' : '' }}>35</option>
                         <option value="50" {{ request('per_page') == '50' ? 'selected' : '' }}>50</option>
-                        <option value="all" {{ request('per_page') == 'all' ? 'selected' : '' }}>Semua</option>
+                        <option value="all" {{ request('per_page') == 'all' ? 'selected' : '' }}>All</option>
                     </select>
                 </form>
-                <span class="text-muted ms-2 small">dari <strong>{{ $siswas->total() }}</strong> data</span>
+                <span class="text-muted ms-2 small">Total: <strong>{{ $siswas->total() }}</strong> Siswa</span>
             </div>
             <div class="col-md-6 d-flex justify-content-md-end justify-content-center">
                 @if(request('per_page') != 'all')
@@ -189,85 +201,6 @@
         </div>
     </div>
 </div>
-
-<div class="modal fade" id="modalRegisterKeluar" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <form id="formRegisterKeluar" method="POST">
-                @csrf
-                @method('PATCH')
-                <div class="modal-header border-bottom">
-                    <h5 class="modal-title">Register Keluar Siswa: <span id="namaSiswaModal" class="fw-bold"></span></h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="bg-light p-3 rounded mb-3" style="border-left: 4px solid #ffab00;">
-                        <small class="text-dark">
-                            <span class="text-danger fw-bold">* )</span> Peserta didik yang bisa diluluskan hanyalah peserta didik yang berada pada rombongan belajar tingkat akhir (TK B, Kelas 6, Kelas 9, Kelas 12/13, Paket A Tingkatan 2 Kelas 6, Paket B Tingkatan 4 Kelas 9 dan Paket C Tingkatan 6 Kelas 12)
-                        </small>
-                    </div>
-
-                    <div class="mb-3 row">
-                        <label class="col-sm-4 col-form-label text-sm-end">Keluar karena:</label>
-                        <div class="col-sm-8">
-                            <select name="status" class="form-select" required>
-                                <option value="">-- Pilih Alasan --</option>
-                                <option value="Lulus">Lulus</option>
-                                <option value="Mutasi">Mutasi</option>
-                                <option value="Dikeluarkan">Dikeluarkan</option>
-                                <option value="Putus Sekolah">Putus Sekolah</option>
-                                <option value="Meninggal Dunia">Meninggal Dunia</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="mb-3 row">
-                        <label class="col-sm-4 col-form-label text-sm-end">Tanggal keluar:</label>
-                        <div class="col-sm-8">
-                            <input type="date" name="tanggal_keluar" class="form-control" value="{{ date('Y-m-d') }}" required>
-                        </div>
-                    </div>
-
-                    <div class="mb-3 row">
-                        <label class="col-sm-4 col-form-label text-sm-end">Alasan:</label>
-                        <div class="col-sm-8">
-                            <textarea name="alasan" class="form-control" rows="3" placeholder="Contoh: Lulus Tahun Ajaran 2024/2025"></textarea>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer bg-light">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-primary" style="background-color: #233446;">
-                        <i class="bx bx-save me-1"></i> Simpan dan Tutup
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-<div class="modal fade" id="modalUnregisterKeluar" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <form id="formUnregisterKeluar" method="POST">
-                @csrf
-                @method('PATCH')
-                <div class="modal-header border-bottom">
-                    <h5 class="modal-title">Batalkan Register Keluar Siswa: <span id="namaSiswaUnregModal" class="fw-bold"></span></h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <p>Anda yakin ingin membatalkan pencatatan keluar untuk siswa <strong><span id="namaSiswaUnregModal2"></span></strong>? Tindakan ini akan mengembalikan status siswa menjadi <strong>Aktif</strong>.</p>
-                </div>
-                <div class="modal-footer bg-light">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-warning"><i class="bx bx-undo me-1"></i> Batalkan Keluar</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
 @endsection
 
 @push('scripts')
@@ -276,72 +209,25 @@
         const selectAllCheckbox = document.getElementById('selectAllCheckbox');
         const rowCheckboxes = document.querySelectorAll('.row-checkbox');
         const viewSelectedBtn = document.getElementById('viewSelectedBtn');
-        const exportSelectedLink = document.getElementById('exportSelectedLink');
-        const btnRegisterKeluar = document.querySelectorAll('.btn-register-keluar');
-const modalRegisterKeluar = new bootstrap.Modal(document.getElementById('modalRegisterKeluar'));
-const formRegisterKeluar = document.getElementById('formRegisterKeluar');
-const namaSiswaModal = document.getElementById('namaSiswaModal');
-
-btnRegisterKeluar.forEach(btn => {
-    btn.addEventListener('click', function() {
-        const id = this.getAttribute('data-id');
-        const nama = this.getAttribute('data-nama');
-
-        // Update Modal UI
-        namaSiswaModal.innerText = nama;
-
-        // Set dynamic form action URL
-        // Make sure this matches your route name in web.php
-        formRegisterKeluar.action = `/admin/kesiswaan/siswa/${id}/register-keluar`;
-
-        modalRegisterKeluar.show();
-    });
-});
-
-// Unregister (undo) button handling
-const btnUnregisterKeluar = document.querySelectorAll('.btn-unregister-keluar');
-const modalUnregisterKeluar = new bootstrap.Modal(document.getElementById('modalUnregisterKeluar'));
-const formUnregisterKeluar = document.getElementById('formUnregisterKeluar');
-const namaSiswaUnregModal = document.getElementById('namaSiswaUnregModal');
-const namaSiswaUnregModal2 = document.getElementById('namaSiswaUnregModal2');
-
-btnUnregisterKeluar.forEach(btn => {
-    btn.addEventListener('click', function() {
-        const id = this.getAttribute('data-id');
-        const nama = this.getAttribute('data-nama');
-
-        namaSiswaUnregModal.innerText = nama;
-        namaSiswaUnregModal2.innerText = nama;
-        formUnregisterKeluar.action = `/admin/kesiswaan/siswa/${id}/unregister-keluar`;
-
-        modalUnregisterKeluar.show();
-    });
-});
+        
+        // Logic Tampilan Tombol "Lihat Detail"
         function handleCheckboxChange() {
             const checkedCheckboxes = document.querySelectorAll('.row-checkbox:checked');
-
             if (checkedCheckboxes.length > 0) {
                 viewSelectedBtn.style.display = 'inline-block';
-                exportSelectedLink.classList.remove('disabled');
-
-                // Ubah teks tombol jika cuma 1 yang dipilih
                 if(checkedCheckboxes.length === 1) {
                     viewSelectedBtn.innerHTML = '<i class="bx bx-show-alt me-1"></i> Lihat Detail';
                 } else {
-                    viewSelectedBtn.innerHTML = '<i class="bx bx-show-alt me-1"></i> Lihat Data (' + checkedCheckboxes.length + ')';
+                    viewSelectedBtn.innerHTML = '<i class="bx bx-show-alt me-1"></i> Lihat Detail (' + checkedCheckboxes.length + ')';
                 }
-
             } else {
                 viewSelectedBtn.style.display = 'none';
-                exportSelectedLink.classList.add('disabled');
             }
         }
 
         if (selectAllCheckbox) {
             selectAllCheckbox.addEventListener('change', function() {
-                rowCheckboxes.forEach(checkbox => {
-                    checkbox.checked = this.checked;
-                });
+                rowCheckboxes.forEach(checkbox => { checkbox.checked = this.checked; });
                 handleCheckboxChange();
             });
         }
@@ -350,41 +236,19 @@ btnUnregisterKeluar.forEach(btn => {
             checkbox.addEventListener('change', handleCheckboxChange);
         });
 
-        // ACTION: LIHAT DATA (PINTAR)
+        // Logic Klik Tombol "Lihat Detail"
         if (viewSelectedBtn) {
             viewSelectedBtn.addEventListener('click', function(e) {
                 e.preventDefault();
                 const checkedCheckboxes = document.querySelectorAll('.row-checkbox:checked');
-
                 if (checkedCheckboxes.length === 1) {
-                    // Jika cuma 1, langsung buka detailnya
-                    const id = checkedCheckboxes[0].value;
-                    // Pastikan URL-nya benar manual karena JS tidak bisa parse route() PHP dynamic parameter dengan mudah di sini
-                    // Kita ambil base URL dari window location atau hardcode prefix
-                    window.location.href = `/admin/kesiswaan/siswa/${id}`;
+                    window.location.href = `/admin/kesiswaan/siswa/${checkedCheckboxes[0].value}`;
                 } else if (checkedCheckboxes.length > 1) {
-                    // Jika banyak, buka show-multiple
                     const selectedIds = Array.from(checkedCheckboxes).map(cb => cb.value).join(',');
-                    let url = `{{ route('admin.kesiswaan.siswa.show-multiple') }}?ids=${selectedIds}`;
-                    window.location.href = url;
+                    window.location.href = `{{ route('admin.kesiswaan.siswa.show-multiple') }}?ids=${selectedIds}`;
                 }
             });
         }
-
-        // ACTION: EXPORT SELECTED
-        if (exportSelectedLink) {
-            exportSelectedLink.addEventListener('click', function(e) {
-                if (this.classList.contains('disabled')) return;
-                e.preventDefault();
-                const selectedIds = Array.from(document.querySelectorAll('.row-checkbox:checked')).map(cb => cb.value).join(',');
-
-                if (selectedIds) {
-                    let url = `{{ route('admin.kesiswaan.siswa.export.excel') }}?ids=${selectedIds}`;
-                    window.location.href = url;
-                }
-            });
-        }
-
         handleCheckboxChange();
     });
 </script>

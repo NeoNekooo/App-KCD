@@ -13,63 +13,76 @@ use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\GtkExport;
 use Illuminate\Support\Facades\Storage;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
+use Intervention\Image\ImageManager;
+use Intervention\Image\Drivers\Gd\Driver;
 
 class GtkController extends Controller
 {
-    // --- FUNGSI DAFTAR PEGAWAI (Data Guru & Tendik) ---
+    // =========================================================================
+    // 1. FUNGSI DAFTAR PEGAWAI (GURU & TENDIK)
+    // =========================================================================
 
     public function indexGuru(Request $request)
     {
         $query = Gtk::query()->where('jenis_ptk_id_str', 'Guru');
 
+        // --- 1. PENCARIAN (NAMA, NIP, NIK, & ALAMAT JALAN) ---
         $query->when($request->search, function ($q, $search) {
             return $q->where(function ($sub) use ($search) {
                 $sub->where('nama', 'like', "%{$search}%")
                     ->orWhere('nip', 'like', "%{$search}%")
-                    ->orWhere('nik', 'like', "%{$search}%");
+                    ->orWhere('nik', 'like', "%{$search}%")
+                    ->orWhere('alamat_jalan', 'like', "%{$search}%"); // Cari berdasarkan Alamat
             });
         });
 
-        // --- LOGIKA PAGINATION DINAMIS ---
+        // --- 2. PAGINASI ---
         $perPage = $request->input('per_page', 15); 
-
         if ($perPage === 'all') {
-            $perPage = $query->count(); 
-            if ($perPage == 0) $perPage = 15; 
+            $perPage = $query->count() > 0 ? $query->count() : 15; 
         }
 
         $gurus = $query->latest()->paginate($perPage)->appends($request->all());
         
-        return view('admin.kepegawaian.gtk.index_guru', compact('gurus'));
+        // Kirim array kosong agar View tidak error (karena filter dropdown dihapus)
+        $listKabupaten = [];
+        $listKecamatan = [];
+        
+        return view('admin.kepegawaian.gtk.index_guru', compact('gurus', 'listKabupaten', 'listKecamatan'));
     }
 
     public function indexTendik(Request $request)
     {
-        // 1. Filter Data (Gabungkan Kepsek (91) & Tendik (93))
-        $query = Gtk::query()->whereIn('jenis_ptk_id', ['91', '93']);
+        $query = Gtk::query()->whereIn('jenis_ptk_id', ['91', '93']); 
         
+        // --- 1. PENCARIAN (NAMA, NIP, NIK, & ALAMAT JALAN) ---
         $query->when($request->search, function ($q, $search) {
             return $q->where(function ($sub) use ($search) {
                 $sub->where('nama', 'like', "%{$search}%")
                     ->orWhere('nip', 'like', "%{$search}%")
-                    ->orWhere('nik', 'like', "%{$search}%"); 
+                    ->orWhere('nik', 'like', "%{$search}%")
+                    ->orWhere('alamat_jalan', 'like', "%{$search}%"); // Cari berdasarkan Alamat
             });
         });
 
-        // 2. LOGIKA PAGINATION DINAMIS
+        // --- 2. PAGINASI ---
         $perPage = $request->input('per_page', 15); 
-
         if ($perPage === 'all') {
-            $perPage = $query->count(); 
-            if ($perPage == 0) $perPage = 15;
+            $perPage = $query->count() > 0 ? $query->count() : 15;
         }
 
         $tendiks = $query->latest()->paginate($perPage)->appends($request->all());
         
-        return view('admin.kepegawaian.gtk.index_tendik', compact('tendiks'));
+        // Kirim array kosong
+        $listKabupaten = [];
+        $listKecamatan = [];
+        
+        return view('admin.kepegawaian.gtk.index_tendik', compact('tendiks', 'listKabupaten', 'listKecamatan'));
     }
 
-    // --- FUNGSI EXPORT & PDF BAWAAN ---
+    // =========================================================================
+    // 2. FUNGSI EXPORT (EXCEL & PDF)
+    // =========================================================================
 
     public function exportGuruExcel(Request $request)
     {
@@ -78,13 +91,17 @@ class GtkController extends Controller
         if ($request->has('ids')) {
             $ids = explode(',', $request->input('ids'));
             $query->whereIn('id', $ids);
-        } elseif ($request->has('search')) {
-            $search = $request->search;
-            $query->where(function ($sub) use ($search) {
-                $sub->where('nama', 'like', "%{$search}%")
-                    ->orWhere('nip', 'like', "%{$search}%")
-                    ->orWhere('nik', 'like', "%{$search}%");
-            });
+        } else {
+            // Filter Search dengan Alamat
+            if ($request->filled('search')) {
+                $search = $request->search;
+                $query->where(function ($sub) use ($search) {
+                    $sub->where('nama', 'like', "%{$search}%")
+                        ->orWhere('nip', 'like', "%{$search}%")
+                        ->orWhere('nik', 'like', "%{$search}%")
+                        ->orWhere('alamat_jalan', 'like', "%{$search}%");
+                });
+            }
         }
 
         $query->latest(); 
@@ -99,13 +116,17 @@ class GtkController extends Controller
         if ($request->has('ids')) {
             $ids = explode(',', $request->input('ids'));
             $query->whereIn('id', $ids);
-        } elseif ($request->has('search')) {
-            $search = $request->search;
-            $query->where(function ($sub) use ($search) {
-                $sub->where('nama', 'like', "%{$search}%")
-                    ->orWhere('nip', 'like', "%{$search}%")
-                    ->orWhere('nik', 'like', "%{$search}%");
-            });
+        } else {
+            // Filter Search dengan Alamat
+            if ($request->filled('search')) {
+                $search = $request->search;
+                $query->where(function ($sub) use ($search) {
+                    $sub->where('nama', 'like', "%{$search}%")
+                        ->orWhere('nip', 'like', "%{$search}%")
+                        ->orWhere('nik', 'like', "%{$search}%")
+                        ->orWhere('alamat_jalan', 'like', "%{$search}%");
+                });
+            }
         }
         
         $query->latest();
@@ -126,9 +147,9 @@ class GtkController extends Controller
         $gtk = Gtk::findOrFail($id);
         $sekolah = Sekolah::first();
         $qrCodeData = "Nama: " . $gtk->nama . "\nNUPTK: " . ($gtk->nuptk ?? '-');
+        
         $rombelWali = Rombel::where('ptk_id', $gtk->ptk_id)->first();
         $rombelMengajar = Rombel::whereJsonContains('pembelajaran', ['ptk_id' => $gtk->ptk_id])->get();
-        
         $tugasTerbaru = TugasPegawai::where('pegawai_id', $gtk->ptk_id)->orderBy('tmt', 'desc')->first();
 
         $pdf = Pdf::loadView('admin.kepegawaian.gtk.gtk_pdf', compact(
@@ -145,7 +166,6 @@ class GtkController extends Controller
         $ids = explode(',', $request->input('ids'));
         $gtks = Gtk::find($ids); 
         $sekolah = Sekolah::first();
-        
         $rombelMengajar = Rombel::all(); 
 
         $pdf = Pdf::loadView('admin.kepegawaian.gtk.gtk_pdf_multiple', compact('gtks', 'sekolah', 'rombelMengajar'));
@@ -153,7 +173,9 @@ class GtkController extends Controller
         return $pdf->stream($fileName);
     }
 
-    // --- FUNGSI UPDATE DATA & UPLOAD MEDIA ---
+    // =========================================================================
+    // 3. FUNGSI UPDATE DATA & UPLOAD MEDIA
+    // =========================================================================
 
     public function updateData(Request $request, $id)
     {
@@ -180,7 +202,7 @@ class GtkController extends Controller
     public function uploadMedia(Request $request, $id)
     {
         $request->validate([
-            'foto' => 'nullable|image|mimes:jpeg,png,jpg|max:2048', 
+            'foto' => 'nullable|image|mimes:jpeg,png,jpg|max:5120', 
             'tandatangan' => 'nullable|image|mimes:png|max:1024',
         ]);
 
@@ -190,7 +212,17 @@ class GtkController extends Controller
             if ($gtk->foto && Storage::disk('public')->exists($gtk->foto)) {
                 Storage::disk('public')->delete($gtk->foto);
             }
-            $path = $request->file('foto')->store('gtk_media/foto', 'public');
+            
+            $file = $request->file('foto');
+            $fileName = time() . '_' . \Illuminate\Support\Str::slug($gtk->nama) . '.jpg';
+            $path = 'gtk_media/foto/' . $fileName;
+
+            $manager = new ImageManager(new Driver());
+            $image = $manager->read($file);
+            $image->scale(width: 400); 
+            $encoded = $image->toJpeg(70); 
+            
+            Storage::disk('public')->put($path, (string) $encoded);
             $gtk->foto = $path;
         }
 
@@ -206,7 +238,9 @@ class GtkController extends Controller
         return back()->with('success', 'Media GTK berhasil diperbarui!');
     }
 
-    // --- FITUR BARU: CETAK KARTU ID ---
+    // =========================================================================
+    // 4. FITUR CETAK KARTU ID & LAIN-LAIN
+    // =========================================================================
 
     public function indexCetakKartu(Request $request)
     {
@@ -218,7 +252,8 @@ class GtkController extends Controller
                 $q->where('nama', 'like', "%{$search}%")
                   ->orWhere('nip', 'like', "%{$search}%")
                   ->orWhere('nuptk', 'like', "%{$search}%")
-                  ->orWhere('nik', 'like', "%{$search}%"); // <--- UPDATE: Tambahkan pencarian NIK
+                  ->orWhere('nik', 'like', "%{$search}%")
+                  ->orWhere('alamat_jalan', 'like', "%{$search}%"); // Tambah Search Alamat
             });
         }
 
@@ -242,7 +277,8 @@ class GtkController extends Controller
                 $q->where('nama', 'like', "%{$search}%")
                   ->orWhere('nip', 'like', "%{$search}%")
                   ->orWhere('nuptk', 'like', "%{$search}%")
-                  ->orWhere('nik', 'like', "%{$search}%"); // <--- UPDATE: Tambahkan pencarian NIK
+                  ->orWhere('nik', 'like', "%{$search}%")
+                  ->orWhere('alamat_jalan', 'like', "%{$search}%"); // Tambah Search Alamat
             });
         }
 
@@ -283,5 +319,29 @@ class GtkController extends Controller
         }
 
         return back()->with('success', 'Background kartu berhasil diupdate!');
+    }
+    
+    public function registerKeluar(Request $request, $id)
+    {
+        $request->validate([
+            'status' => 'required',
+            'tanggal_keluar' => 'required|date',
+            'alasan' => 'nullable|string',
+        ]);
+
+        $gtk = Gtk::findOrFail($id);
+        $gtk->status = 'Non-Aktif'; 
+        $gtk->save();
+
+        return redirect()->back()->with('success', 'Status GTK berhasil diperbarui.');
+    }
+    
+    public function unregisterKeluar(Request $request, $id)
+    {
+        $gtk = Gtk::findOrFail($id);
+        $gtk->status = 'Aktif';
+        $gtk->save();
+        
+        return redirect()->back()->with('success', 'Status GTK kembali Aktif.');
     }
 }
