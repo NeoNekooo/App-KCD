@@ -1,11 +1,12 @@
 <?php
 
-namespace App\Http\Controllers\Admin\kepegawaian;
+namespace App\Http\Controllers\Admin\Kepegawaian; // <--- INI SAYA SESUAIKAN JADI KEPEGAWAIAN
 
 use App\Http\Controllers\Controller;
 use App\Models\NomorSuratSetting;
 use App\Models\SuratLog;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB; // Tambahkan ini biar DB::transaction jalan
 
 class NomorSuratSettingController extends Controller
 {
@@ -53,7 +54,7 @@ class NomorSuratSettingController extends Controller
         return back()->with('success', 'Format nomor berhasil dihapus!');
     }
 
-    // === MAGIC FUNCTION: GENERATE RESMI (DIPERBAIKI) ===
+    // === MAGIC FUNCTION ===
     public static function generateNomor($kategori, $logInfo, $isiSurat)
     {
         if (strpos($isiSurat, '{{no_surat}}') === false) {
@@ -62,14 +63,13 @@ class NomorSuratSettingController extends Controller
 
         $setting = NomorSuratSetting::where('kategori', $kategori)->first();
         if(!$setting) {
-            return ['status' => 'error', 'pesan' => 'Format nomor untuk kategori ini belum diatur!'];
+            return ['status' => 'error', 'pesan' => 'Format nomor belum diatur!'];
         }
 
         $newCounter = $setting->nomor_terakhir + 1;
         $noUrut = str_pad($newCounter, 3, '0', STR_PAD_LEFT);
         $romawi = ['', 'I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII'];
         
-        // String nomor pendek untuk database (Contoh: 421/001/SMK/2025)
         $finalNumber = str_replace(
             ['{no}', '{bulan}', '{tahun}', '{romawi}'],
             [$noUrut, date('m'), date('Y'), $romawi[date('n')]],
@@ -88,11 +88,10 @@ class NomorSuratSettingController extends Controller
 
         $isiFinal = str_replace('{{no_surat}}', $finalNumber, $isiSurat);
 
-        // KEMBALIKAN nomor_saja secara terpisah agar tidak error Data Too Long
         return [
             'status' => 'success', 
-            'hasil' => $isiFinal,      // Berisi HTML Lengkap
-            'nomor_saja' => $finalNumber // Berisi Teks Nomor Pendek
+            'hasil' => $isiFinal,       
+            'nomor_saja' => $finalNumber 
         ];
     }
 

@@ -39,7 +39,8 @@ class TempalateSuratSkController extends Controller
             'template_isi'  => $request->template_isi,
             'ukuran_kertas' => $request->ukuran_kertas,
             'use_kop'       => $request->has('use_kop') ? 1 : 0,
-            // Tambahkan baris di bawah ini agar margin tersimpan
+            
+            // Simpan Margin agar bisa diload kembali di editor
             'margin_top'    => $request->margin_top ?? 20,
             'margin_left'   => $request->margin_left ?? 25,
             'margin_right'  => $request->margin_right ?? 25,
@@ -74,15 +75,19 @@ class TempalateSuratSkController extends Controller
         ]);
 
         $tipeSurat = TipeSurat::findOrFail($id);
+        
+        // Tapel ID tetap ikut yang lama jika tidak ada tapel aktif, atau update ke yang aktif
         $tapelAktif = Tapel::where('is_active', 1)->first();
+        $newTapelId = $tapelAktif ? $tapelAktif->id : $tipeSurat->tapel_id;
 
         $tipeSurat->update([
             'judul_surat'   => $request->judul_surat,
-            'tapel_id'      => $tapelAktif ? $tapelAktif->id : $tipeSurat->tapel_id,
+            'tapel_id'      => $newTapelId,
             'template_isi'  => $request->template_isi,
             'ukuran_kertas' => $request->ukuran_kertas,
             'use_kop'       => $request->has('use_kop') ? 1 : 0,
-            // Tambahkan baris di bawah ini agar margin terupdate
+            
+            // Update Margin
             'margin_top'    => $request->margin_top,
             'margin_left'   => $request->margin_left,
             'margin_right'  => $request->margin_right,
@@ -96,7 +101,13 @@ class TempalateSuratSkController extends Controller
 
     public function destroy($id)
     {
-        TipeSurat::findOrFail($id)->delete();
-        return redirect()->back()->with('success', 'Template SK berhasil dihapus.');
+        $tipeSurat = TipeSurat::findOrFail($id);
+        
+        if ($tipeSurat->kategori === 'sk') {
+            $tipeSurat->delete();
+            return redirect()->back()->with('success', 'Template SK berhasil dihapus.');
+        }
+        
+        return redirect()->back()->with('error', 'Template tidak valid.');
     }
 }
