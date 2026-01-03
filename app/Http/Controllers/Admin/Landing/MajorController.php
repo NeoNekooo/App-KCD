@@ -3,15 +3,15 @@
 namespace App\Http\Controllers\Admin\Landing;
 
 use App\Http\Controllers\Controller;
-use App\Models\Jurusan;
+use App\Models\Major;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
-class JurusanController extends Controller
+class MajorController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Jurusan::latest();
+        $query = Major::latest();
 
         if ($request->has('q') && $request->q != '') {
             $query->where('nama_jurusan', 'like', '%' . $request->q . '%')
@@ -41,14 +41,14 @@ class JurusanController extends Controller
             $data['gambar'] = $image->hashName();
         }
 
-        Jurusan::create($data);
+        Major::create($data);
 
         return redirect()->back()->with('success', 'Jurusan berhasil ditambahkan!');
     }
 
     public function update(Request $request, $id)
     {
-        $jurusan = Jurusan::findOrFail($id);
+        $jurusan = Major::findOrFail($id);
 
         $request->validate([
             'nama_jurusan'   => 'required|string|max:255',
@@ -77,7 +77,7 @@ class JurusanController extends Controller
 
     public function destroy($id)
     {
-        $jurusan = Jurusan::findOrFail($id);
+        $jurusan = Major::findOrFail($id);
         
         if ($jurusan->gambar && Storage::disk('public')->exists('jurusans/' . $jurusan->gambar)) {
             Storage::disk('public')->delete('jurusans/' . $jurusan->gambar);
