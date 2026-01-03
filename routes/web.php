@@ -299,7 +299,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
     Route::get('/landing/sambutan', [SambutanController::class, 'index'])->name('landing.sambutan.index');
     Route::post('/landing/sambutan', [SambutanController::class, 'update'])->name('landing.sambutan.update');
     Route::resource('/landing/fasilitas', FasilitasController::class, ['as' => 'landing'])->except(['create', 'edit', 'show']);
-    Route::resource('/landing/jurusan', JurusanController::class, ['as' => 'landing'])->except(['create', 'edit', 'show']);
+    Route::resource('/landing/jurusan', LandingJurusanController::class, ['as' => 'landing'])->except(['create', 'edit', 'show']);
     Route::resource('/landing/berita', BeritaController::class, ['as' => 'landing'])->except(['create', 'edit', 'show']);
     Route::resource('/landing/mitra', MitraController::class, ['as' => 'landing'])->except(['create', 'edit', 'show']);
     Route::resource('/landing/ekstrakurikuler', EkskulController::class, ['as' => 'landing'])->except(['create', 'edit', 'show']);
