@@ -98,6 +98,7 @@ use App\Http\Controllers\Admin\Administrasi\SuratKeluarSiswaController;
 use App\Http\Controllers\Admin\Administrasi\SuratKeluarGuruController;
 use App\Http\Controllers\Admin\Administrasi\SuratMasukController;
 use App\Http\Controllers\Admin\Administrasi\NomorSuratSettingController;
+use App\Http\Controllers\Admin\Administrasi\ArsipSuratController; // <--- TAMBAHAN UNTUK ARSIP
 
 
 use App\Http\Controllers\DashboardController;
@@ -556,20 +557,24 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
         Route::get('/wali', [RombelWaliController::class, 'index'])->name('wali.index');
     });
 
-    // --- GRUP ADMINISTRASI ---
+    // ====================================================
+    // GRUP ADMINISTRASI
+    // ====================================================
     Route::prefix('administrasi')->name('administrasi.')->group(function () {
+
+        // 1. Tipe / Template Surat
         Route::resource('tipe-surat', TipeSuratController::class);
 
-        // Surat Keluar Siswa
+        // 2. Surat Keluar Siswa
         Route::controller(SuratKeluarSiswaController::class)->group(function () {
             Route::get('surat-keluar-siswa', 'index')->name('surat-keluar-siswa.index');
-            Route::post('surat-keluar-siswa/store', 'store')->name('surat-keluar-siswa.store'); // Preview
-            Route::post('surat-keluar-siswa/cetak', 'cetak')->name('surat-keluar-siswa.cetak'); // Registrasi & Print
-            Route::post('surat-keluar-siswa/pdf', 'downloadPdf')->name('surat-keluar-siswa.pdf'); // Download PDF
+            Route::post('surat-keluar-siswa/store', 'store')->name('surat-keluar-siswa.store');
+            Route::post('surat-keluar-siswa/cetak', 'cetak')->name('surat-keluar-siswa.cetak');
+            Route::post('surat-keluar-siswa/pdf', 'downloadPdf')->name('surat-keluar-siswa.pdf');
             Route::get('get-siswa-by-kelas/{nama_rombel}', 'getSiswaByKelas')->name('get-siswa-by-kelas');
         });
 
-        // Surat Keluar Guru
+        // 3. Surat Keluar Guru
         Route::controller(SuratKeluarGuruController::class)->group(function () {
             Route::get('surat-keluar-guru', 'index')->name('surat-keluar-guru.index');
             Route::post('surat-keluar-guru/store', 'store')->name('surat-keluar-guru.store');
@@ -577,15 +582,29 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
             Route::post('surat-keluar-guru/pdf', 'downloadPdf')->name('surat-keluar-guru.pdf');
         });
 
+        // 4. Surat Masuk
         Route::resource('surat-masuk', SuratMasukController::class);
 
-        // Pengaturan Nomor
-        Route::controller(NomorSuratSettingController::class)->prefix('pengaturan-nomor')->name('pengaturan-nomor.')->group(function() {
-            Route::get('/', 'index')->name('index');
-            Route::post('/', 'store')->name('store');
-            Route::put('/{id}', 'update')->name('update');
-            Route::delete('/{id}', 'destroy')->name('destroy');
-            Route::post('/reset/{id}', 'resetCounter')->name('reset');
+        // 5. Pengaturan Nomor Surat
+        Route::controller(NomorSuratSettingController::class)
+            ->prefix('pengaturan-nomor')
+            ->name('pengaturan-nomor.')
+            ->group(function() {
+                Route::get('/', 'index')->name('index');
+                Route::post('/', 'store')->name('store');
+                Route::put('/{id}', 'update')->name('update');
+                Route::delete('/{id}', 'destroy')->name('destroy');
+                Route::post('/reset/{id}', 'resetCounter')->name('reset');
+        });
+
+        // 6. Arsip Surat Digital (Log & Cetak Ulang)
+        Route::controller(ArsipSuratController::class)
+            ->prefix('arsip-surat')
+            ->name('arsip-surat.')
+            ->group(function() {
+                Route::get('/', 'index')->name('index');           // admin.administrasi.arsip-surat.index
+                Route::get('/cetak/{id}', 'cetakUlang')->name('cetak'); // admin.administrasi.arsip-surat.cetak
+                Route::delete('/{id}', 'destroy')->name('destroy'); // admin.administrasi.arsip-surat.destroy
         });
     });
 

@@ -13,11 +13,8 @@ class NomorSuratSettingController extends Controller
     public function index()
     {
         $settings = NomorSuratSetting::all();
-        
-        // Limit log 100 biar tidak berat
         $logs = SuratLog::latest()->limit(100)->get();
 
-        // Generate preview di tabel admin
         foreach($settings as $s) {
             $s->preview = $this->previewFormat($s);
         }
@@ -64,12 +61,12 @@ class NomorSuratSettingController extends Controller
         return back()->with('success', 'Format nomor berhasil dihapus!');
     }
 
-    // === 6. MAGIC FUNCTION: GENERATE RESMI (Simpan DB) ===
-    public static function generateNomor($kategori, $logInfo, $isiSurat)
+    // === 6. MAGIC FUNCTION: GENERATE RESMI (Simpan Log Arsip Digital) ===
+    // UPDATE: Menambahkan parameter $templateId, $targetId, $targetType
+    public static function generateNomor($kategori, $logInfo, $isiSurat, $templateId = null, $targetId = null, $targetType = null)
     {
-        // Cek placeholder {{no_surat}}
         if (strpos($isiSurat, '{{no_surat}}') === false) {
-            return ['status' => 'skip', 'hasil' => $isiSurat];
+            return ['status' => 'skip', 'hasil' => $isiSurat, 'nomor_saja' => ''];
         }
 
         $setting = NomorSuratSetting::where('kategori', $kategori)->first();
@@ -80,7 +77,6 @@ class NomorSuratSettingController extends Controller
         // Generate Nomor Baru
         $newCounter = $setting->nomor_terakhir + 1;
         $noUrut = str_pad($newCounter, 3, '0', STR_PAD_LEFT);
-        
         $romawi = ['', 'I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII'];
         
         $finalNumber = str_replace(
@@ -89,33 +85,38 @@ class NomorSuratSettingController extends Controller
             $setting->format_surat
         );
 
-        // Simpan Perubahan Counter & Log
+        // Simpan Perubahan Counter
         $setting->update(['nomor_terakhir' => $newCounter]);
         
+        // Simpan Log Arsip (Dengan Relasi ID)
         SuratLog::create([
             'kategori' => $kategori,
             'nomor_surat_final' => $finalNumber,
             'nomor_urut' => $noUrut,
             'tujuan' => $logInfo,
             'tanggal_dibuat' => now(),
+            // Kolom Baru untuk Arsip Digital
+            'template_id' => $templateId,
+            'target_id' => $targetId,
+            'target_type' => $targetType,
         ]);
 
-        // Replace text
+        // Replace text nomor di surat
         $isiFinal = str_replace('{{no_surat}}', $finalNumber, $isiSurat);
 
-        return ['status' => 'success', 'hasil' => $isiFinal];
+        return [
+            'status' => 'success', 
+            'hasil' => $isiFinal,
+            'nomor_saja' => $finalNumber
+        ];
     }
 
-    // === 7. MAGIC FUNCTION: PREVIEW ONLY (Tanpa Simpan DB) ===
-    // INI YANG DIPANGGIL TOMBOL MATA (PREVIEW)
+    // === 7. MAGIC FUNCTION: PREVIEW ONLY ===
     public static function getPreviewNomor($kategori)
     {
         $setting = NomorSuratSetting::where('kategori', $kategori)->first();
-        
-        // Kalau setting belum ada, kasih placeholder default
         if(!$setting) return '[Format Belum Diatur]';
 
-        // Hitung estimasi nomor selanjutnya
         $next = $setting->nomor_terakhir + 1;
         $no = str_pad($next, 3, '0', STR_PAD_LEFT);
         $romawi = ['', 'I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII'];
@@ -127,7 +128,7 @@ class NomorSuratSettingController extends Controller
         );
     }
 
-    // === 8. HELPER PRIVATE UNTUK TABEL ADMIN ===
+    // === 8. HELPER PRIVATE ===
     private function previewFormat($setting) {
         $next = $setting->nomor_terakhir + 1;
         $no = str_pad($next, 3, '0', STR_PAD_LEFT);

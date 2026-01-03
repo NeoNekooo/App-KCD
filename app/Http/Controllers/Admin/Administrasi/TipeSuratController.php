@@ -17,10 +17,15 @@ class TipeSuratController extends Controller
         $kategori = $request->get('kategori', 'siswa');
 
         $templates = TipeSurat::where('kategori', $kategori)
-                              ->latest()
-                              ->get();
+                             ->latest()
+                             ->get();
 
         $template = null;
+
+        // Jika ada parameter tipe_surat (dari redirect edit), ambil datanya
+        if ($request->has('tipe_surat')) {
+             $template = TipeSurat::find($request->tipe_surat);
+        }
 
         return view('admin.administrasi.tipe_surat.index', compact('templates', 'kategori', 'template'));
     }
@@ -30,38 +35,13 @@ class TipeSuratController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
-            'judul_surat'   => 'required|string|max:255',
-            'kategori'      => 'required|in:siswa,guru,sk',
-            'template_isi'  => 'required',
-            'ukuran_kertas' => 'required',
-            // Validasi Margin (Boleh kosong/null, tapi harus angka)
-            'margin_top'    => 'nullable|integer',
-            'margin_right'  => 'nullable|integer',
-            'margin_bottom' => 'nullable|integer',
-            'margin_left'   => 'nullable|integer',
-        ]);
+        $this->validateRequest($request);
 
         // Ambil Tahun Pelajaran Aktif
         $tapelAktif = Tapel::where('is_active', 1)->first();
         $tapelId = $tapelAktif ? $tapelAktif->id : null;
 
-        TipeSurat::create([
-            'judul_surat'   => $request->judul_surat,
-            'kategori'      => $request->kategori,
-            'template_isi'  => $request->template_isi,
-            'ukuran_kertas' => $request->ukuran_kertas,
-            'tapel_id'      => $tapelId,
-            
-            // Logic Checkbox Use Kop (Jika dicentang = 1, jika tidak = 0)
-            'use_kop'       => $request->has('use_kop') ? 1 : 0,
-
-            // Simpan Margin (Default ke 20/25 jika input kosong)
-            'margin_top'    => $request->margin_top ?? 20,
-            'margin_right'  => $request->margin_right ?? 25,
-            'margin_bottom' => $request->margin_bottom ?? 20,
-            'margin_left'   => $request->margin_left ?? 25,
-        ]);
+        TipeSurat::create($this->prepareData($request, $tapelId));
 
         return redirect()
                 ->route('admin.administrasi.tipe-surat.index', ['kategori' => $request->kategori])
@@ -74,10 +54,11 @@ class TipeSuratController extends Controller
     public function edit($id)
     {
         $template = TipeSurat::findOrFail($id);
-        $kategori = $template->kategori;
-        $templates = TipeSurat::where('kategori', $kategori)->latest()->get();
-
-        return view('admin.administrasi.tipe_surat.index', compact('template', 'templates', 'kategori'));
+        
+        return redirect()->route('admin.administrasi.tipe-surat.index', [
+            'kategori' => $template->kategori,
+            'tipe_surat' => $id
+        ]);
     }
 
     /**
@@ -85,33 +66,11 @@ class TipeSuratController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $request->validate([
-            'judul_surat'   => 'required|string|max:255',
-            'template_isi'  => 'required',
-            'ukuran_kertas' => 'required',
-            // Validasi Margin
-            'margin_top'    => 'nullable|integer',
-            'margin_right'  => 'nullable|integer',
-            'margin_bottom' => 'nullable|integer',
-            'margin_left'   => 'nullable|integer',
-        ]);
+        $this->validateRequest($request);
 
         $tipeSurat = TipeSurat::findOrFail($id);
 
-        $tipeSurat->update([
-            'judul_surat'   => $request->judul_surat,
-            'template_isi'  => $request->template_isi,
-            'ukuran_kertas' => $request->ukuran_kertas,
-            
-            // Update Kop (PENTING: Gunakan has() untuk checkbox)
-            'use_kop'       => $request->has('use_kop') ? 1 : 0,
-
-            // Update Margin
-            'margin_top'    => $request->margin_top ?? 20,
-            'margin_right'  => $request->margin_right ?? 25,
-            'margin_bottom' => $request->margin_bottom ?? 0,
-            'margin_left'   => $request->margin_left ?? 25,
-        ]);
+        $tipeSurat->update($this->prepareData($request, $tipeSurat->tapel_id));
 
         return redirect()
             ->route('admin.administrasi.tipe-surat.index', ['kategori' => $tipeSurat->kategori])
@@ -130,5 +89,50 @@ class TipeSuratController extends Controller
         return redirect()
                 ->route('admin.administrasi.tipe-surat.index', ['kategori' => $kategori])
                 ->with('success', 'Template surat berhasil dihapus.');
+    }
+
+    /**
+     * Validasi Request
+     */
+    private function validateRequest(Request $request)
+    {
+        $request->validate([
+            'judul_surat'   => 'required|string|max:255',
+            'kategori'      => 'required|in:siswa,guru,sk',
+            'template_isi'  => 'required',
+            'ukuran_kertas' => 'required',
+            // 'orientasi' dihapus karena tidak ada di DB
+            'margin_top'    => 'nullable|integer',
+            'margin_right'  => 'nullable|integer',
+            'margin_bottom' => 'nullable|integer',
+            'margin_left'   => 'nullable|integer',
+        ]);
+    }
+
+    /**
+     * Prepare Data untuk Simpan/Update
+     */
+    private function prepareData(Request $request, $tapelId)
+    {
+        return [
+            'judul_surat'   => $request->judul_surat,
+            'kategori'      => $request->kategori,
+            'template_isi'  => $request->template_isi,
+            'ukuran_kertas' => $request->ukuran_kertas,
+            'tapel_id'      => $tapelId,
+            
+            // 'orientasi' dihapus agar tidak error SQL 'Column not found'
+            
+            'use_kop'       => 0, // Default 0 (Fitur dimatikan)
+
+            // Margin
+            'margin_top'    => $request->margin_top ?? 20,
+            'margin_right'  => $request->margin_right ?? 25,
+            
+            // UPDATE: Default Margin Bottom diset 20 jika kosong, agar ada jarak aman
+            'margin_bottom' => $request->margin_bottom ?? 20, 
+            
+            'margin_left'   => $request->margin_left ?? 25,
+        ];
     }
 }
