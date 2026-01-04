@@ -150,6 +150,7 @@
                         </div>
                     </td>
                     <td class="text-center">
+                        {{-- TOMBOL DETAIL MENGARAH KE ROUTE MONITORING --}}
                         <a href="{{ route('admin.sekolah.show', $sekolah->id) }}" class="btn btn-sm btn-icon btn-label-info"><i class="bx bx-show-alt"></i></a>
                     </td>
                 </tr>

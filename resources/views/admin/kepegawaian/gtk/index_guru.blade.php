@@ -4,228 +4,227 @@
 <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Kepegawaian /</span> Data Guru</h4>
 
 <div class="card">
-    {{-- HEADER: JUDUL & TOMBOL AKSI ATAS (HANYA LIHAT DATA) --}}
-    <div class="card-header">
-        <div class="d-flex align-items-center justify-content-between">
-            <h5 class="card-title m-0 me-2">Daftar Guru</h5>
-            <div>
-                {{-- Tombol Lihat Data (Muncul saat checkbox dipilih) --}}
-                <a href="#" id="viewSelectedBtn" class="btn btn-info btn-sm" style="display: none;">
-                    <i class="bx bx-show-alt me-1"></i> Lihat Data
-                </a>
-            </div>
-        </div>
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Daftar Guru</h5>
+        {{-- Tombol ini akan berubah fungsi & teks via JS --}}
+        <a href="#" id="viewSelectedBtn" class="btn btn-info btn-sm" style="display: none;">
+            <i class="bx bx-show"></i> Lihat Detail
+        </a>
     </div>
 
-    {{-- FILTER WILAYAH & PENCARIAN --}}
     <div class="card-body">
         <form action="{{ route('admin.kepegawaian.guru.index') }}" method="GET" id="filterForm">
             <input type="hidden" name="per_page" value="{{ request('per_page', 15) }}">
-
-            <div class="row g-2">
-                {{-- Filter Kabupaten --}}
+            
+            {{-- FILTER AREA --}}
+            @if(isset($listKabupaten) && count($listKabupaten) > 0)
+            <div class="row g-3 mb-4 p-3 bg-lighter rounded">
+                <div class="col-12"><small class="text-muted fw-bold text-uppercase">Filter Data</small></div>
                 <div class="col-md-3">
-                    <select name="kabupaten_kota" class="form-select" onchange="this.form.submit()">
+                    <select name="kabupaten_kota" class="form-select select2" onchange="this.form.submit()">
                         <option value="">- Semua Kab/Kota -</option>
                         @foreach($listKabupaten as $kab)
                             <option value="{{ $kab }}" {{ request('kabupaten_kota') == $kab ? 'selected' : '' }}>
-                                {{ $kab }}
+                                {{ str_replace(['Kab. ', 'Kota '], '', $kab) }}
                             </option>
                         @endforeach
                     </select>
                 </div>
-
-                {{-- Filter Kecamatan --}}
                 <div class="col-md-3">
-                    <select name="kecamatan" class="form-select" onchange="this.form.submit()">
+                    <select name="kecamatan" class="form-select select2" onchange="this.form.submit()" {{ empty($listKecamatan) ? 'disabled' : '' }}>
                         <option value="">- Semua Kecamatan -</option>
                         @foreach($listKecamatan as $kec)
-                            <option value="{{ $kec }}" {{ request('kecamatan') == $kec ? 'selected' : '' }}>
-                                {{ $kec }}
-                            </option>
+                            <option value="{{ $kec }}" {{ request('kecamatan') == $kec ? 'selected' : '' }}>{{ str_replace('Kec. ', '', $kec) }}</option>
                         @endforeach
                     </select>
                 </div>
+                <div class="col-md-4">
+                    <select name="sekolah_id" class="form-select select2" onchange="this.form.submit()" {{ empty($listSekolah) ? 'disabled' : '' }}>
+                        <option value="">- Semua Sekolah -</option>
+                        @foreach($listSekolah as $idSekolah => $namaSekolah)
+                            <option value="{{ $idSekolah }}" {{ request('sekolah_id') == $idSekolah ? 'selected' : '' }}>{{ $namaSekolah }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <a href="{{ route('admin.kepegawaian.guru.index') }}" class="btn btn-outline-danger w-100"><i class="bx bx-refresh"></i> Reset</a>
+                </div>
+            </div>
+            @endif
 
-                {{-- Pencarian --}}
-                <div class="col-md-6">
+            <div class="row g-2">
+                <div class="col-12">
                     <div class="input-group input-group-merge">
-                        <span class="input-group-text"><i class="bx bx-search"></i></span>
-                        <input type="text" name="search" class="form-control" placeholder="Cari Nama, NIP, atau NIK..." value="{{ request('search') }}">
-                        <button type="submit" class="btn btn-primary">Cari</button>
+                        <span class="input-group-text bg-white"><i class="bx bx-search"></i></span>
+                        <input type="text" id="searchInput" name="search" class="form-control" placeholder="Cari Nama, NIP, atau NIK..." value="{{ request('search') }}" autocomplete="off">
                     </div>
                 </div>
             </div>
         </form>
     </div>
 
-    {{-- TABEL DATA --}}
-    <div class="table-responsive text-nowrap">
-        <table class="table table-hover">
-            <thead>
-                <tr>
-                    <th width="1%"><input class="form-check-input" type="checkbox" id="selectAllCheckbox"></th>
-                    <th>Status Induk</th>
-                    <th>Identitas Guru</th>
-                    <th>NIK</th>
-                    <th>L/P</th>
-                    <th>Domisili</th>
-                    <th>Status Pegawai</th>
-                    <th>Jenis GTK</th>
-                    <th>Jabatan</th>
-                    <th>NUPTK</th>
-                </tr>
-            </thead>
-            <tbody class="table-border-bottom-0">
-                @forelse ($gurus as $gtk)
-                <tr>
-                    {{-- Checkbox --}}
-                    <td><input class="form-check-input row-checkbox" type="checkbox" value="{{ $gtk->id }}"></td>
-
-                    {{-- Status Induk --}}
-                    <td>
-                        <span class="badge bg-label-{{ $gtk->ptk_induk == 1 ? 'success' : 'secondary' }}">
-                            {{ $gtk->ptk_induk == 1 ? 'Induk' : 'Non-Induk' }}
-                        </span>
-                    </td>
-
-                    {{-- Nama & Foto --}}
-                    <td style="min-width: 250px;">
-                        <div class="d-flex justify-content-start align-items-center">
-                            <div class="avatar-wrapper me-3">
-                                <div class="avatar avatar-sm">
-                                    @if(!empty($gtk->foto) && \Illuminate\Support\Facades\Storage::disk('public')->exists($gtk->foto))
-                                        <img src="{{ asset('storage/' . $gtk->foto) }}" alt="Avatar" class="rounded-circle" style="width: 100%; height: 100%; object-fit: cover;object-position: 50% 20%; ">
-                                    @else
-                                        <img src="https://ui-avatars.com/api/?name={{ urlencode($gtk->nama) }}&background=random&color=ffffff&size=100" alt="Avatar" class="rounded-circle">
-                                    @endif
+    <div id="tableContainer">
+        <div class="table-responsive text-nowrap">
+            <table class="table table-hover align-middle">
+                <thead class="bg-light">
+                    <tr>
+                        <th width="1%"><input class="form-check-input" type="checkbox" id="selectAllCheckbox"></th>
+                        <th>Nama & Identitas</th>
+                        @if(isset($listKabupaten) && count($listKabupaten) > 0)
+                            <th>Asal Sekolah</th>
+                        @endif
+                        <th>L/P</th>
+                        <th>Status</th>
+                        <th>Jabatan</th>
+                    </tr>
+                </thead>
+                <tbody class="table-border-bottom-0">
+                    @forelse ($gurus as $gtk)
+                    <tr>
+                        <td><input class="form-check-input row-checkbox" type="checkbox" value="{{ $gtk->id }}"></td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="avatar-wrapper me-3">
+                                    <div class="avatar avatar-sm">
+                                        @php
+                                            $cleanPath = str_replace('public/', '', $gtk->foto ?? '');
+                                            $fileExists = !empty($cleanPath) && Storage::disk('public')->exists($cleanPath);
+                                        @endphp
+                                        @if($fileExists)
+                                            <img src="{{ asset('storage/' . $cleanPath) }}" alt="Avatar" class="rounded-circle" style="width: 100%; height: 100%; object-fit: cover;">
+                                        @else
+                                            <span class="avatar-initial rounded-circle bg-label-primary fw-bold">{{ substr($gtk->nama, 0, 2) }}</span>
+                                        @endif
+                                    </div>
+                                </div>
+                                <div class="d-flex flex-column">
+                                    <span class="fw-semibold text-body text-truncate">{{ $gtk->nama }}</span>
+                                    <small class="text-muted">
+                                        @if($gtk->nip && trim($gtk->nip) != '-') NIP: {{ $gtk->nip }}
+                                        @elseif($gtk->nuptk && trim($gtk->nuptk) != '-') NUPTK: {{ $gtk->nuptk }}
+                                        @else - @endif
+                                    </small>
                                 </div>
                             </div>
-                            <div class="d-flex flex-column">
-                                <span class="fw-semibold text-truncate text-body">{{ $gtk->nama }}</span>
-                                <small class="text-muted">
-                                    @if($gtk->nip && trim($gtk->nip) != '-') NIP: {{ $gtk->nip }}
-                                    @elseif($gtk->nuptk && trim($gtk->nuptk) != '-') NUPTK: {{ $gtk->nuptk }}
-                                    @else - @endif
-                                </small>
+                        </td>
+                        @if(isset($listKabupaten) && count($listKabupaten) > 0)
+                        <td><span class="badge bg-label-dark">{{ $gtk->pengguna && $gtk->pengguna->sekolah ? \Illuminate\Support\Str::limit($gtk->pengguna->sekolah->nama, 30) : '-' }}</span></td>
+                        @endif
+                        <td>{{ ($gtk->jenis_kelamin == 'L' || $gtk->jenis_kelamin == 'Laki-laki') ? 'L' : 'P' }}</td>
+                        <td><span class="badge bg-label-info">{{ $gtk->status_kepegawaian_id_str ?? '-' }}</span></td>
+                        <td>{{ $gtk->jabatan_ptk_id_str ?? '-' }}</td>
+                    </tr>
+                    @empty
+                    <tr>
+                        <td colspan="6" class="text-center py-5">
+                            <div class="d-flex flex-column align-items-center">
+                                <i class="bx bx-user-x bx-lg text-muted mb-2"></i>
+                                <h6 class="text-muted">Tidak ada data guru ditemukan.</h6>
                             </div>
-                        </div>
-                    </td>
-
-                    <td>{{ $gtk->nik ?? '-' }}</td>
-                    <td>{{ ($gtk->jenis_kelamin == 'L' || $gtk->jenis_kelamin == 'Laki-laki') ? 'L' : 'P' }}</td>
-                    
-                    {{-- Domisili --}}
-                    <td>
-                        <div class="d-flex flex-column">
-                            <span class="small fw-semibold">{{ $gtk->kecamatan ?? '-' }}</span>
-                            <small class="text-muted">{{ $gtk->kabupaten_kota ?? '-' }}</small>
-                        </div>
-                    </td>
-
-                    <td><span class="badge bg-label-primary">{{ $gtk->status_kepegawaian_id_str ?? '-' }}</span></td>
-                    <td><span class="badge bg-label-info">{{ $gtk->jenis_ptk_id_str ?? '-' }}</span></td>
-                    <td>{{ $gtk->jabatan_ptk_id_str ?? '-' }}</td>
-                    <td>{{ $gtk->nuptk ?? '-' }}</td>
-                </tr>
-                @empty
-                <tr>
-                    <td colspan="10" class="text-center py-5">
-                        <div class="d-flex flex-column align-items-center justify-content-center">
-                            <i class="bx bx-user-x bx-lg text-muted mb-2"></i>
-                            <h6 class="text-muted">Tidak ada data guru ditemukan.</h6>
-                        </div>
-                    </td>
-                </tr>
-                @endforelse
-            </tbody>
-        </table>
-    </div>
-
-    {{-- FOOTER PAGINATION --}}
-    <div class="card-footer border-top">
-        <div class="row align-items-center">
-            <div class="col-md-6 d-flex align-items-center mb-2 mb-md-0">
-                <span class="text-muted me-2 small">Menampilkan</span>
-                <form action="{{ route('admin.kepegawaian.guru.index') }}" method="GET" class="d-inline-block">
-                    <input type="hidden" name="search" value="{{ request('search') }}">
-                    <input type="hidden" name="kabupaten_kota" value="{{ request('kabupaten_kota') }}">
-                    <input type="hidden" name="kecamatan" value="{{ request('kecamatan') }}">
-                    
-                    <select name="per_page" class="form-select form-select-sm d-inline-block w-auto" onchange="this.form.submit()">
-                        <option value="15" {{ request('per_page') == '15' ? 'selected' : '' }}>15</option>
-                        <option value="35" {{ request('per_page') == '35' ? 'selected' : '' }}>35</option>
-                        <option value="50" {{ request('per_page') == '50' ? 'selected' : '' }}>50</option>
-                        <option value="all" {{ request('per_page') == 'all' ? 'selected' : '' }}>Semua</option>
-                    </select>
-                </form>
-                <span class="text-muted ms-2 small">dari <strong>{{ $gurus->total() }}</strong> data</span>
-            </div>
-            <div class="col-md-6 d-flex justify-content-md-end justify-content-center">
-                @if(request('per_page') != 'all')
-                    {{ $gurus->appends(request()->query())->links() }}
-                @endif
-            </div>
+                        </td>
+                    </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+        <div class="card-footer border-top">
+            {{ $gurus->appends(request()->query())->links() }}
         </div>
     </div>
 </div>
-
 @endsection
 
 @push('scripts')
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        const selectAllCheckbox = document.getElementById('selectAllCheckbox');
-        const rowCheckboxes = document.querySelectorAll('.row-checkbox');
-        const viewSelectedBtn = document.getElementById('viewSelectedBtn');
         
-        // --- Logic Checkbox & Tombol Lihat Data ---
-        function handleCheckboxChange() {
-            const checkedCheckboxes = document.querySelectorAll('.row-checkbox:checked');
+        const searchInput = document.getElementById('searchInput');
+        const tableContainer = document.getElementById('tableContainer');
+        const filterForm = document.getElementById('filterForm');
+        let timeout = null;
 
-            if (checkedCheckboxes.length > 0) {
-                viewSelectedBtn.style.display = 'inline-block';
-                
-                if(checkedCheckboxes.length === 1) {
-                    viewSelectedBtn.innerHTML = '<i class="bx bx-show-alt me-1"></i> Lihat Data';
+        // --- 1. LIVE SEARCH ---
+        if (searchInput) {
+            searchInput.addEventListener('input', function() {
+                tableContainer.style.opacity = '0.5';
+                clearTimeout(timeout);
+                timeout = setTimeout(function() {
+                    const formData = new FormData(filterForm);
+                    const params = new URLSearchParams(formData).toString();
+                    const url = `{{ route('admin.kepegawaian.guru.index') }}?${params}`;
+                    window.history.replaceState({}, '', url);
+
+                    fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                    .then(r => r.text())
+                    .then(html => {
+                        const parser = new DOMParser();
+                        const doc = parser.parseFromString(html, 'text/html');
+                        tableContainer.innerHTML = doc.getElementById('tableContainer').innerHTML;
+                        tableContainer.style.opacity = '1';
+                        initCheckboxListeners();
+                    });
+                }, 300); 
+            });
+        }
+
+        // --- 2. CHECKBOX & TOMBOL DETAIL (LOGIKA BARU) ---
+        function initCheckboxListeners() {
+            const selectAll = document.getElementById('selectAllCheckbox');
+            const btnView = document.getElementById('viewSelectedBtn');
+
+            function toggleBtn() {
+                const checkedCount = document.querySelectorAll('.row-checkbox:checked').length;
+                if (checkedCount > 0) {
+                    btnView.style.display = 'inline-block';
+                    // Jika pilih 1, teksnya "Lihat Profil". Jika banyak, "Lihat Data Terpilih"
+                    btnView.innerHTML = checkedCount === 1 
+                        ? '<i class="bx bx-user me-1"></i> Lihat Profil Guru' 
+                        : `<i class="bx bx-list-check me-1"></i> Lihat Data Terpilih (${checkedCount})`;
                 } else {
-                    viewSelectedBtn.innerHTML = '<i class="bx bx-show-alt me-1"></i> Lihat Data (' + checkedCheckboxes.length + ')';
+                    btnView.style.display = 'none';
                 }
-            } else {
-                viewSelectedBtn.style.display = 'none';
+            }
+
+            if(selectAll) {
+                const newSelectAll = selectAll.cloneNode(true);
+                selectAll.parentNode.replaceChild(newSelectAll, selectAll);
+                newSelectAll.addEventListener('change', function() {
+                    document.querySelectorAll('.row-checkbox').forEach(cb => cb.checked = this.checked);
+                    toggleBtn();
+                });
+            }
+
+            document.querySelectorAll('.row-checkbox').forEach(cb => {
+                cb.addEventListener('change', toggleBtn);
+            });
+
+            // --- KLIK TOMBOL DETAIL ---
+            if(btnView && !btnView.hasAttribute('data-listening')) {
+                btnView.setAttribute('data-listening', 'true');
+                btnView.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    const checkedBoxes = document.querySelectorAll('.row-checkbox:checked');
+                    const ids = Array.from(checkedBoxes).map(cb => cb.value);
+
+                    if (ids.length === 0) return;
+
+                    if (ids.length === 1) {
+                        // JIKA 1 DATA: Redirect ke Halaman Profil (Show)
+                        // Menggunakan replace untuk memasukkan ID ke route
+                        var url = "{{ route('admin.kepegawaian.gtk.show', ':id') }}";
+                        url = url.replace(':id', ids[0]);
+                        window.location.href = url;
+                    } else {
+                        // JIKA BANYAK DATA: Redirect ke Halaman Multiple
+                        var url = `{{ route('admin.kepegawaian.gtk.show-multiple') }}?ids=${ids.join(',')}`;
+                        window.location.href = url;
+                    }
+                });
             }
         }
 
-        if (selectAllCheckbox) {
-            selectAllCheckbox.addEventListener('change', function() {
-                rowCheckboxes.forEach(checkbox => {
-                    checkbox.checked = this.checked;
-                });
-                handleCheckboxChange();
-            });
-        }
-
-        rowCheckboxes.forEach(checkbox => {
-            checkbox.addEventListener('change', handleCheckboxChange);
-        });
-
-        // --- Logic Tombol Lihat Data (Multiple) ---
-        if (viewSelectedBtn) {
-            viewSelectedBtn.addEventListener('click', function(e) {
-                e.preventDefault();
-                const checkedCheckboxes = document.querySelectorAll('.row-checkbox:checked');
-
-                if (checkedCheckboxes.length > 0) {
-                    const selectedIds = Array.from(checkedCheckboxes).map(cb => cb.value).join(',');
-                    // Arahkan ke route show multiple
-                    let url = `{{ route('admin.kepegawaian.gtk.show-multiple') }}?ids=${selectedIds}`;
-                    window.location.href = url;
-                }
-            });
-        }
-
-        // Init Checkbox State
-        handleCheckboxChange();
+        initCheckboxListeners();
     });
 </script>
 @endpush

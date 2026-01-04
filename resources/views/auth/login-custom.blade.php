@@ -5,7 +5,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
-    <title>Login - Sistem Informasi Akademik</title>
+    <title>Login - Kantor Cabang Dinas</title>
 
 
     <link rel="stylesheet" href="{{ asset('vendor/fonts/boxicons.css') }}">
@@ -62,7 +62,7 @@
                 <div class="card">
                     <div class="card-body">
                         <h4 class="mb-2 text-center">Masuk</h4>
-                        <p class="mb-4 text-center">Selamat datang di SI-Akademik</p>
+                        <p class="mb-4 text-center">Selamat datang di Kantor Cabang Dinas</p>
 
                         @if ($errors->any())
                             <div class="alert alert-danger py-2">

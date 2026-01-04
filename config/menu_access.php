@@ -9,11 +9,19 @@ return [
     */
     'role_map' => [
         'Admin' => [
-            '*',
+            '*', 
         ],
-        'Operator KCD' => [ // Ganti nama role jika perlu
+        'Operator KCD' => [
             'dashboard',
+            'profil-instansi', // <--- AKSES BARU
             'satuan-pendidikan',
+            'kepegawaian',
+            'kesiswaan',
+            'administrasi-surat',
+            'pengaturan-sistem',
+        ],
+        'Sekolah' => [
+            'dashboard',
             'kepegawaian',
             'kesiswaan',
             'administrasi-surat',
@@ -25,7 +33,7 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | MENU STRUCTURE (KHUSUS MONITORING KCD)
+    | MENU STRUCTURE
     |--------------------------------------------------------------------------
     */
     'sidebar_menu' => [
@@ -35,19 +43,28 @@ return [
             'slug' => 'dashboard',
             'icon' => 'bx bx-home-circle',
             'route' => 'admin.dashboard',
-            'is_active' => 'request()->is("admin/dashboard")',
+            'is_active' => 'request()->routeIs("admin.dashboard")',
         ],
 
-        // 2. SATUAN PENDIDIKAN (BARU)
+        // 2. PROFIL INSTANSI (MENU BARU)
+        [
+            'title' => 'Profil Instansi',
+            'slug' => 'profil-instansi', 
+            'icon' => 'bx bxs-landmark', // <--- GANTI ICON (Gedung Pemerintahan/KCD)
+            'route' => 'admin.instansi.index',
+            'is_active' => 'request()->routeIs("admin.instansi.*")',
+        ],
+
+        // 3. SATUAN PENDIDIKAN
         [
             'title' => 'Satuan Pendidikan',
             'slug' => 'satuan-pendidikan',
-            'icon' => 'bx bx-buildings',
+            'icon' => 'bx bxs-school', // <--- GANTI ICON (Ikon Sekolah Spesifik)
             'route' => 'admin.sekolah.index',
-            'is_active' => 'request()->is("admin/sekolah*")',
+            'is_active' => 'request()->routeIs("admin.sekolah.*")',
         ],
 
-        // 3. KEPEGAWAIAN (GTK)
+        // 4. KEPEGAWAIAN (GTK)
         [
             'title' => 'Kepegawaian',
             'slug' => 'kepegawaian',
@@ -55,23 +72,31 @@ return [
             'is_toggle' => true,
             'is_open' => 'request()->is("admin/kepegawaian*")',
             'submenu' => [
-                ['title' => 'Data Guru', 'route' => 'admin.kepegawaian.guru.index', 'is_active' => 'request()->routeIs("admin.kepegawaian.guru.*")'],
+                [
+                    'title' => 'Data Guru', 
+                    'route' => 'admin.kepegawaian.guru.index', 
+                    'is_active' => 'request()->routeIs("admin.kepegawaian.guru.index")'
+                ]
             ]
         ],
 
-        // 4. KESISWAAN
+        // 5. KESISWAAN
         [
             'title' => 'Kesiswaan',
             'slug' => 'kesiswaan',
-            'icon' => 'bx bx-user-check',
+            'icon' => 'bx bx-user',
             'is_toggle' => true,
             'is_open' => 'request()->is("admin/kesiswaan*")',
             'submenu' => [
-                ['title' => 'Data Siswa', 'route' => 'admin.kesiswaan.siswa.index', 'is_active' => 'request()->is("admin/kesiswaan/siswa*")'],
+                [
+                    'title' => 'Data Siswa', 
+                    'route' => 'admin.kesiswaan.siswa.index', 
+                    'is_active' => 'request()->routeIs("admin.kesiswaan.siswa.*")'
+                ],
             ]
         ],
 
-        // 5. ADMINISTRASI SURAT (Jika KCD perlu memantau/mengelola surat)
+        // 6. ADMINISTRASI SURAT
         [
             'title' => 'Administrasi Surat',
             'slug' => 'administrasi-surat',
@@ -79,15 +104,37 @@ return [
             'is_toggle' => true,
             'is_open' => 'request()->is("admin/administrasi*")',
             'submenu' => [
-                ['title' => 'Surat Masuk', 'route' => 'admin.administrasi.surat-masuk.index', 'is_active' => 'request()->routeIs("admin.administrasi.surat-masuk.*")'],
-                ['title' => 'Surat Keluar', 'route' => 'admin.administrasi.surat-keluar-guru.index', 'is_active' => 'request()->routeIs("admin.administrasi.surat-keluar-guru.*")'],
-                ['title' => 'Arsip Surat', 'route' => 'admin.administrasi.arsip-surat.index', 'is_active' => 'request()->routeIs("admin.administrasi.arsip-surat.*")'],
+                [
+                    'title' => 'Surat Masuk', 
+                    'route' => 'admin.administrasi.surat-masuk.index', 
+                    'is_active' => 'request()->routeIs("admin.administrasi.surat-masuk.*")'
+                ],
+                [
+                    'title' => 'Surat Keluar (Siswa)', 
+                    'route' => 'admin.administrasi.surat-keluar-siswa.index', 
+                    'is_active' => 'request()->routeIs("admin.administrasi.surat-keluar-siswa.*")'
+                ],
+                [
+                    'title' => 'Surat Keluar (Guru)', 
+                    'route' => 'admin.administrasi.surat-keluar-guru.index', 
+                    'is_active' => 'request()->routeIs("admin.administrasi.surat-keluar-guru.*")'
+                ],
+                [
+                    'title' => 'Arsip Surat', 
+                    'route' => 'admin.administrasi.arsip-surat.index', 
+                    'is_active' => 'request()->routeIs("admin.administrasi.arsip-surat.*")'
+                ],
+                [
+                    'title' => 'Template Surat', 
+                    'route' => 'admin.administrasi.tipe-surat.index', 
+                    'is_active' => 'request()->routeIs("admin.administrasi.tipe-surat.*")'
+                ],
             ]
         ],
 
-        // 6. PENGATURAN
+        // 7. PENGATURAN LAINNYA
         [
-            'title' => 'Pengaturan Sistem',
+            'title' => 'Lainnya',
             'slug' => 'pengaturan-sistem-header',
             'is_header' => true,
         ],
@@ -96,20 +143,14 @@ return [
             'slug' => 'pengaturan-sistem',
             'icon' => 'bx bx-cog',
             'is_toggle' => true,
-            'is_open' => 'request()->is("admin/pengaturan*")',
+            'is_open' => 'request()->is("admin/pengaturan-nomor*")',
             'submenu' => [
-                ['title' => 'Profil Instansi', 'route' => 'admin.pengaturan.sekolah.index', 'is_active' => 'request()->routeIs("admin.pengaturan.sekolah.*")'],
+                [
+                    'title' => 'Nomor Surat', 
+                    'route' => 'admin.administrasi.pengaturan-nomor.index', 
+                    'is_active' => 'request()->routeIs("admin.administrasi.pengaturan-nomor.*")'
+                ],
             ]
-        ],
-
-        // 7. KELUAR
-        [
-            'title' => 'Keluar',
-            'slug' => 'logout',
-            'icon' => 'bx bx-log-out',
-            'route' => 'logout',
-            'is_active' => 'false',
-            'is_danger' => true,
         ],
     ],
 ];

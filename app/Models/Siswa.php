@@ -6,12 +6,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne; // [PENTING: Import ini ditambahkan]
 use Illuminate\Support\Facades\Storage;
-
 
 use App\Models\AlumniTestimoni;
 use App\Models\TracerStudy;
-
+use App\Models\Pengguna; // [Opsional: Import model Pengguna]
 
 class Siswa extends Model
 {
@@ -21,24 +21,18 @@ class Siswa extends Model
     protected $primaryKey = 'id';
 
     // =================================================================
-    // [PERBAIKAN 1] KONFIGURASI UUID
+    // KONFIGURASI UUID
     // =================================================================
-    // Wajib ada karena ID di database Anda tipe CHAR(36)/UUID.
-    // Tanpa ini, Laravel akan menganggap ID adalah angka (Integer) dan Update akan Gagal.
     public $incrementing = false;
     protected $keyType = 'string';
 
-    /**
-     * Daftar kolom yang boleh diisi (Mass Assignment).
-     * Sudah disesuaikan dengan siswas (2).sql
-     */
     protected $fillable = [
         // ID & Kunci Utama
         'id', 'peserta_didik_id', 'registrasi_id', 'qr_token',
 
         // Identitas Pribadi
         'nama',
-        'nipd', // Database pakai nipd, bukan nis
+        'nipd',
         'nisn',
         'nik',
         'jenis_kelamin',
@@ -46,7 +40,6 @@ class Siswa extends Model
         'tanggal_lahir',
         'agama_id',
         'agama_id_str',
-        // 'kewarganegaraan', // (Hapus komentar jika kolom ini nanti ditambahkan ke DB, saat ini di SQL tidak ada)
         'email',
         'nomor_telepon_rumah',
         'nomor_telepon_seluler',
@@ -54,16 +47,14 @@ class Siswa extends Model
         'tinggi_badan',
         'berat_badan',
         'kebutuhan_khusus',
+        'anak_keberapa',
 
-        // [PERBAIKAN 2] Penulisan kolom ini salah di model lama
-        'anak_keberapa', // SEBELUMNYA: anak_ke_berapa (Salah)
-
-        // Alamat (Lengkap sesuai SQL)
+        // Alamat
         'alamat_jalan',
         'rt',
         'rw',
-        'nama_dusun', // Kadang dapodik pakai ini
-        'dusun',      // Kadang pakai ini, kita masukkan dua-duanya biar aman
+        'nama_dusun',
+        'dusun',
         'desa_kelurahan',
         'kecamatan',
         'kabupaten_kota',
@@ -105,7 +96,7 @@ class Siswa extends Model
     ];
 
     protected $casts = [
-        'riwayat_penyakit' => 'array', // Pastikan kolom ini ada di DB atau hapus jika tidak
+        'riwayat_penyakit' => 'array',
         'data_ayah' => 'array',
         'data_ibu' => 'array',
         'data_wali_laki' => 'array',
@@ -116,11 +107,17 @@ class Siswa extends Model
         'tanggal_masuk_sekolah' => 'date',
     ];
 
-    // --- RELASI ---
-
-        // =================================================================
-    // RELASI ALUMNI
     // =================================================================
+    // RELASI DATABASE
+    // =================================================================
+
+    /**
+     * Relasi ke Pengguna (PENTING: Untuk Filter Sekolah di KCD)
+     */
+    public function pengguna(): HasOne
+    {
+        return $this->hasOne(Pengguna::class, 'peserta_didik_id', 'peserta_didik_id');
+    }
 
     public function tracer(): HasOne
     {
@@ -130,11 +127,6 @@ class Siswa extends Model
     public function testimoni(): HasOne
     {
         return $this->hasOne(AlumniTestimoni::class, 'siswa_id', 'id');
-    }
-
-    public function isAlumni()
-    {
-        return strtolower($this->status) === 'lulus';
     }
 
     public function rombel(): BelongsTo
@@ -147,24 +139,10 @@ class Siswa extends Model
         return $this->hasMany(PelanggaranNilai::class, 'nipd', 'nipd');
     }
 
-    public function getFotoUrlAttribute()
-    {
-        if ($this->foto && Storage::disk('public')->exists($this->foto)) {
-            return Storage::disk('public')->url($this->foto);
-        }
-        // Pastikan path image default benar
-        return asset('assets/img/avatars/default.png');
-    }
-
-    public function scopeAktif($query)
-    {
-        return $query->where('status', 'Aktif');
-    }
-
     public function mutasiKeluar()
-{
-    return $this->morphOne(MutasiKeluar::class, 'keluarable');
-}
+    {
+        return $this->morphOne(MutasiKeluar::class, 'keluarable');
+    }
 
     // --- Relasi Keuangan ---
     public function tagihans() { return $this->hasMany(Tagihan::class); }
@@ -181,5 +159,26 @@ class Siswa extends Model
                     ->withPivot(['peserta_didik_id','anggota_rombel_id','jenis_pendaftaran_id'])
                     ->withTimestamps();
     }
-}
 
+    // =================================================================
+    // ACCESSOR & SCOPE
+    // =================================================================
+
+    public function isAlumni()
+    {
+        return strtolower($this->status) === 'lulus';
+    }
+
+    public function getFotoUrlAttribute()
+    {
+        if ($this->foto && Storage::disk('public')->exists($this->foto)) {
+            return Storage::disk('public')->url($this->foto);
+        }
+        return asset('assets/img/avatars/default.png');
+    }
+
+    public function scopeAktif($query)
+    {
+        return $query->where('status', 'Aktif');
+    }
+}

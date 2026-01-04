@@ -4,67 +4,61 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Carbon\Carbon;
 use App\Models\Siswa;
 use App\Models\Gtk;
-use App\Models\Rombel; // Tetap dipakai untuk hitung total rombel se-wilayah
 use App\Models\Sekolah;
+use App\Models\Instansi; // Pastikan model ini sudah dibuat
 use App\Http\Controllers\Controller;
 
 class DashboardController extends Controller
 {
     public function index()
     {
-        // 1. IDENTITAS WILAYAH (KCD)
-        // Ambil data sekolah induk (atau KCD jika ada tabel khususnya)
-        $instansi = Sekolah::firstOrCreate(['id' => 1]); 
+        // 1. DATA INSTANSI (Mengambil profil KCD dari tabel instansis)
+        $instansi = Instansi::first(); 
         
-        // 2. STATISTIK UTAMA (KCD VIEW)
-        
-        // A. Total Satuan Pendidikan (Sekolah Binaan)
-        // Jika aplikasi ini menampung banyak sekolah, hitung jumlah row di tabel Sekolah.
-        // Jika aplikasi ini single-tenant tapi ingin terlihat KCD, kita hitung Rombel sebagai 'Kelompok Belajar'.
-        $totalSekolah = Sekolah::count(); 
+        // Proteksi jika data instansi masih kosong di database
+        if (!$instansi) {
+            $instansi = new Instansi();
+            $instansi->nama_instansi = 'KCD Wilayah';
+        }
 
-        // B. Total Peserta Didik (Se-Wilayah)
+        // 2. STATISTIK UTAMA (4 KOTAK)
+        $totalSekolah = Sekolah::count();
         $totalSiswa = Siswa::where('status', 'Aktif')->count();
-        
-        // C. Total GTK (Se-Wilayah)
         $totalGuru = Gtk::count();
 
-        // D. Cakupan Wilayah (Kecamatan)
-        // Menghitung ada berapa kecamatan unik dari data domisili siswa
-        $totalKecamatan = Siswa::where('status', 'Aktif')
-            ->whereNotNull('kecamatan')
-            ->distinct('kecamatan')
-            ->count('kecamatan');
+        // Hitung Wilayah berdasarkan data sekolah yang ada
+        $totalKabupaten = Sekolah::distinct('kabupaten_kota')
+                                 ->whereNotNull('kabupaten_kota')
+                                 ->count('kabupaten_kota');
 
-        // 3. STATISTIK RINCIAN
+        $totalKecamatan = Sekolah::distinct('kecamatan')
+                                 ->whereNotNull('kecamatan')
+                                 ->count('kecamatan');
 
-        // Gender Parity (L/P)
+        // 3. DATA PENDUKUNG (Gender & Status Guru)
         $siswaLaki = Siswa::where('status', 'Aktif')->whereIn('jenis_kelamin', ['L', 'Laki-laki'])->count();
         $siswaPerempuan = Siswa::where('status', 'Aktif')->whereIn('jenis_kelamin', ['P', 'Perempuan'])->count();
 
-        // Status Kepegawaian (ASN vs Non-ASN)
         $guruASN = Gtk::where('status_kepegawaian_id_str', 'like', '%PNS%')
-                    ->orWhere('status_kepegawaian_id_str', 'like', '%PPPK%')
-                    ->count();
+                      ->orWhere('status_kepegawaian_id_str', 'like', '%PPPK%')
+                      ->orWhere('status_kepegawaian_id_str', 'like', '%CPNS%')
+                      ->count();
         $guruNonASN = $totalGuru - $guruASN;
 
-        // 4. CHART: SEBARAN SISWA PER KECAMATAN (Top 5)
-        // Ini lebih relevan buat KCD daripada "Siswa per Tahun"
-        $sebaranKecamatan = Siswa::select('kecamatan', DB::raw('count(*) as total'))
-            ->where('status', 'Aktif')
+        // 4. CHART DATA (Sebaran Sekolah per Kecamatan)
+        $dataChart = Sekolah::select('kecamatan', DB::raw('count(*) as total'))
             ->whereNotNull('kecamatan')
             ->groupBy('kecamatan')
             ->orderByDesc('total')
-            ->limit(5) // Ambil 5 kecamatan terbanyak
+            ->limit(10)
             ->get();
 
-        $chartCategories = $sebaranKecamatan->pluck('kecamatan')->toArray();
-        $chartData = $sebaranKecamatan->pluck('total')->toArray();
+        $chartCategories = $dataChart->pluck('kecamatan')->toArray(); 
+        $chartData = $dataChart->pluck('total')->toArray();           
 
-        // Tahun Ajaran Dinamis
+        // 5. Tahun Ajaran Dinamis
         $currMonth = date('n');
         $currYear = date('Y');
         $tahunAjaran = ($currMonth > 6) ? "$currYear/" . ($currYear + 1) : ($currYear - 1) . "/$currYear";
@@ -74,7 +68,7 @@ class DashboardController extends Controller
             'totalSekolah',
             'totalSiswa', 'siswaLaki', 'siswaPerempuan',
             'totalGuru', 'guruASN', 'guruNonASN',
-            'totalKecamatan',
+            'totalKabupaten', 'totalKecamatan', 
             'chartCategories', 'chartData',
             'tahunAjaran'
         ));
