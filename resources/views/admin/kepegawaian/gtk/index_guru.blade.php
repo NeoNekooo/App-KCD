@@ -13,7 +13,7 @@
     </div>
 
     <div class="card-body">
-        <form action="{{ route('admin.kepegawaian.guru.index') }}" method="GET" id="filterForm">
+        <form action="{{ route('admin.gtk.guru.index') }}" method="GET" id="filterForm">
             <input type="hidden" name="per_page" value="{{ request('per_page', 15) }}">
             
             {{-- FILTER AREA --}}
@@ -47,7 +47,7 @@
                     </select>
                 </div>
                 <div class="col-md-2">
-                    <a href="{{ route('admin.kepegawaian.guru.index') }}" class="btn btn-outline-danger w-100"><i class="bx bx-refresh"></i> Reset</a>
+                    <a href="{{ route('admin.gtk.guru.index') }}" class="btn btn-outline-danger w-100"><i class="bx bx-refresh"></i> Reset</a>
                 </div>
             </div>
             @endif
@@ -68,7 +68,8 @@
             <table class="table table-hover align-middle">
                 <thead class="bg-light">
                     <tr>
-                        <th width="1%"><input class="form-check-input" type="checkbox" id="selectAllCheckbox"></th>
+                        {{-- HAPUS SELECT ALL, GANTI JADI KOLOM BIASA --}}
+                        <th width="1%" class="text-center">#</th> 
                         <th>Nama & Identitas</th>
                         @if(isset($listKabupaten) && count($listKabupaten) > 0)
                             <th>Asal Sekolah</th>
@@ -151,7 +152,9 @@
                 timeout = setTimeout(function() {
                     const formData = new FormData(filterForm);
                     const params = new URLSearchParams(formData).toString();
-                    const url = `{{ route('admin.kepegawaian.guru.index') }}?${params}`;
+                    
+                    const url = `{{ route('admin.gtk.guru.index') }}?${params}`;
+                    
                     window.history.replaceState({}, '', url);
 
                     fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
@@ -167,9 +170,9 @@
             });
         }
 
-        // --- 2. CHECKBOX & TOMBOL DETAIL (LOGIKA BARU) ---
+        // --- 2. CHECKBOX & TOMBOL DETAIL (TANPA SELECT ALL) ---
         function initCheckboxListeners() {
-            const selectAll = document.getElementById('selectAllCheckbox');
+            // Kita hapus logika selectAll di sini
             const btnView = document.getElementById('viewSelectedBtn');
 
             function toggleBtn() {
@@ -185,15 +188,7 @@
                 }
             }
 
-            if(selectAll) {
-                const newSelectAll = selectAll.cloneNode(true);
-                selectAll.parentNode.replaceChild(newSelectAll, selectAll);
-                newSelectAll.addEventListener('change', function() {
-                    document.querySelectorAll('.row-checkbox').forEach(cb => cb.checked = this.checked);
-                    toggleBtn();
-                });
-            }
-
+            // Hanya listen checkbox per baris
             document.querySelectorAll('.row-checkbox').forEach(cb => {
                 cb.addEventListener('change', toggleBtn);
             });
@@ -210,14 +205,13 @@
                     if (ids.length === 0) return;
 
                     if (ids.length === 1) {
-                        // JIKA 1 DATA: Redirect ke Halaman Profil (Show)
-                        // Menggunakan replace untuk memasukkan ID ke route
-                        var url = "{{ route('admin.kepegawaian.gtk.show', ':id') }}";
+                        // JIKA 1 DATA
+                        var url = "{{ route('admin.gtk.show', ':id') }}";
                         url = url.replace(':id', ids[0]);
                         window.location.href = url;
                     } else {
-                        // JIKA BANYAK DATA: Redirect ke Halaman Multiple
-                        var url = `{{ route('admin.kepegawaian.gtk.show-multiple') }}?ids=${ids.join(',')}`;
+                        // JIKA BANYAK DATA
+                        var url = `{{ route('admin.gtk.show-multiple') }}?ids=${ids.join(',')}`;
                         window.location.href = url;
                     }
                 });

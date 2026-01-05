@@ -13,14 +13,21 @@ class Instansi extends Model
     
     protected $fillable = [
         'nama_instansi',
+        'nama_brand',   // <-- KCD ENAM
         'nama_kepala',
         'nip_kepala',
-        'alamat',
+        'alamat',       // <-- Alamat Lengkap (termasuk Kab/Kota)
+        'peta',         // <-- Embed Maps
         'email',
         'telepon',
         'website',
+        'social_media', // <-- JSON Sosmed
         'logo',
         'visi',
         'misi'
+    ];
+
+    protected $casts = [
+        'social_media' => 'array',
     ];
 }

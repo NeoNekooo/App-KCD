@@ -8,10 +8,17 @@
     <div class="card-header d-flex justify-content-between align-items-center">
         <h5 class="mb-0">Daftar Siswa</h5>
         
-        {{-- Tombol Lihat Detail (Muncul via JS) --}}
-        <a href="#" id="viewSelectedBtn" class="btn btn-info btn-sm" style="display: none;">
-            <i class="bx bx-show"></i> Lihat Detail
-        </a>
+        <div>
+            {{-- Tombol Export Excel (Selalu Muncul) --}}
+            <button type="button" id="btnExport" class="btn btn-success btn-sm">
+                <i class="bx bx-spreadsheet me-1"></i> Export Excel
+            </button>
+
+            {{-- Tombol Lihat Detail (Muncul via JS saat checkbox dipilih) --}}
+            <button type="button" id="viewSelectedBtn" class="btn btn-primary btn-sm ms-2" style="display: none;">
+                <i class="bx bx-user me-1"></i> Lihat Detail Siswa
+            </button>
+        </div>
     </div>
 
     {{-- FILTER & SEARCH --}}
@@ -58,7 +65,7 @@
                 <div class="col-12">
                     <div class="input-group input-group-merge">
                         <span class="input-group-text bg-white"><i class="bx bx-search"></i></span>
-                        <input type="text" id="searchInput" name="search" class="form-control" placeholder="Cari Nama Siswa, NISN, atau NIK..." value="{{ request('search') }}" autocomplete="off">
+                        <input type="text" id="searchInput" name="search" class="form-control" placeholder="Cari Nama Siswa, NISN, NIK, atau Nama Sekolah..." value="{{ request('search') }}" autocomplete="off">
                     </div>
                 </div>
             </div>
@@ -71,7 +78,7 @@
             <table class="table table-hover align-middle">
                 <thead class="bg-light">
                     <tr>
-                        <th width="1%"><input class="form-check-input" type="checkbox" id="selectAllCheckbox"></th>
+                        <th width="1%" class="text-center">#</th>
                         <th>Identitas Siswa</th>
                         @if(isset($listKabupaten) && count($listKabupaten) > 0)
                             <th>Asal Sekolah</th>
@@ -79,24 +86,23 @@
                         <th>L/P</th>
                         <th>Nomor Induk</th>
                         <th>Kelas</th>
-                        {{-- KOLOM DETAIL DIHAPUS --}}
                     </tr>
                 </thead>
                 <tbody class="table-border-bottom-0">
                     @forelse ($siswas as $siswa)
-                    <tr>
-                        <td><input class="form-check-input row-checkbox" type="checkbox" value="{{ $siswa->id }}"></td>
+                    <tr onclick="toggleRow(this)" style="cursor: pointer;">
+                        <td class="text-center" onclick="event.stopPropagation()">
+                            <input class="form-check-input row-checkbox" type="checkbox" name="selected_ids[]" value="{{ $siswa->id }}">
+                        </td>
                         <td style="min-width: 250px;">
                             <div class="d-flex align-items-center">
                                 <div class="avatar me-3">
-                                    {{-- Menggunakan logic public path fix agar gambar aman --}}
                                     @php
                                         $cleanPath = str_replace('public/', '', $siswa->foto ?? '');
-                                        // Jika ada accessor foto_url, bisa pakai itu, tapi ini fallback manual yg aman
-                                        $fileExists = !empty($cleanPath) && \Illuminate\Support\Facades\Storage::disk('public')->exists($cleanPath);
+                                        $fileExists = !empty($cleanPath) && Storage::disk('public')->exists($cleanPath);
                                     @endphp
                                     @if($fileExists)
-                                        <img src="{{ asset('storage/' . $cleanPath) }}" alt="Avatar" class="rounded-circle" style="object-fit: cover;">
+                                        <img src="{{ asset('storage/' . $cleanPath) }}" alt="Avatar" class="rounded-circle" style="width: 100%; height: 100%; object-fit: cover;">
                                     @else
                                         <span class="avatar-initial rounded-circle bg-label-primary fw-bold">{{ substr($siswa->nama, 0, 2) }}</span>
                                     @endif
@@ -180,37 +186,48 @@
             });
         }
 
-        // 2. CHECKBOX & BUTTON LOGIC
+        // 2. LOGIKA CHECKBOX, DETAIL, & EXPORT
         function initCheckboxListeners() {
-            const selectAll = document.getElementById('selectAllCheckbox');
             const btnView = document.getElementById('viewSelectedBtn');
+            const btnExport = document.getElementById('btnExport'); // Ambil tombol export
+            const checkboxes = document.querySelectorAll('.row-checkbox');
 
-            function toggleBtn() {
-                const checkedCount = document.querySelectorAll('.row-checkbox:checked').length;
-                if (checkedCount > 0) {
+            function updateButtonState() {
+                const checkedBoxes = document.querySelectorAll('.row-checkbox:checked');
+                const count = checkedBoxes.length;
+
+                // Handle Tombol Detail
+                if (count > 0) {
                     btnView.style.display = 'inline-block';
-                    btnView.innerHTML = checkedCount === 1 
-                        ? '<i class="bx bx-user me-1"></i> Lihat Profil Siswa' 
-                        : `<i class="bx bx-list-check me-1"></i> Lihat Data Terpilih (${checkedCount})`;
+                    if (count === 1) {
+                        btnView.innerHTML = '<i class="bx bx-user me-1"></i> Lihat Detail Siswa';
+                    } else {
+                        btnView.innerHTML = `<i class="bx bx-list-ul me-1"></i> Lihat ${count} Siswa Terpilih`;
+                    }
+                    // Update Text Export biar user tau dia mau export yang dipilih
+                    btnExport.innerHTML = `<i class="bx bx-check-square me-1"></i> Export (${count}) Terpilih`;
                 } else {
                     btnView.style.display = 'none';
+                    // Balikin Text Export ke Default
+                    btnExport.innerHTML = `<i class="bx bx-spreadsheet me-1"></i> Export Excel`;
                 }
             }
 
-            if(selectAll) {
-                const newSelectAll = selectAll.cloneNode(true);
-                selectAll.parentNode.replaceChild(newSelectAll, selectAll);
-                newSelectAll.addEventListener('change', function() {
-                    document.querySelectorAll('.row-checkbox').forEach(cb => cb.checked = this.checked);
-                    toggleBtn();
-                });
-            }
-
-            document.querySelectorAll('.row-checkbox').forEach(cb => {
-                cb.addEventListener('change', toggleBtn);
+            checkboxes.forEach(cb => {
+                cb.addEventListener('change', updateButtonState);
             });
 
-            // 3. ACTION CLICK
+            window.toggleRow = function(row) {
+                if (event.target.type !== 'checkbox') {
+                    const cb = row.querySelector('.row-checkbox');
+                    if (cb) {
+                        cb.checked = !cb.checked;
+                        cb.dispatchEvent(new Event('change'));
+                    }
+                }
+            };
+
+            // 3. ACTION KLIK TOMBOL VIEW
             if(btnView && !btnView.hasAttribute('data-listening')) {
                 btnView.setAttribute('data-listening', 'true');
                 btnView.addEventListener('click', function(e) {
@@ -221,15 +238,39 @@
                     if (ids.length === 0) return;
 
                     if (ids.length === 1) {
-                        // Single: Go to Profile
-                        var url = "{{ route('admin.kesiswaan.siswa.show', ':id') }}";
+                        let url = "{{ route('admin.kesiswaan.siswa.show', ':id') }}";
                         url = url.replace(':id', ids[0]);
                         window.location.href = url;
                     } else {
-                        // Multiple: Go to List Comparison
-                        var url = `{{ route('admin.kesiswaan.siswa.show-multiple') }}?ids=${ids.join(',')}`;
+                        let url = `{{ route('admin.kesiswaan.siswa.show-multiple') }}?ids=${ids.join(',')}`;
                         window.location.href = url;
                     }
+                });
+            }
+
+            // 4. ACTION KLIK TOMBOL EXPORT
+            if(btnExport && !btnExport.hasAttribute('data-listening')) {
+                btnExport.setAttribute('data-listening', 'true');
+                btnExport.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const checkedBoxes = document.querySelectorAll('.row-checkbox:checked');
+                    let url = "{{ route('admin.kesiswaan.siswa.export-excel') }}";
+
+                    // Logika: Jika ada yang dicentang -> Export ID itu saja
+                    // Jika KOSONG -> Export semua sesuai filter/search URL saat ini
+                    if (checkedBoxes.length > 0) {
+                        const ids = Array.from(checkedBoxes).map(cb => cb.value);
+                        url += `?ids=${ids.join(',')}`;
+                    } else {
+                        // Ambil parameter search/filter dari URL browser saat ini
+                        const currentParams = window.location.search; 
+                        if (currentParams) {
+                            url += currentParams;
+                        }
+                    }
+                    
+                    // Buka di tab baru biar halaman gak refresh
+                    window.open(url, '_blank');
                 });
             }
         }

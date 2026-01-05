@@ -23,25 +23,34 @@ class InstansiController extends Controller
     {
         $instansi = Instansi::first();
 
+        // 1. Validasi Input (Termasuk field baru)
         $request->validate([
             'nama_instansi' => 'required|string|max:255',
-            'logo' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'nama_brand'    => 'nullable|string|max:255', // <-- Baru
+            'peta'          => 'nullable|string',         // <-- Baru (Embed HTML)
+            'social_media'  => 'nullable|array',          // <-- Baru (Array dari form)
+            'logo'          => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
         ]);
 
+        // 2. Ambil semua data input kecuali logo
+        // Note: 'social_media' akan otomatis masuk sebagai array.
+        // Karena di Model sudah ada protected $casts = ['social_media' => 'array'],
+        // Laravel otomatis mengubahnya jadi JSON saat disimpan ke DB.
         $data = $request->except(['logo']);
 
-        // Handle Upload Logo
+        // 3. Handle Upload Logo
         if ($request->hasFile('logo')) {
-            // Hapus logo lama jika ada & bukan default
+            // Hapus logo lama jika ada & file benar-benar ada di storage
             if ($instansi->logo && Storage::disk('public')->exists($instansi->logo)) {
                 Storage::disk('public')->delete($instansi->logo);
             }
             
-            // Simpan logo baru
+            // Simpan logo baru ke folder 'public/logos'
             $path = $request->file('logo')->store('logos', 'public');
             $data['logo'] = $path;
         }
 
+        // 4. Simpan Perubahan
         $instansi->update($data);
 
         return redirect()->back()->with('success', 'Profil Instansi berhasil diperbarui!');

@@ -1,11 +1,11 @@
 <?php
-// File: config/menu_access.php
 
 return [
     /*
     |--------------------------------------------------------------------------
     | ROLE MAPPING
     |--------------------------------------------------------------------------
+    | Pastikan slug di sini cocok dengan slug di sidebar_menu
     */
     'role_map' => [
         'Admin' => [
@@ -13,18 +13,22 @@ return [
         ],
         'Operator KCD' => [
             'dashboard',
-            'profil-instansi', // <--- AKSES BARU
+            'profil-instansi',
+            'kepegawaian',       // Baru
             'satuan-pendidikan',
-            'kepegawaian',
-            'kesiswaan',
+            'gtk',
+            'peserta-didik',     // Dulu kesiswaan
+            'data-pensiun',      // Baru
             'administrasi-surat',
+            'web-profile',       // Baru
             'pengaturan-sistem',
         ],
         'Sekolah' => [
             'dashboard',
-            'kepegawaian',
-            'kesiswaan',
+            'gtk',
+            'peserta-didik',
             'administrasi-surat',
+            'web-profile',
             'pengaturan-sistem',
         ],
     ],
@@ -46,57 +50,80 @@ return [
             'is_active' => 'request()->routeIs("admin.dashboard")',
         ],
 
-        // 2. PROFIL INSTANSI (MENU BARU)
+        // 2. PROFIL INSTANSI
         [
             'title' => 'Profil Instansi',
             'slug' => 'profil-instansi', 
-            'icon' => 'bx bxs-landmark', // <--- GANTI ICON (Gedung Pemerintahan/KCD)
+            'icon' => 'bx bxs-landmark',
             'route' => 'admin.instansi.index',
             'is_active' => 'request()->routeIs("admin.instansi.*")',
         ],
 
-        // 3. SATUAN PENDIDIKAN
+        // 3. KEPEGAWAIAN (Placeholder / Menu Baru)
+        [
+            'title' => 'Kepegawaian',
+            'slug' => 'kepegawaian',
+            'icon' => 'bx bxs-id-card', // Icon Kartu Pegawai
+            'route' => '#', 
+            'is_active' => 'false', 
+        ],
+
+        // 4. SATUAN PENDIDIKAN
         [
             'title' => 'Satuan Pendidikan',
             'slug' => 'satuan-pendidikan',
-            'icon' => 'bx bxs-school', // <--- GANTI ICON (Ikon Sekolah Spesifik)
+            'icon' => 'bx bxs-school',
             'route' => 'admin.sekolah.index',
             'is_active' => 'request()->routeIs("admin.sekolah.*")',
         ],
 
-        // 4. KEPEGAWAIAN (GTK)
+        // 5. GTK (Guru & Tendik)
         [
-            'title' => 'Kepegawaian',
-            'slug' => 'kepegawaian',
+            'title' => 'GTK',
+            'slug' => 'gtk',
             'icon' => 'bx bxs-user-badge',
             'is_toggle' => true,
-            'is_open' => 'request()->is("admin/kepegawaian*")',
+            'is_open' => 'request()->is("admin/gtk*")', 
             'submenu' => [
                 [
-                    'title' => 'Data Guru', 
-                    'route' => 'admin.kepegawaian.guru.index', 
-                    'is_active' => 'request()->routeIs("admin.kepegawaian.guru.index")'
+                    'title' => 'Guru', 
+                    'route' => 'admin.gtk.guru.index', 
+                    'is_active' => 'request()->routeIs("admin.gtk.guru.*")'
+                ],
+                [
+                    'title' => 'Tendik', 
+                    'route' => 'admin.gtk.tendik.index', 
+                    'is_active' => 'request()->routeIs("admin.gtk.tendik.*")'
                 ]
             ]
         ],
 
-        // 5. KESISWAAN
+        // 6. PESERTA DIDIK (Label diganti dari Kesiswaan)
         [
-            'title' => 'Kesiswaan',
-            'slug' => 'kesiswaan',
-            'icon' => 'bx bx-user',
+            'title' => 'Peserta Didik',
+            'slug' => 'peserta-didik',
+            'icon' => 'bx bx-user', // Icon User
             'is_toggle' => true,
-            'is_open' => 'request()->is("admin/kesiswaan*")',
+            'is_open' => 'request()->is("admin/kesiswaan*")', // Tetap detect URL kesiswaan
             'submenu' => [
                 [
-                    'title' => 'Data Siswa', 
+                    'title' => 'Peserta Didik', 
                     'route' => 'admin.kesiswaan.siswa.index', 
                     'is_active' => 'request()->routeIs("admin.kesiswaan.siswa.*")'
                 ],
             ]
         ],
 
-        // 6. ADMINISTRASI SURAT
+        // 7. KELOLA DATA PENSIUN (Placeholder / Menu Baru)
+        [
+            'title' => 'Kelola Data Pensiun',
+            'slug' => 'data-pensiun',
+            'icon' => 'bx bx-archive-out', // Icon Archive/Pensiun
+            'route' => '#',
+            'is_active' => 'false',
+        ],
+
+        // 8. ADMINISTRASI SURAT
         [
             'title' => 'Administrasi Surat',
             'slug' => 'administrasi-surat',
@@ -132,7 +159,16 @@ return [
             ]
         ],
 
-        // 7. PENGATURAN LAINNYA
+        // 9. WEB PROFILE (Placeholder / Menu Baru)
+        [
+            'title' => 'Web Profile',
+            'slug' => 'web-profile',
+            'icon' => 'bx bx-globe', // Icon Globe/Web
+            'route' => '#',
+            'is_active' => 'false',
+        ],
+
+        // 10. PENGATURAN
         [
             'title' => 'Lainnya',
             'slug' => 'pengaturan-sistem-header',

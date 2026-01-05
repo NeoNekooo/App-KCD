@@ -84,6 +84,16 @@
                                     <span id="togglePassword" class="input-group-text cursor-pointer"><i class="bx bx-hide"></i></span>
                                 </div>
                             </div>
+
+                            <div class="mb-3 d-none">
+                                <label for="tahun_pelajaran" class="form-label">Tahun Pelajaran</label>
+                                <select id="tahun_pelajaran" name="tahun_pelajaran" class="form-select" required>
+                                    <option value="">Pilih Tahun Pelajaran...</option>
+                                    <option value="2025/2026 Ganjil" selected>2025/2026 Ganjil</option>
+                                    <option value="2024/2025 Genap">2024/2025 Genap</option>
+                                </select>
+                            </div>
+
                             <div class="mb-3">
                                 <div class="form-check">
                                     <input class="form-check-input" type="checkbox" id="remember-me" name="remember" />
@@ -93,7 +103,7 @@
 
                             <div class="d-flex gap-2">
                                 <button class="btn btn-primary d-grid w-100 btn-masuk" type="submit">Masuk</button>
-                                <a href="{{ route('register') }}" class="btn btn-primary d-grid w-100 btn-registrasi">Registrasi</a>
+                                {{-- <a href="{{ route('register') }}" class="btn btn-primary d-grid w-100 btn-registrasi">Registrasi</a> --}}
                             </div>
                         </form>
                     </div>

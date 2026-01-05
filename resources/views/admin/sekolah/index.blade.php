@@ -47,50 +47,64 @@
 </div>
 
 <div class="card">
-    {{-- HEADER & FILTER --}}
-    <div class="card-header border-bottom">
+    {{-- HEADER & BUTTON EXPORT --}}
+    <div class="card-header border-bottom d-flex justify-content-between align-items-center">
         <h5 class="card-title mb-0">Daftar Sekolah Binaan</h5>
+        <button type="button" id="btnExport" class="btn btn-success btn-sm">
+            <i class="bx bx-spreadsheet me-1"></i> Export Excel
+        </button>
     </div>
+
+    {{-- FILTER FORM --}}
     <div class="card-body mt-3">
-        <form action="{{ route('admin.sekolah.index') }}" method="GET">
+        <form action="{{ route('admin.sekolah.index') }}" method="GET" id="filterForm">
             <input type="hidden" name="per_page" value="{{ request('per_page', 15) }}">
             <div class="row g-3">
+                {{-- KABUPATEN --}}
                 <div class="col-md-2">
                     <label class="form-label small text-muted">Kabupaten</label>
-                    <select name="kabupaten_kota" class="form-select" onchange="this.form.submit()">
+                    <select name="kabupaten_kota" class="form-select" onchange="handleFilterChange(this)">
                         <option value="">- Semua -</option>
                         @foreach($listKabupaten as $kab)
-                            <option value="{{ $kab }}" {{ request('kabupaten_kota') == $kab ? 'selected' : '' }}>{{ str_replace('Kab. ', '', $kab) }}</option>
+                            <option value="{{ $kab }}" {{ request('kabupaten_kota') == $kab ? 'selected' : '' }}>{{ str_replace(['Kab. ', 'Kota '], '', $kab) }}</option>
                         @endforeach
                     </select>
                 </div>
+                
+                {{-- KECAMATAN --}}
                 <div class="col-md-2">
                     <label class="form-label small text-muted">Kecamatan</label>
-                    <select name="kecamatan" class="form-select" onchange="this.form.submit()">
+                    <select name="kecamatan" class="form-select" onchange="handleFilterChange(this)" {{ empty($listKecamatan) ? 'disabled' : '' }}>
                         <option value="">- Semua -</option>
                         @foreach($listKecamatan as $kec)
                             <option value="{{ $kec }}" {{ request('kecamatan') == $kec ? 'selected' : '' }}>{{ str_replace('Kec. ', '', $kec) }}</option>
                         @endforeach
                     </select>
                 </div>
+
+                {{-- JENJANG --}}
                 <div class="col-md-2">
                     <label class="form-label small text-muted">Jenjang</label>
-                    <select name="jenjang" class="form-select" onchange="this.form.submit()">
+                    <select name="jenjang" class="form-select" onchange="handleFilterChange(this)" {{ empty($listJenjang) ? 'disabled' : '' }}>
                         <option value="">- Semua -</option>
                         @foreach($listJenjang as $j)
                             <option value="{{ $j }}" {{ request('jenjang') == $j ? 'selected' : '' }}>{{ $j }}</option>
                         @endforeach
                     </select>
                 </div>
+
+                {{-- STATUS --}}
                 <div class="col-md-2">
                     <label class="form-label small text-muted">Status</label>
-                    <select name="status_sekolah" class="form-select" onchange="this.form.submit()">
+                    <select name="status_sekolah" class="form-select" onchange="handleFilterChange(this)" {{ empty($listStatus) ? 'disabled' : '' }}>
                         <option value="">- Semua -</option>
                         @foreach($listStatus as $s)
                             <option value="{{ $s }}" {{ request('status_sekolah') == $s ? 'selected' : '' }}>{{ $s }}</option>
                         @endforeach
                     </select>
                 </div>
+
+                {{-- SEARCH --}}
                 <div class="col-md-4">
                     <label class="form-label small text-muted">Cari Data</label>
                     <div class="input-group input-group-merge">
@@ -150,7 +164,6 @@
                         </div>
                     </td>
                     <td class="text-center">
-                        {{-- TOMBOL DETAIL MENGARAH KE ROUTE MONITORING --}}
                         <a href="{{ route('admin.sekolah.show', $sekolah->id) }}" class="btn btn-sm btn-icon btn-label-info"><i class="bx bx-show-alt"></i></a>
                     </td>
                 </tr>
@@ -189,3 +202,47 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+    // LOGIKA FILTER BERANTAI
+    function handleFilterChange(element) {
+        const form = document.getElementById('filterForm');
+        const name = element.name;
+
+        // Jika Kabupaten diganti, reset semua anak-anaknya
+        if (name === 'kabupaten_kota') {
+            form.querySelector('select[name="kecamatan"]').value = '';
+            form.querySelector('select[name="jenjang"]').value = '';
+            form.querySelector('select[name="status_sekolah"]').value = '';
+        } 
+        // Jika Kecamatan diganti, reset jenjang & status
+        else if (name === 'kecamatan') {
+            form.querySelector('select[name="jenjang"]').value = '';
+            form.querySelector('select[name="status_sekolah"]').value = '';
+        }
+        // Jika Jenjang diganti, reset status (Opsional, biar clean)
+        else if (name === 'jenjang') {
+            form.querySelector('select[name="status_sekolah"]').value = '';
+        }
+
+        // Submit form otomatis
+        form.submit();
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const btnExport = document.getElementById('btnExport');
+        if(btnExport) {
+            btnExport.addEventListener('click', function(e) {
+                e.preventDefault();
+                let url = "{{ route('admin.sekolah.export-excel') }}";
+                const currentParams = window.location.search; 
+                if (currentParams) {
+                    url += currentParams;
+                }
+                window.open(url, '_blank');
+            });
+        }
+    });
+</script>
+@endpush

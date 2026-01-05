@@ -2,48 +2,64 @@
 
 namespace App\Models;
 
-use App\Models\Sekolah;
-use App\Exports\SiswaExport;
-use Maatwebsite\Excel\Facades\Excel;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
 class Sekolah extends Model
 {
     use HasFactory;
 
-    protected $guarded = [];
+    // Nama tabel sesuai di database 'miaw' kamu
+    protected $table = 'sekolahs';
+
+    // Semua kolom yang bisa diisi (sesuai struktur SQL sekolahs.sql)
+    protected $fillable = [
+        'sekolah_id',
+        'nama',
+        'nss',
+        'npsn',
+        'kode_sekolah',
+        'bentuk_pendidikan_id',
+        'bentuk_pendidikan_id_str',
+        'status_sekolah',
+        'status_sekolah_str',
+        'alamat_jalan',
+        'rt',
+        'rw',
+        'kode_wilayah',
+        'kode_pos',
+        'nomor_telepon',
+        'nomor_fax',
+        'email',
+        'website',
+        'is_sks',
+        'lintang',
+        'bujur',
+        'dusun',
+        'desa_kelurahan',
+        'kecamatan',
+        'kabupaten_kota',
+        'provinsi',
+        'logo',
+        'background_kartu',
+        'peta',
+        'social_media'
+    ];
 
     /**
-     * The attributes that should be cast.
-     *
-     * @var array
+     * Casting otomatis kolom JSON biar langsung jadi array di Laravel
      */
     protected $casts = [
-        // Ini kuncinya: Database simpan JSON <-> Laravel baca sebagai Array
         'social_media' => 'array',
     ];
-    public function exportExcel(Request $request)
-    {
-        // 1. Cek apakah user memilih spesifik siswa (Export Selected)
-        // Biasanya dikirim dalam format comma-separated string, misal: "1,5,10"
-        $ids = null;
-        if ($request->has('ids') && !empty($request->ids)) {
-            $ids = explode(',', $request->ids);
-        }
 
-        // 2. Ambil Nama Sekolah dari Database untuk Nama File
-        $sekolah = Sekolah::first();
-        
-        // Bersihkan nama sekolah agar aman untuk nama file (hilangkan spasi aneh/simbol)
-        // Jika data sekolah kosong, default ke 'Sekolah'
-        $namaSekolahClean = $sekolah ? \Illuminate\Support\Str::slug($sekolah->nama, '_') : 'Data_Siswa';
-        
-        // Format Nama File: NAMA_SEKOLAH_Data_Siswa_TANGGAL.xlsx
-        // Contoh: SMK_NURUL_ISLAM_AFFANDIYAH_Data_Siswa_17-12-2025.xlsx
-        $fileName = strtoupper($namaSekolahClean) . '_Data_Siswa_' . date('d-m-Y') . '.xlsx';
-        
-        // 3. Download Excel dengan parameter IDs
-        return Excel::download(new SiswaExport($ids), $fileName);
+    /**
+     * RELASI KE TABEL PENGGUNA
+     * Dipakai di SekolahController buat hitung total Siswa, Guru, Tendik, & Kepsek.
+     */
+    public function pengguna()
+    {
+        // Relasi ke model Pengguna berdasarkan 'sekolah_id' (UUID)
+        return $this->hasMany(Pengguna::class, 'sekolah_id', 'sekolah_id');
     }
 }

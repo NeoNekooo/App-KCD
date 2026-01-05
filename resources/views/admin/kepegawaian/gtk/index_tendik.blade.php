@@ -1,241 +1,145 @@
 @extends('layouts.admin')
 
 @section('content')
-<h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Kepegawaian /</span> Data Tenaga Kependidikan</h4>
+<h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">GTK /</span> Data Tendik</h4>
 
 <div class="card">
-    <div class="card-header">
-        <div class="d-flex align-items-center justify-content-between">
-            <h5 class="card-title m-0 me-2">Daftar Tenaga Kependidikan & Kepala Sekolah</h5>
-            <div class="d-flex gap-2">
-                {{-- Tombol Lihat Data --}}
-                <a href="#" id="viewSelectedBtn" class="btn btn-info btn-sm" style="display: none;">
-                    <i class="bx bx-show-alt me-1"></i> Lihat Data
-                </a>
-
-                {{-- Tombol Opsi Export --}}
-                <div class="dropdown">
-                    <button class="btn btn-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="bx bx-export me-1"></i> Opsi Export
-                    </button>
-                    <ul class="dropdown-menu dropdown-menu-end">
-                        <li><a class="dropdown-item" href="{{ route('admin.kepegawaian.tendik.export.excel', request()->query()) }}">Export Semua</a></li>
-                        <li><a class="dropdown-item disabled" href="javascript:void(0);" id="exportSelectedLink">Export yang Dipilih</a></li>
-                    </ul>
-                </div>
-            </div>
-        </div>
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Daftar Tenaga Kependidikan</h5>
+        {{-- Tombol ini akan berubah fungsi & teks via JS --}}
+        <a href="#" id="viewSelectedBtn" class="btn btn-info btn-sm" style="display: none;">
+            <i class="bx bx-show"></i> Lihat Detail
+        </a>
     </div>
 
-    {{-- PENCARIAN (HEADER TETAP BERSIH) --}}
     <div class="card-body">
-        <form action="{{ route('admin.kepegawaian.tendik.index') }}" method="GET">
-            {{-- Pertahankan per_page saat mencari --}}
+        <form action="{{ route('admin.gtk.tendik.index') }}" method="GET" id="filterForm">
             <input type="hidden" name="per_page" value="{{ request('per_page', 15) }}">
+            
+            {{-- FILTER AREA --}}
+            <div class="row g-3 mb-4 p-3 bg-lighter rounded">
+                <div class="col-12"><small class="text-muted fw-bold text-uppercase">Filter Data</small></div>
+                
+                {{-- Filter Kabupaten --}}
+                <div class="col-md-3">
+                    <select name="kabupaten_kota" class="form-select select2" onchange="this.form.submit()">
+                        <option value="">- Semua Kab/Kota -</option>
+                        @foreach($listKabupaten as $kab)
+                            <option value="{{ $kab }}" {{ request('kabupaten_kota') == $kab ? 'selected' : '' }}>
+                                {{ str_replace(['Kab. ', 'Kota '], '', $kab) }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
 
-            <div class="input-group input-group-merge">
-                <span class="input-group-text"><i class="bx bx-search"></i></span>
-                <input type="text" name="search" class="form-control" placeholder="Cari berdasarkan Nama, NIP, atau NIK..." value="{{ request('search') }}">
-                <button type="submit" class="btn btn-primary">Cari</button>
+                {{-- Filter Kecamatan --}}
+                <div class="col-md-3">
+                    <select name="kecamatan" class="form-select select2" onchange="this.form.submit()" {{ empty($listKecamatan) ? 'disabled' : '' }}>
+                        <option value="">- Semua Kecamatan -</option>
+                        @foreach($listKecamatan as $kec)
+                            <option value="{{ $kec }}" {{ request('kecamatan') == $kec ? 'selected' : '' }}>{{ str_replace('Kec. ', '', $kec) }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                {{-- Filter Sekolah --}}
+                <div class="col-md-4">
+                    <select name="sekolah_id" class="form-select select2" onchange="this.form.submit()" {{ empty($listSekolah) ? 'disabled' : '' }}>
+                        <option value="">- Semua Sekolah -</option>
+                        @foreach($listSekolah as $idSekolah => $namaSekolah)
+                            <option value="{{ $idSekolah }}" {{ request('sekolah_id') == $idSekolah ? 'selected' : '' }}>{{ $namaSekolah }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                {{-- Tombol Reset --}}
+                <div class="col-md-2">
+                    <a href="{{ route('admin.gtk.tendik.index') }}" class="btn btn-outline-danger w-100"><i class="bx bx-refresh"></i> Reset</a>
+                </div>
+            </div>
+
+            {{-- SEARCH INPUT --}}
+            <div class="row g-2">
+                <div class="col-12">
+                    <div class="input-group input-group-merge">
+                        <span class="input-group-text bg-white"><i class="bx bx-search"></i></span>
+                        <input type="text" id="searchInput" name="search" class="form-control" placeholder="Cari Nama, NIP, atau NIK..." value="{{ request('search') }}" autocomplete="off">
+                    </div>
+                </div>
             </div>
         </form>
     </div>
 
-    <div class="table-responsive text-nowrap">
-        <table class="table table-hover">
-            <thead>
-                <tr>
-                    <th width="1%"><input class="form-check-input" type="checkbox" id="selectAllCheckbox"></th>
-                    <th>Induk</th>
-                    <th>Nama Lengkap</th>
-                    <th>NIK</th>
-                    <th>L/P</th>
-                    <th>Tgl Lahir</th>
-                    <th>Status</th>
-                    <th>Jenis GTK</th>
-                    {{-- <th>Jabatan</th> --}}
-                    <th>NUPTK</th>
-                    <th>Tgl Surat Tugas</th>
-                    <th width="5%">Aksi</th>
-                </tr>
-            </thead>
-            <tbody class="table-border-bottom-0">
-                @forelse ($tendiks as $gtk)
-                <tr>
-                    <td><input class="form-check-input row-checkbox" type="checkbox" value="{{ $gtk->id }}"></td>
-                    <td><span class="badge bg-label-{{ $gtk->ptk_induk == 1 ? 'success' : 'secondary' }}">{{ $gtk->ptk_induk == 1 ? 'Induk' : 'Non' }}</span></td>
-                    <td style="min-width: 250px;">
-                        <div class="d-flex justify-content-start align-items-center">
-                            <div class="avatar-wrapper me-3">
-                                <div class="avatar avatar-sm">
-                                    @if(!empty($gtk->foto) && \Illuminate\Support\Facades\Storage::disk('public')->exists($gtk->foto))
-                                        <img src="{{ asset('storage/' . $gtk->foto) }}" alt="Avatar" class="rounded-circle" style="width: 100%; height: 100%; object-fit: cover;">
-                                    @else
-                                        <img src="https://ui-avatars.com/api/?name={{ urlencode($gtk->nama) }}&background=random&color=ffffff&size=100" alt="Avatar" class="rounded-circle">
-                                    @endif
+    <div id="tableContainer">
+        <div class="table-responsive text-nowrap">
+            <table class="table table-hover align-middle">
+                <thead class="bg-light">
+                    <tr>
+                        {{-- Select All Dihapus, diganti # --}}
+                        <th width="1%" class="text-center">#</th>
+                        <th>Nama & Identitas</th>
+                        <th>Unit Kerja</th>
+                        <th>Jenis PTK</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody class="table-border-bottom-0">
+                    @forelse ($tendiks as $tendik)
+                    <tr>
+                        <td><input class="form-check-input row-checkbox" type="checkbox" value="{{ $tendik->id }}"></td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="avatar-wrapper me-3">
+                                    <div class="avatar avatar-sm">
+                                        @php
+                                            $cleanPath = str_replace('public/', '', $tendik->foto ?? '');
+                                            $fileExists = !empty($cleanPath) && Storage::disk('public')->exists($cleanPath);
+                                        @endphp
+                                        @if($fileExists)
+                                            <img src="{{ asset('storage/' . $cleanPath) }}" alt="Avatar" class="rounded-circle" style="width: 100%; height: 100%; object-fit: cover;">
+                                        @else
+                                            <span class="avatar-initial rounded-circle bg-label-warning fw-bold">{{ substr($tendik->nama, 0, 2) }}</span>
+                                        @endif
+                                    </div>
+                                </div>
+                                <div class="d-flex flex-column">
+                                    <span class="fw-semibold text-body text-truncate">{{ $tendik->nama }}</span>
+                                    <small class="text-muted">
+                                        @if($tendik->nip && trim($tendik->nip) != '-') NIP: {{ $tendik->nip }}
+                                        @elseif($tendik->nuptk && trim($tendik->nuptk) != '-') NUPTK: {{ $tendik->nuptk }}
+                                        @else - @endif
+                                    </small>
                                 </div>
                             </div>
-                            <div class="d-flex flex-column">
-                                <span class="fw-semibold text-truncate text-body">{{ $gtk->nama }}</span>
-                                <small class="text-muted">{{ $gtk->nip ? 'NIP: ' . $gtk->nip : '-' }}</small>
+                        </td>
+                        <td>
+                            @if($tendik->pengguna && $tendik->pengguna->sekolah)
+                                <div class="d-flex flex-column">
+                                    <span class="fw-medium text-truncate" style="max-width: 200px;">{{ $tendik->pengguna->sekolah->nama }}</span>
+                                    <small class="text-muted">{{ $tendik->pengguna->sekolah->kecamatan ?? '-' }}</small>
+                                </div>
+                            @else 
+                                <span class="text-muted fst-italic">-</span> 
+                            @endif
+                        </td>
+                        <td><span class="badge bg-label-info">{{ $tendik->jenis_ptk_id_str ?? '-' }}</span></td>
+                        <td><span class="badge bg-label-success">{{ $tendik->status_kepegawaian_id_str ?? '-' }}</span></td>
+                    </tr>
+                    @empty
+                    <tr>
+                        <td colspan="5" class="text-center py-5">
+                            <div class="d-flex flex-column align-items-center">
+                                <i class="bx bx-user-x bx-lg text-muted mb-2"></i>
+                                <h6 class="text-muted">Data tendik tidak ditemukan.</h6>
                             </div>
-                        </div>
-                    </td>
-                    <td>{{ $gtk->nik ?? '-' }}</td>
-                    <td>{{ ($gtk->jenis_kelamin == 'L' || $gtk->jenis_kelamin == 'Laki-laki') ? 'L' : 'P' }}</td>
-                    <td>{{ $gtk->tanggal_lahir ? \Carbon\Carbon::parse($gtk->tanggal_lahir)->format('d-m-Y') : '-' }}</td>
-                    <td><span class="badge bg-label-primary">{{ $gtk->status_kepegawaian_id_str ?? '-' }}</span></td>
-                    <td>
-                        @if($gtk->jenis_ptk_id == 91 || str_contains(strtolower($gtk->jenis_ptk_id_str ?? ''), 'kepala sekolah'))
-                             <span class="badge bg-label-success fw-bold">Kepala Sekolah</span>
-                        @else
-                             <span class="badge bg-label-info">{{ $gtk->jenis_ptk_id_str ?? 'Tendik' }}</span>
-                        @endif
-                    </td>
-                    {{-- <td>{{ $gtk->jabatan_ptk_id_str ?? '-' }}</td> --}}
-                    <td>{{ $gtk->nuptk ?? '-' }}</td>
-                    <td>{{ $gtk->tanggal_surat_tugas ? \Carbon\Carbon::parse($gtk->tanggal_surat_tugas)->format('d-m-Y') : '-' }}</td>
-                    <td>
-                        @if($gtk->status != 'Aktif')
-                            <button type="button" class="btn btn-sm btn-outline-warning btn-unregister-keluar-gtk" data-id="{{ $gtk->id }}" data-nama="{{ $gtk->nama }}">
-                                <i class="bx bx-undo me-1"></i> Batalkan Keluar
-                            </button>
-                        @else
-                            <button type="button"
-                                    class="btn btn-sm btn-outline-danger btnRegisterKeluarGTK"
-                                    data-id="{{ $gtk->id }}"
-                                    data-nama="{{ $gtk->nama }}"
-                                    data-url="{{ route('admin.kepegawaian.gtk.register-keluar', $gtk->id) }}">
-                                <i class="bx bx-log-out-circle me-1"></i> Register Keluar
-                            </button>
-                        @endif
-                    </td>
-                </tr>
-                @empty
-                <tr>
-                    <td colspan="11" class="text-center py-5">
-                        <h6 class="text-muted">Tidak ada data ditemukan.</h6>
-                    </td>
-                </tr>
-                @endforelse
-            </tbody>
-        </table>
-    </div>
-
-    {{-- MODIFIKASI FOOTER: PENGATURAN SHOW DATA --}}
-    <div class="card-footer border-top">
-        <div class="row align-items-center">
-
-            {{-- KIRI: INFO SHOWING & DROPDOWN --}}
-            <div class="col-md-6 d-flex align-items-center mb-2 mb-md-0">
-                <span class="text-muted me-2 small">Menampilkan</span>
-
-                {{-- Form Kecil untuk ubah jumlah per halaman --}}
-                <form action="{{ route('admin.kepegawaian.tendik.index') }}" method="GET" class="d-inline-block">
-                    {{-- Pastikan Search tidak hilang saat ganti jumlah --}}
-                    <input type="hidden" name="search" value="{{ request('search') }}">
-
-                    <select name="per_page" class="form-select form-select-sm d-inline-block w-auto" onchange="this.form.submit()">
-                        <option value="15" {{ request('per_page') == '15' ? 'selected' : '' }}>15</option>
-                        <option value="35" {{ request('per_page') == '35' ? 'selected' : '' }}>35</option>
-                        <option value="50" {{ request('per_page') == '50' ? 'selected' : '' }}>50</option>
-                        <option value="all" {{ request('per_page') == 'all' ? 'selected' : '' }}>Semua</option>
-                    </select>
-                </form>
-
-                <span class="text-muted ms-2 small">
-                    dari <strong>{{ $tendiks->total() }}</strong> data
-                </span>
-            </div>
-
-            {{-- KANAN: PAGINATION LINK --}}
-            <div class="col-md-6 d-flex justify-content-md-end justify-content-center">
-                {{-- Jika mode 'Semua', matikan pagination agar tidak membingungkan --}}
-                @if(request('per_page') != 'all')
-                    {{ $tendiks->appends(request()->query())->links() }}
-                @endif
-            </div>
+                        </td>
+                    </tr>
+                    @endforelse
+                </tbody>
+            </table>
         </div>
-    </div>
-</div>
-
-<div class="modal fade" id="modalRegisterKeluarGTK" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <form id="formRegisterKeluarGTK" method="POST">
-                @csrf
-                @method('PATCH')
-                <div class="modal-header border-bottom">
-                    <h5 class="modal-title">Register Keluar GTK: <span id="namaGTKModal" class="fw-bold"></span></h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="bg-light p-3 rounded mb-3" style="border-left: 4px solid #ffab00;">
-                        <small class="text-dark">
-                            <i class="bx bx-info-circle me-1"></i>
-                            Pastikan data penugasan dan hak akses GTK yang bersangkutan telah diselesaikan sebelum melakukan proses ini.
-                        </small>
-                    </div>
-
-                    <div class="mb-3 row">
-                        <label class="col-sm-4 col-form-label text-sm-end">Keluar karena:</label>
-                        <div class="col-sm-8">
-                            <select name="status" class="form-select" required>
-                                <option value="">-- Pilih Alasan --</option>
-                                <option value="Pensiun">Pensiun</option>
-                                <option value="Resign/Mengundurkan Diri">Resign/Mengundurkan Diri</option>
-                                <option value="Mutasi/Pindah Tugas">Mutasi/Pindah Tugas</option>
-                                <option value="Diberhentikan">Diberhentikan</option>
-                                <option value="Meninggal Dunia">Meninggal Dunia</option>
-                                <option value="Tugas Belajar">Tugas Belajar</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="mb-3 row">
-                        <label class="col-sm-4 col-form-label text-sm-end">Tanggal keluar:</label>
-                        <div class="col-sm-8">
-                            <input type="date" name="tanggal_keluar" class="form-control" value="{{ date('Y-m-d') }}" required>
-                        </div>
-                    </div>
-
-                    <div class="mb-3 row">
-                        <label class="col-sm-4 col-form-label text-sm-end">Keterangan:</label>
-                        <div class="col-sm-8">
-                            <textarea name="alasan" class="form-control" rows="3" placeholder="Contoh: Pindah tugas ke sekolah luar daerah atau SK Pensiun No.xxx"></textarea>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer bg-light">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-danger">
-                        <i class="bx bx-save me-1"></i> Simpan Data Keluar
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-<!-- Modal: Unregister Keluar GTK -->
-<div class="modal fade" id="modalUnregisterKeluarGTK" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <form id="formUnregisterKeluarGTK" method="POST">
-                @csrf
-                @method('PATCH')
-                <div class="modal-header border-bottom">
-                    <h5 class="modal-title">Batalkan Register Keluar GTK: <span id="namaGTKUnregModal" class="fw-bold"></span></h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <p>Anda yakin ingin membatalkan pencatatan keluar untuk GTK <strong><span id="namaGTKUnregModal2"></span></strong>? Tindakan ini akan mengembalikan status menjadi <strong>Aktif</strong>.</p>
-                </div>
-                <div class="modal-footer bg-light">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-warning"><i class="bx bx-undo me-1"></i> Batalkan Keluar</button>
-                </div>
-            </form>
+        <div class="card-footer border-top">
+            {{ $tendiks->appends(request()->query())->links() }}
         </div>
     </div>
 </div>
@@ -244,115 +148,87 @@
 @push('scripts')
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        const selectAllCheckbox = document.getElementById('selectAllCheckbox');
-        const rowCheckboxes = document.querySelectorAll('.row-checkbox');
-        const viewSelectedBtn = document.getElementById('viewSelectedBtn');
-        const exportSelectedLink = document.getElementById('exportSelectedLink');
-// Inisialisasi Modal
-const modalRegisterKeluarGTK = new bootstrap.Modal(document.getElementById('modalRegisterKeluarGTK'));
-const formRegisterKeluarGTK = document.getElementById('formRegisterKeluarGTK');
-const namaGTKModal = document.getElementById('namaGTKModal');
-const btnRegisterKeluarGTK = document.querySelectorAll('.btnRegisterKeluarGTK');
+        
+        const searchInput = document.getElementById('searchInput');
+        const tableContainer = document.getElementById('tableContainer');
+        const filterForm = document.getElementById('filterForm');
+        let timeout = null;
 
-btnRegisterKeluarGTK.forEach(btn => {
-    btn.addEventListener('click', function() {
-        const id = this.getAttribute('data-id');
-        const nama = this.getAttribute('data-nama');
-        const url = this.getAttribute('data-url');
+        // --- 1. LIVE SEARCH ---
+        if (searchInput) {
+            searchInput.addEventListener('input', function() {
+                tableContainer.style.opacity = '0.5';
+                clearTimeout(timeout);
+                timeout = setTimeout(function() {
+                    const formData = new FormData(filterForm);
+                    const params = new URLSearchParams(formData).toString();
+                    
+                    // Route khusus Tendik
+                    const url = `{{ route('admin.gtk.tendik.index') }}?${params}`;
+                    
+                    window.history.replaceState({}, '', url);
 
-        // Update UI Modal
-        namaGTKModal.innerText = nama;
-
-        // Set action URL ke route GTK (gunakan data-url jika tersedia)
-        if (url) {
-            formRegisterKeluarGTK.action = url;
-        } else {
-            // fallback ke path yang benar
-            formRegisterKeluarGTK.action = `/admin/kepegawaian/gtk/${id}/register-keluar`;
+                    fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                    .then(r => r.text())
+                    .then(html => {
+                        const parser = new DOMParser();
+                        const doc = parser.parseFromString(html, 'text/html');
+                        tableContainer.innerHTML = doc.getElementById('tableContainer').innerHTML;
+                        tableContainer.style.opacity = '1';
+                        initCheckboxListeners();
+                    });
+                }, 300); 
+            });
         }
 
-        modalRegisterKeluarGTK.show();
-    });
-});
+        // --- 2. CHECKBOX & TOMBOL DETAIL (TANPA SELECT ALL) ---
+        function initCheckboxListeners() {
+            const btnView = document.getElementById('viewSelectedBtn');
 
-        // Unregister GTK (undo register keluar)
-        const btnUnregisterKeluarGTK = document.querySelectorAll('.btn-unregister-keluar-gtk');
-        const modalUnregisterKeluarGTK = new bootstrap.Modal(document.getElementById('modalUnregisterKeluarGTK'));
-        const formUnregisterKeluarGTK = document.getElementById('formUnregisterKeluarGTK');
-        const namaGTKUnregModal = document.getElementById('namaGTKUnregModal');
-        const namaGTKUnregModal2 = document.getElementById('namaGTKUnregModal2');
+            function toggleBtn() {
+                const checkedCount = document.querySelectorAll('.row-checkbox:checked').length;
+                if (checkedCount > 0) {
+                    btnView.style.display = 'inline-block';
+                    // Jika pilih 1, teksnya "Lihat Profil". Jika banyak, "Lihat Data Terpilih"
+                    btnView.innerHTML = checkedCount === 1 
+                        ? '<i class="bx bx-user me-1"></i> Lihat Profil Tendik' 
+                        : `<i class="bx bx-list-check me-1"></i> Lihat Data Terpilih (${checkedCount})`;
+                } else {
+                    btnView.style.display = 'none';
+                }
+            }
 
-        btnUnregisterKeluarGTK.forEach(btn => {
-            btn.addEventListener('click', function() {
-                const id = this.getAttribute('data-id');
-                const nama = this.getAttribute('data-nama');
-
-                namaGTKUnregModal.innerText = nama;
-                namaGTKUnregModal2.innerText = nama;
-
-                formUnregisterKeluarGTK.action = `/admin/kepegawaian/gtk/${id}/unregister-keluar`;
-                modalUnregisterKeluarGTK.show();
+            // Hanya listen checkbox per baris (bisa pilih banyak secara manual)
+            document.querySelectorAll('.row-checkbox').forEach(cb => {
+                cb.addEventListener('change', toggleBtn);
             });
-        });
-        function handleCheckboxChange() {
-            const checkedCheckboxes = document.querySelectorAll('.row-checkbox:checked');
 
-            if (checkedCheckboxes.length > 0) {
-                viewSelectedBtn.style.display = 'inline-block';
-                exportSelectedLink.classList.remove('disabled');
-            } else {
-                viewSelectedBtn.style.display = 'none';
-                exportSelectedLink.classList.add('disabled');
+            // --- KLIK TOMBOL DETAIL ---
+            if(btnView && !btnView.hasAttribute('data-listening')) {
+                btnView.setAttribute('data-listening', 'true');
+                btnView.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    const checkedBoxes = document.querySelectorAll('.row-checkbox:checked');
+                    const ids = Array.from(checkedBoxes).map(cb => cb.value);
+
+                    if (ids.length === 0) return;
+
+                    if (ids.length === 1) {
+                        // JIKA 1 DATA: Redirect ke Profil
+                        var url = "{{ route('admin.gtk.show', ':id') }}";
+                        url = url.replace(':id', ids[0]);
+                        window.location.href = url;
+                    } else {
+                        // JIKA BANYAK DATA: Redirect ke Multiple
+                        var url = `{{ route('admin.gtk.show-multiple') }}?ids=${ids.join(',')}`;
+                        window.location.href = url;
+                    }
+                });
             }
         }
 
-        if (selectAllCheckbox) {
-            selectAllCheckbox.addEventListener('change', function() {
-                rowCheckboxes.forEach(checkbox => {
-                    checkbox.checked = this.checked;
-                });
-                handleCheckboxChange();
-            });
-        }
-
-        rowCheckboxes.forEach(checkbox => {
-            checkbox.addEventListener('change', handleCheckboxChange);
-        });
-
-        if (viewSelectedBtn) {
-            viewSelectedBtn.addEventListener('click', function(e) {
-                e.preventDefault();
-                const checkedCheckboxes = document.querySelectorAll('.row-checkbox:checked');
-
-                if (checkedCheckboxes.length > 0) {
-                    const selectedIds = Array.from(checkedCheckboxes).map(cb => cb.value).join(',');
-                    let url = `{{ route('admin.kepegawaian.gtk.show-multiple') }}?ids=${selectedIds}`;
-                    window.location.href = url;
-                }
-            });
-        }
-
-        if (exportSelectedLink) {
-            exportSelectedLink.addEventListener('click', function(e) {
-                if (this.classList.contains('disabled')) return;
-                e.preventDefault();
-                const selectedIds = Array.from(document.querySelectorAll('.row-checkbox:checked')).map(cb => cb.value).join(',');
-
-                if (selectedIds) {
-                    let url = `{{ route('admin.kepegawaian.tendik.export.excel') }}?ids=${selectedIds}`;
-                    const currentUrl = new URL(window.location.href);
-                    currentUrl.searchParams.delete('ids');
-
-                    let finalUrl = url;
-                    if(currentUrl.search) {
-                         finalUrl += '&' + currentUrl.search.substring(1);
-                    }
-                    window.location.href = finalUrl;
-                }
-            });
-        }
-
-        handleCheckboxChange();
+        initCheckboxListeners();
     });
 </script>
 @endpush
