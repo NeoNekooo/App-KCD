@@ -99,6 +99,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
 
         // Arsip Surat
         Route::resource('arsip-surat', ArsipSuratController::class)->only(['index', 'destroy']);
+        Route::get('arsip-surat/{id}/cetak', [ArsipSuratController::class, 'cetak'])->name('arsip-surat.cetak');
     });
 
     // Halaman Under Construction
