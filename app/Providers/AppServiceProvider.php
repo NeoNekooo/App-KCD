@@ -4,42 +4,86 @@ namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Pagination\Paginator;
-use App\Models\ProfilSekolah;
-use App\Models\KontakPpdb;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
+
+// --- IMPORT MODEL ---
+use App\Models\ProfilSekolah;
+use App\Models\KontakPpdb;
+use App\Models\PengajuanSekolah; 
 
 class AppServiceProvider extends ServiceProvider
 {
-    /**
-     * Register any application services.
-     */
-    public function register(): void
-    {
-        //
-    }
+    public function register(): void { }
 
-    /**
-     * Bootstrap any application services.
-     */
     public function boot(): void
     {
         Paginator::useBootstrapFive();
-
-        // Mengatur lokal default untuk Carbon (penanganan tanggal & waktu) ke Bahasa Indonesia
         Carbon::setLocale('id');
 
-        // Mengirim data ProfilSekolah ke semua view
+        // 1. GLOBAL VARIABLE: PROFIL SEKOLAH
         if (Schema::hasTable('profil_sekolahs')) {
-            $profilSekolah = ProfilSekolah::first();
-            view()->share('profilSekolah', $profilSekolah);
+            try {
+                view()->share('profilSekolah', ProfilSekolah::first());
+            } catch (\Exception $e) {}
         }
 
-        // Mengirim data KontakPpdb ke semua view
+        // 2. GLOBAL VARIABLE: KONTAK PPDB
         if (Schema::hasTable('kontak_ppdbs')) {
-            $kontakPpdb = KontakPpdb::first();
-            view()->share('kontakPpdb', $kontakPpdb);
+            try {
+                view()->share('kontakPpdb', KontakPpdb::first());
+            } catch (\Exception $e) {}
         }
+
+        /* |--------------------------------------------------------------------------
+        | 3. GLOBAL BADGES (NOTIF: PROSES & VERIFIKASI BERKAS)
+        |--------------------------------------------------------------------------
+        */
+        View::composer('*', function ($view) {
+            
+            $notif_data = [];
+
+            if (Auth::check()) {
+                
+                // Status yang dianggap butuh tindakan Admin KCD
+                $statusPerluTindakan = ['Proses', 'Verifikasi Berkas']; 
+
+                // Query Hitung per Kategori
+                $countKP = PengajuanSekolah::where('kategori', 'LIKE', '%kenaikan pangkat%')
+                            ->whereIn('status', $statusPerluTindakan)->count();
+
+                $countKGB = PengajuanSekolah::where('kategori', 'LIKE', '%kgb%')
+                            ->whereIn('status', $statusPerluTindakan)->count();
+
+                $countMutasi = PengajuanSekolah::where('kategori', 'LIKE', '%mutasi%')
+                            ->whereIn('status', $statusPerluTindakan)->count();
+
+                $countRelokasi = PengajuanSekolah::where('kategori', 'LIKE', '%relokasi%')
+                            ->whereIn('status', $statusPerluTindakan)->count();
+                
+                $countSatya = PengajuanSekolah::where('kategori', 'LIKE', '%satya%')
+                            ->whereIn('status', $statusPerluTindakan)->count();
+
+                $countHukdis = PengajuanSekolah::where('kategori', 'LIKE', '%hukuman%')
+                            ->whereIn('status', $statusPerluTindakan)->count();
+
+                // Hitung Total untuk Menu Parent 'Layanan GTK'
+                $totalLayanan = $countKP + $countKGB + $countMutasi + $countRelokasi + $countSatya + $countHukdis;
+
+                $notif_data = [
+                    'total_layanan_gtk' => $totalLayanan, 
+                    'notif_kp'       => $countKP,
+                    'notif_kgb'      => $countKGB,
+                    'notif_mutasi'   => $countMutasi,
+                    'notif_relokasi' => $countRelokasi,
+                    'notif_satya'    => $countSatya,
+                    'notif_hukdis'   => $countHukdis,
+                ];
+            }
+
+            $view->with('notif_data', $notif_data);
+        });
     }
 }

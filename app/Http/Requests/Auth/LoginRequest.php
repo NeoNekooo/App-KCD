@@ -5,106 +5,84 @@ namespace App\Http\Requests\Auth;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
-use App\Models\Pengguna;
-use Illuminate\Support\Facades\DB;
-
 
 class LoginRequest extends FormRequest
 {
+    /**
+     * Tentukan apakah user diizinkan membuat request ini.
+     */
     public function authorize(): bool
     {
         return true;
     }
 
+    /**
+     * Aturan validasi input login.
+     */
     public function rules(): array
     {
         return [
-            'username'         => ['required', 'string'],
-            'password'         => ['required', 'string'],
-            'tahun_pelajaran'  => ['required', 'string'],
+            'username' => ['required', 'string'],
+            'password' => ['required', 'string'],
+            // Validasi tahun_pelajaran dihapus karena inputnya di-hide/dihapus di view
+            // 'tahun_pelajaran' => ['required', 'string'], 
         ];
     }
 
+    /**
+     * Proses autentikasi user.
+     */
     public function authenticate(): void
     {
-        // ==================================================
-        // RATE LIMIT
-        // ==================================================
+        // 1. Cek Rate Limiter (Mencegah Brute Force Attack)
         $this->ensureIsNotRateLimited();
 
+        // 2. Ambil kredensial (username & password)
         $credentials = $this->only('username', 'password');
 
-        // ==================================================
-        // AMBIL USER
-        // ==================================================
-       $user = Pengguna::where('username', $credentials['username'])->first();
+        // 3. PROSES LOGIN (Menggunakan Tabel 'users')
+        // Auth::attempt otomatis mengecek ke tabel users, mencocokkan username,
+        // dan memverifikasi password yang di-hash.
+        if (! Auth::attempt($credentials, $this->boolean('remember'))) {
+            
+            // Jika gagal, catat percobaan login
+            RateLimiter::hit($this->throttleKey());
 
-
-        if (!$user) {
+            // Lempar error validasi ke view
             throw ValidationException::withMessages([
                 'username' => trans('auth.failed'),
             ]);
         }
 
-        // ==================================================
-        // VALIDASI PASSWORD (SATU-SATUNYA JALUR)
-        // ==================================================
-        //dd('Input: ' . $credentials['password'], 'Database: ' . $user->password);
-        $hashedPassword = str_replace('$2b$', '$2y$', $user->password);
-        if (!Hash::check($credentials['password'], $hashedPassword)) {
-            throw ValidationException::withMessages([
-                'username' => trans('auth.failed'),
-            ]);
-        }
+        // 4. Jika login berhasil, ambil data user
+        $user = Auth::user();
 
+        // 5. Bersihkan counter Rate Limiter
+        RateLimiter::clear($this->throttleKey());
 
-
-        // ==================================================
-        // LOGIN
-        // ==================================================
-       Auth::login($user, $this->boolean('remember'));
-
-        // ==================================================
-        // ROLE & SESSION
-        // ==================================================
-        $role               = $user->peran_id_str;
-        $sub_role           = null;
-        $peserta_didik_id   = null;
-
-        // === PTK ===
-        if ($role === 'PTK' && $user->ptk_id) {
-            $gtk = DB::table('gtks')
-                ->where('ptk_id', $user->ptk_id)
-                ->first();
-
-            if ($gtk) {
-                $sub_role = $gtk->jenis_ptk_id_str;
-            }
-        }
-
-        // === PESERTA DIDIK ===
-        if ($role === 'Peserta Didik' && $user->peserta_didik_id) {
-            $peserta_didik_id = $user->peserta_didik_id;
-        }
-
-        // ==================================================
-        // SET SESSION FINAL
-        // ==================================================
+        // 6. SETUP SESSION (Penting untuk hak akses di aplikasi)
+        // Kita set session berdasarkan data dari tabel users
         session([
-            'role'             => $role,
-            'sub_role'         => $sub_role,
-            'ptk_id'           => $user->ptk_id,
-            'peserta_didik_id' => $peserta_didik_id,
+            'role'             => $user->role, // Role: 'Admin', 'Kepala', 'Staff', dll.
+            'user_id'          => $user->id,
+            'nama'             => $user->name,
+            // Nilai default untuk kompatibilitas sistem lama (bisa disesuaikan nanti)
+            'sub_role'         => null,
+            'ptk_id'           => null,
+            'peserta_didik_id' => null,
+            'tahun_pelajaran'  => '2025/2026 Ganjil', // Default Tapel
         ]);
     }
 
+    /**
+     * Memastikan user tidak terkena limit login (terlalu banyak percobaan gagal).
+     */
     public function ensureIsNotRateLimited(): void
     {
-        if (!RateLimiter::tooManyAttempts($this->throttleKey(), 5)) {
+        if (! RateLimiter::tooManyAttempts($this->throttleKey(), 5)) {
             return;
         }
 
@@ -120,13 +98,11 @@ class LoginRequest extends FormRequest
         ]);
     }
 
+    /**
+     * Key unik untuk Rate Limiter (berdasarkan username + IP address).
+     */
     public function throttleKey(): string
     {
-        return Str::lower($this->input('username')) . '|' . $this->ip();
-    }
-
-    protected function guard()
-    {
-        return Auth::guard('web');
+        return Str::transliterate(Str::lower($this->input('username')).'|'.$this->ip());
     }
 }

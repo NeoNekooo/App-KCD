@@ -13,20 +13,21 @@ class Instansi extends Model
     
     protected $fillable = [
         'nama_instansi',
-        'nama_brand',   // <-- KCD ENAM
+        'nama_brand',
         'nama_kepala',
         'nip_kepala',
-        'alamat',       // <-- Alamat Lengkap (termasuk Kab/Kota)
-        'peta',         // <-- Embed Maps
+        'alamat',
+        'peta',
         'email',
         'telepon',
         'website',
-        'social_media', // <-- JSON Sosmed
+        'social_media',
         'logo',
         'visi',
         'misi'
     ];
 
+    // INI KUNCINYA: Otomatis convert Array PHP <-> JSON Database
     protected $casts = [
         'social_media' => 'array',
     ];

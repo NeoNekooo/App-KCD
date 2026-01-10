@@ -21,6 +21,9 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        // --- TAMBAHIN DUA INI BRE ---
+        'username',
+        'role',
     ];
 
     /**

@@ -23,34 +23,39 @@ class InstansiController extends Controller
     {
         $instansi = Instansi::first();
 
-        // 1. Validasi Input (Termasuk field baru)
+        // 1. Validasi Input
         $request->validate([
             'nama_instansi' => 'required|string|max:255',
-            'nama_brand'    => 'nullable|string|max:255', // <-- Baru
-            'peta'          => 'nullable|string',         // <-- Baru (Embed HTML)
-            'social_media'  => 'nullable|array',          // <-- Baru (Array dari form)
+            'nama_brand'    => 'nullable|string|max:255',
+            'peta'          => 'nullable|string',
+            'social_media'  => 'nullable|array', // Validasi array
             'logo'          => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
         ]);
 
-        // 2. Ambil semua data input kecuali logo
-        // Note: 'social_media' akan otomatis masuk sebagai array.
-        // Karena di Model sudah ada protected $casts = ['social_media' => 'array'],
-        // Laravel otomatis mengubahnya jadi JSON saat disimpan ke DB.
-        $data = $request->except(['logo']);
+        // 2. Ambil data input KECUALI logo & social_media (kita olah manual)
+        $data = $request->except(['logo', 'social_media']);
 
-        // 3. Handle Upload Logo
+        // 3. FIX: Rapikan Array Social Media biar jadi JSON Array [{}, {}]
+        // Kalau gak diginiin, nanti jadinya Object JSON {"1": {}, "2": {}} dan error di JS
+        if ($request->has('social_media')) {
+            $data['social_media'] = array_values($request->input('social_media'));
+        } else {
+            $data['social_media'] = []; // Kalau kosong, simpan array kosong
+        }
+
+        // 4. Handle Upload Logo
         if ($request->hasFile('logo')) {
-            // Hapus logo lama jika ada & file benar-benar ada di storage
+            // Hapus logo lama jika ada & file benar-benar ada
             if ($instansi->logo && Storage::disk('public')->exists($instansi->logo)) {
                 Storage::disk('public')->delete($instansi->logo);
             }
             
-            // Simpan logo baru ke folder 'public/logos'
+            // Simpan logo baru
             $path = $request->file('logo')->store('logos', 'public');
             $data['logo'] = $path;
         }
 
-        // 4. Simpan Perubahan
+        // 5. Simpan Perubahan
         $instansi->update($data);
 
         return redirect()->back()->with('success', 'Profil Instansi berhasil diperbarui!');

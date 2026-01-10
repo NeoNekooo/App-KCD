@@ -3,14 +3,34 @@
 use Illuminate\Support\Facades\Route;
 
 /* =========================================================
-| ACTIVE CHECK
+| ACTIVE CHECK (FIXED: CEK ROUTE + PARAMETER)
 ========================================================= */
 if (!function_exists('menuIsActive')) {
     function menuIsActive(array $menu): bool
     {
-        return !empty($menu['route'])
-            && Route::has($menu['route'])
-            && request()->routeIs($menu['route']);
+        // 1. Validasi dasar: Route harus ada dan terdaftar
+        if (empty($menu['route']) || !Route::has($menu['route'])) {
+            return false;
+        }
+
+        // 2. Cek apakah Nama Route cocok dengan URL saat ini
+        if (!request()->routeIs($menu['route'])) {
+            return false;
+        }
+
+        // 3. CEK PARAMETER (PENTING untuk filter kategori)
+        if (!empty($menu['params'])) {
+            $currentParams = request()->route()->parameters();
+
+            foreach ($menu['params'] as $key => $value) {
+                // Bandingkan parameter di URL dengan parameter di config
+                if (!isset($currentParams[$key]) || $currentParams[$key] != $value) {
+                    return false; 
+                }
+            }
+        }
+
+        return true;
     }
 }
 
@@ -32,7 +52,7 @@ if (!function_exists('menuHasActiveChild')) {
 }
 
 /* =========================================================
-| ACCESS CHECK (* + !exclude SUPPORT)
+| ACCESS CHECK
 ========================================================= */
 if (!function_exists('canAccessMenu')) {
     function canAccessMenu(
@@ -48,44 +68,29 @@ if (!function_exists('canAccessMenu')) {
             ? ($subRoleMap[$subRole] ?? [])
             : ($roleMap[$role] ?? []);
 
-        if (empty($allowed)) {
-            return false;
-        }
+        if (empty($allowed)) return false;
 
-        // explicit exclude: !slug
-        if (in_array('!' . $slug, $allowed, true)) {
-            return false;
-        }
+        if (in_array('!' . $slug, $allowed, true)) return false;
 
-        // wildcard full access
-        if (in_array('*', $allowed, true)) {
-            return true;
-        }
+        if (in_array('*', $allowed, true)) return true;
 
-        // menu induk
         if ($parentSlug === null) {
             return in_array($slug, $allowed, true);
         }
 
-        // menu anak: induk wajib ada
-        if (!in_array($parentSlug, $allowed, true)) {
-            return false;
-        }
+        if (!in_array($parentSlug, $allowed, true)) return false;
 
-        // whitelist anak
         $specificChildren = array_filter(
             $allowed,
             fn ($item) => str_starts_with($item, $parentSlug . '-')
         );
 
-        return empty($specificChildren)
-            ? true
-            : in_array($slug, $specificChildren, true);
+        return empty($specificChildren) ? true : in_array($slug, $specificChildren, true);
     }
 }
 
 /* =========================================================
-| RENDER SIDEBAR (ANTI DOUBLE CLICK)
+| RENDER SIDEBAR (SUPPORT PARAMETERS & BADGES)
 ========================================================= */
 if (!function_exists('renderSidebarMenu')) {
     function renderSidebarMenu(
@@ -95,48 +100,41 @@ if (!function_exists('renderSidebarMenu')) {
         array $roleMap,
         array $subRoleMap,
         array $underConstructionRoutes,
+        array $badges = [], 
         ?string $parentSlug = null
     ): void {
 
         foreach ($menus as $menu) {
-
             $slug = $menu['slug'] ?? null;
 
-            if (
-                $slug &&
-                !canAccessMenu(
-                    $slug,
-                    $parentSlug,
-                    $role,
-                    $subRole,
-                    $roleMap,
-                    $subRoleMap
-                )
-            ) {
+            // 1. Cek Hak Akses
+            if ($slug && !canAccessMenu($slug, $parentSlug, $role, $subRole, $roleMap, $subRoleMap)) {
                 continue;
             }
 
             $hasSub   = !empty($menu['submenu']);
-            $isActive = menuHasActiveChild($menu);
+            $isActive = menuHasActiveChild($menu); 
 
-            $liClass = 'menu-item' . ($isActive ? ' active open' : '');
+            // Kelas CSS (Active Open untuk parent yang punya anak aktif)
+            $liClass = 'menu-item' . ($isActive ? ' active' : '') . ($hasSub && $isActive ? ' open' : '');
             $aClass  = 'menu-link' . ($hasSub ? ' menu-toggle' : '');
 
-            /* ================= HREF (URUTAN WAJIB) ================= */
+            // 2. Logic Href
             if ($hasSub) {
-                // dropdown WAJIB void
                 $href = 'javascript:void(0);';
-            } elseif (
-                !empty($menu['route']) &&
-                in_array($menu['route'], $underConstructionRoutes, true)
-            ) {
+            } elseif (!empty($menu['route']) && in_array($menu['route'], $underConstructionRoutes, true)) {
                 $href = 'javascript:void(0);';
             } elseif (!empty($menu['route']) && Route::has($menu['route'])) {
-                $href = route($menu['route']);
+                try {
+                    $href = route($menu['route'], $menu['params'] ?? []);
+                } catch (\Exception $e) {
+                    $href = '#'; 
+                }
             } else {
-                $href = '#';
+                $href = $menu['url'] ?? '#';
             }
 
+            // 3. Render HTML
             echo "<li class='{$liClass}'>";
             echo "<a href='{$href}' class='{$aClass}'>";
 
@@ -144,9 +142,17 @@ if (!function_exists('renderSidebarMenu')) {
                 echo "<i class='menu-icon tf-icons {$menu['icon']}'></i>";
             }
 
-            echo "<div>{$menu['title']}</div>";
+            echo "<div data-i18n='{$menu['title']}'>{$menu['title']}</div>";
+
+            // LOGIC BADGE (Dukungan notif_data)
+            if (isset($menu['badge_key']) && !empty($badges[$menu['badge_key']])) {
+                $count = $badges[$menu['badge_key']];
+                echo "<div class='badge bg-danger rounded-pill ms-auto'>{$count}</div>";
+            }
+
             echo "</a>";
 
+            // 4. Render Submenu (Rekursif)
             if ($hasSub) {
                 echo "<ul class='menu-sub'>";
                 renderSidebarMenu(
@@ -156,6 +162,7 @@ if (!function_exists('renderSidebarMenu')) {
                     $roleMap,
                     $subRoleMap,
                     $underConstructionRoutes,
+                    $badges,
                     $slug
                 );
                 echo "</ul>";

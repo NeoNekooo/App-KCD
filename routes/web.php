@@ -8,18 +8,24 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\InstansiController;
 
-// --- Controller Monitoring ---
+// --- Controller Internal KCD ---
+use App\Http\Controllers\Admin\Kepegawaian\PegawaiKcdController;
+
+// --- Controller Monitoring (Data Sekolah/GTK) ---
 use App\Http\Controllers\Admin\Sekolah\SekolahController as SekolahMonitoringController;
 use App\Http\Controllers\Admin\Kepegawaian\GtkController;
 use App\Http\Controllers\Admin\Kesiswaan\SiswaController;
 
-// --- Controller Administrasi ---
+// --- Controller Administrasi Internal KCD ---
 use App\Http\Controllers\Admin\Administrasi\TipeSuratController;
 use App\Http\Controllers\Admin\Administrasi\SuratKeluarSiswaController;
 use App\Http\Controllers\Admin\Administrasi\SuratKeluarGuruController;
 use App\Http\Controllers\Admin\Administrasi\SuratMasukController;
 use App\Http\Controllers\Admin\Administrasi\NomorSuratSettingController;
 use App\Http\Controllers\Admin\Administrasi\ArsipSuratController;
+
+// --- Controller Verifikasi & Layanan GTK ---
+use App\Http\Controllers\Admin\VerifikasiController;
 
 /*
 |--------------------------------------------------------------------------
@@ -37,7 +43,7 @@ Route::get('/', function () {
 
 /*
 |--------------------------------------------------------------------------
-| PANEL ADMIN
+| PANEL ADMIN KCD
 |--------------------------------------------------------------------------
 */
 Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () {
@@ -47,57 +53,72 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
 
     // 2. PROFIL INSTANSI
     Route::controller(InstansiController::class)->prefix('profil-instansi')->name('instansi.')->group(function () {
+        Route::get('/', 'index')->name('index'); // Tambah Route::
+        Route::put('/', 'update')->name('update'); // Tambah Route::
+    });
+
+    /*
+    |--------------------------------------------------------------------------
+    | 2.5 MANAJEMEN PEGAWAI INTERNAL KCD
+    |--------------------------------------------------------------------------
+    */
+    Route::prefix('kcd/pegawai')->name('kcd.pegawai.')->controller(PegawaiKcdController::class)->group(function() {
         Route::get('/', 'index')->name('index');
-        Route::put('/', 'update')->name('update');
+        Route::post('/', 'store')->name('store');
+        Route::put('/{id}', 'update')->name('update');
+        Route::delete('/{id}', 'destroy')->name('destroy');
+        Route::put('/{id}/reset', 'resetPassword')->name('reset');
     });
 
     // 3. SATUAN PENDIDIKAN
-    // Route Export ditaruh SEBELUM resource agar tidak dianggap ID
     Route::get('sekolah/export-excel', [SekolahMonitoringController::class, 'exportExcel'])->name('sekolah.export-excel');
     Route::resource('sekolah', SekolahMonitoringController::class)->only(['index', 'show']);
 
     // 4. GTK (GURU & TENDIK)
     Route::prefix('gtk')->name('gtk.')->controller(GtkController::class)->group(function () {
-        // List Data
         Route::get('guru', 'indexGuru')->name('guru.index');
         Route::get('tenaga-kependidikan', 'indexTendik')->name('tendik.index');
-        
-        // Detail & Fitur Lain
         Route::get('show-multiple', 'showMultiple')->name('show-multiple'); 
         Route::get('{id}', 'show')->name('show');
     });
 
     // 5. KESISWAAN
     Route::prefix('kesiswaan')->name('kesiswaan.')->group(function() {
-        // --- ROUTE TAMBAHAN (Wajib ditaruh SEBELUM resource) ---
         Route::get('siswa/export-excel', [SiswaController::class, 'exportExcel'])->name('siswa.export-excel');
         Route::get('siswa/show-multiple', [SiswaController::class, 'showMultiple'])->name('siswa.show-multiple');
-        
-        // --- Resource Standar ---
         Route::resource('siswa', SiswaController::class)->only(['index', 'show']);
     });
 
-    // 6. ADMINISTRASI
-    Route::prefix('administrasi')->name('administrasi.')->group(function () {
+    /*
+    |--------------------------------------------------------------------------
+    | 7. LAYANAN GTK & VERIFIKASI SURAT (DINAMIS)
+    |--------------------------------------------------------------------------
+    */
+    // Route Dinamis
+    Route::get('/layanan/{kategori}', [VerifikasiController::class, 'indexByKategori'])
+        ->name('layanan.kategori');
+
+    Route::prefix('verifikasi')->name('verifikasi.')->group(function () {
+        Route::get('/', [VerifikasiController::class, 'index'])->name('index');
         
-        // Tipe Surat
+        // LOGIC 1 & 2
+        Route::post('/{id}/minta-syarat', [VerifikasiController::class, 'kirimPermintaan'])->name('minta_syarat');
+        Route::post('/{id}/simpan-cek', [VerifikasiController::class, 'simpanPemeriksaan'])->name('simpan_cek');
+    });
+
+    // 6. ADMINISTRASI (Surat Internal KCD)
+    Route::prefix('administrasi')->name('administrasi.')->group(function () {
         Route::resource('tipe-surat', TipeSuratController::class);
         
-        // Surat Keluar Siswa
         Route::get('surat-keluar-siswa/get-siswa/{nama_rombel}', [SuratKeluarSiswaController::class, 'getSiswaByKelas'])->name('surat-keluar-siswa.get-siswa');
         Route::resource('surat-keluar-siswa', SuratKeluarSiswaController::class)->only(['index', 'store']);
 
-        // Surat Keluar Guru
         Route::resource('surat-keluar-guru', SuratKeluarGuruController::class)->only(['index', 'store']);
-        
-        // Surat Masuk
         Route::resource('surat-masuk', SuratMasukController::class);
 
-        // Pengaturan Nomor Surat
         Route::post('pengaturan-nomor/reset/{id}', [NomorSuratSettingController::class, 'resetCounter'])->name('pengaturan-nomor.reset');
         Route::resource('pengaturan-nomor', NomorSuratSettingController::class)->except(['create', 'edit', 'show']);
 
-        // Arsip Surat
         Route::resource('arsip-surat', ArsipSuratController::class)->only(['index', 'destroy']);
         Route::get('arsip-surat/{id}/cetak', [ArsipSuratController::class, 'cetak'])->name('arsip-surat.cetak');
     });
