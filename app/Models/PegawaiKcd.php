@@ -9,7 +9,27 @@ class PegawaiKcd extends Model
 {
     use HasFactory;
 
-    protected $guarded = []; // Biar bisa create massal
+    protected $table = 'pegawai_kcds';
+
+    // Kita definisikan $fillable biar aman dan jelas kolom apa aja yang boleh diisi
+    protected $fillable = [
+        'user_id', 
+        'nama', 
+        'nik', 
+        'nip', 
+        'jabatan', 
+        'tempat_lahir', 
+        'tanggal_lahir', 
+        'jenis_kelamin', 
+        'no_hp', 
+        'email_pribadi', 
+        'alamat', 
+        'foto'
+    ];
+
+    protected $casts = [
+        'tanggal_lahir' => 'date',
+    ];
 
     // Relasi ke User Login
     public function user()

@@ -7,11 +7,13 @@ use App\Models\PengajuanSekolah;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log; 
+use Illuminate\Support\Str; // Tambah helper Str
 
 class TerimaPengajuanController extends Controller
 {
     /**
      * STEP 1: Terima Data Awal (Judul & Identitas)
+     * Tugas: Mencatat data baru dari sekolah. SK BELUM ADA di tahap ini.
      */
     public function terimaRequestAwal(Request $request)
     {
@@ -24,7 +26,7 @@ class TerimaPengajuanController extends Controller
         // 2. Validasi Input
         $validator = Validator::make($request->all(), [
             'uuid'         => 'required|uuid',
-            'npsn'         => 'required|string|max:10', // Pakai string untuk jaga-jaga angka 0 di depan
+            'npsn'         => 'required|string|max:10',
             'nama_sekolah' => 'required|string|max:255',
             'nama_guru'    => 'required|string|max:255',
             'nip'          => 'nullable|string|max:50',
@@ -38,9 +40,9 @@ class TerimaPengajuanController extends Controller
         }
 
         try {
-            // 3. Normalisasi Kategori (PENTING!)
-            // Kita buat jadi UPPERCASE biar konsisten saat difilter di Sidebar Admin KCD
-            $kategoriInput = strtoupper(trim($request->kategori));
+            // 3. Normalisasi Kategori jadi Slug (Biar Rapi di DB)
+            // Contoh: "Kenaikan Pangkat" -> "kenaikan-pangkat"
+            $kategoriSlug = Str::slug($request->kategori); 
 
             // 4. Simpan / Update Data
             PengajuanSekolah::updateOrCreate(
@@ -50,14 +52,14 @@ class TerimaPengajuanController extends Controller
                     'nama_sekolah' => $request->nama_sekolah,
                     'nama_guru'    => $request->nama_guru,
                     'nip'          => $request->nip,
-                    'kategori'     => $kategoriInput, // Simpan yang sudah di-uppercase
+                    'kategori'     => $kategoriSlug, // Simpan format slug
                     'judul'        => $request->judul,
                     'url_callback' => $request->url_callback,
                     'status'       => 'Proses', 
                 ]
             );
 
-            Log::info("API: Pengajuan Diterima - Kategori: {$kategoriInput}, UUID: {$request->uuid}");
+            Log::info("API: Pengajuan Diterima - Kategori: {$kategoriSlug}, UUID: {$request->uuid}");
             
             return response()->json([
                 'status' => 'success', 
@@ -72,6 +74,7 @@ class TerimaPengajuanController extends Controller
 
     /**
      * STEP 2: Terima Update Berkas
+     * Tugas: Menerima file syarat. SK JUGA BELUM ADA di tahap ini.
      */
     public function terimaBerkas(Request $request)
     {

@@ -1,294 +1,428 @@
 @extends('layouts.admin')
 
 @section('content')
-<div class="container-xxl flex-grow-1 container-p-y">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h4 class="fw-bold py-3 mb-0">Pegawai KCD</h4>
-        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalTambah">
-            <i class='bx bx-user-plus me-1'></i> Tambah Pegawai
-        </button>
-    </div>
+    <div class="container-xxl flex-grow-1 container-p-y">
 
-    {{-- ALERT SUKSES/ERROR --}}
-    @if (session('success'))
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            <i class='bx bx-check-circle me-1'></i> {!! session('success') !!}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    @endif
-    @if (session('error'))
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            <i class='bx bx-error me-1'></i> {{ session('error') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    @endif
+        {{-- 1. HERO SECTION (Compact Style) --}}
+        <div class="row g-3 mb-4">
+            {{-- Kiri: Judul & Deskripsi --}}
+            <div class="col-md-8">
+                <div class="card border-0 shadow-sm h-100 overflow-hidden"
+                    style="background: linear-gradient(120deg, #696cff, #8592a3); border-radius: 12px;">
+                    <div class="card-body d-flex align-items-center text-white p-3">
+                        <div class="me-3 rounded d-flex align-items-center justify-content-center"
+                            style="width: 48px; height: 48px; min-width: 48px; background: rgba(255, 255, 255, 0.2);">
+                            <i class='bx bx-id-card text-white' style="font-size: 1.5rem;"></i>
+                        </div>
+                        <div class="overflow-hidden">
+                            <h5 class="text-white fw-bold mb-0 text-nowrap">Pegawai KCD</h5>
+                            <small class="text-white opacity-75 text-nowrap">Kelola data kepegawaian & akses login.</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-    {{-- ALERT VALIDASI --}}
-    @if ($errors->any())
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            <strong><i class='bx bx-error-circle'></i> Gagal Menyimpan Data:</strong>
-            <ul class="mb-0 mt-2">
-                @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            {{-- Kanan: Statistik Ringkas --}}
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm h-100" style="border-radius: 12px;">
+                    <div class="card-body p-3 d-flex align-items-center justify-content-between">
+                        <div>
+                            <span class="d-block text-muted text-uppercase fw-bold" style="font-size: 0.7rem;">Total
+                                Aktif</span>
+                            <h4 class="mb-0 fw-bolder text-primary">{{ $pegawais->total() }}</h4>
+                        </div>
+                        <div class="avatar avatar-md">
+                            <span
+                                class="avatar-initial rounded bg-label-primary d-flex align-items-center justify-content-center">
+                                <i class="bx bx-user fs-4"></i>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-    @endif
 
-    <div class="card">
-        <div class="table-responsive text-nowrap">
-            <table class="table table-hover align-middle">
-                <thead class="table-light">
-                    <tr>
-                        <th>Nama / NIP</th>
-                        <th>Jabatan</th>
-                        <th>Username Login</th>
-                        <th class="text-center" width="15%">Aksi</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse($pegawais as $item)
+        {{-- 2. MAIN CARD (Action + Table Gabung) --}}
+        <div class="card border-0 shadow-lg" style="border-radius: 12px;">
+
+            {{-- Header: Search & Buttons --}}
+            <div class="card-header bg-white py-3 border-bottom">
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
+                    <div class="input-group input-group-merge rounded-pill" style="max-width: 300px;">
+                        <span class="input-group-text border-light bg-light ps-3"><i
+                                class="bx bx-search text-muted"></i></span>
+                        <input type="text" class="form-control border-light bg-light shadow-none"
+                            placeholder="Cari Pegawai..." id="searchPegawai">
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-sm btn-label-secondary fw-semibold rounded-pill" data-bs-toggle="modal"
+                            data-bs-target="#modalGantiPass">
+                            <i class='bx bx-lock-alt me-1'></i> Password Saya
+                        </button>
+                        <button class="btn btn-sm btn-primary fw-bold rounded-pill shadow-sm px-3" data-bs-toggle="modal"
+                            data-bs-target="#modalTambah">
+                            <i class='bx bx-plus me-1'></i> Tambah Baru
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Table Content --}}
+            <div class="table-responsive text-nowrap">
+                <table class="table table-hover align-middle table-borderless">
+                    <thead class="bg-light">
                         <tr>
-                            <td>
-                                <div class="fw-bold text-dark">{{ $item->nama }}</div>
-                                <div class="small text-muted">{{ $item->nip ?? 'Tanpa NIP' }}</div>
-                            </td>
-                            <td>
-                                <span class="badge bg-label-primary">{{ $item->jabatan }}</span>
-                            </td>
-                            <td>
-                                @if($item->user)
-                                    <span class="badge bg-label-success">
-                                        <i class='bx bx-user me-1'></i> {{ $item->user->username }}
+                            <th class="ps-4 py-3 text-uppercase small fw-bold text-muted">Pegawai</th>
+                            <th class="py-3 text-uppercase small fw-bold text-muted">Jabatan</th>
+                            <th class="py-3 text-uppercase small fw-bold text-muted">Kontak</th>
+                            <th class="py-3 text-uppercase small fw-bold text-muted">Akun Login</th>
+                            <th class="pe-4 py-3 text-end text-uppercase small fw-bold text-muted">Opsi</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white">
+                        @forelse($pegawais as $item)
+                            <tr class="border-bottom hover-bg-soft">
+                                {{-- Nama & NIP --}}
+                                <td class="ps-4">
+                                    <div class="d-flex align-items-center" style="max-width: 100%;">
+                                        <div class="avatar avatar-sm me-2 flex-shrink-0">
+                                            @if ($item->foto && Storage::disk('public')->exists($item->foto))
+                                                <img src="{{ Storage::url($item->foto) }}" alt="Avatar"
+                                                    class="rounded-circle" style="object-fit: cover;">
+                                            @else
+                                                <span
+                                                    class="avatar-initial rounded-circle bg-label-primary fw-bold d-flex align-items-center justify-content-center">
+                                                    {{ substr($item->nama, 0, 1) }}
+                                                </span>
+                                            @endif
+                                        </div>
+                                        <div class="d-flex flex-column text-truncate">
+                                            <a href="{{ route('admin.kepegawaian.show', $item->id) }}"
+                                                class="fw-bold text-dark text-truncate text-decoration-none hover-primary"
+                                                title="Lihat Detail">
+                                                {{ $item->nama }}
+                                            </a>
+                                            <small class="text-muted font-monospace"
+                                                style="font-size: 0.75rem;">{{ $item->nip ?? '-' }}</small>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                {{-- Jabatan --}}
+                                <td>
+                                    <span class="badge bg-label-info rounded px-2 text-uppercase fw-bold"
+                                        style="font-size: 0.65rem;">
+                                        {{ $item->jabatan }}
                                     </span>
-                                @else
-                                    <span class="badge bg-label-danger">No Access</span>
-                                @endif
-                            </td>
-                            
-                            {{-- KOLOM AKSI (BUTTONS) --}}
-                            <td class="text-center">
-                                <div class="btn-group" role="group">
-                                    {{-- TOMBOL EDIT --}}
-                                    <button type="button" class="btn btn-sm btn-warning" 
-                                            data-bs-toggle="modal" 
-                                            data-bs-target="#modalEdit{{ $item->id }}"
-                                            data-bs-placement="top" 
-                                            title="Edit Data">
-                                        <i class="bx bx-edit-alt"></i>
-                                    </button>
+                                </td>
 
-                                    {{-- TOMBOL RESET PASSWORD --}}
-                                    <form action="{{ route('admin.kcd.pegawai.reset', $item->id) }}" method="POST" class="d-inline">
-                                        @csrf @method('PUT')
-                                        <button type="submit" class="btn btn-sm btn-info" 
-                                                onclick="return confirm('Yakin reset password jadi kcd123?')"
-                                                data-bs-toggle="tooltip" 
-                                                data-bs-placement="top" 
-                                                title="Reset Password (kcd123)">
-                                            <i class="bx bx-key"></i>
+                                {{-- Kontak --}}
+                                <td>
+                                    @if ($item->no_hp)
+                                        <a href="https://wa.me/{{ $item->no_hp }}" target="_blank"
+                                            class="text-body d-inline-flex align-items-center text-decoration-none">
+                                            <i class='bx bxl-whatsapp text-success me-1'></i>
+                                            <span class="small">{{ $item->no_hp }}</span>
+                                        </a>
+                                    @else
+                                        <span class="text-muted small">-</span>
+                                    @endif
+                                </td>
+
+                                {{-- Status Akun --}}
+                                <td>
+                                    @if ($item->user)
+                                        <div class="d-flex align-items-center gap-1">
+                                            <div class="badge badge-dot bg-success"></div>
+                                            <small class="text-muted">{{ $item->user->username }}</small>
+                                        </div>
+                                    @else
+                                        <div class="badge badge-dot bg-danger"></div> <small class="text-muted">No
+                                            User</small>
+                                    @endif
+                                </td>
+
+                                {{-- Opsi --}}
+                                <td class="pe-4 text-end">
+                                    <div class="dropdown">
+                                        <button type="button"
+                                            class="btn btn-sm btn-icon btn-light rounded-circle shadow-sm dropdown-toggle hide-arrow"
+                                            data-bs-toggle="dropdown">
+                                            <i class="bx bx-dots-vertical-rounded text-muted"></i>
                                         </button>
-                                    </form>
-
-                                    {{-- TOMBOL HAPUS --}}
-                                    <form action="{{ route('admin.kcd.pegawai.destroy', $item->id) }}" method="POST" class="d-inline">
-                                        @csrf @method('DELETE')
-                                        <button type="submit" class="btn btn-sm btn-danger" 
-                                                onclick="return confirm('Hapus pegawai {{ $item->nama }}? Akun login juga akan terhapus.')"
-                                                data-bs-toggle="tooltip" 
-                                                data-bs-placement="top" 
-                                                title="Hapus Pegawai">
-                                            <i class="bx bx-trash"></i>
-                                        </button>
-                                    </form>
-                                </div>
-
-                                {{-- MODAL EDIT (Hidden) --}}
-                                <div class="modal fade" id="modalEdit{{ $item->id }}" tabindex="-1" aria-hidden="true">
-                                    <div class="modal-dialog modal-dialog-centered">
-                                        <div class="modal-content">
-                                            <div class="modal-header">
-                                                <h5 class="modal-title">Edit Pegawai</h5>
-                                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                            </div>
-                                            <form action="{{ route('admin.kcd.pegawai.update', $item->id) }}" method="POST">
+                                        <div class="dropdown-menu dropdown-menu-end border-0 shadow-lg p-1">
+                                            <a class="dropdown-item py-2 small"
+                                                href="{{ route('admin.kepegawaian.show', $item->id) }}">
+                                                <i class="bx bx-show me-2 text-primary"></i> Detail Profil
+                                            </a>
+                                            <a class="dropdown-item py-2 small" href="javascript:void(0);"
+                                                data-bs-toggle="modal" data-bs-target="#modalEdit{{ $item->id }}">
+                                                <i class="bx bx-edit-alt me-2 text-warning"></i> Edit Cepat
+                                            </a>
+                                            <div class="dropdown-divider my-1"></div>
+                                            <form action="{{ route('admin.kepegawaian.reset', $item->id) }}" method="POST"
+                                                class="d-inline">
                                                 @csrf @method('PUT')
-                                                <div class="modal-body text-start">
-                                                    <div class="mb-3">
-                                                        <label class="form-label">Nama Lengkap</label>
-                                                        <input type="text" name="nama" class="form-control" value="{{ old('nama', $item->nama) }}" required>
-                                                    </div>
-                                                    <div class="mb-3">
-                                                        <label class="form-label">NIP</label>
-                                                        <input type="text" name="nip" class="form-control" value="{{ old('nip', $item->nip) }}">
-                                                    </div>
-                                                    <div class="mb-3">
-                                                        <label class="form-label">Jabatan</label>
-                                                        <select name="jabatan" class="form-select" required>
-                                                            @foreach(['Administrator', 'Kepala', 'Kasubag', 'Kepegawaian', 'Kesiswaan', 'Sarpras', 'Divisi IT', 'Staff'] as $jab)
-                                                                <option value="{{ $jab }}" {{ $item->jabatan == $jab ? 'selected' : '' }}>{{ $jab }}</option>
-                                                            @endforeach
-                                                        </select>
-                                                    </div>
-                                                    <div class="mb-3">
-                                                        <label class="form-label">No HP</label>
-                                                        <input type="text" name="no_hp" class="form-control" value="{{ old('no_hp', $item->no_hp) }}">
-                                                    </div>
-                                                </div>
-                                                <div class="modal-footer">
-                                                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
-                                                    <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
-                                                </div>
+                                                <button type="submit" class="dropdown-item py-2 small"
+                                                    onclick="return confirm('Reset password jadi kcd123?')">
+                                                    <i class="bx bx-key me-2 text-info"></i> Reset Pass
+                                                </button>
+                                            </form>
+                                            <form action="{{ route('admin.kepegawaian.destroy', $item->id) }}"
+                                                method="POST" class="d-inline">
+                                                @csrf @method('DELETE')
+                                                <button type="submit" class="dropdown-item py-2 small text-danger"
+                                                    onclick="return confirm('Hapus permanen?')">
+                                                    <i class="bx bx-trash me-2"></i> Hapus
+                                                </button>
                                             </form>
                                         </div>
                                     </div>
+
+                                    {{-- MODAL EDIT CEPAT --}}
+                                    <div class="modal fade" id="modalEdit{{ $item->id }}" tabindex="-1"
+                                        aria-hidden="true">
+                                        <div class="modal-dialog modal-dialog-centered">
+                                            <div class="modal-content border-0 shadow-lg rounded-4">
+                                                <div class="modal-header border-bottom py-3 bg-light">
+                                                    <h6 class="modal-title fw-bold"><i class="bx bx-edit me-2"></i>Edit
+                                                        Data Utama</h6>
+                                                    <button type="button" class="btn-close"
+                                                        data-bs-dismiss="modal"></button>
+                                                </div>
+                                                <form action="{{ route('admin.kepegawaian.update', $item->id) }}"
+                                                    method="POST">
+                                                    @csrf @method('PUT')
+                                                    <div class="modal-body p-4 text-start">
+                                                        <div class="mb-3">
+                                                            <label class="form-label small fw-bold">Nama Lengkap</label>
+                                                            <input type="text" name="nama" class="form-control"
+                                                                value="{{ $item->nama }}" required>
+                                                        </div>
+                                                        <div class="row g-3">
+                                                            <div class="col-6">
+                                                                <label class="form-label small fw-bold">NIP</label>
+                                                                <input type="text" name="nip" class="form-control"
+                                                                    value="{{ $item->nip }}">
+                                                            </div>
+                                                            <div class="col-6">
+                                                                <label class="form-label small fw-bold">Jabatan</label>
+                                                                <select name="jabatan" class="form-select" required>
+                                                                    @foreach (['Administrator', 'Kepala', 'Kasubag', 'Kepegawaian', 'Kesiswaan', 'Sarpras', 'Divisi IT', 'Staff'] as $jab)
+                                                                        <option value="{{ $jab }}"
+                                                                            {{ $item->jabatan == $jab ? 'selected' : '' }}>
+                                                                            {{ $jab }}</option>
+                                                                    @endforeach
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                        <div class="mt-3">
+                                                            <label class="form-label small fw-bold text-danger">Reset
+                                                                Password (Opsional)</label>
+                                                            <input type="password" name="password"
+                                                                class="form-control form-control-sm"
+                                                                placeholder="Isi password baru...">
+                                                        </div>
+                                                    </div>
+                                                    <div class="modal-footer border-top bg-light py-2">
+                                                        <button type="button"
+                                                            class="btn btn-sm btn-label-secondary rounded-pill"
+                                                            data-bs-dismiss="modal">Batal</button>
+                                                        <button type="submit"
+                                                            class="btn btn-sm btn-primary rounded-pill px-3">Simpan</button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="5" class="text-center py-5">
+                                    <div class="d-flex flex-column align-items-center">
+                                        <i class='bx bx-folder-open text-muted fs-1 opacity-50'></i>
+                                        <small class="mt-2 text-muted">Belum ada data pegawai.</small>
+                                    </div>
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="card-footer border-0 bg-white py-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <small class="text-muted">Total: {{ $pegawais->total() }}</small>
+                    <div class="small-pagination">{{ $pegawais->links() }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- MODAL TAMBAH --}}
+    <div class="modal fade" id="modalTambah" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg rounded-4">
+                <div class="modal-header bg-primary text-white py-3">
+                    <h6 class="modal-title text-white fw-bold"><i class='bx bx-user-plus me-2'></i>Tambah Baru</h6>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <form action="{{ route('admin.kepegawaian.store') }}" method="POST" enctype="multipart/form-data">
+                    @csrf
+                    <div class="modal-body p-4">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold text-muted">Nama Lengkap <span
+                                        class="text-danger">*</span></label>
+                                <input type="text" name="nama" class="form-control" placeholder="Budi Santoso"
+                                    required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold text-muted">NIP / Username</label>
+                                <input type="text" name="nip" class="form-control" placeholder="Isi NIP...">
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold text-muted">Jabatan <span
+                                        class="text-danger">*</span></label>
+                                <select name="jabatan" class="form-select" required>
+                                    <option value="">-- Pilih --</option>
+                                    <option value="Administrator">Administrator</option>
+                                    <option value="Kepala">Kepala</option>
+                                    <option value="Kasubag">Kasubag</option>
+                                    <option value="Kepegawaian">Kepegawaian</option>
+                                    <option value="Kesiswaan">Kesiswaan</option>
+                                    <option value="Sarpras">Sarpras</option>
+                                    <option value="Divisi IT">Divisi IT</option>
+                                    <option value="Staff">Staff</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold text-muted">Jenis Kelamin</label>
+                                <select name="jenis_kelamin" class="form-select" required>
+                                    <option value="L">Laki-laki</option>
+                                    <option value="P">Perempuan</option>
+                                </select>
+                            </div>
+
+                            <div class="col-12 mt-3">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="customPassCheck"
+                                        onclick="toggleCustomPass()">
+                                    <label class="form-check-label small" for="customPassCheck">Buat password manual
+                                        (Default: <b>kcd123</b>)</label>
                                 </div>
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="4" class="text-center py-5">
-                                <img src="{{ asset('assets/img/illustrations/empty.png') }}" alt="Kosong" width="150" class="mb-3" onerror="this.style.display='none'">
-                                <p class="text-muted">Belum ada data pegawai.</p>
-                            </td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-        <div class="card-footer py-3">
-            <div class="d-flex justify-content-end">
-                {{ $pegawais->links() }}
+                                <div class="mt-2 d-none" id="customPassBox">
+                                    <input type="password" name="password" class="form-control"
+                                        placeholder="Min. 6 Karakter">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-top bg-light py-2">
+                        <button type="button" class="btn btn-sm btn-label-secondary rounded-pill"
+                            data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-sm btn-primary rounded-pill px-4 fw-bold">Simpan</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
-</div>
 
-{{-- MODAL TAMBAH --}}
-<div class="modal fade" id="modalTambah" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title text-white">Tambah Pegawai Baru</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <form action="{{ route('admin.kcd.pegawai.store') }}" method="POST">
-                @csrf
-                <div class="modal-body">
-                    <div class="alert alert-primary d-flex align-items-center" role="alert">
-                        <i class='bx bx-info-circle me-2 fs-4'></i>
+    {{-- MODAL GANTI PASSWORD SAYA --}}
+    <div class="modal fade" id="modalGantiPass" tabindex="-1">
+        <div class="modal-dialog modal-sm modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg rounded-4">
+                <div class="modal-header border-bottom py-3">
+                    <h6 class="modal-title fw-bold">Ganti Password</h6>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form action="{{ route('admin.kepegawaian.change-password') }}" method="POST">
+                    @csrf @method('PUT')
+                    <div class="modal-body p-4">
+                        <div class="mb-3">
+                            <label class="form-label small text-muted">Password Lama</label>
+                            <input type="password" name="current_password" class="form-control form-control-sm" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small text-muted">Password Baru</label>
+                            <input type="password" name="new_password" class="form-control form-control-sm" required>
+                        </div>
                         <div>
-                            Akun login akan dibuat otomatis.
+                            <label class="form-label small text-muted">Konfirmasi</label>
+                            <input type="password" name="new_password_confirmation" class="form-control form-control-sm"
+                                required>
                         </div>
                     </div>
-
-                    <div class="mb-3">
-                        <label class="form-label">Nama Lengkap</label>
-                        <input type="text" name="nama" class="form-control" placeholder="Contoh: Budi Santoso" value="{{ old('nama') }}" required>
+                    <div class="modal-footer border-top bg-light py-2">
+                        <button type="submit" class="btn btn-sm btn-dark w-100 rounded-pill">Simpan</button>
                     </div>
-                    
-                    <div class="mb-3">
-                        <label class="form-label">NIP (Username Login)</label>
-                        <input type="text" name="nip" class="form-control" placeholder="Isi NIP atau Kosongkan" value="{{ old('nip') }}">
-                        <div class="form-text text-muted small">Jika kosong, username login akan menggunakan Nama Depan + Angka Acak.</div>
-                    </div>
-
-                    {{-- FITUR PASSWORD CUSTOM / GENERATE --}}
-                    <div class="mb-3">
-                        <label class="form-label">Password Login</label>
-                        <div class="input-group">
-                            <input type="password" name="password" id="inputPassword" class="form-control" placeholder="Isi manual atau generate..." autocomplete="new-password">
-                            
-                            {{-- Tombol Generate --}}
-                            <button type="button" class="btn btn-outline-secondary" onclick="generatePassword()" title="Buat Password Acak" data-bs-toggle="tooltip">
-                                <i class='bx bx-refresh'></i>
-                            </button>
-
-                            {{-- Tombol Lihat Password --}}
-                            <button type="button" class="btn btn-outline-secondary" onclick="togglePasswordVisibility()">
-                                <i class='bx bx-show' id="iconEye"></i>
-                            </button>
-                        </div>
-                        <div class="form-text text-muted small">
-                            Kosongkan jika ingin menggunakan password default: <strong>kcd123</strong>
-                        </div>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label class="form-label">Jabatan / Divisi</label>
-                        <select name="jabatan" class="form-select" required>
-                            <option value="">-- Pilih Jabatan --</option>
-                            <option value="Administrator">Administrator</option>
-                            <option value="Kepala">Kepala</option>
-                            <option value="Kasubag">Kasubag</option>
-                            <option value="Kepegawaian">Kepegawaian</option>
-                            <option value="Kesiswaan">Kesiswaan</option>
-                            <option value="Sarpras">Sarpras</option>
-                            <option value="Divisi IT">Divisi IT</option>
-                            <option value="Staff">Staff</option>
-                        </select>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label class="form-label">No HP / WhatsApp</label>
-                        <input type="text" name="no_hp" class="form-control" placeholder="08..." value="{{ old('no_hp') }}">
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-primary">Simpan & Buat Akun</button>
-                </div>
-            </form>
+                </form>
+            </div>
         </div>
     </div>
-</div>
 
-{{-- SCRIPT GABUNGAN --}}
-<script>
-    document.addEventListener("DOMContentLoaded", function() {
-        // Init Tooltip Bootstrap
-        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[title], [data-bs-toggle="tooltip"]'))
-        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-            return new bootstrap.Tooltip(tooltipTriggerEl)
+    <script>
+        function toggleCustomPass() {
+            var checkBox = document.getElementById("customPassCheck");
+            var text = document.getElementById("customPassBox");
+            if (checkBox.checked == true) {
+                text.classList.remove("d-none");
+            } else {
+                text.classList.add("d-none");
+            }
+        }
+
+        // Live Search
+        document.getElementById('searchPegawai').addEventListener('keyup', function() {
+            let value = this.value.toLowerCase();
+            let rows = document.querySelectorAll('tbody tr');
+            rows.forEach(row => {
+                let text = row.innerText.toLowerCase();
+                row.style.display = text.includes(value) ? '' : 'none';
+            });
         });
-    });
+    </script>
 
-    // 1. Fungsi Generate Password Acak
-    function generatePassword() {
-        const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%";
-        const length = 10;
-        let password = "";
-
-        for (let i = 0; i < length; i++) {
-            const randomNumber = Math.floor(Math.random() * chars.length);
-            password += chars.substring(randomNumber, randomNumber + 1);
+    <style>
+        .table-responsive {
+            overflow-x: auto;
         }
 
-        const inputPass = document.getElementById('inputPassword');
-        inputPass.value = password;
-        
-        // Otomatis tampilkan password biar bisa dicopy/dilihat
-        inputPass.type = "text";
-        document.getElementById('iconEye').classList.remove('bx-show');
-        document.getElementById('iconEye').classList.add('bx-hide');
-    }
-
-    // 2. Fungsi Lihat/Sembunyikan Password
-    function togglePasswordVisibility() {
-        const inputPass = document.getElementById('inputPassword');
-        const icon = document.getElementById('iconEye');
-
-        if (inputPass.type === "password") {
-            inputPass.type = "text";
-            icon.classList.remove('bx-show');
-            icon.classList.add('bx-hide');
-        } else {
-            inputPass.type = "password";
-            icon.classList.remove('bx-hide');
-            icon.classList.add('bx-show');
+        .text-truncate {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
-    }
-</script>
 
+        tr.border-bottom {
+            border-bottom: 1px solid #f1f3f5 !important;
+        }
+
+        .hover-bg-soft:hover {
+            background-color: #fafbfc !important;
+        }
+
+        .small-pagination .pagination {
+            margin-bottom: 0;
+        }
+
+        .small-pagination .page-link {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.8rem;
+        }
+
+        .avatar-initial {
+            display: flex !important;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .hover-primary:hover {
+            color: #696cff !important;
+            text-decoration: underline !important;
+        }
+    </style>
 @endsection

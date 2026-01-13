@@ -23,12 +23,13 @@ return Application::configure(basePath: dirname(__DIR__))
             \Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets::class,
         ]);
 
+        // PERBAIKAN DISINI:
+        // Ganti 'menu.access' jadi 'check_menu' biar cocok sama routes/web.php
         $middleware->alias([
-            'menu.access' => CheckMenuAccess::class,
+            'check_menu' => CheckMenuAccess::class,
         ]);
-        //
+        
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
     })->create();
-

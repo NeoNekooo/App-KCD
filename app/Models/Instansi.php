@@ -23,6 +23,7 @@ class Instansi extends Model
         'website',
         'social_media',
         'logo',
+        'tanda_tangan', // <-- Tambahkan Kolom Baru Ini Bre!
         'visi',
         'misi'
     ];

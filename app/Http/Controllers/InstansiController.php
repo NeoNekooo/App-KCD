@@ -27,37 +27,48 @@ class InstansiController extends Controller
         $request->validate([
             'nama_instansi' => 'required|string|max:255',
             'nama_brand'    => 'nullable|string|max:255',
+            'nama_kepala'   => 'nullable|string|max:255',
+            'nip_kepala'    => 'nullable|string|max:50',
             'peta'          => 'nullable|string',
-            'social_media'  => 'nullable|array', // Validasi array
+            'social_media'  => 'nullable|array',
             'logo'          => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            // UPDATE: Sekarang support JPG/JPEG selain PNG
+            'tanda_tangan'  => 'nullable|image|mimes:png,jpg,jpeg|max:1024', 
         ]);
 
-        // 2. Ambil data input KECUALI logo & social_media (kita olah manual)
-        $data = $request->except(['logo', 'social_media']);
+        // 2. Ambil data input KECUALI logo, ttd, & social_media
+        $data = $request->except(['logo', 'tanda_tangan', 'social_media']);
 
-        // 3. FIX: Rapikan Array Social Media biar jadi JSON Array [{}, {}]
-        // Kalau gak diginiin, nanti jadinya Object JSON {"1": {}, "2": {}} dan error di JS
+        // 3. Rapikan Array Social Media
         if ($request->has('social_media')) {
             $data['social_media'] = array_values($request->input('social_media'));
         } else {
-            $data['social_media'] = []; // Kalau kosong, simpan array kosong
+            $data['social_media'] = []; 
         }
 
         // 4. Handle Upload Logo
         if ($request->hasFile('logo')) {
-            // Hapus logo lama jika ada & file benar-benar ada
+            // Hapus logo lama jika ada
             if ($instansi->logo && Storage::disk('public')->exists($instansi->logo)) {
                 Storage::disk('public')->delete($instansi->logo);
             }
-            
             // Simpan logo baru
-            $path = $request->file('logo')->store('logos', 'public');
-            $data['logo'] = $path;
+            $data['logo'] = $request->file('logo')->store('logos', 'public');
         }
 
-        // 5. Simpan Perubahan
+        // 5. Handle Upload Tanda Tangan (TTD)
+        if ($request->hasFile('tanda_tangan')) {
+            // Hapus TTD lama jika ada
+            if ($instansi->tanda_tangan && Storage::disk('public')->exists($instansi->tanda_tangan)) {
+                Storage::disk('public')->delete($instansi->tanda_tangan);
+            }
+            // Simpan TTD baru di folder 'signatures'
+            $data['tanda_tangan'] = $request->file('tanda_tangan')->store('signatures', 'public');
+        }
+
+        // 6. Simpan Perubahan ke Database
         $instansi->update($data);
 
-        return redirect()->back()->with('success', 'Profil Instansi berhasil diperbarui!');
+        return redirect()->back()->with('success', 'Profil Instansi dan Aset Surat berhasil diperbarui!');
     }
 }

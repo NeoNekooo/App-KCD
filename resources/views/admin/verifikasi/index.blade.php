@@ -1,350 +1,619 @@
 @extends('layouts.admin')
 
 @section('content')
-<div class="container-xxl flex-grow-1 container-p-y">
-    
-    {{-- 1. HEADER PAGE --}}
-    <div class="d-flex justify-content-between align-items-center py-3 mb-2">
-        <div>
-            <h4 class="fw-bold m-0">
-                <span class="text-muted fw-light">Layanan /</span> {{ $title ?? 'Verifikasi Masuk' }}
-            </h4>
-            <small class="text-muted">Pantau dan kelola progres pengajuan berkas sekolah.</small>
-        </div>
-    </div>
+    <div class="container-xxl flex-grow-1 container-p-y">
 
-    {{-- 2. STATISTIK CARDS --}}
-    <div class="row mb-4 g-3">
-        <div class="col-sm-6 col-xl-3">
-            <div class="card border-0 shadow-sm border-start border-primary border-3">
-                <div class="card-body">
-                    <div class="d-flex align-items-center justify-content-between">
+        {{-- 1. HEADER PAGE --}}
+        <div class="d-flex justify-content-between align-items-center py-3 mb-2">
+            <div>
+                <h4 class="fw-bold m-0">
+                    <span class="text-muted fw-light">Layanan /</span> {{ $title ?? 'Verifikasi Masuk' }}
+                </h4>
+                <small class="text-muted">Pantau dan kelola progres pengajuan berkas sekolah.</small>
+            </div>
+        </div>
+
+        {{-- 2. STATISTIK CARDS (DATA REALTIME DARI CONTROLLER) --}}
+        <div class="row mb-4 g-3">
+            {{-- Card 1: Perlu Syarat --}}
+            <div class="col-sm-6 col-xl-3">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body d-flex align-items-center justify-content-between">
                         <div>
-                            <span class="text-muted small fw-bold text-uppercase">Perlu Syarat</span>
-                            <h4 class="mb-0 mt-1 fw-bold text-primary">{{ $data->where('status', 'Proses')->count() }}</h4>
+                            <span class="text-muted fw-bold small text-uppercase">PERLU SYARAT</span>
+                            <h3 class="mb-0 mt-2 fw-bold text-primary">
+                                {{ $count_proses ?? 0 }}
+                            </h3>
                         </div>
-                        <span class="badge bg-label-primary p-2 rounded"><i class="bx bx-list-plus fs-4"></i></span>
+                        <div class="avatar bg-label-primary rounded p-2">
+                            <i class="bx bx-list-plus fs-3"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Card 2: Menunggu Upload --}}
+            <div class="col-sm-6 col-xl-3">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body d-flex align-items-center justify-content-between">
+                        <div>
+                            <span class="text-muted fw-bold small text-uppercase">MENUNGGU UPLOAD</span>
+                            <h3 class="mb-0 mt-2 fw-bold text-warning">
+                                {{ $count_upload ?? 0 }}
+                            </h3>
+                        </div>
+                        <div class="avatar bg-label-warning rounded p-2">
+                            <i class="bx bx-cloud-upload fs-3"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Card 3: Siap Diperiksa --}}
+            <div class="col-sm-6 col-xl-3">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body d-flex align-items-center justify-content-between">
+                        <div>
+                            <span class="text-muted fw-bold small text-uppercase">SIAP DIPERIKSA</span>
+                            <h3 class="mb-0 mt-2 fw-bold text-info">
+                                {{ $count_verifikasi ?? 0 }}
+                            </h3>
+                        </div>
+                        <div class="avatar bg-label-info rounded p-2">
+                            <i class="bx bx-search-alt fs-3"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Card 4: Selesai --}}
+            <div class="col-sm-6 col-xl-3">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body d-flex align-items-center justify-content-between">
+                        <div>
+                            <span class="text-muted fw-bold small text-uppercase">SELESAI (ACC)</span>
+                            <h3 class="mb-0 mt-2 fw-bold text-success">
+                                {{ $count_selesai ?? 0 }}
+                            </h3>
+                        </div>
+                        <div class="avatar bg-label-success rounded p-2">
+                            <i class="bx bx-check-double fs-3"></i>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="col-sm-6 col-xl-3">
-            <div class="card border-0 shadow-sm border-start border-warning border-3">
-                <div class="card-body">
-                    <div class="d-flex align-items-center justify-content-between">
-                        <div>
-                            <span class="text-muted small fw-bold text-uppercase">Menunggu Upload</span>
-                            <h4 class="mb-0 mt-1 fw-bold text-warning">{{ $data->where('status', 'Menunggu Upload')->count() }}</h4>
+
+        {{-- 4. MAIN TABLE CARD --}}
+        <div class="card shadow-sm border-0">
+            <div class="card-header border-bottom bg-white py-3">
+                <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
+                    <h5 class="m-0 fw-bold"><i class="bx bx-list-ul me-2"></i>Daftar Pengajuan</h5>
+
+                    {{-- FILTER COMPACT --}}
+                    <form action="{{ url()->current() }}" method="GET" class="d-flex align-items-center gap-2">
+                        @if (request('kategori'))
+                            <input type="hidden" name="kategori" value="{{ request('kategori') }}">
+                        @endif
+
+                        <div class="input-group input-group-merge" style="width: 280px;">
+                            <span class="input-group-text bg-light border-light"><i
+                                    class="bx bx-filter-alt small"></i></span>
+                            <select name="status" class="form-select border-light bg-light" onchange="this.form.submit()">
+                                <option value="">Semua Status</option>
+                                <option value="Proses" {{ request('status') == 'Proses' ? 'selected' : '' }}>Tiket Baru
+                                </option>
+                                <option value="Verifikasi Berkas"
+                                    {{ request('status') == 'Verifikasi Berkas' ? 'selected' : '' }}>Di Meja Admin</option>
+                                <option value="Verifikasi Kasubag"
+                                    {{ request('status') == 'Verifikasi Kasubag' ? 'selected' : '' }}>Di Meja Kasubag
+                                </option>
+                                <option value="Verifikasi Kepala"
+                                    {{ request('status') == 'Verifikasi Kepala' ? 'selected' : '' }}>Di Meja Kepala
+                                </option>
+                                <option value="ACC" {{ request('status') == 'ACC' ? 'selected' : '' }}>Sudah ACC
+                                </option>
+                                <option value="Revisi" {{ request('status') == 'Revisi' ? 'selected' : '' }}>Revisi Sekolah
+                                </option>
+                            </select>
                         </div>
-                        <span class="badge bg-label-warning p-2 rounded"><i class="bx bx-cloud-upload fs-4"></i></span>
-                    </div>
+                        @if (request('status'))
+                            <a href="{{ url()->current() }}?{{ http_build_query(request()->except('status')) }}"
+                                class="btn btn-icon btn-outline-secondary border-light" title="Reset Status">
+                                <i class="bx bx-refresh"></i>
+                            </a>
+                        @endif
+                    </form>
                 </div>
             </div>
-        </div>
-        <div class="col-sm-6 col-xl-3">
-            <div class="card border-0 shadow-sm border-start border-info border-3">
-                <div class="card-body">
-                    <div class="d-flex align-items-center justify-content-between">
-                        <div>
-                            <span class="text-muted small fw-bold text-uppercase">Siap Diperiksa</span>
-                            <h4 class="mb-0 mt-1 fw-bold text-info">{{ $data->where('status', 'Verifikasi Berkas')->count() }}</h4>
-                        </div>
-                        <span class="badge bg-label-info p-2 rounded"><i class="bx bx-search-alt fs-4"></i></span>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-sm-6 col-xl-3">
-            <div class="card border-0 shadow-sm border-start border-success border-3">
-                <div class="card-body">
-                    <div class="d-flex align-items-center justify-content-between">
-                        <div>
-                            <span class="text-muted small fw-bold text-uppercase">Selesai (ACC)</span>
-                            <h4 class="mb-0 mt-1 fw-bold text-success">{{ $data->where('status', 'ACC')->count() }}</h4>
-                        </div>
-                        <span class="badge bg-label-success p-2 rounded"><i class="bx bx-check-double fs-4"></i></span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
 
-    {{-- 3. ALERT MESSAGES --}}
-    @if(session('success')) 
-        <div class="alert alert-success alert-dismissible shadow-sm border-0" role="alert">
-            <i class='bx bx-check-circle me-2'></i> {{ session('success') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div> 
-    @endif
-
-    {{-- 4. MAIN TABLE CARD WITH INTEGRATED FILTER --}}
-    <div class="card shadow-sm border-0">
-        <div class="card-header border-bottom bg-white py-3">
-            <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
-                <h5 class="m-0 fw-bold"><i class="bx bx-list-ul me-2"></i>Daftar Pengajuan</h5>
-                
-                {{-- FILTER COMPACT --}}
-                <form action="{{ url()->current() }}" method="GET" class="d-flex align-items-center gap-2">
-                    <div class="input-group input-group-merge" style="width: 280px;">
-                        <span class="input-group-text bg-light border-light"><i class="bx bx-filter-alt small"></i></span>
-                        <select name="status" class="form-select border-light bg-light" onchange="this.form.submit()">
-                            <option value="">Semua Status</option>
-                            <option value="Proses" {{ request('status') == 'Proses' ? 'selected' : '' }}>Tiket Baru</option>
-                            <option value="Menunggu Upload" {{ request('status') == 'Menunggu Upload' ? 'selected' : '' }}>Menunggu Upload</option>
-                            <option value="Verifikasi Berkas" {{ request('status') == 'Verifikasi Berkas' ? 'selected' : '' }}>Siap Diperiksa</option>
-                            <option value="ACC" {{ request('status') == 'ACC' ? 'selected' : '' }}>Sudah ACC</option>
-                            <option value="Ditolak" {{ request('status') == 'Ditolak' ? 'selected' : '' }}>Ditolak</option>
-                        </select>
-                    </div>
-                    @if(request('status'))
-                        <a href="{{ url()->current() }}" class="btn btn-icon btn-outline-secondary border-light" title="Reset">
-                            <i class="bx bx-refresh"></i>
-                        </a>
-                    @endif
-                </form>
-            </div>
-        </div>
-
-        @if($data->count() > 0)
-            <div class="table-responsive text-nowrap">
-                <table class="table table-hover align-middle">
-                    <thead class="bg-light">
-                        <tr>
-                            <th class="py-3 ps-4 text-uppercase small fw-bold text-muted">Sekolah & Pemohon</th>
-                            <th class="text-uppercase small fw-bold text-muted">Perihal</th>
-                            <th class="text-uppercase small fw-bold text-muted">Status</th>
-                            <th class="text-end pe-4 text-uppercase small fw-bold text-muted">Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody class="table-border-bottom-0">
-                        @foreach($data as $item)
-                        <tr>
-                            <td class="ps-4">
-                                <div class="d-flex align-items-center">
-                                    <div class="avatar avatar-sm me-3">
-                                        <span class="avatar-initial rounded-circle bg-label-primary"><i class='bx bxs-school'></i></span>
-                                    </div>
-                                    <div>
-                                        <span class="fw-bold d-block text-dark small">{{ $item->nama_sekolah }}</span>
-                                        <small class="text-muted">{{ $item->nama_guru }}</small>
-                                    </div>
-                                </div>
-                            </td>
-                            <td>
-                                <span class="badge bg-label-secondary mb-1" style="font-size: 0.7rem;">{{ strtoupper(str_replace('-', ' ', $item->kategori)) }}</span>
-                                <div class="text-wrap small text-dark fw-semibold" style="max-width: 250px;">{{ Str::limit($item->judul, 50) }}</div>
-                            </td>
-                            <td>
-                                @php
-                                    $statusClass = match($item->status) {
-                                        'Proses' => 'bg-label-primary',
-                                        'Menunggu Upload' => 'bg-label-warning',
-                                        'Verifikasi Berkas' => 'bg-label-info',
-                                        'ACC' => 'bg-label-success',
-                                        'Ditolak' => 'bg-label-danger',
-                                        default => 'bg-label-secondary'
-                                    };
-                                    $statusIcon = match($item->status) {
-                                        'Proses' => 'bx-loader-circle',
-                                        'Menunggu Upload' => 'bx-time',
-                                        'Verifikasi Berkas' => 'bx-search-alt',
-                                        'ACC' => 'bx-check-double',
-                                        'Ditolak' => 'bx-x-circle',
-                                        default => 'bx-question-mark'
-                                    };
-                                @endphp
-                                <span class="badge {{ $statusClass }} d-inline-flex align-items-center">
-                                    <i class='bx {{ $statusIcon }} me-1'></i> {{ $item->status }}
-                                </span>
-                            </td>
-                            <td class="text-end pe-4">
-                                @if($item->status == 'Proses')
-                                    <button class="btn btn-sm btn-primary shadow-sm" data-bs-toggle="modal" data-bs-target="#modalSyarat{{ $item->id }}">
-                                        <i class='bx bx-list-check me-1'></i> Atur Syarat
-                                    </button>
-                                @elseif($item->status == 'Verifikasi Berkas' || $item->status == 'Ditolak' || $item->status == 'ACC')
-                                    <button class="btn btn-sm btn-success shadow-sm" data-bs-toggle="modal" data-bs-target="#modalCek{{ $item->id }}">
-                                        <i class='bx bx-search-alt me-1'></i> Periksa
-                                    </button>
-                                @endif
-
-                                {{-- MODAL ATUR PERSYARATAN --}}
-                                <div class="modal fade text-start" id="modalSyarat{{ $item->id }}" tabindex="-1" aria-hidden="true">
-                                    <div class="modal-dialog modal-dialog-centered">
-                                        <div class="modal-content border-0 shadow">
-                                            <div class="modal-header border-bottom">
-                                                <h5 class="modal-title fw-bold text-dark"><i class='bx bx-list-plus me-2 text-primary'></i>Permintaan Persyaratan</h5>
-                                                <button type="button" class="btn-close btn-close-animated" data-bs-dismiss="modal"></button>
+            @if ($data->count() > 0)
+                <div class="table-responsive text-nowrap">
+                    <table class="table table-hover align-middle">
+                        <thead class="bg-light">
+                            <tr>
+                                <th class="py-3 ps-4 text-uppercase small fw-bold text-muted">Sekolah & Pemohon</th>
+                                <th class="text-uppercase small fw-bold text-muted">Perihal</th>
+                                <th class="text-uppercase small fw-bold text-muted">Status & Posisi</th>
+                                <th class="text-end pe-4 text-uppercase small fw-bold text-muted">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody class="table-border-bottom-0">
+                            @foreach ($data as $item)
+                                <tr>
+                                    <td class="ps-4">
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar avatar-sm me-3">
+                                                <span class="avatar-initial rounded-circle bg-label-primary"><i
+                                                        class='bx bxs-school'></i></span>
                                             </div>
-                                            <form action="{{ route('admin.verifikasi.minta_syarat', $item->id) }}" method="POST">
-                                                @csrf
-                                                <div class="modal-body bg-light">
-                                                    <div class="alert alert-primary d-flex align-items-center mb-3 py-2" role="alert">
-                                                        <i class='bx bx-info-circle me-2'></i>
-                                                        <div class="small">Pilih dokumen yang wajib diupload oleh sekolah.</div>
+                                            <div>
+                                                <span
+                                                    class="fw-bold d-block text-dark small">{{ $item->nama_sekolah }}</span>
+                                                <small class="text-muted">{{ $item->nama_guru }}</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-label-secondary mb-1"
+                                            style="font-size: 0.7rem;">{{ strtoupper(str_replace('-', ' ', $item->kategori)) }}</span>
+                                        <div class="text-wrap small text-dark fw-semibold" style="max-width: 250px;">
+                                            {{ Str::limit($item->judul, 50) }}</div>
+                                    </td>
+                                    <td>
+                                        @php
+                                            $statusClass = match ($item->status) {
+                                                'Proses', 'Verifikasi Berkas' => 'bg-label-primary',
+                                                'Verifikasi Kasubag' => 'bg-label-warning',
+                                                'Verifikasi Kepala' => 'bg-label-info',
+                                                'ACC' => 'bg-label-success',
+                                                'Revisi', 'Ditolak' => 'bg-label-danger',
+                                                'Menunggu Upload' => 'bg-label-secondary',
+                                                default => 'bg-label-secondary',
+                                            };
+
+                                            $statusLabel = match ($item->status) {
+                                                'Proses' => 'Tiket Baru',
+                                                'Verifikasi Berkas' => 'Cek Admin',
+                                                'Verifikasi Kasubag' => 'Cek Kasubag',
+                                                'Verifikasi Kepala' => 'Cek Kepala',
+                                                default => $item->status,
+                                            };
+                                        @endphp
+                                        <span class="badge {{ $statusClass }} d-inline-flex align-items-center">
+                                            {{ $statusLabel }}
+                                        </span>
+                                        {{-- Tampilkan Nomor SK jika sudah ACC --}}
+                                        @if ($item->status == 'ACC' && $item->nomor_sk)
+                                            <div class="d-block mt-1 small text-muted">
+                                                <i class='bx bx-hash'></i> {{ $item->nomor_sk }}
+                                            </div>
+                                        @endif
+                                    </td>
+
+                                    {{-- LOGIC TOMBOL PINTAR --}}
+                                    <td class="text-end pe-4">
+                                        {{-- 1. Tombol Tiket Baru --}}
+                                        @if ($item->status == 'Proses')
+                                            <button class="btn btn-sm btn-primary shadow-sm" data-bs-toggle="modal"
+                                                data-bs-target="#modalSyarat{{ $item->id }}">
+                                                <i class='bx bx-list-check me-1'></i> Atur Syarat
+                                            </button>
+
+                                            {{-- 2. Tombol Proses Verifikasi (Satu tombol, modal menyesuaikan) --}}
+                                        @elseif(in_array($item->status, ['Verifikasi Berkas', 'Verifikasi Kasubag', 'Verifikasi Kepala']))
+                                            <button
+                                                class="btn btn-sm {{ $item->status == 'Verifikasi Berkas' ? 'btn-primary' : ($item->status == 'Verifikasi Kasubag' ? 'btn-warning' : 'btn-info') }} shadow-sm"
+                                                data-bs-toggle="modal" data-bs-target="#modalCek{{ $item->id }}">
+                                                @if ($item->status == 'Verifikasi Berkas')
+                                                    <i class='bx bx-search-alt me-1'></i> Periksa (Admin)
+                                                @elseif($item->status == 'Verifikasi Kasubag')
+                                                    <i class='bx bx-edit-alt me-1'></i> Periksa (Kasubag)
+                                                @elseif($item->status == 'Verifikasi Kepala')
+                                                    <i class='bx bx-pen me-1'></i> Approval (Kepala)
+                                                @endif
+                                            </button>
+
+                                            {{-- 3. Status Selesai (ACC) -> Tombol Cetak (STRICT MODE) --}}
+                                        @elseif($item->status == 'ACC')
+                                            {{-- Hanya muncul jika Kepala sudah pilih template --}}
+                                            @if ($item->template_id)
+                                                <a href="{{ route('cetak.sk', $item->uuid) }}" target="_blank"
+                                                    class="btn btn-sm btn-success shadow-sm">
+                                                    <i class='bx bx-printer me-1'></i> Cetak SK
+                                                </a>
+                                            @else
+                                                {{-- Jika data lama/error --}}
+                                                <span class="badge bg-label-secondary" data-bs-toggle="tooltip"
+                                                    title="Format belum dipilih">
+                                                    <i class='bx bx-error-circle'></i> Template Missing
+                                                </span>
+                                            @endif
+
+                                            {{-- 4. Status Revisi --}}
+                                        @elseif($item->status == 'Revisi')
+                                            <span class="badge bg-danger"><i class='bx bx-time'></i> Tunggu Revisi</span>
+                                        @endif
+
+                                        {{-- ========================================================== --}}
+                                        {{-- START: MODAL SYARAT (Admin)                            --}}
+                                        {{-- ========================================================== --}}
+                                        <div class="modal fade" id="modalSyarat{{ $item->id }}" tabindex="-1"
+                                            aria-hidden="true">
+                                            <div class="modal-dialog modal-dialog-centered">
+                                                <div class="modal-content border-0 shadow-lg">
+                                                    <div class="modal-header border-bottom">
+                                                        <h5 class="modal-title fw-bold">Atur Persyaratan Dokumen</h5>
+                                                        <button type="button" class="btn-close btn-close-animated"
+                                                            data-bs-dismiss="modal" aria-label="Close"></button>
                                                     </div>
-                                                    <div class="card shadow-none border mb-3">
-                                                        <div class="card-header py-2 bg-white fw-bold small text-uppercase text-muted">Dokumen Standar</div>
-                                                        <div class="card-body pt-2 pb-1">
-                                                            @php $presets = ['Surat Pengantar', 'SK Pangkat Terakhir', 'Fotokopi KTP', 'Kartu Keluarga']; @endphp
-                                                            @foreach($presets as $key => $val)
-                                                            <div class="form-check mb-2">
-                                                                <input class="form-check-input" type="checkbox" name="syarat[]" value="{{ $val }}" id="c{{ $key }}_{{ $item->id }}" checked>
-                                                                <label class="form-check-label text-dark" for="c{{ $key }}_{{ $item->id }}">{{ $val }}</label>
+                                                    <form action="{{ route('admin.verifikasi.set_syarat', $item->id) }}"
+                                                        method="POST">
+                                                        @csrf @method('PUT')
+                                                        <div class="modal-body bg-light">
+                                                            <div
+                                                                class="alert alert-primary shadow-sm border-0 mb-3 text-start">
+                                                                <i class="bx bx-info-circle me-1"></i>
+                                                                Tentukan dokumen apa saja yang harus diupload oleh
+                                                                <b>{{ $item->nama_sekolah }}</b>.
                                                             </div>
-                                                            @endforeach
-                                                        </div>
-                                                    </div>
-                                                    <div class="card shadow-none border">
-                                                        <div class="card-header py-2 bg-white fw-bold small text-uppercase text-muted">Dokumen Tambahan</div>
-                                                        <div class="card-body pt-3">
-                                                            <div id="containerManual{{ $item->id }}"></div>
-                                                            <button type="button" class="btn btn-outline-primary btn-sm w-100 dashed-border" onclick="tambahSyaratManual('{{ $item->id }}')">
-                                                                <i class='bx bx-plus'></i> Tambah Item Lain
+                                                            <label
+                                                                class="form-label fw-bold text-uppercase small text-muted">Daftar
+                                                                Dokumen</label>
+                                                            <div id="containerManual{{ $item->id }}">
+                                                                <div class="input-group mb-2">
+                                                                    <span class="input-group-text bg-white"><i
+                                                                            class='bx bx-file'></i></span>
+                                                                    <input type="text" name="syarat[]"
+                                                                        class="form-control"
+                                                                        placeholder="Contoh: Surat Pengantar Kepala Sekolah"
+                                                                        required>
+                                                                </div>
+                                                            </div>
+                                                            <button type="button"
+                                                                class="btn btn-outline-primary btn-sm w-100 dashed-border mt-2"
+                                                                onclick="tambahSyaratManual({{ $item->id }})">
+                                                                <i class="bx bx-plus"></i> Tambah Dokumen Lain
                                                             </button>
                                                         </div>
+                                                        <div class="modal-footer border-top bg-white">
+                                                            <button type="button" class="btn btn-label-secondary"
+                                                                data-bs-dismiss="modal">Batal</button>
+                                                            <button type="submit" class="btn btn-primary">Simpan & Minta
+                                                                Upload</button>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {{-- ========================================================== --}}
+                                        {{-- START: MODAL CEK (SMART MODAL - BERUBAH SESUAI STATUS) --}}
+                                        {{-- ========================================================== --}}
+                                        <div class="modal fade" id="modalCek{{ $item->id }}" tabindex="-1"
+                                            aria-hidden="true">
+                                            <div class="modal-dialog modal-lg modal-dialog-centered">
+                                                <div class="modal-content border-0 shadow-lg">
+                                                    <div class="modal-header border-bottom">
+                                                        <div>
+                                                            <h5 class="modal-title fw-bold">
+                                                                @if ($item->status == 'Verifikasi Kasubag')
+                                                                    Validasi Kasubag
+                                                                @elseif($item->status == 'Verifikasi Kepala')
+                                                                    Approval Kepala
+                                                                @else
+                                                                    Verifikasi Admin
+                                                                @endif
+                                                            </h5>
+                                                            <small class="text-muted">Pengirim:
+                                                                {{ $item->nama_sekolah }}</small>
+                                                        </div>
+                                                        <button type="button" class="btn-close btn-close-animated"
+                                                            data-bs-dismiss="modal" aria-label="Close"></button>
                                                     </div>
-                                                </div>
-                                                <div class="modal-footer border-top bg-white">
-                                                    <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">Batal</button>
-                                                    <button type="submit" class="btn btn-primary">Kirim Permintaan</button>
-                                                </div>
-                                            </form>
-                                        </div>
-                                    </div>
-                                </div>
 
-                                {{-- MODAL PEMERIKSAAN BERKAS --}}
-                                <div class="modal fade text-start" id="modalCek{{ $item->id }}" tabindex="-1" aria-hidden="true">
-                                    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
-                                        <div class="modal-content border-0 shadow">
-                                            <div class="modal-header bg-success text-white">
-                                                <h5 class="modal-title text-white fw-bold"><i class='bx bx-check-shield me-2'></i>Verifikasi Dokumen</h5>
-                                                <button type="button" class="btn-close btn-close-animated" data-bs-dismiss="modal"></button>
-                                            </div>
-                                            <div class="modal-body p-0 bg-light">
-                                                <form id="formCek{{ $item->id }}" action="{{ route('admin.verifikasi.simpan_cek', $item->id) }}" method="POST">
-                                                    @csrf
-                                                    <table class="table table-striped mb-0">
-                                                        <thead class="bg-white sticky-top shadow-sm">
-                                                            <tr>
-                                                                <th class="ps-4 py-3">Dokumen & File</th>
-                                                                <th class="pe-4 py-3 text-start" style="width: 40%;">Validasi</th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody>
-                                                            @if($item->dokumen_syarat)
-                                                                @foreach($item->dokumen_syarat as $index => $syarat)
-                                                                <tr id="rowDoc{{ $item->id }}_{{ $index }}" class="{{ (isset($syarat['valid']) && $syarat['valid']) ? 'table-success-soft' : '' }}">
-                                                                    <td class="ps-4 align-top pt-3">
-                                                                        <div class="fw-bold text-dark mb-1">{{ $syarat['nama'] }}</div>
-                                                                        @if(!empty($syarat['file']))
-                                                                            <a href="{{ $syarat['file'] }}" target="_blank" class="btn btn-xs btn-outline-primary rounded-pill">
-                                                                                <i class='bx bx-link-external me-1'></i> Buka File
-                                                                            </a>
-                                                                        @else
-                                                                            <span class="badge bg-label-danger" style="font-size: 0.65rem;">Belum diupload</span>
-                                                                        @endif
-                                                                    </td>
-                                                                    <td class="pe-4 pt-3 text-start">
-                                                                        <div class="form-check m-0 mb-2">
-                                                                            <input class="form-check-input" type="checkbox" 
-                                                                                   name="verifikasi[{{ $index }}][valid]" value="1" 
-                                                                                   id="chk{{ $item->id }}_{{ $index }}" 
-                                                                                   onchange="toggleCatatan('{{ $item->id }}_{{ $index }}')"
-                                                                                   {{ (isset($syarat['valid']) && $syarat['valid']) ? 'checked' : '' }}>
-                                                                            <label class="form-check-label fw-bold text-dark" for="chk{{ $item->id }}_{{ $index }}">Dokumen Valid</label>
+                                                    @php
+                                                        $actionRoute = match ($item->status) {
+                                                            'Verifikasi Kasubag' => route(
+                                                                'admin.verifikasi.kasubag_process',
+                                                                $item->id,
+                                                            ),
+                                                            'Verifikasi Kepala' => route(
+                                                                'admin.verifikasi.kepala_process',
+                                                                $item->id,
+                                                            ),
+                                                            default => route('admin.verifikasi.process', $item->id),
+                                                        };
+                                                    @endphp
+
+                                                    <form action="{{ $actionRoute }}" method="POST">
+                                                        @csrf @method('PUT')
+                                                        <div class="modal-body bg-light">
+
+                                                            {{-- Info Singkat --}}
+                                                            <div class="card shadow-sm border-0 mb-3">
+                                                                <div class="card-body p-3 d-flex align-items-center gap-3">
+                                                                    <div
+                                                                        class="avatar bg-label-{{ $item->status == 'Verifikasi Kepala' ? 'info' : ($item->status == 'Verifikasi Kasubag' ? 'warning' : 'primary') }} rounded p-2">
+                                                                        <i class="bx bx-file fs-3"></i>
+                                                                    </div>
+                                                                    <div>
+                                                                        <h6 class="mb-0 fw-bold">{{ $item->judul }}</h6>
+                                                                        <small
+                                                                            class="text-muted">{{ $item->kategori }}</small>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+
+                                                            {{-- [BARU] DROPDOWN PILIH TEMPLATE (KHUSUS KEPALA) --}}
+                                                            @if ($item->status == 'Verifikasi Kepala')
+                                                                <div
+                                                                    class="card p-3 border border-primary bg-white mb-4 animate__animated animate__fadeIn">
+                                                                    <label class="form-label fw-bold text-primary mb-2">
+                                                                        <i class='bx bx-layout me-1'></i> Pilih Format SK
+                                                                        yang Akan Dicetak
+                                                                    </label>
+                                                                    <select name="template_id"
+                                                                        class="form-select border-primary" required>
+                                                                        <option value="" selected disabled>-- Pilih
+                                                                            Template Surat --</option>
+                                                                        @foreach ($templates as $tpl)
+                                                                            <option value="{{ $tpl->id }}">
+                                                                                {{ $tpl->judul_surat }} (Kertas:
+                                                                                {{ $tpl->ukuran_kertas }})
+                                                                            </option>
+                                                                        @endforeach
+                                                                    </select>
+                                                                    <div class="form-text small text-muted mt-1">
+                                                                        *Template ini akan menentukan desain PDF saat
+                                                                        dicetak nanti.
+                                                                    </div>
+
+                                                                    {{-- Tampilkan Catatan Kasubag --}}
+                                                                    @if (!empty($item->catatan_internal))
+                                                                        <div
+                                                                            class="alert alert-warning mt-3 mb-0 d-flex align-items-center">
+                                                                            <i class='bx bx-note me-2'></i>
+                                                                            <div><strong>Note Kasubag:</strong>
+                                                                                {{ $item->catatan_internal }}</div>
                                                                         </div>
-                                                                        <textarea class="form-control form-control-sm border-warning {{ (isset($syarat['valid']) && $syarat['valid']) ? 'd-none' : '' }}" 
-                                                                                  name="verifikasi[{{ $index }}][catatan]" 
-                                                                                  id="note{{ $item->id }}_{{ $index }}" 
-                                                                                  placeholder="Tulis alasan ditolak..." rows="2">{{ $syarat['catatan'] ?? '' }}</textarea>
-                                                                    </td>
-                                                                </tr>
-                                                                @endforeach
+                                                                    @endif
+                                                                </div>
                                                             @endif
-                                                        </tbody>
-                                                    </table>
-                                                </form>
-                                            </div>
-                                            <div class="modal-footer bg-white border-top">
-                                                <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">Tutup</button>
-                                                <button type="submit" form="formCek{{ $item->id }}" class="btn btn-success px-4 shadow-sm fw-bold">Simpan & Kabari Sekolah</button>
+
+                                                            <h6 class="fw-bold mb-3 mt-4"><i
+                                                                    class="bx bx-check-square me-2"></i>Kelengkapan Dokumen
+                                                            </h6>
+
+                                                            <div
+                                                                class="table-responsive bg-white rounded shadow-sm border">
+                                                                <table class="table table-sm mb-0">
+                                                                    <thead class="bg-light">
+                                                                        <tr>
+                                                                            <th class="ps-3">Nama Dokumen</th>
+                                                                            <th class="text-center" style="width: 100px;">
+                                                                                Lihat</th>
+                                                                            <th class="text-end pe-3"
+                                                                                style="width: 150px;">Status</th>
+                                                                        </tr>
+                                                                    </thead>
+                                                                    <tbody>
+                                                                        {{-- [FIXED] Pake dokumen_syarat bukan berkas --}}
+                                                                        @forelse($item->dokumen_syarat ?? [] as $doc)
+                                                                            @php $uniq = $item->id . '_' . $loop->index; @endphp
+                                                                            <tr id="rowDoc{{ $uniq }}">
+                                                                                <td class="ps-3 align-middle">
+                                                                                    <div class="fw-semibold text-dark">
+                                                                                        {{ $doc['nama'] ?? 'Nama Dokumen' }}
+                                                                                    </div>
+                                                                                    {{-- Note Revisi: Hanya Admin --}}
+                                                                                    @if ($item->status == 'Verifikasi Berkas')
+                                                                                        <div id="note{{ $uniq }}"
+                                                                                            class="mt-1">
+                                                                                            <input type="text"
+                                                                                                name="catatan[{{ $doc['id'] ?? $loop->index }}]"
+                                                                                                class="form-control form-control-sm border-danger text-danger"
+                                                                                                placeholder="Alasan tolak..."
+                                                                                                style="font-size: 0.85rem;">
+                                                                                        </div>
+                                                                                    @endif
+                                                                                </td>
+                                                                                <td class="text-center align-middle">
+                                                                                    {{-- File di-link ke storage --}}
+                                                                                    <a href="{{ $doc['file'] ? asset('storage/' . $doc['file']) : '#' }}"
+                                                                                        target="_blank"
+                                                                                        class="btn btn-icon btn-sm btn-label-secondary">
+                                                                                        <i class="bx bx-show"></i>
+                                                                                    </a>
+                                                                                </td>
+                                                                                <td class="text-end pe-3 align-middle">
+                                                                                    @if ($item->status == 'Verifikasi Berkas')
+                                                                                        <div
+                                                                                            class="form-check form-switch d-flex justify-content-end">
+                                                                                            <input class="form-check-input"
+                                                                                                type="checkbox"
+                                                                                                role="switch"
+                                                                                                id="chk{{ $uniq }}"
+                                                                                                onchange="toggleCatatan('{{ $uniq }}')">
+                                                                                        </div>
+                                                                                    @else
+                                                                                        {{-- Read Only Badge --}}
+                                                                                        <span
+                                                                                            class="badge bg-label-success"><i
+                                                                                                class='bx bx-check'></i>
+                                                                                            Ada</span>
+                                                                                    @endif
+                                                                                </td>
+                                                                            </tr>
+                                                                        @empty
+                                                                            <tr>
+                                                                                <td colspan="3"
+                                                                                    class="text-center py-3 text-muted">
+                                                                                    Belum ada dokumen yang diupload.</td>
+                                                                            </tr>
+                                                                        @endforelse
+                                                                    </tbody>
+                                                                </table>
+                                                            </div>
+
+                                                            {{-- FORM KASUBAG --}}
+                                                            @if ($item->status == 'Verifikasi Kasubag')
+                                                                <div class="mt-3 animate__animated animate__fadeIn">
+                                                                    <label
+                                                                        class="form-label fw-bold small text-uppercase text-muted">Catatan
+                                                                        Internal (Opsional)</label>
+                                                                    <textarea name="catatan_internal" class="form-control" rows="2" placeholder="Pesan untuk Kepala KCD..."></textarea>
+                                                                </div>
+                                                            @endif
+
+                                                        </div>
+                                                        <div
+                                                            class="modal-footer border-top bg-white justify-content-between">
+                                                            <div>
+                                                                <button type="submit" name="action" value="reject"
+                                                                    class="btn btn-outline-danger">
+                                                                    <i class="bx bx-undo me-1"></i>
+                                                                    {{ $item->status == 'Verifikasi Kepala' ? 'Tolak' : 'Minta Revisi' }}
+                                                                </button>
+                                                            </div>
+                                                            <div class="d-flex gap-2">
+                                                                <button type="button" class="btn btn-label-secondary"
+                                                                    data-bs-dismiss="modal">Tutup</button>
+                                                                <button type="submit" name="action" value="approve"
+                                                                    class="btn {{ $item->status == 'Verifikasi Kepala' ? 'btn-info' : ($item->status == 'Verifikasi Kasubag' ? 'btn-warning' : 'btn-success') }}">
+                                                                    @if ($item->status == 'Verifikasi Kepala')
+                                                                        <i class="bx bx-pen me-1"></i> ACC & Tanda Tangan
+                                                                    @elseif($item->status == 'Verifikasi Kasubag')
+                                                                        <i class="bx bx-send me-1"></i> Teruskan ke Kepala
+                                                                    @else
+                                                                        <i class="bx bx-check-circle me-1"></i> Lanjut
+                                                                        Kasubag
+                                                                    @endif
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </form>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                </div>
-                            </td>
-                        </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
-            <div class="px-4 py-3 border-top d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
-                <small class="text-muted">Menampilkan {{ $data->count() }} dari total pengajuan</small>
-                <div>{{ $data->appends(request()->query())->links() }}</div>
-            </div>
-        @else
-            <div class="text-center py-5">
-                <i class='bx bx-box text-light mb-3' style="font-size: 80px;"></i>
-                <h5 class="text-muted fw-bold">Data tidak ditemukan.</h5>
-                <p class="text-muted small">Coba ubah filter status atau periksa kembali kategori ini.</p>
-            </div>
-        @endif
-    </div>
-</div>
+                                        {{-- END: MODAL CEK --}}
 
-<script>
-function tambahSyaratManual(id) {
-    let container = document.getElementById('containerManual' + id);
-    let div = document.createElement('div');
-    div.className = 'input-group mb-2 animate__animated animate__fadeInDown';
-    div.innerHTML = `
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+                <div
+                    class="px-4 py-3 border-top d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
+                    <small class="text-muted">Menampilkan {{ $data->count() }} data</small>
+                    <div>{{ $data->appends(request()->query())->links() }}</div>
+                </div>
+            @else
+                <div class="text-center py-5">
+                    <i class='bx bx-box text-light mb-3' style="font-size: 80px;"></i>
+                    <h5 class="text-muted fw-bold">Data tidak ditemukan.</h5>
+                </div>
+            @endif
+        </div>
+    </div>
+
+    <script>
+        function tambahSyaratManual(id) {
+            let container = document.getElementById('containerManual' + id);
+            let div = document.createElement('div');
+            div.className = 'input-group mb-2 animate__animated animate__fadeInDown';
+            div.innerHTML = `
         <span class="input-group-text bg-white"><i class='bx bx-file'></i></span>
         <input type="text" name="syarat[]" class="form-control" placeholder="Nama dokumen..." required>
         <button class="btn btn-outline-danger" type="button" onclick="this.parentElement.remove()">
             <i class='bx bx-trash'></i>
         </button>
     `;
-    container.appendChild(div);
-    div.querySelector('input').focus();
-}
+            container.appendChild(div);
+            div.querySelector('input').focus();
+        }
 
-function toggleCatatan(uniqueId) {
-    let chk = document.getElementById('chk' + uniqueId);
-    let note = document.getElementById('note' + uniqueId);
-    let row = document.getElementById('rowDoc' + uniqueId);
-    
-    if(chk.checked) {
-        note.classList.add('d-none');
-        row.classList.add('table-success-soft');
-    } else {
-        note.classList.remove('d-none');
-        row.classList.remove('table-success-soft');
-    }
-}
-</script>
+        function toggleCatatan(uniqueId) {
+            let chk = document.getElementById('chk' + uniqueId);
+            let note = document.getElementById('note' + uniqueId);
+            let row = document.getElementById('rowDoc' + uniqueId);
 
-<style>
-.table-success-soft { background-color: #f0fdf4 !important; transition: background 0.3s; }
-.btn-label-secondary { background: #ebeef0; color: #8592a3; border:none; }
-.btn-label-secondary:hover { background: #e1e4e6; }
-.dashed-border { border: 2px dashed #d9dee3; transition: all 0.3s; }
-.dashed-border:hover { border-color: #696cff; background: #f5f5f9; }
-.bg-label-primary { background-color: #e7e7ff !important; color: #696cff !important; }
-.bg-label-success { background-color: #e8fadf !important; color: #71dd37 !important; }
-.bg-label-danger { background-color: #ff3e1d29 !important; color: #ff3e1d !important; }
-.bg-label-warning { background-color: #fff2d6 !important; color: #ffab00 !important; }
-.bg-label-info { background-color: #d7f5fc !important; color: #03c3ec !important; }
+            if (chk.checked) {
+                note.classList.add('d-none');
+                row.classList.add('table-success-soft');
+                let inputNote = note.querySelector('input');
+                if (inputNote) inputNote.value = '';
+            } else {
+                note.classList.remove('d-none');
+                row.classList.remove('table-success-soft');
+            }
+        }
+    </script>
 
-.btn-close-animated {
-    background-color: white !important; 
-    border-radius: 50%;
-    padding: 0.5rem; 
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-    transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-    background-size: 40%;
-}
-.btn-close-animated:hover { transform: rotate(90deg) scale(1.1); background-color: #f0f2f5 !important; }
-</style>
+    <style>
+        .table-success-soft {
+            background-color: #f0fdf4 !important;
+            transition: background 0.3s;
+        }
+
+        .btn-label-secondary {
+            background: #ebeef0;
+            color: #8592a3;
+            border: none;
+        }
+
+        .btn-label-secondary:hover {
+            background: #e1e4e6;
+        }
+
+        .dashed-border {
+            border: 2px dashed #d9dee3;
+            transition: all 0.3s;
+        }
+
+        .dashed-border:hover {
+            border-color: #696cff;
+            background: #f5f5f9;
+        }
+
+        .bg-label-primary {
+            background-color: #e7e7ff !important;
+            color: #696cff !important;
+        }
+
+        .bg-label-success {
+            background-color: #e8fadf !important;
+            color: #71dd37 !important;
+        }
+
+        .bg-label-danger {
+            background-color: #ff3e1d29 !important;
+            color: #ff3e1d !important;
+        }
+
+        .bg-label-warning {
+            background-color: #fff2d6 !important;
+            color: #ffab00 !important;
+        }
+
+        .bg-label-info {
+            background-color: #d7f5fc !important;
+            color: #03c3ec !important;
+        }
+
+        .btn-close-animated {
+            background-color: white !important;
+            border-radius: 50%;
+            padding: 0.5rem;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            background-size: 40%;
+        }
+
+        .btn-close-animated:hover {
+            transform: rotate(90deg) scale(1.1);
+            background-color: #f0f2f5 !important;
+        }
+    </style>
 @endsection
