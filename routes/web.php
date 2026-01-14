@@ -11,6 +11,7 @@ use App\Http\Controllers\CetakSkController;
 
 // --- Controller Internal KCD ---
 use App\Http\Controllers\Admin\Kepegawaian\PegawaiKcdController;
+use App\Http\Controllers\Admin\Kepegawaian\TugasPegawaiKcdController; // <--- Wajib ada
 
 // --- Controller Monitoring (Data Sekolah/GTK) ---
 use App\Http\Controllers\Admin\Sekolah\SekolahController as SekolahMonitoringController;
@@ -51,6 +52,63 @@ Route::middleware(['auth'])->group(function() {
     Route::get('/cetak-sk/{uuid}', [CetakSkController::class, 'cetakSk'])->name('cetak.sk');
 });
 
+Route::get('/cek-injeksi', function() {
+    $user = Illuminate\Support\Facades\Auth::user();
+    if(!$user) return "Login dulu!";
+
+    echo "<h3>1. CEK USER</h3>";
+    echo "Role: " . $user->role . " (Harus 'Pegawai')<br>";
+    echo "ID: " . $user->pegawai_kcd_id . " (Harus 8)<br>";
+    
+    // Cek Kesamaan Role (Case Insensitive)
+    $isRoleMatch = strcasecmp($user->role, 'Pegawai') === 0;
+    echo "Role Match? " . ($isRoleMatch ? "<b style='color:green'>YES</b>" : "<b style='color:red'>NO (Cek ejaan role di tabel users)</b>") . "<br>";
+
+    echo "<hr><h3>2. CEK DATABASE TUGAS</h3>";
+    $tugas = \App\Models\TugasPegawaiKcd::where('pegawai_kcd_id', $user->pegawai_kcd_id)
+                                        ->where('is_active', 1)
+                                        ->first();
+    
+    if($tugas) {
+        echo "Tugas Ditemukan: <b style='color:green'>" . $tugas->kategori_layanan . "</b><br>";
+    } else {
+        echo "<b style='color:red'>TUGAS TIDAK DITEMUKAN / TIDAK AKTIF!</b><br>";
+        return; // Stop diagnosa
+    }
+
+    echo "<hr><h3>3. CEK MAPPING</h3>";
+    $mapKategoriToSlug = [
+        'kenaikan-pangkat' => 'layanan-kp',
+        'kgb'              => 'layanan-kgb',
+        'mutasi'           => 'layanan-mutasi',
+        'relokasi'         => 'layanan-relokasi',
+        'satya-lencana'    => 'layanan-satya',
+        'hukuman-disiplin' => 'layanan-hukdis',
+        'verifikasi-surat' => 'verifikasi-surat',
+    ];
+    
+    $kategori = $tugas->kategori_layanan;
+    if(isset($mapKategoriToSlug[$kategori])) {
+        echo "Mapping OK. Slug Target: <b>" . $mapKategoriToSlug[$kategori] . "</b><br>";
+    } else {
+        echo "<b style='color:red'>MAPPING GAGAL!</b> Kategori '".$kategori."' tidak ada di daftar array.<br>";
+        echo "Cek ejaan 'kategori_layanan' di tabel tugas_pegawai_kcds. Harus persis sama.";
+    }
+
+    echo "<hr><h3>4. CEK CONFIG AKHIR</h3>";
+    $config = config('sidebar_menu.role_map.Pegawai'); // Cek key standar
+    echo "Menu Pegawai saat ini:<pre>";
+    print_r($config);
+    echo "</pre>";
+
+    if(in_array('layanan-gtk', $config ?? [])) {
+        echo "<h1>✅ STATUS: INJEKSI BERHASIL</h1>";
+        echo "Kalau masih gak muncul di sidebar, berarti masalahnya di file <b>SidebarHelper.php</b>";
+    } else {
+        echo "<h1>❌ STATUS: INJEKSI GAGAL</h1>";
+        echo "AppServiceProvider tidak berhasil menyuntikkan menu.";
+    }
+});
 /*
 |--------------------------------------------------------------------------
 | PANEL ADMIN KCD
@@ -63,29 +121,41 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
 
     /*
     |--------------------------------------------------------------------------
-    | 2. KEPEGAWAIAN KCD (FLEXIBLE ACCESS)
+    | 2.A PENUGASAN PEGAWAI (TUGAS & AKSES LAYANAN) - [PRIORITAS UTAMA]
     |--------------------------------------------------------------------------
-    | Logic: 
-    | - Admin (Punya Menu): Bisa akses Index, Tambah, Hapus.
-    | - Pegawai (Via Menu Profil Saya): Akses showMe tanpa middleware menu.
+    | URL: admin/kepegawaian/tugas-internal
+    | PENTING: Ditaruh DI ATAS Kepegawaian Data agar tidak dianggap sebagai {id}
+    */
+    Route::controller(TugasPegawaiKcdController::class)
+        ->prefix('kepegawaian/tugas-internal')
+        ->name('kepegawaian.tugas-kcd.')
+        ->middleware('check_menu:kepegawaian-tugas') 
+        ->group(function() {
+            Route::get('/', 'index')->name('index');
+            Route::post('/', 'store')->name('store');
+            Route::delete('/{id}', 'destroy')->name('destroy');
+        });
+
+    /*
+    |--------------------------------------------------------------------------
+    | 2.B KEPEGAWAIAN KCD (DATA PEGAWAI)
+    |--------------------------------------------------------------------------
+    | Karena ini punya route dinamis /{id}, harus ditaruh SETELAH route spesifik.
     */
     Route::prefix('kepegawaian')->name('kepegawaian.')->controller(PegawaiKcdController::class)->group(function() {
         
-        // [BARU] Route Khusus Menu 'Profil Saya' (Pegawai)
-        // URL: /admin/kepegawaian/profil-saya
-        // REVISI: Middleware menu dilepas agar tidak 403, keamanan via Controller
+        // Route Khusus Menu 'Profil Saya' (Pegawai)
         Route::get('/profil-saya', 'showMe')->name('me');
 
-        // GRUP A: Hanya yang punya menu 'kepegawaian-kcd' (Admin)
-        Route::middleware('check_menu:kepegawaian-kcd')->group(function() {
+        // Admin Only (Using new slug 'kepegawaian-data')
+        Route::middleware('check_menu:kepegawaian-data')->group(function() {
             Route::get('/', 'index')->name('index');
             Route::post('/', 'store')->name('store');
             Route::delete('/{id}', 'destroy')->name('destroy');
             Route::put('/{id}/reset', 'resetPassword')->name('reset');
         });
 
-        // GRUP B: Bebas Middleware Menu (Tapi diproteksi Controller by ID)
-        // Untuk handle Update data profil (baik Admin maupun Pegawai)
+        // Update Profil (HATI-HATI: Route ini menangkap semua URL /kepegawaian/{apa-saja})
         Route::put('/change-password', 'changePassword')->name('change-password'); 
         Route::get('/{id}', 'show')->name('show'); 
         Route::put('/{id}', 'update')->name('update');

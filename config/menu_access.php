@@ -3,12 +3,22 @@
 return [
     // 1. MAPPING AKSES MENU BERDASARKAN ROLE
     'role_map' => [
-        'Admin' => ['*'], // Admin akses semua
+        'Admin' => ['*'], 
         
         'Operator KCD' => [
-            'dashboard', 'profil-instansi', 'kepegawaian-kcd', 'satuan-pendidikan', 
-            'gtk', 'peserta-didik', 'layanan-gtk', 'administrasi-surat', 
-            'web-profile', 'pengaturan-sistem-header', 'pengaturan-sistem',
+            'dashboard', 
+            'profil-instansi', 
+            'kepegawaian',          // Induk Menu
+            'kepegawaian-data',     // Submenu Data Pegawai
+            'kepegawaian-tugas',    // Submenu Penugasan
+            'satuan-pendidikan', 
+            'gtk', 
+            'peserta-didik', 
+            'layanan-gtk', 
+            'administrasi-surat', 
+            'web-profile', 
+            'pengaturan-sistem-header', 
+            'pengaturan-sistem',
         ],
         
         'Sekolah' => [
@@ -16,10 +26,16 @@ return [
             'web-profile', 'pengaturan-sistem-header', 'pengaturan-sistem',
         ],
 
-        // [BARU] Role Pegawai: Akses Dashboard & Profil Saya
+        // === PERBAIKAN DI SINI ===
         'Pegawai' => [
             'dashboard', 
-            'profil-saya', // <-- Slug baru agar bisa buka menu Profil Saya
+            'profil-saya',
+            
+            // Tambahkan menu standar ini agar muncul:
+            'pengaturan-sistem-header',
+            
+            // Catatan: Menu 'layanan-gtk' dan 'layanan-mutasi' (dll) 
+            // akan otomatis disuntikkan oleh Middleware, jadi tidak perlu ditulis di sini.
         ],
     ],
 
@@ -27,6 +43,7 @@ return [
 
     // 2. STRUKTUR SIDEBAR
     'sidebar_menu' => [
+        
         // 1. DASHBOARD
         [
             'title' => 'Dashboard',
@@ -35,8 +52,7 @@ return [
             'route' => 'admin.dashboard',
         ],
 
-        // [BARU] MENU PROFIL SAYA (KHUSUS PEGAWAI)
-        // Route ini mengarah ke method showMe() di controller
+        // 2. PROFIL SAYA (KHUSUS PEGAWAI)
         [
             'title' => 'Profil Saya',
             'slug'  => 'profil-saya',
@@ -44,7 +60,7 @@ return [
             'route' => 'admin.kepegawaian.me', 
         ],
 
-        // 2. PROFIL INSTANSI
+        // 3. PROFIL INSTANSI
         [
             'title' => 'Profil Instansi',
             'slug' => 'profil-instansi',
@@ -52,15 +68,26 @@ return [
             'route' => 'admin.instansi.index',
         ],
 
-        // 3. KEPEGAWAIAN (KCD) - Ini tetap ada buat Admin
+        // 4. KEPEGAWAIAN (INDUK MENU BARU)
         [
-            'title' => 'Kepegawaian (KCD)',
-            'slug' => 'kepegawaian-kcd',
-            'icon' => 'bx bxs-id-card',
-            'route' => 'admin.kepegawaian.index', 
+            'title' => 'Kepegawaian',
+            'slug'  => 'kepegawaian',
+            'icon'  => 'bx bxs-id-card',
+            'submenu' => [
+                [
+                    'title' => 'Data Pegawai',
+                    'slug'  => 'kepegawaian-data', // Slug untuk permission
+                    'route' => 'admin.kepegawaian.index', 
+                ],
+                [
+                    'title' => 'Tugas Pegawai',
+                    'slug'  => 'kepegawaian-tugas', // Slug untuk permission
+                    'route' => 'admin.kepegawaian.tugas-kcd.index',
+                ],
+            ],
         ],
 
-        // 4. SATUAN PENDIDIKAN
+        // 5. SATUAN PENDIDIKAN
         [
             'title' => 'Satuan Pendidikan',
             'slug' => 'satuan-pendidikan',
@@ -68,7 +95,7 @@ return [
             'route' => 'admin.sekolah.index',
         ],
 
-        // 5. GTK
+        // 6. GTK
         [
             'title' => 'GTK',
             'slug' => 'gtk',
@@ -79,7 +106,7 @@ return [
             ],
         ],
 
-        // 6. PESERTA DIDIK
+        // 7. PESERTA DIDIK
         [
             'title' => 'Peserta Didik',
             'slug' => 'peserta-didik',
@@ -89,7 +116,7 @@ return [
             ],
         ],
 
-        // 7. LAYANAN GTK
+        // 8. LAYANAN GTK
         [
             'title' => 'Layanan GTK',
             'slug' => 'layanan-gtk',
@@ -147,7 +174,7 @@ return [
             ],
         ],
 
-        // 8. ADMINISTRASI SURAT
+        // 9. ADMINISTRASI SURAT
         [
             'title' => 'Administrasi Surat',
             'slug' => 'administrasi-surat',
@@ -161,7 +188,7 @@ return [
             ],
         ],
 
-        // 9. WEB PROFILE
+        // 10. WEB PROFILE
         [
             'title' => 'Web Profile',
             'slug' => 'web-profile',
@@ -169,7 +196,7 @@ return [
             'route' => '#',
         ],
 
-        // 10. PENGATURAN
+        // 11. PENGATURAN
         [
             'title' => 'Lainnya',
             'slug' => 'pengaturan-sistem-header',

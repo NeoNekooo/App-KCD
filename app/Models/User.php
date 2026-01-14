@@ -21,9 +21,9 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        // --- TAMBAHIN DUA INI BRE ---
         'username',
         'role',
+        'pegawai_kcd_id', // <--- WAJIB ADA INI! JANGAN LUPA!
     ];
 
     /**

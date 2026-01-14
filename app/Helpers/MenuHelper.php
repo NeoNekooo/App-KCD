@@ -3,65 +3,54 @@
 use Illuminate\Support\Facades\Route;
 
 /* =========================================================
-| 1. LOGIKA CEK MENU AKTIF (SMART LOGIC)
+| 1. LOGIKA CEK MENU AKTIF
 ========================================================= */
 if (!function_exists('menuIsActive')) {
     function menuIsActive(array $menu): bool
     {
-        // A. Validasi Dasar: Jika tidak ada route, cek URL manual (opsional) atau return false
-        if (empty($menu['route'])) {
+        if (empty($menu['route'])) return false;
+
+        // Cek apakah Route Valid
+        if (!Route::has($menu['route'])) return false;
+
+        // Cek apakah Route saat ini cocok
+        if (!request()->routeIs($menu['route'])) {
             return false;
         }
 
-        // B. Cek Nama Route (Basic Check)
-        // Jika nama route di URL sekarang tidak sama dengan config, langsung False.
-        if (!Route::has($menu['route']) || !request()->routeIs($menu['route'])) {
-            return false;
-        }
-
-        // C. LOGIKA PARAMETER (Advanced Check)
-        // 1. Jika menu punya parameter spesifik (misal: kategori=mutasi)
+        // Cek Parameter Spesifik (Opsional - misal ?kategori=mutasi)
         if (!empty($menu['params'])) {
             foreach ($menu['params'] as $key => $value) {
-                // Cek di Query String (?kategori=...) ATAU Route Param ({id})
-                $queryParam = request()->query($key);
-                $routeParam = request()->route($key);
-
-                // Jika salah satu tidak cocok, berarti menu ini BUKAN yang sedang aktif
-                if ($queryParam != $value && $routeParam != $value) {
+                // Cek di Query String (?kategori=...) ATAU di Route Param (/siswa/{kategori})
+                if (request()->query($key) != $value && request()->route($key) != $value) {
                     return false;
                 }
             }
-            return true; // Route Cocok & Param Cocok -> AKTIF
+            return true;
         }
 
-        // 2. Jika menu TIDAK punya parameter (Menu Default / "Lainnya")
-        // Kasus: "Verifikasi Surat Lainnya" (params kosong).
-        // Aturan: Jika URL saat ini MEMILIKI parameter 'kategori', maka menu default ini HARUS MATI.
-        // Supaya dia tidak ikut menyala saat kita buka menu "Kenaikan Pangkat".
-        if (request()->has('kategori')) {
+        // PENTING: Jika URL punya parameter 'kategori', tapi menu ini polosan (tidak punya params),
+        // Maka anggap menu ini TIDAK AKTIF (supaya tidak bentrok dengan menu spesifik).
+        if (request()->has('kategori') && empty($menu['params'])) {
             return false;
         }
 
-        // Jika lolos semua cek (Route sama, tidak ada syarat param, URL bersih) -> AKTIF
         return true;
     }
 }
 
 /* =========================================================
-| 2. CEK APAKAH PARENT PUNYA ANAK AKTIF
+| 2. CEK APAKAH PARENT PUNYA ANAK AKTIF (Recursive)
 ========================================================= */
 if (!function_exists('menuHasActiveChild')) {
     function menuHasActiveChild(array $menu): bool
     {
-        if (menuIsActive($menu)) {
-            return true;
-        }
+        // Jika dirinya sendiri aktif
+        if (menuIsActive($menu)) return true;
 
+        // Cek anak-anaknya
         foreach ($menu['submenu'] ?? [] as $child) {
-            if (menuHasActiveChild($child)) {
-                return true;
-            }
+            if (menuHasActiveChild($child)) return true;
         }
 
         return false;
@@ -69,21 +58,59 @@ if (!function_exists('menuHasActiveChild')) {
 }
 
 /* =========================================================
-| 3. CEK HAK AKSES (ROLE PERMISSION)
+| 3. CEK HAK AKSES (ROLE PERMISSION) - [STRICT MODE]
 ========================================================= */
 if (!function_exists('canAccessMenu')) {
     function canAccessMenu($slug, $parentSlug, $role, $subRole, $roleMap, $subRoleMap): bool {
-        $allowed = ($role === 'PTK' && $subRole) ? ($subRoleMap[$subRole] ?? []) : ($roleMap[$role] ?? []);
         
-        if (empty($allowed)) return false;
-        if (in_array('!' . $slug, $allowed, true)) return false;
-        if (in_array('*', $allowed, true)) return true;
-        
-        if ($parentSlug === null) return in_array($slug, $allowed, true);
-        if (!in_array($parentSlug, $allowed, true)) return false;
+        // 1. Admin Selalu Lolos (Case Insensitive)
+        if (strcasecmp($role, 'admin') === 0) {
+            return true;
+        }
 
-        $specificChildren = array_filter($allowed, fn ($item) => str_starts_with($item, $parentSlug . '-'));
-        return empty($specificChildren) ? true : in_array($slug, $specificChildren, true);
+        // 2. Ambil Config Izin Sesuai Role
+        $allowed = $roleMap[$role] ?? [];
+
+        // Fallback: Jika key tidak ketemu langsung, cari case-insensitive
+        if (empty($allowed)) {
+            foreach ($roleMap as $key => $val) {
+                if (strcasecmp($key, $role) === 0) {
+                    $allowed = $val;
+                    break;
+                }
+            }
+        }
+
+        // 3. Cek Sub Role (Khusus PTK atau role bercabang lain)
+        if ($subRole && isset($subRoleMap[$subRole])) {
+            // Merge atau Replace izin subrole (tergantung kebutuhan, di sini kita replace/add)
+            $subAllowed = $subRoleMap[$subRole];
+            if (!empty($subAllowed)) {
+                $allowed = array_merge($allowed, $subAllowed);
+            }
+        }
+
+        // 4. Cek Wildcard (*) - Akses Total
+        if (in_array('*', $allowed, true)) return true;
+
+        // 5. CEK SLUG SPESIFIK (STRICT)
+        // Menu hanya boleh muncul jika slug-nya ADA di daftar allowed.
+        if (in_array($slug, $allowed, true)) return true;
+
+        // -------------------------------------------------------------
+        // ❌ BAGIAN INI DIHAPUS AGAR FILTER KETAT BERJALAN ❌
+        // -------------------------------------------------------------
+        // Logika lama: "Jika Parent boleh, anak otomatis boleh".
+        // Ini kita matikan supaya 'layanan-mutasi' harus ditulis eksplisit,
+        // dan 'layanan-kgb' otomatis hilang walau parent-nya sama.
+        /*
+        if ($parentSlug && in_array($parentSlug, $allowed, true)) {
+             if (in_array('!' . $slug, $allowed, true)) return false;
+             return true;
+        }
+        */
+
+        return false;
     }
 }
 
@@ -95,31 +122,43 @@ if (!function_exists('renderSidebarMenu')) {
         
         foreach ($menus as $menu) {
             $slug = $menu['slug'] ?? null;
+            $isHeader = $menu['is_header'] ?? false;
 
-            // Cek Permission
+            // --- A. Render Header ---
+            if ($isHeader) {
+                 // Header hanya muncul jika permission mengizinkan (opsional)
+                 // atau kamu bisa set header selalu muncul. Di sini kita cek permission slug header.
+                 if ($slug && !canAccessMenu($slug, $parentSlug, $role, $subRole, $roleMap, $subRoleMap)) {
+                    continue;
+                 }
+                 echo "<li class='menu-header small text-uppercase'><span class='menu-header-text'>{$menu['title']}</span></li>";
+                 continue;
+            }
+
+            // --- B. Cek Permission Item Menu ---
+            // Jika slug tidak diizinkan, SKIP (Jangan render HTML-nya)
             if ($slug && !canAccessMenu($slug, $parentSlug, $role, $subRole, $roleMap, $subRoleMap)) {
                 continue;
             }
 
-            // Cek Status Aktif
+            // --- C. Hitung Status Aktif ---
             $hasSub   = !empty($menu['submenu']);
             $isActive = menuHasActiveChild($menu); 
             
-            // Generate CSS Classes
             $liClass  = 'menu-item' . ($isActive ? ' active' : '') . ($hasSub && $isActive ? ' open' : '');
             $aClass   = 'menu-link' . ($hasSub ? ' menu-toggle' : '');
 
-            // Generate URL (dengan Parameter jika ada)
+            // --- D. Tentukan URL ---
             if ($hasSub || (!empty($menu['route']) && in_array($menu['route'], $underConstructionRoutes))) {
                 $href = 'javascript:void(0);';
             } elseif (!empty($menu['route']) && Route::has($menu['route'])) {
-                // INI PENTING: Masukkan params ke route() generator
+                // Aman pakai route() karena Route::has sudah dicek
                 $href = route($menu['route'], $menu['params'] ?? []);
             } else {
                 $href = $menu['url'] ?? '#';
             }
 
-            // Output HTML
+            // --- E. Render HTML ---
             echo "<li class='{$liClass}'>";
             echo "<a href='{$href}' class='{$aClass}'>";
             
@@ -129,15 +168,16 @@ if (!function_exists('renderSidebarMenu')) {
             
             echo "<div data-i18n='{$menu['title']}'>{$menu['title']}</div>";
             
-            // Render Badge (Notifikasi Angka)
+            // Badge Notifikasi
             if (isset($menu['badge_key']) && !empty($badges[$menu['badge_key']])) {
                 echo "<div class='badge bg-danger rounded-pill ms-auto'>{$badges[$menu['badge_key']]}</div>";
             }
             echo "</a>";
 
-            // Render Submenu (Rekursif)
+            // --- F. Render Submenu (Recursive) ---
             if ($hasSub) {
                 echo "<ul class='menu-sub'>";
+                // PENTING: Pass $slug saat ini sebagai $parentSlug ke anak-anaknya
                 renderSidebarMenu($menu['submenu'], $role, $subRole, $roleMap, $subRoleMap, $underConstructionRoutes, $badges, $slug);
                 echo "</ul>";
             }

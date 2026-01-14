@@ -3,7 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Middleware\SyncApiAuth;
-use App\Http\Controllers\Api\GenericSyncController;
+use App\Http\Controllers\Api\SchoolSyncController;
 
 // --- TAMBAHAN: Controller Penerima Pengajuan ---
 use App\Http\Controllers\Api\TerimaPengajuanController; 
@@ -14,8 +14,9 @@ use App\Http\Controllers\Api\TerimaPengajuanController;
 |--------------------------------------------------------------------------
 */
 
-// 1. Sync Data Pokok (Existing)
-Route::post('/sync/{entity}', [GenericSyncController::class, 'handleSync'])
+// 1. Sync Data (Sekolah -> KCD)
+// Endpoint ini menerima data dari aplikasi sekolah
+Route::post('/sync/{table}', [SchoolSyncController::class, 'handle'])
      ->middleware(SyncApiAuth::class);
 
 // 2. TERIMA PENGAJUAN DARI SEKOLAH (BARU)

@@ -136,6 +136,7 @@
             if (empty($reqKategori) && $isEdit) {
                 $reqKategori = $template->kategori;
             }
+            // Default kategori
             $kategoriAktif = $reqKategori ?? 'siswa';
 
             $formAction = $isEdit
@@ -152,14 +153,14 @@
                 $pages = [$fullContent ?: ''];
             }
 
-            // === DAFTAR VARIABEL SESUAI DATABASE (MIAW.SQL) ===
+            // === DAFTAR VARIABEL ===
             $variableGroups = [
                 'Data Umum (Wajib)' => [
                     ['code' => '{{no_surat}}', 'desc' => 'Nomor Surat Resmi'],
                     ['code' => '{{tanggal}}', 'desc' => 'Tanggal Cetak (Indo)'],
                     ['code' => '{{tahun_ajaran}}', 'desc' => 'Tahun Ajaran Aktif'],
                 ],
-                // Variabel SISWA (Sesuai tabel siswas)
+                // Variabel SISWA
                 'Identitas Siswa' =>
                     $kategoriAktif == 'siswa'
                         ? [
@@ -169,18 +170,18 @@
                             ['code' => '{{nik}}', 'desc' => 'NIK Siswa'],
                             ['code' => '{{kelas}}', 'desc' => 'Kelas (Rombel)'],
                             ['code' => '{{ttl}}', 'desc' => 'Tempat, Tgl Lahir'],
-                            ['code' => '{{jk}}', 'desc' => 'Jenis Kelamin (Laki/Perempuan)'],
+                            ['code' => '{{jk}}', 'desc' => 'Jenis Kelamin'],
                             ['code' => '{{agama}}', 'desc' => 'Agama'],
-                            ['code' => '{{alamat}}', 'desc' => 'Alamat Lengkap (Jl, Desa, Kec, Kab)'],
+                            ['code' => '{{alamat}}', 'desc' => 'Alamat Lengkap'],
                             ['code' => '{{nama_ayah}}', 'desc' => 'Nama Ayah'],
                             ['code' => '{{nama_ibu}}', 'desc' => 'Nama Ibu'],
                             ['code' => '{{pekerjaan_ayah}}', 'desc' => 'Pekerjaan Ayah'],
                             ['code' => '{{nama_wali}}', 'desc' => 'Nama Wali'],
                         ]
                         : [],
-                // Variabel GURU (Sesuai tabel gtks)
-                'Identitas Guru/GTK' =>
-                    $kategoriAktif == 'guru'
+                // Variabel GURU / LAYANAN (Biasanya Layanan juga pake data Guru)
+                'Identitas Guru/PTK' =>
+                    ($kategoriAktif == 'guru' || $kategoriAktif == 'layanan')
                         ? [
                             ['code' => '{{nama}}', 'desc' => 'Nama Lengkap (Gelar)'],
                             ['code' => '{{nip}}', 'desc' => 'NIP'],
@@ -192,31 +193,60 @@
                             ['code' => '{{alamat}}', 'desc' => 'Alamat Jalan'],
                             ['code' => '{{no_hp}}', 'desc' => 'Nomor HP'],
                             ['code' => '{{email}}', 'desc' => 'Email'],
+                            ['code' => '{{pangkat}}', 'desc' => 'Pangkat/Golongan'],
+                            ['code' => '{{unit_kerja}}', 'desc' => 'Unit Kerja'],
                         ]
                         : [],
             ];
+
+            // Tentukan grup variabel utama berdasarkan kategori
+            $mainVarGroup = 'Identitas Siswa';
+            if($kategoriAktif == 'guru' || $kategoriAktif == 'layanan') {
+                $mainVarGroup = 'Identitas Guru/PTK';
+            }
 
             // Ambil 6 variabel pertama untuk quick access
             $quickAccess = array_merge(
                 $variableGroups['Data Umum (Wajib)'],
                 array_slice(
-                    $variableGroups['Identitas ' . ucfirst($kategoriAktif == 'siswa' ? 'Siswa' : 'Guru/GTK')],
+                    $variableGroups[$mainVarGroup] ?? [],
                     0,
                     6,
                 ),
             );
         @endphp
 
+        {{-- TABS NAVIGATION --}}
         <ul class="nav nav-pills mb-3">
-            <li class="nav-item"><a class="nav-link {{ $kategoriAktif == 'siswa' ? 'active' : '' }}"
-                    href="{{ route('admin.administrasi.tipe-surat.index', ['kategori' => 'siswa']) }}"><i
-                        class='bx bx-user me-1'></i> Siswa</a></li>
-            <li class="nav-item"><a class="nav-link {{ $kategoriAktif == 'guru' ? 'active' : '' }}"
-                    href="{{ route('admin.administrasi.tipe-surat.index', ['kategori' => 'guru']) }}"><i
-                        class='bx bx-briefcase-alt-2 me-1'></i> Guru</a></li>
+            <li class="nav-item">
+                <a class="nav-link {{ $kategoriAktif == 'siswa' ? 'active' : '' }}"
+                   href="{{ route('admin.administrasi.tipe-surat.index', ['kategori' => 'siswa']) }}">
+                   <i class='bx bx-user me-1'></i> Siswa
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {{ $kategoriAktif == 'guru' ? 'active' : '' }}"
+                   href="{{ route('admin.administrasi.tipe-surat.index', ['kategori' => 'guru']) }}">
+                   <i class='bx bx-briefcase-alt-2 me-1'></i> Guru
+                </a>
+            </li>
+            {{-- TAB BARU: LAYANAN --}}
+            <li class="nav-item">
+                <a class="nav-link {{ $kategoriAktif == 'layanan' ? 'active' : '' }}"
+                   href="{{ route('admin.administrasi.tipe-surat.index', ['kategori' => 'layanan']) }}">
+                   <i class='bx bx-layer me-1'></i> Layanan
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {{ $kategoriAktif == 'sk' ? 'active' : '' }}"
+                   href="{{ route('admin.administrasi.tipe-surat.index', ['kategori' => 'sk']) }}">
+                   <i class='bx bx-file me-1'></i> SK
+                </a>
+            </li>
         </ul>
 
         <div class="row">
+            {{-- FORM EDITOR --}}
             <div class="col-md-9">
                 <div class="card h-100 border-0 shadow-sm">
                     <div class="card-header bg-white border-bottom">
@@ -228,25 +258,55 @@
                             @if ($isEdit)
                                 @method('PUT')
                             @endif
+                            
+                            {{-- Input Hidden Kategori --}}
                             <input type="hidden" name="kategori" value="{{ $kategoriAktif }}">
                             <input type="hidden" name="orientasi" value="portrait">
                             <textarea name="template_isi" id="real_template_isi" style="display:none;"></textarea>
 
-                            <div class="row g-3 mb-4 bg-light p-3 rounded mx-1">
-                                <div class="col-md-8">
-                                    <label class="form-label fw-bold">Judul Surat</label>
-                                    <input type="text" name="judul_surat" class="form-control"
-                                        value="{{ old('judul_surat', $isEdit ? $template->judul_surat : '') }}" required>
-                                </div>
-                                <div class="col-md-4">
-                                    <label class="form-label fw-bold">Ukuran Kertas</label>
-                                    <select name="ukuran_kertas" id="paperSizeSelect" class="form-select">
-                                        @foreach (['A4', 'F4', 'Legal', 'Letter'] as $uk)
-                                            <option value="{{ $uk }}"
-                                                {{ old('ukuran_kertas', $isEdit ? $template->ukuran_kertas : 'A4') == $uk ? 'selected' : '' }}>
-                                                {{ $uk }}</option>
-                                        @endforeach
-                                    </select>
+                            <div class="bg-light p-3 rounded mx-1 mb-4">
+                                <div class="row g-3">
+                                    {{-- Jika Kategori Layanan, Tampilkan Dropdown Jenis Layanan --}}
+                                    @if($kategoriAktif == 'layanan')
+                                    <div class="col-md-12">
+                                        <label class="form-label fw-bold text-primary">Jenis Layanan</label>
+                                        <select name="sub_kategori" class="form-select border-primary" required>
+                                            <option value="" disabled selected>-- Pilih Jenis Layanan --</option>
+                                            @php
+                                                $layananList = [
+                                                    'kenaikan-pangkat' => 'Kenaikan Pangkat',
+                                                    'kgb' => 'KGB (Gaji Berkala)',
+                                                    'mutasi' => 'Mutasi',
+                                                    'relokasi' => 'Relokasi / Penempatan',
+                                                    'satya-lencana' => 'Satya Lencana',
+                                                    'hukuman-disiplin' => 'Hukuman Disiplin',
+                                                    'verifikasi-surat' => 'Verifikasi Surat Lainnya'
+                                                ];
+                                                $selectedSub = old('sub_kategori', $isEdit ? $template->sub_kategori : '');
+                                            @endphp
+                                            @foreach($layananList as $key => $label)
+                                                <option value="{{ $key }}" {{ $selectedSub == $key ? 'selected' : '' }}>{{ $label }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    @endif
+
+                                    <div class="col-md-8">
+                                        <label class="form-label fw-bold">Judul Surat / Template</label>
+                                        <input type="text" name="judul_surat" class="form-control"
+                                            value="{{ old('judul_surat', $isEdit ? $template->judul_surat : '') }}" 
+                                            placeholder="Contoh: Surat Pengantar Kenaikan Pangkat" required>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label fw-bold">Ukuran Kertas</label>
+                                        <select name="ukuran_kertas" id="paperSizeSelect" class="form-select">
+                                            @foreach (['A4', 'F4', 'Legal', 'Letter'] as $uk)
+                                                <option value="{{ $uk }}"
+                                                    {{ old('ukuran_kertas', $isEdit ? $template->ukuran_kertas : 'A4') == $uk ? 'selected' : '' }}>
+                                                    {{ $uk }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
                                 </div>
                             </div>
 
@@ -321,15 +381,20 @@
             <div class="col-md-3">
                 <div class="card h-100 border-0 shadow-sm">
                     <div class="card-header bg-light">
-                        <h6 class="mb-0 fw-bold text-secondary">Daftar Template</h6>
+                        <h6 class="mb-0 fw-bold text-secondary">Daftar Template ({{ ucfirst($kategoriAktif) }})</h6>
                     </div>
                     <ul class="list-group list-group-flush">
-                        @foreach ($templates as $t)
+                        @forelse ($templates as $t)
                             <li class="list-group-item py-3">
                                 <div class="d-flex justify-content-between align-items-center">
                                     <div class="me-2 overflow-hidden">
-                                        <h6 class="mb-1 text-truncate" style="max-width: 120px;">{{ $t->judul_surat }}</h6>
-                                        <small class="badge bg-label-secondary">{{ $t->ukuran_kertas }}</small>
+                                        <h6 class="mb-1 text-truncate" style="max-width: 140px;">{{ $t->judul_surat }}</h6>
+                                        <div class="d-flex gap-1 flex-wrap">
+                                            <small class="badge bg-label-secondary">{{ $t->ukuran_kertas }}</small>
+                                            @if($t->sub_kategori)
+                                                <small class="badge bg-label-info">{{ ucwords(str_replace('-', ' ', $t->sub_kategori)) }}</small>
+                                            @endif
+                                        </div>
                                     </div>
                                     <div class="btn-group btn-group-sm">
                                         <a href="{{ route('admin.administrasi.tipe-surat.edit', ['tipe_surat' => $t->id, 'kategori' => $kategoriAktif]) }}"
@@ -341,14 +406,16 @@
                                     </div>
                                 </div>
                             </li>
-                        @endforeach
+                        @empty
+                            <li class="list-group-item text-center py-4 text-muted">Belum ada template.</li>
+                        @endforelse
                     </ul>
                 </div>
             </div>
         </div>
     </div>
 
-    {{-- MODAL & TOAST --}}
+    {{-- MODAL & TOAST (SAMA SEPERTI SEBELUMNYA) --}}
     <div class="modal fade" id="variableModal" tabindex="-1">
         <div class="modal-dialog modal-lg modal-dialog-centered">
             <div class="modal-content">
@@ -397,23 +464,12 @@
 
     @push('scripts')
         <script>
+            // ... (Kode Javascript sama persis dengan yang kamu kirim, tidak perlu diubah) ...
             const paperConfig = {
-                'A4': {
-                    width: '210mm',
-                    heightVal: 297
-                },
-                'F4': {
-                    width: '215mm',
-                    heightVal: 330
-                },
-                'Legal': {
-                    width: '216mm',
-                    heightVal: 356
-                },
-                'Letter': {
-                    width: '216mm',
-                    heightVal: 279
-                }
+                'A4': { width: '210mm', heightVal: 297 },
+                'F4': { width: '215mm', heightVal: 330 },
+                'Legal': { width: '216mm', heightVal: 356 },
+                'Letter': { width: '216mm', heightVal: 279 }
             };
 
             let pageCount = {{ count($pages) }};
@@ -431,13 +487,8 @@
                     height: '800px',
                     plugins: 'preview searchreplace autolink autosave save directionality code visualblocks visualchars fullscreen image link media table nonbreaking anchor lists wordcount help',
                     toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline | alignleft aligncenter alignright alignjustify | numlist bullist | table',
-                    table_default_attributes: {
-                        border: '1'
-                    },
-                    table_default_styles: {
-                        'width': '100%',
-                        'border-collapse': 'collapse'
-                    },
+                    table_default_attributes: { border: '1' },
+                    table_default_styles: { 'width': '100%', 'border-collapse': 'collapse' },
                     content_style: `
                         html { background-color: #525659 !important; padding: 2rem 0; margin: 0; }
                         body { background-color: white !important; color: black; margin: 0 auto !important; box-shadow: 0 4px 15px rgba(0,0,0,0.3); box-sizing: border-box; display: block !important; font-family: 'Times New Roman', serif; font-size: 12pt; overflow-wrap: break-word; word-wrap: break-word; overflow-y: auto !important; }
@@ -445,19 +496,10 @@
                         td, th { word-wrap: break-word; vertical-align: top; }
                     `,
                     setup: function(editor) {
-                        editor.on('init', function() {
-                            updateEditorVisuals();
-                        });
-                        editor.on('focus', function() {
-                            window.activeEditorId = editor.id;
-                        });
-                        editor.on('keyup', function(e) {
-                            checkPageOverflow(editor);
-                            editor.selection.scrollIntoView();
-                        });
-                        editor.on('paste', function(e) {
-                            setTimeout(() => checkPageOverflow(editor), 100);
-                        });
+                        editor.on('init', function() { updateEditorVisuals(); });
+                        editor.on('focus', function() { window.activeEditorId = editor.id; });
+                        editor.on('keyup', function(e) { checkPageOverflow(editor); editor.selection.scrollIntoView(); });
+                        editor.on('paste', function(e) { setTimeout(() => checkPageOverflow(editor), 100); });
                     }
                 });
             }
@@ -508,8 +550,7 @@
                 document.querySelectorAll('.page-editor').forEach((el) => {
                     const editorInstance = tinymce.get(el.id);
                     if (editorInstance) {
-                        if (!first) combinedContent +=
-                            '<div class="mce-pagebreak" contenteditable="false"></div>';
+                        if (!first) combinedContent += '<div class="mce-pagebreak" contenteditable="false"></div>';
                         combinedContent += editorInstance.getContent();
                         first = false;
                     }

@@ -10,7 +10,6 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withProviders([
         SidebarServiceProvider::class,
     ])
-    
     ->withRouting(
         web: __DIR__.'/../routes/web.php',
         api: __DIR__.'/../routes/api.php',
@@ -18,13 +17,15 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        
         $middleware->web(append: [
             \App\Http\Middleware\HandleInertiaRequests::class,
             \Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets::class,
+            
+            // 🔥 INI WAJIB ADA! (Jangan dihapus lagi) 🔥
+            \App\Http\Middleware\SetupMenuPegawai::class, 
         ]);
 
-        // PERBAIKAN DISINI:
-        // Ganti 'menu.access' jadi 'check_menu' biar cocok sama routes/web.php
         $middleware->alias([
             'check_menu' => CheckMenuAccess::class,
         ]);

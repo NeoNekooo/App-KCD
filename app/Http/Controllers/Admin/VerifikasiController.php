@@ -4,7 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\PengajuanSekolah;
-use App\Models\TipeSurat; 
+use App\Models\TipeSurat;
+use App\Models\TugasPegawaiKcd; 
 use App\Http\Controllers\Admin\Administrasi\NomorSuratSettingController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
@@ -16,7 +17,7 @@ use Illuminate\Support\Str;
 class VerifikasiController extends Controller
 {
     // =========================================================================
-    // 1. HALAMAN UTAMA (FIX FILTER KATEGORI)
+    // 1. HALAMAN UTAMA (INDEX)
     // =========================================================================
     public function index(Request $request)
     {
@@ -25,51 +26,102 @@ class VerifikasiController extends Controller
         
         $query = PengajuanSekolah::query();
 
-        // --- A. FIX FILTER PENCARIAN KATEGORI (Case Insensitive & Slug Match) ---
-        if ($request->filled('kategori')) {
-            $catRaw = $request->kategori; 
-            
-            // Logika pencarian cerdas agar "hukuman-disiplin" ketemu dengan "HUKUMAN DISIPLIN"
-            $query->where(function($q) use ($catRaw) {
-                $q->where('kategori', 'LIKE', '%' . $catRaw . '%')
-                  ->orWhere('kategori', 'LIKE', '%' . str_replace('-', ' ', $catRaw) . '%');
-            });
+        // ---------------------------------------------------------------------
+        // A. LOGIKA HAK AKSES PEGAWAI (MODE TUGAS)
+        // ---------------------------------------------------------------------
+        $kategoriTarget = $request->kategori; 
 
-            $title = 'Pengajuan: ' . ucwords(str_replace('-', ' ', $catRaw));
+        if ($user->role === 'Pegawai' && $user->pegawai_kcd_id) {
+            $penugasan = TugasPegawaiKcd::where('pegawai_kcd_id', $user->pegawai_kcd_id)
+                                        ->where('is_active', 1)
+                                        ->first();
+
+            if ($penugasan && !empty($penugasan->kategori_layanan)) {
+                // Cek apakah dia Pegawai "Sapu Jagat" (Umum)
+                $masterKeys = ['umum', 'all', 'semua-layanan', 'koordinator'];
+                
+                if (in_array(strtolower($penugasan->kategori_layanan), $masterKeys)) {
+                    // Mode Umum: Tidak ada pembatasan, ikuti request URL
+                } else {
+                    // Mode Spesifik: Paksa filter sesuai tugas
+                    $hakAkses = $penugasan->kategori_layanan;
+                    
+                    // Security Check: Kalau coba akses kategori lain lewat URL, tolak.
+                    if ($request->filled('kategori') && $request->kategori !== $hakAkses) {
+                        abort(403, 'AKSES DITOLAK. Tugas Anda hanya: ' . strtoupper(str_replace('-', ' ', $hakAkses)));
+                    }
+
+                    // Paksa variable filter
+                    $kategoriTarget = $hakAkses; 
+                    $request->merge(['kategori' => $hakAkses]);
+                }
+            }
         }
 
-        // --- B. FILTER HAK AKSES (ROLE) ---
+        // ---------------------------------------------------------------------
+        // B. FILTER QUERY (PENCARIAN)
+        // ---------------------------------------------------------------------
+        if ($kategoriTarget) {
+            $query->where(function($q) use ($kategoriTarget) {
+                $q->where('kategori', 'LIKE', '%' . $kategoriTarget . '%')
+                  ->orWhere('kategori', 'LIKE', '%' . str_replace('-', ' ', $kategoriTarget) . '%');
+            });
+            // Update Title Halaman biar sesuai konteks
+            $title = 'Verifikasi: ' . ucwords(str_replace('-', ' ', $kategoriTarget));
+        }
+
+        // ---------------------------------------------------------------------
+        // C. FILTER STATUS (BERDASARKAN ROLE)
+        // ---------------------------------------------------------------------
         if ($user->role == 'kasubag') {
-            $query->whereIn('status', ['Verifikasi Kasubag', 'Verifikasi Kepala', 'ACC']);
-            $query->orderByRaw("FIELD(status, 'Verifikasi Kasubag') DESC");
-        } 
-        elseif ($user->role == 'kepala') {
-            $query->whereIn('status', ['Verifikasi Kepala', 'ACC']);
-            $query->orderByRaw("FIELD(status, 'Verifikasi Kepala') DESC");
-        } 
-        else {
+            $query->whereIn('status', ['Verifikasi Kasubag', 'Verifikasi Kepala', 'ACC'])
+                  ->orderByRaw("FIELD(status, 'Verifikasi Kasubag') DESC");
+        } elseif ($user->role == 'kepala') {
+            $query->whereIn('status', ['Verifikasi Kepala', 'ACC'])
+                  ->orderByRaw("FIELD(status, 'Verifikasi Kepala') DESC");
+        } else {
+            // Admin & Pegawai
             if ($request->filled('status')) {
                 $query->where('status', $request->status);
             }
         }
 
-        // --- C. HITUNG STATISTIK ---
-        $count_proses     = (clone $query)->where('status', 'Proses')->count(); 
-        $count_upload     = (clone $query)->where('status', 'Menunggu Upload')->count(); 
-        $count_verifikasi = (clone $query)->whereIn('status', ['Verifikasi Berkas', 'Verifikasi Kasubag', 'Verifikasi Kepala'])->count();
-        $count_selesai    = (clone $query)->where('status', 'ACC')->count(); 
+        // ---------------------------------------------------------------------
+        // D. HITUNG STATISTIK (DENGAN CLONE QUERY AGAR AKURAT)
+        // ---------------------------------------------------------------------
+        $statQuery = clone $query;
+        
+        // Reset filter status untuk statistik (kecuali Kasubag/Kepala yg memang terbatas)
+        if ($user->role !== 'kasubag' && $user->role !== 'kepala') {
+             $statQuery = PengajuanSekolah::query();
+             if($kategoriTarget) {
+                $statQuery->where(function($q) use ($kategoriTarget) {
+                    $q->where('kategori', 'LIKE', '%' . $kategoriTarget . '%')
+                      ->orWhere('kategori', 'LIKE', '%' . str_replace('-', ' ', $kategoriTarget) . '%');
+                });
+             }
+        }
 
+        $count_proses     = (clone $statQuery)->where('status', 'Proses')->count(); 
+        $count_upload     = (clone $statQuery)->where('status', 'Menunggu Upload')->count(); 
+        $count_verifikasi = (clone $statQuery)->whereIn('status', ['Verifikasi Berkas', 'Verifikasi Kasubag', 'Verifikasi Kepala'])->count();
+        $count_selesai    = (clone $statQuery)->where('status', 'ACC')->count(); 
+
+        // ---------------------------------------------------------------------
+        // E. EKSEKUSI DATA
+        // ---------------------------------------------------------------------
         $data = $query->latest()->paginate(10)->withQueryString();
         $templates = TipeSurat::where('kategori', 'sk')->get();
 
+        // Kirim data ke View (Perbaikan: pakai ->with() untuk kategoriUrl)
         return view('admin.verifikasi.index', compact(
             'data', 'title', 'templates',
             'count_proses', 'count_upload', 'count_verifikasi', 'count_selesai'
-        ));
+        ))->with('kategoriUrl', $kategoriTarget);
     }
 
     // =========================================================================
-    // 2. ADMIN: SET SYARAT
+    // 2. ADMIN: SET SYARAT (TIKET BARU)
     // =========================================================================
     public function setSyarat(Request $request, $id)
     {
@@ -101,7 +153,7 @@ class VerifikasiController extends Controller
     }
 
     // =========================================================================
-    // 3. ADMIN: VERIFIKASI BERKAS
+    // 3. ADMIN/PEGAWAI: VERIFIKASI BERKAS
     // =========================================================================
     public function verifyProcess(Request $request, $id)
     {
@@ -144,7 +196,7 @@ class VerifikasiController extends Controller
     }
 
     // =========================================================================
-    // 4. KASUBAG: VALIDASI
+    // 4. KASUBAG PROCESS
     // =========================================================================
     public function kasubagProcess(Request $request, $id)
     {
@@ -170,7 +222,7 @@ class VerifikasiController extends Controller
     }
 
     // =========================================================================
-    // 5. KEPALA KCD: APPROVAL
+    // 5. KEPALA PROCESS (ACC & NOMOR SK)
     // =========================================================================
     public function kepalaProcess(Request $request, $id)
     {
@@ -210,7 +262,7 @@ class VerifikasiController extends Controller
     }
 
     // =========================================================================
-    // 6. HELPER: WEBHOOK (PUSH DATA KE SEKOLAH)
+    // 6. HELPER: NOTIFIKASI KE SEKOLAH (WEBHOOK)
     // =========================================================================
     private function notifySchool($pengajuan, $statusLabel)
     {

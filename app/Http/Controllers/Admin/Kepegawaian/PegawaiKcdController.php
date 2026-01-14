@@ -8,47 +8,31 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Str;
+use Illuminate\Support\Str; // <--- SUDAH BENAR PAKAI INI
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage; 
 
 class PegawaiKcdController extends Controller
 {
-    /**
-     * Tampilkan daftar pegawai (Admin)
-     */
     public function index()
     {
-        // Karena sudah diproteksi middleware 'check_menu:kepegawaian-kcd' di route,
-        // yang masuk sini PASTI Admin (atau yang punya hak akses menu tsb).
-        
         $pegawais = PegawaiKcd::with('user')->latest()->paginate(10);
         return view('admin.kepegawaian_kcd.index', compact('pegawais'));
     }
 
-    /**
-     * [BARU] Menampilkan Profil Pegawai yang sedang Login (Tanpa ID di URL)
-     * Diakses via menu 'Profil Saya'
-     */
     public function showMe()
     {
         $userId = Auth::id();
-        
-        // Cari data pegawai berdasarkan user yang login
         $pegawai = PegawaiKcd::with('user')->where('user_id', $userId)->first();
 
         if (!$pegawai) {
-            // Jika belum ada data pegawai (misal Admin baru), bisa redirect atau tampilkan error
-            return abort(404, 'Data profil kepegawaian Anda belum dihubungkan. Hubungi Administrator Utama.');
+            return abort(404, 'Data profil kepegawaian Anda belum dihubungkan.');
         }
 
-        // Gunakan view yang sama dengan 'show' biasa
         return view('admin.kepegawaian_kcd.show', compact('pegawai'));
     }
 
-    /**
-     * Tambah Pegawai Baru + Akun Login Otomatis
-     */
+    // --- BAGIAN PENTING YANG DIUPDATE ---
     public function store(Request $request)
     {
         $request->validate([
@@ -74,7 +58,6 @@ class PegawaiKcdController extends Controller
                     $fotoPath = $request->file('foto')->store('foto_pegawai', 'public');
                 }
 
-                // Generate Akun Login
                 $username = $request->nip 
                     ? $request->nip 
                     : Str::slug(explode(' ', $request->nama)[0]) . rand(100, 999);
@@ -83,6 +66,7 @@ class PegawaiKcdController extends Controller
                 $passwordFix = $request->password ?: 'kcd123';
                 $role = ($request->jabatan === 'Administrator') ? 'Admin' : 'Pegawai'; 
 
+                // 1. Buat User (pegawai_kcd_id masih NULL)
                 $user = User::create([
                     'name'     => $request->nama,
                     'username' => $username,
@@ -91,7 +75,8 @@ class PegawaiKcdController extends Controller
                     'role'     => $role,
                 ]);
 
-                PegawaiKcd::create([
+                // 2. Buat Data Pegawai
+                $pegawai = PegawaiKcd::create([ // <--- Kita tampung ke variabel $pegawai
                     'user_id'       => $user->id,
                     'nama'          => $request->nama,
                     'nip'           => $request->nip,
@@ -105,6 +90,10 @@ class PegawaiKcdController extends Controller
                     'alamat'        => $request->alamat,
                     'foto'          => $fotoPath,
                 ]);
+
+                // 3. UPDATE USER OTOMATIS (BIAR MENU MUNCUL) - [PENTING!]
+                // Sambungkan ID Pegawai barusan ke tabel User
+                $user->update(['pegawai_kcd_id' => $pegawai->id]);
             });
 
             return back()->with('success', 'Profil Pegawai berhasil dibuat & Akun Login aktif!');
@@ -114,14 +103,10 @@ class PegawaiKcdController extends Controller
         }
     }
 
-    /**
-     * Tampilkan Detail Profil (Show by ID) - Untuk Admin melihat detail orang lain
-     */
     public function show($id)
     {
         $pegawai = PegawaiKcd::with('user')->findOrFail($id);
         
-        // SECURITY: Cek apakah user berhak melihat profil ini
         if (Auth::user()->role !== 'Admin' && $pegawai->user_id !== Auth::id()) {
             abort(403, 'Anda tidak memiliki akses ke profil ini.');
         }
@@ -129,14 +114,10 @@ class PegawaiKcdController extends Controller
         return view('admin.kepegawaian_kcd.show', compact('pegawai'));
     }
 
-    /**
-     * Update Data Profil + Sinkronisasi Akun Login
-     */
     public function update(Request $request, $id)
     {
         $pegawai = PegawaiKcd::findOrFail($id);
 
-        // SECURITY Check
         if (Auth::user()->role !== 'Admin' && $pegawai->user_id !== Auth::id()) {
             abort(403, 'Akses Ditolak.');
         }
@@ -171,7 +152,6 @@ class PegawaiKcdController extends Controller
                         $userUpdate['email'] = $request->email_pribadi;
                     }
 
-                    // Hanya Admin yang bisa ubah username via NIP
                     if (Auth::user()->role === 'Admin' && $request->nip) {
                         $userUpdate['username'] = $request->nip;
                     }
@@ -180,7 +160,6 @@ class PegawaiKcdController extends Controller
                         $userUpdate['password'] = Hash::make($request->password);
                     }
 
-                    // Update Role (Hanya Admin)
                     if (Auth::user()->role === 'Admin') {
                         if ($request->jabatan === 'Administrator') {
                             $userUpdate['role'] = 'Admin';
@@ -200,9 +179,6 @@ class PegawaiKcdController extends Controller
         }
     }
 
-    /**
-     * Hapus Pegawai (Hanya Admin)
-     */
     public function destroy($id)
     {
         if (Auth::user()->role !== 'Admin') {
@@ -223,8 +199,6 @@ class PegawaiKcdController extends Controller
 
         return back()->with('success', 'Pegawai dihapus permanen.');
     }
-
-    // --- FITUR TAMBAHAN ---
 
     public function resetPassword($id)
     {

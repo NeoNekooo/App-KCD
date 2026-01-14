@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\View;
+use Illuminate\Support\Facades\Auth; // Tambahkan ini
 
 class SidebarServiceProvider extends ServiceProvider
 {
@@ -11,16 +12,20 @@ class SidebarServiceProvider extends ServiceProvider
     {
         View::composer('layouts.partials.sidebar', function ($view) {
 
-            $user = auth()->user();
+            $user = Auth::user();
 
-            $role     = session('role');
-            $subRole  = session('sub_role');
+            // FIX: Prioritaskan Session, tapi kalau kosong ambil dari Auth User
+            // Ini biar menu tetap muncul meski session belum ke-set
+            $role    = session('role') ?? $user?->role; 
+            $subRole = session('sub_role');
 
-            $menus = config('menu_access.sidebar_menu');
-            $roleMap = config('menu_access.role_map');
+            // Baca Config (Sekarang isinya sudah di-inject oleh Middleware)
+            $menus      = config('menu_access.sidebar_menu');
+            $roleMap    = config('menu_access.role_map');
             $subRoleMap = config('menu_access.sub_role_map');
 
-            $hasFullAccess = $role === 'Admin';
+            // Cek Admin (Case Insensitive biar aman)
+            $hasFullAccess = $role && strcasecmp($role, 'Admin') === 0;
 
             $adminExcluded = [
                 'profil-guru',

@@ -3,27 +3,44 @@
 @section('content')
     <div class="container-xxl flex-grow-1 container-p-y">
 
-        {{-- 1. HEADER PAGE --}}
+        {{-- =================================================================== --}}
+        {{-- 1. HEADER PAGE (DINAMIS SESUAI KATEGORI TUGAS) --}}
+        {{-- =================================================================== --}}
         <div class="d-flex justify-content-between align-items-center py-3 mb-2">
             <div>
-                <h4 class="fw-bold m-0">
-                    <span class="text-muted fw-light">Layanan /</span> {{ $title ?? 'Verifikasi Masuk' }}
+                <h4 class="fw-bold m-0 text-primary">
+                    <span class="text-muted fw-light">Layanan /</span>
+                    {{-- Tampilkan Nama Layanan yang sedang dibuka --}}
+                    @if (isset($kategoriUrl) && $kategoriUrl)
+                        {{ ucwords(str_replace('-', ' ', $kategoriUrl)) }}
+                    @else
+                        {{ $title ?? 'Semua Layanan' }}
+                    @endif
                 </h4>
-                <small class="text-muted">Pantau dan kelola progres pengajuan berkas sekolah.</small>
+                <small class="text-muted">
+                    @if (Auth::user()->role == 'Pegawai')
+                        <i class="bx bx-user-check me-1"></i> Mode Tugas:
+                        <span class="fw-bold text-dark">
+                            {{ isset($kategoriUrl) ? 'Spesifik (' . ucwords(str_replace('-', ' ', $kategoriUrl)) . ')' : 'Umum (Semua Layanan)' }}
+                        </span>
+                    @else
+                        Pantau dan kelola progres pengajuan berkas sekolah.
+                    @endif
+                </small>
             </div>
         </div>
 
-        {{-- 2. STATISTIK CARDS (DATA REALTIME DARI CONTROLLER) --}}
+        {{-- =================================================================== --}}
+        {{-- 2. STATISTIK CARDS (DATA REALTIME) --}}
+        {{-- =================================================================== --}}
         <div class="row mb-4 g-3">
             {{-- Card 1: Perlu Syarat --}}
             <div class="col-sm-6 col-xl-3">
                 <div class="card border-0 shadow-sm h-100">
                     <div class="card-body d-flex align-items-center justify-content-between">
                         <div>
-                            <span class="text-muted fw-bold small text-uppercase">PERLU SYARAT</span>
-                            <h3 class="mb-0 mt-2 fw-bold text-primary">
-                                {{ $count_proses ?? 0 }}
-                            </h3>
+                            <span class="text-muted fw-bold small text-uppercase">TIKET BARU</span>
+                            <h3 class="mb-0 mt-2 fw-bold text-primary">{{ $count_proses ?? 0 }}</h3>
                         </div>
                         <div class="avatar bg-label-primary rounded p-2">
                             <i class="bx bx-list-plus fs-3"></i>
@@ -37,10 +54,8 @@
                 <div class="card border-0 shadow-sm h-100">
                     <div class="card-body d-flex align-items-center justify-content-between">
                         <div>
-                            <span class="text-muted fw-bold small text-uppercase">MENUNGGU UPLOAD</span>
-                            <h3 class="mb-0 mt-2 fw-bold text-warning">
-                                {{ $count_upload ?? 0 }}
-                            </h3>
+                            <span class="text-muted fw-bold small text-uppercase">TUNGGU UPLOAD</span>
+                            <h3 class="mb-0 mt-2 fw-bold text-warning">{{ $count_upload ?? 0 }}</h3>
                         </div>
                         <div class="avatar bg-label-warning rounded p-2">
                             <i class="bx bx-cloud-upload fs-3"></i>
@@ -54,10 +69,8 @@
                 <div class="card border-0 shadow-sm h-100">
                     <div class="card-body d-flex align-items-center justify-content-between">
                         <div>
-                            <span class="text-muted fw-bold small text-uppercase">SIAP DIPERIKSA</span>
-                            <h3 class="mb-0 mt-2 fw-bold text-info">
-                                {{ $count_verifikasi ?? 0 }}
-                            </h3>
+                            <span class="text-muted fw-bold small text-uppercase">SIAP PERIKSA</span>
+                            <h3 class="mb-0 mt-2 fw-bold text-info">{{ $count_verifikasi ?? 0 }}</h3>
                         </div>
                         <div class="avatar bg-label-info rounded p-2">
                             <i class="bx bx-search-alt fs-3"></i>
@@ -72,9 +85,7 @@
                     <div class="card-body d-flex align-items-center justify-content-between">
                         <div>
                             <span class="text-muted fw-bold small text-uppercase">SELESAI (ACC)</span>
-                            <h3 class="mb-0 mt-2 fw-bold text-success">
-                                {{ $count_selesai ?? 0 }}
-                            </h3>
+                            <h3 class="mb-0 mt-2 fw-bold text-success">{{ $count_selesai ?? 0 }}</h3>
                         </div>
                         <div class="avatar bg-label-success rounded p-2">
                             <i class="bx bx-check-double fs-3"></i>
@@ -84,7 +95,9 @@
             </div>
         </div>
 
-        {{-- 4. MAIN TABLE CARD --}}
+        {{-- =================================================================== --}}
+        {{-- 3. MAIN TABLE CARD --}}
+        {{-- =================================================================== --}}
         <div class="card shadow-sm border-0">
             <div class="card-header border-bottom bg-white py-3">
                 <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
@@ -92,14 +105,17 @@
 
                     {{-- FILTER COMPACT --}}
                     <form action="{{ url()->current() }}" method="GET" class="d-flex align-items-center gap-2">
+
+                        {{-- Pertahankan Kategori di URL (Agar tidak hilang saat filter status/page) --}}
                         @if (request('kategori'))
                             <input type="hidden" name="kategori" value="{{ request('kategori') }}">
                         @endif
 
-                        <div class="input-group input-group-merge" style="width: 280px;">
+                        <div class="input-group input-group-merge" style="width: 250px;">
                             <span class="input-group-text bg-light border-light"><i
                                     class="bx bx-filter-alt small"></i></span>
-                            <select name="status" class="form-select border-light bg-light" onchange="this.form.submit()">
+                            <select name="status" class="form-select border-light bg-light form-select-sm"
+                                onchange="this.form.submit()">
                                 <option value="">Semua Status</option>
                                 <option value="Proses" {{ request('status') == 'Proses' ? 'selected' : '' }}>Tiket Baru
                                 </option>
@@ -111,15 +127,16 @@
                                 <option value="Verifikasi Kepala"
                                     {{ request('status') == 'Verifikasi Kepala' ? 'selected' : '' }}>Di Meja Kepala
                                 </option>
-                                <option value="ACC" {{ request('status') == 'ACC' ? 'selected' : '' }}>Sudah ACC
+                                <option value="ACC" {{ request('status') == 'ACC' ? 'selected' : '' }}>Selesai (ACC)
                                 </option>
                                 <option value="Revisi" {{ request('status') == 'Revisi' ? 'selected' : '' }}>Revisi Sekolah
                                 </option>
                             </select>
                         </div>
+
                         @if (request('status'))
                             <a href="{{ url()->current() }}?{{ http_build_query(request()->except('status')) }}"
-                                class="btn btn-icon btn-outline-secondary border-light" title="Reset Status">
+                                class="btn btn-sm btn-icon btn-outline-secondary border-light" title="Reset Filter">
                                 <i class="bx bx-refresh"></i>
                             </a>
                         @endif
@@ -133,8 +150,8 @@
                         <thead class="bg-light">
                             <tr>
                                 <th class="py-3 ps-4 text-uppercase small fw-bold text-muted">Sekolah & Pemohon</th>
-                                <th class="text-uppercase small fw-bold text-muted">Perihal</th>
-                                <th class="text-uppercase small fw-bold text-muted">Status & Posisi</th>
+                                <th class="text-uppercase small fw-bold text-muted">Layanan</th>
+                                <th class="text-uppercase small fw-bold text-muted">Status</th>
                                 <th class="text-end pe-4 text-uppercase small fw-bold text-muted">Aksi</th>
                             </tr>
                         </thead>
@@ -155,10 +172,12 @@
                                         </div>
                                     </td>
                                     <td>
-                                        <span class="badge bg-label-secondary mb-1"
-                                            style="font-size: 0.7rem;">{{ strtoupper(str_replace('-', ' ', $item->kategori)) }}</span>
+                                        <span class="badge bg-label-secondary mb-1" style="font-size: 0.7rem;">
+                                            {{ strtoupper(str_replace('-', ' ', $item->kategori)) }}
+                                        </span>
                                         <div class="text-wrap small text-dark fw-semibold" style="max-width: 250px;">
-                                            {{ Str::limit($item->judul, 50) }}</div>
+                                            {{ Str::limit($item->judul, 40) }}
+                                        </div>
                                     </td>
                                     <td>
                                         @php
@@ -168,10 +187,8 @@
                                                 'Verifikasi Kepala' => 'bg-label-info',
                                                 'ACC' => 'bg-label-success',
                                                 'Revisi', 'Ditolak' => 'bg-label-danger',
-                                                'Menunggu Upload' => 'bg-label-secondary',
                                                 default => 'bg-label-secondary',
                                             };
-
                                             $statusLabel = match ($item->status) {
                                                 'Proses' => 'Tiket Baru',
                                                 'Verifikasi Berkas' => 'Cek Admin',
@@ -180,27 +197,24 @@
                                                 default => $item->status,
                                             };
                                         @endphp
-                                        <span class="badge {{ $statusClass }} d-inline-flex align-items-center">
+                                        <span class="badge {{ $statusClass }}">
                                             {{ $statusLabel }}
                                         </span>
-                                        {{-- Tampilkan Nomor SK jika sudah ACC --}}
                                         @if ($item->status == 'ACC' && $item->nomor_sk)
-                                            <div class="d-block mt-1 small text-muted">
-                                                <i class='bx bx-hash'></i> {{ $item->nomor_sk }}
-                                            </div>
+                                            <div class="d-block mt-1 small text-muted"><i class='bx bx-hash'></i>
+                                                {{ $item->nomor_sk }}</div>
                                         @endif
                                     </td>
 
-                                    {{-- LOGIC TOMBOL PINTAR --}}
                                     <td class="text-end pe-4">
-                                        {{-- 1. Tombol Tiket Baru --}}
+                                        {{-- 1. Tombol Atur Syarat (Tiket Baru) --}}
                                         @if ($item->status == 'Proses')
                                             <button class="btn btn-sm btn-primary shadow-sm" data-bs-toggle="modal"
                                                 data-bs-target="#modalSyarat{{ $item->id }}">
                                                 <i class='bx bx-list-check me-1'></i> Atur Syarat
                                             </button>
 
-                                            {{-- 2. Tombol Proses Verifikasi (Satu tombol, modal menyesuaikan) --}}
+                                            {{-- 2. Tombol Verifikasi (Admin/Kasubag/Kepala) --}}
                                         @elseif(in_array($item->status, ['Verifikasi Berkas', 'Verifikasi Kasubag', 'Verifikasi Kepala']))
                                             <button
                                                 class="btn btn-sm {{ $item->status == 'Verifikasi Berkas' ? 'btn-primary' : ($item->status == 'Verifikasi Kasubag' ? 'btn-warning' : 'btn-info') }} shadow-sm"
@@ -214,20 +228,16 @@
                                                 @endif
                                             </button>
 
-                                            {{-- 3. Status Selesai (ACC) -> Tombol Cetak (STRICT MODE) --}}
+                                            {{-- 3. Tombol Cetak (ACC) --}}
                                         @elseif($item->status == 'ACC')
-                                            {{-- Hanya muncul jika Kepala sudah pilih template --}}
                                             @if ($item->template_id)
                                                 <a href="{{ route('cetak.sk', $item->uuid) }}" target="_blank"
                                                     class="btn btn-sm btn-success shadow-sm">
                                                     <i class='bx bx-printer me-1'></i> Cetak SK
                                                 </a>
                                             @else
-                                                {{-- Jika data lama/error --}}
-                                                <span class="badge bg-label-secondary" data-bs-toggle="tooltip"
-                                                    title="Format belum dipilih">
-                                                    <i class='bx bx-error-circle'></i> Template Missing
-                                                </span>
+                                                <span class="badge bg-label-secondary" title="Template belum dipilih"><i
+                                                        class='bx bx-error-circle'></i> Template Missing</span>
                                             @endif
 
                                             {{-- 4. Status Revisi --}}
@@ -235,8 +245,10 @@
                                             <span class="badge bg-danger"><i class='bx bx-time'></i> Tunggu Revisi</span>
                                         @endif
 
+                                        {{-- INCLUDE MODAL (LANGSUNG DI SINI BIAR MUDAH) --}}
+
                                         {{-- ========================================================== --}}
-                                        {{-- START: MODAL SYARAT (Admin)                            --}}
+                                        {{-- START: MODAL SYARAT (Admin)                                --}}
                                         {{-- ========================================================== --}}
                                         <div class="modal fade" id="modalSyarat{{ $item->id }}" tabindex="-1"
                                             aria-hidden="true">
@@ -288,7 +300,7 @@
                                         </div>
 
                                         {{-- ========================================================== --}}
-                                        {{-- START: MODAL CEK (SMART MODAL - BERUBAH SESUAI STATUS) --}}
+                                        {{-- START: MODAL CEK (SMART MODAL)                             --}}
                                         {{-- ========================================================== --}}
                                         <div class="modal fade" id="modalCek{{ $item->id }}" tabindex="-1"
                                             aria-hidden="true">
@@ -329,7 +341,6 @@
                                                     <form action="{{ $actionRoute }}" method="POST">
                                                         @csrf @method('PUT')
                                                         <div class="modal-body bg-light">
-
                                                             {{-- Info Singkat --}}
                                                             <div class="card shadow-sm border-0 mb-3">
                                                                 <div class="card-body p-3 d-flex align-items-center gap-3">
@@ -345,7 +356,7 @@
                                                                 </div>
                                                             </div>
 
-                                                            {{-- [BARU] DROPDOWN PILIH TEMPLATE (KHUSUS KEPALA) --}}
+                                                            {{-- DROPDOWN PILIH TEMPLATE (KHUSUS KEPALA) --}}
                                                             @if ($item->status == 'Verifikasi Kepala')
                                                                 <div
                                                                     class="card p-3 border border-primary bg-white mb-4 animate__animated animate__fadeIn">
@@ -369,7 +380,6 @@
                                                                         dicetak nanti.
                                                                     </div>
 
-                                                                    {{-- Tampilkan Catatan Kasubag --}}
                                                                     @if (!empty($item->catatan_internal))
                                                                         <div
                                                                             class="alert alert-warning mt-3 mb-0 d-flex align-items-center">
@@ -384,7 +394,6 @@
                                                             <h6 class="fw-bold mb-3 mt-4"><i
                                                                     class="bx bx-check-square me-2"></i>Kelengkapan Dokumen
                                                             </h6>
-
                                                             <div
                                                                 class="table-responsive bg-white rounded shadow-sm border">
                                                                 <table class="table table-sm mb-0">
@@ -398,7 +407,6 @@
                                                                         </tr>
                                                                     </thead>
                                                                     <tbody>
-                                                                        {{-- [FIXED] Pake dokumen_syarat bukan berkas --}}
                                                                         @forelse($item->dokumen_syarat ?? [] as $doc)
                                                                             @php $uniq = $item->id . '_' . $loop->index; @endphp
                                                                             <tr id="rowDoc{{ $uniq }}">
@@ -406,7 +414,6 @@
                                                                                     <div class="fw-semibold text-dark">
                                                                                         {{ $doc['nama'] ?? 'Nama Dokumen' }}
                                                                                     </div>
-                                                                                    {{-- Note Revisi: Hanya Admin --}}
                                                                                     @if ($item->status == 'Verifikasi Berkas')
                                                                                         <div id="note{{ $uniq }}"
                                                                                             class="mt-1">
@@ -419,7 +426,6 @@
                                                                                     @endif
                                                                                 </td>
                                                                                 <td class="text-center align-middle">
-                                                                                    {{-- File di-link ke storage --}}
                                                                                     <a href="{{ $doc['file'] ? asset('storage/' . $doc['file']) : '#' }}"
                                                                                         target="_blank"
                                                                                         class="btn btn-icon btn-sm btn-label-secondary">
@@ -437,7 +443,6 @@
                                                                                                 onchange="toggleCatatan('{{ $uniq }}')">
                                                                                         </div>
                                                                                     @else
-                                                                                        {{-- Read Only Badge --}}
                                                                                         <span
                                                                                             class="badge bg-label-success"><i
                                                                                                 class='bx bx-check'></i>
@@ -465,7 +470,6 @@
                                                                     <textarea name="catatan_internal" class="form-control" rows="2" placeholder="Pesan untuk Kepala KCD..."></textarea>
                                                                 </div>
                                                             @endif
-
                                                         </div>
                                                         <div
                                                             class="modal-footer border-top bg-white justify-content-between">
@@ -482,9 +486,11 @@
                                                                 <button type="submit" name="action" value="approve"
                                                                     class="btn {{ $item->status == 'Verifikasi Kepala' ? 'btn-info' : ($item->status == 'Verifikasi Kasubag' ? 'btn-warning' : 'btn-success') }}">
                                                                     @if ($item->status == 'Verifikasi Kepala')
-                                                                        <i class="bx bx-pen me-1"></i> ACC & Tanda Tangan
+                                                                        <i class="bx bx-pen me-1"></i> ACC & Tanda
+                                                                        Tangan
                                                                     @elseif($item->status == 'Verifikasi Kasubag')
-                                                                        <i class="bx bx-send me-1"></i> Teruskan ke Kepala
+                                                                        <i class="bx bx-send me-1"></i> Teruskan ke
+                                                                        Kepala
                                                                     @else
                                                                         <i class="bx bx-check-circle me-1"></i> Lanjut
                                                                         Kasubag
@@ -506,13 +512,16 @@
                 </div>
                 <div
                     class="px-4 py-3 border-top d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
-                    <small class="text-muted">Menampilkan {{ $data->count() }} data</small>
+                    <small class="text-muted">Total {{ $data->total() }} data</small>
                     <div>{{ $data->appends(request()->query())->links() }}</div>
                 </div>
             @else
                 <div class="text-center py-5">
-                    <i class='bx bx-box text-light mb-3' style="font-size: 80px;"></i>
-                    <h5 class="text-muted fw-bold">Data tidak ditemukan.</h5>
+                    <div class="mb-3">
+                        <i class='bx bx-box text-light' style="font-size: 6rem;"></i>
+                    </div>
+                    <h5 class="text-muted fw-bold">Tidak ada pengajuan ditemukan.</h5>
+                    <p class="text-muted small">Coba ubah filter atau tunggu sekolah mengirim berkas.</p>
                 </div>
             @endif
         </div>
@@ -524,12 +533,12 @@
             let div = document.createElement('div');
             div.className = 'input-group mb-2 animate__animated animate__fadeInDown';
             div.innerHTML = `
-        <span class="input-group-text bg-white"><i class='bx bx-file'></i></span>
-        <input type="text" name="syarat[]" class="form-control" placeholder="Nama dokumen..." required>
-        <button class="btn btn-outline-danger" type="button" onclick="this.parentElement.remove()">
-            <i class='bx bx-trash'></i>
-        </button>
-    `;
+            <span class="input-group-text bg-white"><i class='bx bx-file'></i></span>
+            <input type="text" name="syarat[]" class="form-control" placeholder="Nama dokumen..." required>
+            <button class="btn btn-outline-danger" type="button" onclick="this.parentElement.remove()">
+                <i class='bx bx-trash'></i>
+            </button>
+        `;
             container.appendChild(div);
             div.querySelector('input').focus();
         }
@@ -565,16 +574,6 @@
 
         .btn-label-secondary:hover {
             background: #e1e4e6;
-        }
-
-        .dashed-border {
-            border: 2px dashed #d9dee3;
-            transition: all 0.3s;
-        }
-
-        .dashed-border:hover {
-            border-color: #696cff;
-            background: #f5f5f9;
         }
 
         .bg-label-primary {

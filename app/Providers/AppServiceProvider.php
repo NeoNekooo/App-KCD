@@ -8,11 +8,10 @@ use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
-
-// --- IMPORT MODEL ---
 use App\Models\ProfilSekolah;
 use App\Models\KontakPpdb;
 use App\Models\PengajuanSekolah; 
+use App\Models\TugasPegawaiKcd; 
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -23,88 +22,53 @@ class AppServiceProvider extends ServiceProvider
         Paginator::useBootstrapFive();
         Carbon::setLocale('id');
 
-        // 1. GLOBAL VARIABLE: PROFIL SEKOLAH
         if (Schema::hasTable('profil_sekolahs')) {
-            try {
-                view()->share('profilSekolah', ProfilSekolah::first());
-            } catch (\Exception $e) {}
+            try { view()->share('profilSekolah', ProfilSekolah::first()); } catch (\Exception $e) {}
         }
-
-        // 2. GLOBAL VARIABLE: KONTAK PPDB
         if (Schema::hasTable('kontak_ppdbs')) {
-            try {
-                view()->share('kontakPpdb', KontakPpdb::first());
-            } catch (\Exception $e) {}
+            try { view()->share('kontakPpdb', KontakPpdb::first()); } catch (\Exception $e) {}
         }
 
-        /* |--------------------------------------------------------------------------
-        | 3. GLOBAL BADGES (NOTIFIKASI DINAMIS BERDASARKAN ROLE)
-        |--------------------------------------------------------------------------
-        */
+        // HANYA LOGIKA BADGE NOTIFIKASI (Injeksi Menu sudah diurus Middleware)
         View::composer('*', function ($view) {
-            
             $notif_data = [];
+            $pegawaiTugasKategori = null; 
 
-            // Pastikan User Login & Tabel Ada
             if (Auth::check() && Schema::hasTable('pengajuan_sekolahs')) {
-                
                 $user = Auth::user();
                 $targetStatus = [];
 
-                // --- A. TENTUKAN STATUS YANG DIHITUNG BERDASARKAN ROLE ---
-                if ($user->role == 'kasubag') {
-                    // Kasubag hanya dikasih notif yang statusnya 'Verifikasi Kasubag'
-                    $targetStatus = ['Verifikasi Kasubag'];
-                } 
-                elseif ($user->role == 'kepala') {
-                    // Kepala hanya dikasih notif yang statusnya 'Verifikasi Kepala'
-                    $targetStatus = ['Verifikasi Kepala'];
-                } 
-                else {
-                    // Admin melihat 'Proses' (Tiket Baru) dan 'Verifikasi Berkas' (Sedang dicek admin)
-                    $targetStatus = ['Proses', 'Verifikasi Berkas'];
+                if (strcasecmp($user->role, 'Pegawai') === 0 && $user->pegawai_kcd_id) {
+                    $penugasan = TugasPegawaiKcd::where('pegawai_kcd_id', $user->pegawai_kcd_id)
+                                                ->where('is_active', 1)->first();
+                    if ($penugasan) $pegawaiTugasKategori = $penugasan->kategori_layanan;
                 }
 
-                // --- B. HITUNG DATA PER KATEGORI ---
-                // Kita gunakan array map untuk menghitung sekaligus biar rapi
-                
-                $countKP = PengajuanSekolah::where('kategori', 'LIKE', '%kenaikan pangkat%')
-                            ->whereIn('status', $targetStatus)->count();
+                if (strcasecmp($user->role, 'kasubag') === 0) $targetStatus = ['Verifikasi Kasubag'];
+                elseif (strcasecmp($user->role, 'kepala') === 0) $targetStatus = ['Verifikasi Kepala'];
+                else $targetStatus = ['Proses', 'Verifikasi Berkas'];
 
-                $countKGB = PengajuanSekolah::where('kategori', 'LIKE', '%kgb%')
-                            ->whereIn('status', $targetStatus)->count();
+                $hitung = function ($kategoriDb) use ($targetStatus, $pegawaiTugasKategori, $user) {
+                    if (strcasecmp($user->role, 'Pegawai') === 0 && $pegawaiTugasKategori) {
+                        if (stripos($pegawaiTugasKategori, $kategoriDb) === false && stripos($kategoriDb, $pegawaiTugasKategori) === false) return 0; 
+                    }
+                    return PengajuanSekolah::where('kategori', 'LIKE', '%' . $kategoriDb . '%')
+                                           ->whereIn('status', $targetStatus)->count();
+                };
 
-                $countMutasi = PengajuanSekolah::where('kategori', 'LIKE', '%mutasi%')
-                            ->whereIn('status', $targetStatus)->count();
+                $total = 0;
+                $notif_data['notif_kp'] = $hitung('kenaikan pangkat'); $total += $notif_data['notif_kp'];
+                $notif_data['notif_kgb'] = $hitung('kgb'); $total += $notif_data['notif_kgb'];
+                $notif_data['notif_mutasi'] = $hitung('mutasi'); $total += $notif_data['notif_mutasi'];
+                $notif_data['notif_relokasi'] = $hitung('relokasi'); $total += $notif_data['notif_relokasi'];
+                $notif_data['notif_satya'] = $hitung('satya'); $total += $notif_data['notif_satya'];
+                $notif_data['notif_hukdis'] = $hitung('hukuman'); $total += $notif_data['notif_hukdis'];
+                $notif_data['total_layanan_gtk'] = $total > 0 ? $total : '';
 
-                $countRelokasi = PengajuanSekolah::where('kategori', 'LIKE', '%relokasi%')
-                            ->whereIn('status', $targetStatus)->count();
-                
-                $countSatya = PengajuanSekolah::where('kategori', 'LIKE', '%satya%')
-                            ->whereIn('status', $targetStatus)->count();
-
-                $countHukdis = PengajuanSekolah::where('kategori', 'LIKE', '%hukuman%')
-                            ->whereIn('status', $targetStatus)->count();
-
-                // --- C. HITUNG TOTAL PARENT ---
-                $totalLayanan = $countKP + $countKGB + $countMutasi + $countRelokasi + $countSatya + $countHukdis;
-
-                // --- D. PACKING DATA (Kunci Array harus sama dengan 'badge_key' di config/menu.php) ---
-                $notif_data = [
-                    'total_layanan_gtk' => $totalLayanan > 0 ? $totalLayanan : '', // Kalau 0 string kosong biar ga muncul badge
-                    'notif_kp'       => $countKP > 0 ? $countKP : '',
-                    'notif_kgb'      => $countKGB > 0 ? $countKGB : '',
-                    'notif_mutasi'   => $countMutasi > 0 ? $countMutasi : '',
-                    'notif_relokasi' => $countRelokasi > 0 ? $countRelokasi : '',
-                    'notif_satya'    => $countSatya > 0 ? $countSatya : '',
-                    'notif_hukdis'   => $countHukdis > 0 ? $countHukdis : '',
-                ];
+                // Ubah 0 jadi string kosong biar rapi
+                foreach($notif_data as $key => $val) if($val === 0) $notif_data[$key] = '';
             }
-
-            // Share ke semua View sebagai variabel $notif_data (atau $badges di sidebar helper)
-            // Agar kompatibel dengan Helper Sidebar sebelumnya, kita kirim sbg $badges juga.
-            $view->with('notif_data', $notif_data);
-            $view->with('badges', $notif_data); // Duplicate variable biar aman sama helper renderSidebarMenu
+            $view->with('notif_data', $notif_data)->with('badges', $notif_data); 
         });
     }
 }

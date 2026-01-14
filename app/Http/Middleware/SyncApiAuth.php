@@ -9,19 +9,22 @@ use App\Models\Setting; // Import Model Setting
 class SyncApiAuth
 {
     public function handle(Request $request, Closure $next): Response
-{
-    $tokenHeader = $request->header('X-Sync-Token');
+    {
+        $tokenHeader = $request->header('X-Sync-Token');
 
-    // Ambil token dari DB yang tadi diinput manual
-    $tokenDb = \App\Models\Setting::where('key', 'api_sync_token')->value('value');
+            $tokenDb = env('API_SECRET_KEY');
+        
 
-    // Validasi:
-    // 1. Token di DB tidak boleh kosong (belum di-setting)
-    // 2. Token header harus sama persis dengan di DB
-    if (!$tokenDb || $tokenHeader !== $tokenDb) {
-         abort(403, 'Unauthorized action. Token mismatch or not configured.');
+        // Validasi
+        if (!$tokenDb || $tokenHeader !== $tokenDb) {
+             // Debugging message: beri tahu apa yang diharapkan server (Hanya di mode debug/local)
+             $msg = 'Unauthorized action. Token mismatch.';
+             if (env('APP_DEBUG')) {
+                 $msg .= " (Server expects: " . substr($tokenDb, 0, 5) . "...)";
+             }
+             abort(403, $msg);
+        }
+
+        return $next($request);
     }
-
-    return $next($request);
-}
 }
