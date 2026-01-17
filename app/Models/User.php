@@ -6,6 +6,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class User extends Authenticatable
 {
@@ -23,7 +24,7 @@ class User extends Authenticatable
         'password',
         'username',
         'role',
-        'pegawai_kcd_id', // <--- WAJIB ADA INI! JANGAN LUPA!
+        'pegawai_kcd_id', // Menghubungkan user ke data pegawai
     ];
 
     /**
@@ -47,5 +48,15 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    /**
+     * Relasi ke tabel pegawai_kcds.
+     * Digunakan untuk mengambil data detail pegawai termasuk kolom 'jabatan'.
+     */
+    public function pegawaiKcd(): BelongsTo
+    {
+        // Pastikan model \App\Models\PegawaiKcd sudah ada
+        return $this->belongsTo(PegawaiKcd::class, 'pegawai_kcd_id');
     }
 }

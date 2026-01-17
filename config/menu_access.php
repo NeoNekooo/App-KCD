@@ -8,9 +8,9 @@ return [
         'Operator KCD' => [
             'dashboard', 
             'profil-instansi', 
-            'kepegawaian',          // Induk Menu
-            'kepegawaian-data',     // Submenu Data Pegawai
-            'kepegawaian-tugas',    // Submenu Penugasan
+            'kepegawaian',           // Induk Menu
+            'kepegawaian-data',      // Submenu Data Pegawai
+            'kepegawaian-tugas',     // Submenu Penugasan
             'satuan-pendidikan', 
             'gtk', 
             'peserta-didik', 
@@ -26,16 +26,24 @@ return [
             'web-profile', 'pengaturan-sistem-header', 'pengaturan-sistem',
         ],
 
-        // === PERBAIKAN DI SINI ===
         'Pegawai' => [
             'dashboard', 
             'profil-saya',
-            
-            // Tambahkan menu standar ini agar muncul:
             'pengaturan-sistem-header',
+
+            // Menu-menu ini harus ada di sini agar sistem canAccessMenu bernilai true
+            // Middleware di atas yang akan membatasi siapa yang boleh klik (Kasubag vs Pegawai Biasa)
+            'layanan-gtk', 
+            'layanan-kp',
+            'layanan-kgb',
+            'layanan-mutasi',
+            'layanan-relokasi',
+            'layanan-satya',
+            'layanan-hukdis',
+            'verifikasi-surat',
             
-            // Catatan: Menu 'layanan-gtk' dan 'layanan-mutasi' (dll) 
-            // akan otomatis disuntikkan oleh Middleware, jadi tidak perlu ditulis di sini.
+            // Catatan: Menu 'layanan-gtk' dan sub-layanan lainnya 
+            // akan otomatis disuntikkan oleh Middleware untuk Pegawai biasa.
         ],
     ],
 
@@ -68,7 +76,7 @@ return [
             'route' => 'admin.instansi.index',
         ],
 
-        // 4. KEPEGAWAIAN (INDUK MENU BARU)
+        // 4. KEPEGAWAIAN (INDUK MENU)
         [
             'title' => 'Kepegawaian',
             'slug'  => 'kepegawaian',
@@ -76,12 +84,12 @@ return [
             'submenu' => [
                 [
                     'title' => 'Data Pegawai',
-                    'slug'  => 'kepegawaian-data', // Slug untuk permission
+                    'slug'  => 'kepegawaian-data',
                     'route' => 'admin.kepegawaian.index', 
                 ],
                 [
                     'title' => 'Tugas Pegawai',
-                    'slug'  => 'kepegawaian-tugas', // Slug untuk permission
+                    'slug'  => 'kepegawaian-tugas',
                     'route' => 'admin.kepegawaian.tugas-kcd.index',
                 ],
             ],

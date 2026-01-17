@@ -5,7 +5,7 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Models\TugasPegawaiKcd; // <--- JANGAN LUPA IMPORT INI
+use App\Models\TugasPegawaiKcd;
 
 class CheckMenuAccess
 {
@@ -26,17 +26,39 @@ class CheckMenuAccess
         }
 
         // ==================================================================
-        // B. JALUR KHUSUS PEGAWAI (CEK TUGAS DI DB) - [FIXED CASE INSENSITIVE]
+        // B. JALUR KHUSUS PEGAWAI (BIASA & KASUBAG)
         // ==================================================================
-        // FIX: Pakai strcasecmp biar 'PEGAWAI' == 'Pegawai'
         if (strcasecmp($user->role, 'Pegawai') === 0 && $user->pegawai_kcd_id) {
             
-            // 1. Cek Tugas Aktif
+            // --- LOGIKA KHUSUS JABATAN KASUBAG ---
+            // Mengambil data pegawai melalui relasi yang didefinisikan di Canvas (User Model)
+            $pegawai = $user->pegawaiKcd; 
+
+            if ($pegawai && isset($pegawai->jabatan) && strcasecmp(trim($pegawai->jabatan), 'Kasubag') === 0) {
+                // Daftar menu yang diizinkan untuk Kasubag (Bypass pengecekan tugas spesifik)
+                $allowedKasubag = [
+                    'dashboard', 
+                    'profil-saya', 
+                    'layanan-gtk', 
+                    'layanan-kp', 
+                    'layanan-kgb', 
+                    'layanan-mutasi', 
+                    'layanan-relokasi', 
+                    'layanan-satya', 
+                    'layanan-hukdis', 
+                    'verifikasi-surat'
+                ];
+                
+                if (in_array($slug, $allowedKasubag)) {
+                    return $next($request); // Lolos sebagai Kasubag
+                }
+            }
+
+            // --- LOGIKA PEGAWAI BIASA (CEK TABEL TUGAS) ---
             $penugasan = TugasPegawaiKcd::where('pegawai_kcd_id', $user->pegawai_kcd_id)
                                         ->where('is_active', 1)
                                         ->first();
 
-            // 2. Mapping Slug (Sama kayak di AppServiceProvider)
             $mapKategoriToSlug = [
                 'kenaikan-pangkat' => 'layanan-kp',
                 'kgb'              => 'layanan-kgb',
@@ -47,20 +69,16 @@ class CheckMenuAccess
                 'verifikasi-surat' => 'verifikasi-surat',
             ];
 
-            // 3. Logic Pengecekan
             if ($penugasan && isset($mapKategoriToSlug[$penugasan->kategori_layanan])) {
                 $allowedSlug = $mapKategoriToSlug[$penugasan->kategori_layanan];
 
-                // Izin diberikan jika:
-                // a. Slug yang diminta adalah Induk Layanan ('layanan-gtk')
-                // b. Slug yang diminta adalah Tugas Spesifik dia (misal 'layanan-mutasi')
+                // Akses diberikan jika membuka menu induk atau sub-layanan spesifiknya
                 if ($slug === 'layanan-gtk' || $slug === $allowedSlug) {
-                    return $next($request); // LOLOS!
+                    return $next($request); 
                 }
             }
-            
-            // Kalau Pegawai akses menu umum (Dashboard/Profil), lanjut ke pengecekan standar di bawah
         }
+
 
         // ==================================================================
         // C. JALUR UMUM (OPERATOR, SEKOLAH, & PEGAWAI MENU DASAR)
@@ -70,14 +88,13 @@ class CheckMenuAccess
         $roleMap = config('sidebar_menu.role_map', []);
         $subRoleMap = config('sidebar_menu.sub_role_map', []);
         
-        // PENTING: Cek Helper canAccessMenu
         if (!canAccessMenu(
-            $slug,      // 1. Slug
-            null,       // 2. Parent Slug
-            $role,      // 3. Role
-            $subRole,   // 4. Sub Role
-            $roleMap,   // 5. Config Role
-            $subRoleMap // 6. Config Sub Role
+            $slug,
+            null,
+            $role,
+            $subRole,
+            $roleMap,
+            $subRoleMap
         )) {
             abort(403, "AKSES DITOLAK. ROLE: " . strtoupper($role) . " TIDAK PUNYA IZIN KE MENU: " . strtoupper($slug));
         }
