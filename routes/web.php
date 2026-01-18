@@ -216,10 +216,17 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
     // 8. LAYANAN GTK (Khusus Role: Operator KCD)
     Route::middleware('check_menu:layanan-gtk')->prefix('verifikasi')->name('verifikasi.')->group(function () {
         Route::get('/', [VerifikasiController::class, 'index'])->name('index');
+        // Tahap 1: Pegawai Atur Syarat
         Route::put('/{id}/set-syarat', [VerifikasiController::class, 'setSyarat'])->name('set_syarat');
-        Route::put('/{id}/process-admin', [VerifikasiController::class, 'verifyProcess'])->name('process');
-        Route::put('/{id}/process-kasubag', [VerifikasiController::class, 'kasubagProcess'])->name('kasubag_process');
-        Route::put('/{id}/process-kepala', [VerifikasiController::class, 'kepalaProcess'])->name('kepala_process');
+        
+        // Tahap 2: Pegawai Cek Berkas Upload
+        Route::put('/{id}/process', [VerifikasiController::class, 'verifyProcess'])->name('process');
+        
+        // Tahap 3: Kasubag Validasi
+        Route::put('/{id}/kasubag-process', [VerifikasiController::class, 'kasubagProcess'])->name('kasubag_process');
+        
+        // Tahap 4: Kepala Approval & Terbit SK
+        Route::put('/{id}/kepala-process', [VerifikasiController::class, 'kepalaProcess'])->name('kepala_process');
     });
 
     // Halaman Under Construction

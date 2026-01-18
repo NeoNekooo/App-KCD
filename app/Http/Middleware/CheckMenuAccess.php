@@ -25,6 +25,16 @@ class CheckMenuAccess
             return $next($request);
         }
 
+         // ==================================================================
+        // B. JALUR KEPALA KCD (Terbatas ke GTK saja dulu)
+        // ==================================================================
+        if (strtolower($user->role) === 'kepala') {
+            // Sementara hanya diberikan akses ke dashboard layanan GTK
+            if ($slug === 'layanan-gtk') {
+                return $next($request);
+            }
+        }
+
         // ==================================================================
         // B. JALUR KHUSUS PEGAWAI (BIASA & KASUBAG)
         // ==================================================================

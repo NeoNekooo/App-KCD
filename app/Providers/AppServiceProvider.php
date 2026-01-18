@@ -15,60 +15,105 @@ use App\Models\TugasPegawaiKcd;
 
 class AppServiceProvider extends ServiceProvider
 {
+    /**
+     * Register any application services.
+     */
     public function register(): void { }
 
+    /**
+     * Bootstrap any application services.
+     */
     public function boot(): void
     {
+        // Pengaturan default Laravel
         Paginator::useBootstrapFive();
         Carbon::setLocale('id');
 
+        // Berbagi data profil sekolah ke seluruh view jika tabel ada
         if (Schema::hasTable('profil_sekolahs')) {
-            try { view()->share('profilSekolah', ProfilSekolah::first()); } catch (\Exception $e) {}
+            try { View::share('profilSekolah', ProfilSekolah::first()); } catch (\Exception $e) {}
         }
         if (Schema::hasTable('kontak_ppdbs')) {
-            try { view()->share('kontakPpdb', KontakPpdb::first()); } catch (\Exception $e) {}
+            try { View::share('kontakPpdb', KontakPpdb::first()); } catch (\Exception $e) {}
         }
 
-        // HANYA LOGIKA BADGE NOTIFIKASI (Injeksi Menu sudah diurus Middleware)
+        /**
+         * LOGIKA BADGE NOTIFIKASI SIDEBAR (MEJA KERJA PEJABAT)
+         * Menghitung jumlah surat yang sedang menunggu tindakan user yang login.
+         */
         View::composer('*', function ($view) {
             $notif_data = [];
-            $pegawaiTugasKategori = null; 
+            $sidebarCount = 0; 
+            
+            // Default nilai agar tidak error di blade jika tidak login
+            $view->with('sidebarCount', '')->with('notif_data', [])->with('badges', []);
 
             if (Auth::check() && Schema::hasTable('pengajuan_sekolahs')) {
                 $user = Auth::user();
-                $targetStatus = [];
+                $userRole = strtolower($user->role ?? '');
+                
+                // 1. IDENTIFIKASI ROLE & JABATAN SECARA RELEVAN
+                $isKasubag = ($user->pegawaiKcd && strcasecmp($user->pegawaiKcd->jabatan, 'Kasubag') === 0) || $userRole === 'kasubag';
+                $isKepala = $userRole === 'kepala';
 
-                if (strcasecmp($user->role, 'Pegawai') === 0 && $user->pegawai_kcd_id) {
-                    $penugasan = TugasPegawaiKcd::where('pegawai_kcd_id', $user->pegawai_kcd_id)
-                                                ->where('is_active', 1)->first();
-                    if ($penugasan) $pegawaiTugasKategori = $penugasan->kategori_layanan;
+                // Tentukan daftar status "Meja Kerja" masing-masing
+                if ($isKasubag) {
+                    $targetStatus = ['Verifikasi Kasubag'];
+                } elseif ($isKepala) {
+                    $targetStatus = ['Verifikasi Kepala'];
+                } else {
+                    $targetStatus = ['Proses', 'Verifikasi Berkas'];
                 }
 
-                if (strcasecmp($user->role, 'kasubag') === 0) $targetStatus = ['Verifikasi Kasubag'];
-                elseif (strcasecmp($user->role, 'kepala') === 0) $targetStatus = ['Verifikasi Kepala'];
-                else $targetStatus = ['Proses', 'Verifikasi Berkas'];
+                // 2. LOGIKA FILTER KATEGORI UNTUK STAF
+                $kategoriTugas = null;
+                if (!$isKasubag && !$isKepala && $user->pegawai_kcd_id) {
+                    $tugas = TugasPegawaiKcd::where('pegawai_kcd_id', $user->pegawai_kcd_id)
+                                            ->where('is_active', 1)
+                                            ->first();
+                    $kategoriTugas = $tugas ? $tugas->kategori_layanan : null;
+                }
 
-                $hitung = function ($kategoriDb) use ($targetStatus, $pegawaiTugasKategori, $user) {
-                    if (strcasecmp($user->role, 'Pegawai') === 0 && $pegawaiTugasKategori) {
-                        if (stripos($pegawaiTugasKategori, $kategoriDb) === false && stripos($kategoriDb, $pegawaiTugasKategori) === false) return 0; 
-                    }
-                    return PengajuanSekolah::where('kategori', 'LIKE', '%' . $kategoriDb . '%')
-                                           ->whereIn('status', $targetStatus)->count();
-                };
+                // 3. QUERY DASAR BERDASARKAN MEJA KERJA
+                $baseQuery = PengajuanSekolah::whereIn('status', $targetStatus);
 
-                $total = 0;
-                $notif_data['notif_kp'] = $hitung('kenaikan pangkat'); $total += $notif_data['notif_kp'];
-                $notif_data['notif_kgb'] = $hitung('kgb'); $total += $notif_data['notif_kgb'];
-                $notif_data['notif_mutasi'] = $hitung('mutasi'); $total += $notif_data['notif_mutasi'];
-                $notif_data['notif_relokasi'] = $hitung('relokasi'); $total += $notif_data['notif_relokasi'];
-                $notif_data['notif_satya'] = $hitung('satya'); $total += $notif_data['notif_satya'];
-                $notif_data['notif_hukdis'] = $hitung('hukuman'); $total += $notif_data['notif_hukdis'];
-                $notif_data['total_layanan_gtk'] = $total > 0 ? $total : '';
+                // Jika Staf memiliki spesialisasi tugas, batasi query hanya pada kategori tugasnya
+                if ($kategoriTugas) {
+                    $baseQuery->where(function($q) use ($kategoriTugas) {
+                        $q->where('kategori', 'LIKE', '%' . $kategoriTugas . '%')
+                          ->orWhere('kategori', 'LIKE', '%' . str_replace('-', ' ', $kategoriTugas) . '%');
+                    });
+                }
 
-                // Ubah 0 jadi string kosong biar rapi
-                foreach($notif_data as $key => $val) if($val === 0) $notif_data[$key] = '';
+                // 4. HITUNG PER SUB-MENU (DENGAN CLONE QUERY AGAR TIDAK SALING GANGGU)
+                $kp = (clone $baseQuery)->where('kategori', 'LIKE', '%pangkat%')->count();
+                $kgb = (clone $baseQuery)->where('kategori', 'LIKE', '%kgb%')->count();
+                $mutasi = (clone $baseQuery)->where('kategori', 'LIKE', '%mutasi%')->count();
+                $relokasi = (clone $baseQuery)->where('kategori', 'LIKE', '%relokasi%')->count();
+                $satya = (clone $baseQuery)->where('kategori', 'LIKE', '%satya%')->count();
+                $hukdis = (clone $baseQuery)->where('kategori', 'LIKE', '%hukuman%')->count();
+
+                // Masukkan ke array notif_data (Ubah 0 jadi string kosong agar badge tidak muncul jika kosong)
+                $notif_data['notif_kp'] = $kp > 0 ? $kp : '';
+                $notif_data['notif_kgb'] = $kgb > 0 ? $kgb : '';
+                $notif_data['notif_mutasi'] = $mutasi > 0 ? $mutasi : '';
+                $notif_data['notif_relokasi'] = $relokasi > 0 ? $relokasi : '';
+                $notif_data['notif_satya'] = $satya > 0 ? $satya : '';
+                $notif_data['notif_hukdis'] = $hukdis > 0 ? $hukdis : '';
+
+                // 5. HITUNG TOTAL UNTUK MENU INDUK (LAYANAN GTK)
+                // Ini yang akan dipasang di parent menu agar tetap terlihat saat dropdown tertutup
+                $totalGtk = (clone $baseQuery)->count();
+                $notif_data['total_layanan_gtk'] = $totalGtk > 0 ? $totalGtk : '';
+                
+                // Variabel cadangan untuk sidebar utama
+                $sidebarCount = $totalGtk;
+
+                // Kirim variabel ke view
+                $view->with('sidebarCount', $sidebarCount > 0 ? $sidebarCount : '')
+                     ->with('notif_data', $notif_data)
+                     ->with('badges', $notif_data);
             }
-            $view->with('notif_data', $notif_data)->with('badges', $notif_data); 
         });
     }
 }

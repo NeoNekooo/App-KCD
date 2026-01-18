@@ -16,51 +16,57 @@ use Illuminate\Support\Str;
 
 class VerifikasiController extends Controller
 {
-    // =========================================================================
-    // 1. HALAMAN UTAMA (INDEX)
-    // =========================================================================
+    /**
+     * 1. HALAMAN UTAMA (INDEX)
+     * Mengatur tampilan daftar pengajuan berdasarkan Role (Staf, Kasubag, Kepala)
+     * dan melakukan filter kategori layanan sesuai tugas pegawai.
+     */
     public function index(Request $request)
     {
         $user = Auth::user();
         $title = 'Daftar Pengajuan Masuk';
         
-        // Identifikasi apakah user adalah Kasubag berdasarkan jabatan di tabel pegawai_kcds
-        $isKasubag = ($user->pegawaiKcd && strcasecmp($user->pegawaiKcd->jabatan, 'Kasubag') === 0);
-        
+        // Identifikasi Role User secara spesifik
+        $isKasubag = ($user->pegawaiKcd && strcasecmp($user->pegawaiKcd->jabatan, 'Kasubag') === 0) || $user->role === 'kasubag';
+        $isKepala = strtolower($user->role) === 'kepala';
+
         $query = PengajuanSekolah::query();
 
-        // ---------------------------------------------------------------------
-        // A. LOGIKA HAK AKSES (FILTER KATEGORI LAYANAN)
-        // ---------------------------------------------------------------------
+        // --- A. LOGIKA FILTER KATEGORI (HAK AKSES PEGAWAI) ---
         $kategoriTarget = $request->kategori; 
+        
+        // Pegawai biasa (bukan Kasubag) hanya boleh melihat kategori yang ditugaskan kepadanya
+        if ($user->role === 'Pegawai' && $user->pegawai_kcd_id && !$isKasubag) {
+            $penugasan = TugasPegawaiKcd::where('pegawai_kcd_id', $user->pegawai_kcd_id)
+                                        ->where('is_active', 1)
+                                        ->first();
 
-        if ($user->role === 'Pegawai' && $user->pegawai_kcd_id) {
-            // Kasubag memiliki akses monitoring ke semua kategori layanan
-            if (!$isKasubag) {
-                // Pegawai Biasa: Hanya bisa melihat kategori sesuai surat tugas
-                $penugasan = TugasPegawaiKcd::where('pegawai_kcd_id', $user->pegawai_kcd_id)
-                                            ->where('is_active', 1)
-                                            ->first();
-
-                if ($penugasan && !empty($penugasan->kategori_layanan)) {
-                    $masterKeys = ['umum', 'all', 'semua-layanan', 'koordinator'];
-                    if (!in_array(strtolower($penugasan->kategori_layanan), $masterKeys)) {
-                        $hakAkses = $penugasan->kategori_layanan;
-                        
-                        // Keamanan: Cegah manipulasi kategori via URL
-                        if ($request->filled('kategori') && $request->kategori !== $hakAkses) {
-                            abort(403, 'AKSES DITOLAK. Tugas Anda hanya: ' . strtoupper(str_replace('-', ' ', $hakAkses)));
-                        }
-                        $kategoriTarget = $hakAkses; 
-                        $request->merge(['kategori' => $hakAkses]);
-                    }
+            if ($penugasan && !empty($penugasan->kategori_layanan)) {
+                $masterKeys = ['umum', 'all', 'semua-layanan', 'koordinator'];
+                if (!in_array(strtolower($penugasan->kategori_layanan), $masterKeys)) {
+                    $kategoriTarget = $penugasan->kategori_layanan;
+                    $request->merge(['kategori' => $kategoriTarget]);
                 }
             }
         }
 
-        // ---------------------------------------------------------------------
-        // B. FILTER PENCARIAN & KATEGORI
-        // ---------------------------------------------------------------------
+        // --- B. FILTER STATUS (BERDASARKAN MEJA KERJA) ---
+        if ($isKasubag) {
+            // Kasubag melihat berkas yang butuh validasinya, yang sudah diteruskan ke Kepala, atau sudah ACC
+            $query->whereIn('status', ['Verifikasi Kasubag', 'Verifikasi Kepala', 'ACC'])
+                  ->orderByRaw("FIELD(status, 'Verifikasi Kasubag', 'Verifikasi Kepala', 'ACC') ASC");
+        } elseif ($isKepala) {
+            // Kepala hanya melihat berkas di mejanya atau yang sudah selesai
+            $query->whereIn('status', ['Verifikasi Kepala', 'ACC'])
+                  ->orderByRaw("FIELD(status, 'Verifikasi Kepala', 'ACC') ASC");
+        } else {
+            // Admin/Staf bisa memfilter status secara manual
+            if ($request->filled('status')) {
+                $query->where('status', $request->status);
+            }
+        }
+
+        // Filter berdasarkan kategori yang dipilih atau ditugaskan
         if ($kategoriTarget) {
             $query->where(function($q) use ($kategoriTarget) {
                 $q->where('kategori', 'LIKE', '%' . $kategoriTarget . '%')
@@ -69,34 +75,9 @@ class VerifikasiController extends Controller
             $title = 'Verifikasi: ' . ucwords(str_replace('-', ' ', $kategoriTarget));
         }
 
-        // ---------------------------------------------------------------------
-        // C. LOGIKA TAMPILAN STATUS (ALUR KERJA BIROKRASI)
-        // ---------------------------------------------------------------------
-        if ($isKasubag) {
-            // Kasubag memantau berkas di mejanya, meja Kepala, dan yang sudah selesai
-            $query->whereIn('status', ['Verifikasi Kasubag', 'Verifikasi Kepala', 'ACC'])
-                  ->orderByRaw("FIELD(status, 'Verifikasi Kasubag', 'Verifikasi Kepala', 'ACC') ASC");
-        } elseif ($user->role == 'Kepala') {
-            // Kepala hanya melihat berkas yang sudah divalidasi oleh Kasubag
-            $query->whereIn('status', ['Verifikasi Kepala', 'ACC'])
-                  ->orderByRaw("FIELD(status, 'Verifikasi Kepala', 'ACC') ASC");
-        } else {
-            // Admin/Pegawai melihat dari Tiket Baru sampai tahap Verifikasi Berkas
-            if ($request->filled('status')) {
-                $query->where('status', $request->status);
-            }
-        }
-
-        // ---------------------------------------------------------------------
-        // D. STATISTIK REAL-TIME
-        // ---------------------------------------------------------------------
+        // --- C. HITUNG STATISTIK DASHBOARD ---
         $statQuery = PengajuanSekolah::query();
-        if ($kategoriTarget) {
-            $statQuery->where(function($q) use ($kategoriTarget) {
-                $q->where('kategori', 'LIKE', '%' . $kategoriTarget . '%')
-                  ->orWhere('kategori', 'LIKE', '%' . str_replace('-', ' ', $kategoriTarget) . '%');
-            });
-        }
+        if ($kategoriTarget) $statQuery->where('kategori', 'LIKE', '%' . $kategoriTarget . '%');
 
         $count_proses     = (clone $statQuery)->where('status', 'Proses')->count(); 
         $count_upload     = (clone $statQuery)->where('status', 'Menunggu Upload')->count(); 
@@ -107,16 +88,14 @@ class VerifikasiController extends Controller
         $templates = TipeSurat::where('kategori', 'sk')->get();
 
         return view('admin.verifikasi.index', compact(
-            'data', 'title', 'templates',
+            'data', 'title', 'templates', 'isKasubag', 'isKepala',
             'count_proses', 'count_upload', 'count_verifikasi', 'count_selesai'
         ))->with('kategoriUrl', $kategoriTarget);
     }
 
-    // =========================================================================
-    // 2. PEGAWAI: VALIDASI AWAL & ATUR SYARAT (STATUS: PROSES)
-    // =========================================================================
     /**
-     * Digunakan untuk menyetujui permohonan awal dan mengirim daftar persyaratan ke sekolah.
+     * 2. SET SYARAT (MINTA UPLOAD DOKUMEN)
+     * Mengirimkan daftar persyaratan dokumen yang harus dipenuhi sekolah.
      */
     public function setSyarat(Request $request, $id)
     {
@@ -138,39 +117,19 @@ class VerifikasiController extends Controller
             ];
         }
 
-        // Update status menjadi Menunggu Upload agar sekolah bisa mengirim berkas
         $pengajuan->update([
             'dokumen_syarat' => $syaratList,
             'status'         => 'Menunggu Upload'
         ]);
 
-        $this->notifySchool($pengajuan, 'Permohonan Disetujui, Silakan Upload Berkas Persyaratan');
-        
-        return back()->with('success', 'Permohonan divalidasi. Daftar persyaratan telah dikirim ke sekolah.');
+        $this->notifySchool($pengajuan, 'Lengkapi Berkas');
+
+        return back()->with('success', 'Persyaratan dokumen berhasil dikirim ke sekolah!');
     }
 
     /**
-     * Digunakan jika permohonan awal (Proses) ditolak karena data tidak lengkap.
-     */
-    public function initialReject(Request $request, $id)
-    {
-        $pengajuan = PengajuanSekolah::findOrFail($id);
-        
-        $pengajuan->update([
-            'status' => 'Revisi',
-            'catatan_internal' => $request->catatan
-        ]);
-
-        $this->notifySchool($pengajuan, 'Permohonan Awal Ditolak: ' . $request->catatan);
-        
-        return back()->with('warning', 'Permohonan dikembalikan ke sekolah.');
-    }
-
-    // =========================================================================
-    // 3. PEGAWAI: VERIFIKASI DOKUMEN (STATUS: VERIFIKASI BERKAS)
-    // =========================================================================
-    /**
-     * Memeriksa berkas yang diupload sekolah. Jika OK lanjut ke Kasubag, jika tidak balik ke Sekolah.
+     * 3. VERIFIKASI BERKAS (LEVEL STAF)
+     * Memeriksa satu per satu dokumen yang diupload sekolah.
      */
     public function verifyProcess(Request $request, $id)
     {
@@ -178,9 +137,9 @@ class VerifikasiController extends Controller
         $dokumenList = $pengajuan->dokumen_syarat;
         $isAllValid = true;
 
+        // Loop untuk mengecek catatan revisi per dokumen
         foreach ($dokumenList as $key => $doc) {
             $catatanInput = $request->input("catatan.{$doc['id']}");
-            
             if (!empty($catatanInput)) {
                 $dokumenList[$key]['valid'] = false;
                 $dokumenList[$key]['catatan'] = $catatanInput;
@@ -191,113 +150,100 @@ class VerifikasiController extends Controller
             }
         }
 
-        $action = $request->input('action'); 
-
-        // Jika ada berkas salah atau admin memilih tombol reject
-        if ($action == 'reject' || !$isAllValid) {
+        if ($request->input('action') == 'reject' || !$isAllValid) {
+            // Jika ada yang tidak valid, status menjadi Revisi
+            $pengajuan->update(['dokumen_syarat' => $dokumenList, 'status' => 'Revisi']);
+            $this->notifySchool($pengajuan, 'Perbaikan Berkas');
+            return back()->with('warning', 'Berkas dikembalikan ke sekolah untuk diperbaiki.');
+        } else {
+            // Jika semua oke, lanjut ke meja Kasubag
             $pengajuan->update([
                 'dokumen_syarat' => $dokumenList,
-                'status' => 'Revisi'
+                'status'         => 'Verifikasi Kasubag',
+                'acc_admin_at'   => Carbon::now()
             ]);
-            $this->notifySchool($pengajuan, 'Berkas perlu revisi. Silakan periksa catatan di aplikasi.');
-            return back()->with('warning', 'Berkas dikembalikan ke sekolah untuk revisi.');
-        } 
-        else {
-            // Teruskan ke meja Kasubag
-            $pengajuan->update([
-                'dokumen_syarat' => $dokumenList,
-                'status' => 'Verifikasi Kasubag',
-                'acc_admin_at' => Carbon::now()
-            ]);
-            $this->notifySchool($pengajuan, 'Berkas diverifikasi oleh Admin, menunggu validasi Kasubag.');
-            return back()->with('success', 'Verifikasi dokumen berhasil. Diteruskan ke Kasubag.');
+            $this->notifySchool($pengajuan, 'Sedang Diverifikasi Kasubag');
+            return back()->with('success', 'Berkas valid! Diteruskan ke Kasubag.');
         }
     }
 
-    // =========================================================================
-    // 4. KASUBAG: VALIDASI BERJENJANG (STATUS: VERIFIKASI KASUBAG)
-    // =========================================================================
     /**
-     * Memvalidasi hasil kerja Pegawai Verifikator. Jika salah balik ke Pegawai, jika OK lanjut ke Kepala.
+     * 4. PROSES KASUBAG
+     * Validasi oleh Kepala Sub Bagian Tata Usaha.
      */
     public function kasubagProcess(Request $request, $id)
     {
         $pengajuan = PengajuanSekolah::findOrFail($id);
-        $action = $request->input('action');
 
-        // Jika Kasubag menolak, berkas balik ke status Verifikasi Berkas (Meja Pegawai)
-        if ($action == 'reject') {
+        if ($request->input('action') == 'reject') {
+            // Dikembalikan ke level Staf (Verifikasi Berkas) jika Kasubag menolak secara internal
             $pengajuan->update([
-                'status' => 'Verifikasi Berkas', 
-                'catatan_internal' => $request->input('catatan_internal')
+                'status' => 'Verifikasi Berkas',
+                'catatan_internal' => 'DITOLAK KASUBAG: ' . $request->input('catatan_internal')
             ]);
-            return back()->with('warning', 'Berkas dikembalikan ke Pegawai Verifikator untuk pengecekan ulang.');
-        } 
-        else {
-            // Teruskan ke meja Kepala KCD
+            return back()->with('warning', 'Dikembalikan ke Staf Pegawai.');
+        } else {
+            // Diteruskan ke Kepala KCD
             $pengajuan->update([
                 'status' => 'Verifikasi Kepala',
                 'catatan_internal' => $request->input('catatan_internal'),
                 'acc_kasubag_at' => Carbon::now()
             ]);
-            return back()->with('success', 'Validasi Kasubag sukses. Diteruskan ke Kepala KCD.');
+            $this->notifySchool($pengajuan, 'Sedang Diverifikasi Kepala');
+            return back()->with('success', 'Diteruskan ke Kepala KCD.');
         }
     }
 
-    // =========================================================================
-    // 5. KEPALA: APPROVAL AKHIR & CETAK SK (STATUS: VERIFIKASI KEPALA)
-    // =========================================================================
     /**
-     * Persetujuan akhir. Jika ACC, nomor surat terbit dan SK bisa dicetak.
+     * 5. PROSES KEPALA (APPROVAL AKHIR)
+     * Memberikan persetujuan final dan menerbitkan nomor SK.
      */
     public function kepalaProcess(Request $request, $id)
     {
         $pengajuan = PengajuanSekolah::findOrFail($id);
-        $action = $request->input('action');
-
-        // Jika Kepala menolak, kembalikan ke Kasubag
-        if ($action == 'reject') {
+        
+        if ($request->input('action') == 'reject') {
+            // Jika Kepala menolak, balik ke Kasubag
             $pengajuan->update(['status' => 'Verifikasi Kasubag']); 
-            return back()->with('error', 'Pengajuan dikembalikan ke Kasubag untuk ditinjau kembali.');
-        } 
-        else {
-            $request->validate([
-                'template_id' => 'required|exists:tipe_surats,id',
-            ], ['template_id.required' => 'Silakan pilih Template SK terlebih dahulu!']);
-
-            // Generate nomor SK otomatis
-            $nomorBaru = NomorSuratSettingController::getPreviewNomor('sk');
-
-            if ($nomorBaru == '[Format Belum Diatur]') {
-                $nomorBaru = "800 / " . rand(100,999) . " - KCD.XII / " . date('Y');
-            } else {
-                $setting = \App\Models\NomorSuratSetting::where('kategori', 'sk')->first();
-                if($setting) $setting->increment('nomor_terakhir');
-            }
-
-            $pengajuan->update([
-                'status'         => 'ACC',
-                'acc_kepala_at'  => Carbon::now(),
-                'nomor_sk'       => $nomorBaru, 
-                'tgl_selesai'    => date('Y-m-d'),
-                'template_id'    => $request->template_id 
-            ]);
-
-            $this->notifySchool($pengajuan, 'Pengajuan Disetujui (ACC). SK Telah Terbit.');
-            return back()->with('success', 'Dokumen berhasil di-ACC. Nomor SK: ' . $nomorBaru);
+            return back()->with('error', 'Dikembalikan ke Kasubag.');
         }
+
+        $request->validate(['template_id' => 'required|exists:tipe_surats,id']);
+        
+        // Ambil Nomor SK otomatis berdasarkan pengaturan
+        $nomorBaru = NomorSuratSettingController::getPreviewNomor('sk');
+
+        if ($nomorBaru == '[Format Belum Diatur]') {
+            $nomorBaru = "800/" . rand(100,999) . "/KCD.XII/" . date('Y');
+        } else {
+            $setting = \App\Models\NomorSuratSetting::where('kategori', 'sk')->first();
+            if($setting) $setting->increment('nomor_terakhir');
+        }
+
+        $pengajuan->update([
+            'status'        => 'ACC',
+            'acc_kepala_at' => Carbon::now(),
+            'nomor_sk'      => $nomorBaru, 
+            'tgl_selesai'   => date('Y-m-d'),
+            'template_id'   => $request->template_id 
+        ]);
+
+        $this->notifySchool($pengajuan, 'Selesai (ACC)');
+        return back()->with('success', 'Dokumen Berhasil di-ACC.');
     }
 
-    // =========================================================================
-    // 6. HELPER: NOTIFIKASI API KE SEKOLAH (WEBHOOK)
-    // =========================================================================
+    /**
+     * 6. HELPER WEBHOOK (NOTIFIKASI KE SEKOLAH)
+     * Mengirim data terbaru ke API sekolah agar database mereka terupdate otomatis.
+     */
     private function notifySchool($pengajuan, $statusLabel)
     {
         try {
             if ($pengajuan->url_callback) {
+                // Gunakan status asli Bahasa Indonesia karena Sekolah sudah disesuaikan
                 $payload = [
                     'uuid'         => $pengajuan->uuid,
-                    'status'       => $pengajuan->status,
+                    'status'       => $pengajuan->status, 
                     'pesan'        => $statusLabel,
                     'requirements' => $pengajuan->dokumen_syarat,
                     'updated_at'   => now()->toDateTimeString()
@@ -306,17 +252,21 @@ class VerifikasiController extends Controller
                 if ($pengajuan->status == 'ACC') {
                     $payload['hasil_sk'] = [
                         'nomor_sk'      => $pengajuan->nomor_sk,
-                        'tanggal_terbit'=> date('Y-m-d'),
                         'download_url'  => route('cetak.sk', $pengajuan->uuid) 
                     ];
                 }
 
-                Http::withHeaders([
-                    'X-CLIENT-SECRET' => env('SEKOLAH_CALLBACK_SECRET') 
+                // Mengirim request ke sekolah menggunakan kunci keamanan dari .env
+                $response = Http::withHeaders([
+                    'X-CLIENT-SECRET' => env('API_SECRET_KEY') 
                 ])->timeout(10)->post($pengajuan->url_callback, $payload);
+
+                if ($response->failed()) {
+                    Log::error("Webhook Gagal ke {$pengajuan->url_callback}. Status: " . $response->status());
+                }
             }
         } catch (\Exception $e) {
-            Log::error("Gagal mengirim Webhook: " . $e->getMessage());
+            Log::error("Gagal menjalankan Webhook: " . $e->getMessage());
         }
     }
 }

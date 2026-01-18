@@ -20,6 +20,20 @@ return [
             'pengaturan-sistem-header', 
             'pengaturan-sistem',
         ],
+
+        'Kepala' => [
+            'dashboard', 
+            'profil-saya',
+            'layanan-gtk', 
+            'layanan-kp',
+            'layanan-kgb',
+            'layanan-mutasi',
+            'layanan-relokasi',
+            'layanan-satya',
+            'layanan-hukdis',
+            'verifikasi-surat',
+            'pengaturan-sistem-header',
+        ],
         
         'Sekolah' => [
             'dashboard', 'gtk', 'peserta-didik', 'administrasi-surat', 
