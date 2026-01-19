@@ -8,15 +8,16 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str; // <--- SUDAH BENAR PAKAI INI
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage; 
+use Illuminate\Support\Facades\Storage;
 
 class PegawaiKcdController extends Controller
 {
     public function index()
     {
         $pegawais = PegawaiKcd::with('user')->latest()->paginate(10);
+        // ✅ [FIX]: Path View Sesuai Request (admin.kepegawaian_kcd.index)
         return view('admin.kepegawaian_kcd.index', compact('pegawais'));
     }
 
@@ -32,7 +33,7 @@ class PegawaiKcdController extends Controller
         return view('admin.kepegawaian_kcd.show', compact('pegawai'));
     }
 
-    // --- BAGIAN PENTING YANG DIUPDATE ---
+    // --- STORE: SIMPAN DATA BARU ---
     public function store(Request $request)
     {
         $request->validate([
@@ -53,30 +54,34 @@ class PegawaiKcdController extends Controller
         try {
             DB::transaction(function () use ($request) {
                 
+                // 1. Handle Upload Foto
                 $fotoPath = null;
                 if ($request->hasFile('foto')) {
                     $fotoPath = $request->file('foto')->store('foto_pegawai', 'public');
                 }
 
+                // 2. Generate Username & Email Login
                 $username = $request->nip 
                     ? $request->nip 
                     : Str::slug(explode(' ', $request->nama)[0]) . rand(100, 999);
                 
                 $emailLogin = $request->email_pribadi ?: $username . '@kcd.system';
                 $passwordFix = $request->password ?: 'kcd123';
-                $role = ($request->jabatan === 'Administrator') ? 'Admin' : 'Pegawai'; 
 
-                // 1. Buat User (pegawai_kcd_id masih NULL)
+                // 3. BUAT USER (AKUN LOGIN)
                 $user = User::create([
                     'name'     => $request->nama,
                     'username' => $username,
                     'email'    => $emailLogin,
                     'password' => Hash::make($passwordFix),
-                    'role'     => $role,
+                    
+                    // 🔥 [FIX]: Role User mengikuti Input Jabatan dari Form
+                    // Apapun yang dipilih (Kasubag, Staff, dll) akan masuk sini.
+                    'role'     => $request->jabatan, 
                 ]);
 
-                // 2. Buat Data Pegawai
-                $pegawai = PegawaiKcd::create([ // <--- Kita tampung ke variabel $pegawai
+                // 4. BUAT DATA PEGAWAI (BIODATA)
+                $pegawai = PegawaiKcd::create([
                     'user_id'       => $user->id,
                     'nama'          => $request->nama,
                     'nip'           => $request->nip,
@@ -91,12 +96,11 @@ class PegawaiKcdController extends Controller
                     'foto'          => $fotoPath,
                 ]);
 
-                // 3. UPDATE USER OTOMATIS (BIAR MENU MUNCUL) - [PENTING!]
-                // Sambungkan ID Pegawai barusan ke tabel User
+                // 5. UPDATE RELASI DI TABEL USER (Agar menu muncul)
                 $user->update(['pegawai_kcd_id' => $pegawai->id]);
             });
 
-            return back()->with('success', 'Profil Pegawai berhasil dibuat & Akun Login aktif!');
+            return back()->with('success', "Pegawai berhasil dibuat dengan Role: " . $request->jabatan);
 
         } catch (\Exception $e) {
             return back()->with('error', 'Gagal: ' . $e->getMessage())->withInput();
@@ -107,6 +111,7 @@ class PegawaiKcdController extends Controller
     {
         $pegawai = PegawaiKcd::with('user')->findOrFail($id);
         
+        // Validasi Akses: Hanya Admin atau pemilik data yang boleh lihat
         if (Auth::user()->role !== 'Admin' && $pegawai->user_id !== Auth::id()) {
             abort(403, 'Anda tidak memiliki akses ke profil ini.');
         }
@@ -114,10 +119,12 @@ class PegawaiKcdController extends Controller
         return view('admin.kepegawaian_kcd.show', compact('pegawai'));
     }
 
+    // --- UPDATE: EDIT DATA ---
     public function update(Request $request, $id)
     {
         $pegawai = PegawaiKcd::findOrFail($id);
 
+        // Validasi Akses
         if (Auth::user()->role !== 'Admin' && $pegawai->user_id !== Auth::id()) {
             abort(403, 'Akses Ditolak.');
         }
@@ -136,6 +143,7 @@ class PegawaiKcdController extends Controller
                 
                 $dataUpdate = $request->except(['foto', 'password']); 
 
+                // 1. Handle Ganti Foto
                 if ($request->hasFile('foto')) {
                     if ($pegawai->foto && Storage::disk('public')->exists($pegawai->foto)) {
                         Storage::disk('public')->delete($pegawai->foto);
@@ -143,29 +151,29 @@ class PegawaiKcdController extends Controller
                     $dataUpdate['foto'] = $request->file('foto')->store('foto_pegawai', 'public');
                 }
 
+                // 2. Update Data Pegawai
                 $pegawai->update($dataUpdate);
 
+                // 3. Update Akun User (Sinkronisasi)
                 if ($pegawai->user) {
-                    $userUpdate = ['name' => $request->nama];
+                    $userUpdate = [
+                        'name' => $request->nama,
+                        // 🔥 [FIX]: Update Role juga agar sinkron dengan Jabatan baru
+                        'role' => $request->jabatan 
+                    ];
 
                     if ($request->email_pribadi) {
                         $userUpdate['email'] = $request->email_pribadi;
                     }
 
+                    // Update Username jika NIP berubah (Khusus Admin)
                     if (Auth::user()->role === 'Admin' && $request->nip) {
                         $userUpdate['username'] = $request->nip;
                     }
 
+                    // Update Password jika diisi
                     if ($request->filled('password')) {
                         $userUpdate['password'] = Hash::make($request->password);
-                    }
-
-                    if (Auth::user()->role === 'Admin') {
-                        if ($request->jabatan === 'Administrator') {
-                            $userUpdate['role'] = 'Admin';
-                        } elseif ($request->jabatan !== 'Administrator' && $pegawai->user->role === 'Admin') {
-                             $userUpdate['role'] = 'Pegawai'; 
-                        }
                     }
 
                     $pegawai->user->update($userUpdate);
@@ -187,15 +195,18 @@ class PegawaiKcdController extends Controller
 
         $pegawai = PegawaiKcd::findOrFail($id);
         
+        // Hapus file foto
         if ($pegawai->foto && Storage::disk('public')->exists($pegawai->foto)) {
             Storage::disk('public')->delete($pegawai->foto);
         }
 
+        // Hapus akun user
         if ($pegawai->user) {
             $pegawai->user->delete();
-        } else {
-            $pegawai->delete();
-        }
+        } 
+        
+        // Hapus data pegawai
+        $pegawai->delete();
 
         return back()->with('success', 'Pegawai dihapus permanen.');
     }

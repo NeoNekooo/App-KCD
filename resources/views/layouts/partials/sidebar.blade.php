@@ -15,39 +15,143 @@
 
     <div class="menu-inner-shadow"></div>
 
-    {{-- ================= MENU LIST ================= --}}
+    {{-- ================= MENU LIST DARI DATABASE ================= --}}
     <ul class="menu-inner py-1">
-        
-        {{-- 1. Render Menu Otomatis --}}
-        @php
-            // Ambil role & subrole
-            $userRole = (string) (auth()->user()->role ?? '');
-            $userSubRole = (string) ($subRole ?? '');
 
-            /** * AMBIL DATA BADGES 
-             * Tadi di AppServiceProvider kita passing dengan nama 'notif_data'
-             * Kita pastikan variabelnya tersedia agar tidak error
-             */
-            $badgeData = $notif_data ?? []; 
+        @if (isset($menus))
+            @foreach ($menus as $menu)
+                {{-- 1. CEK HEADER (LABEL PEMBATAS) --}}
+                @if ($menu->is_header)
+                    <li class="menu-header small text-uppercase">
+                        <span class="menu-header-text">{{ $menu->title }}</span>
+                    </li>
+                    @continue
+                @endif
 
-            renderSidebarMenu(
-                $menus ?? [],
-                $userRole,      
-                $userSubRole,   
-                $roleMap ?? [],
-                $subRoleMap ?? [],
-                $underConstructionRoutes ?? [],
-                $badgeData // Data jumlah notifikasi masuk ke sini bre
-            );
-        @endphp
+                {{-- 2. LOGIC ACTIVE STATE (INDUK & ANAK) --}}
+                @php
+                    $isActive = false; // Untuk menu tanpa anak (Dashboard, Profil)
+                    $isOpen   = false; // Untuk menu induk (Layanan GTK)
 
-        {{-- 2. Tombol Keluar --}}
-        <li class="menu-item mt-2">
+                    // A. Cek jika Menu ini adalah Single Link (Gak punya anak)
+                    if ($menu->children->isEmpty()) {
+                        if ($menu->route && Route::has($menu->route) && request()->routeIs($menu->route)) {
+                            $isActive = true;
+                        }
+                    } 
+                    // B. Cek jika Menu ini punya Anak (Submenu)
+                    else {
+                        foreach ($menu->children as $child) {
+                            // Cek apakah route anak ini sedang diakses?
+                            if ($child->route && Route::has($child->route) && request()->routeIs($child->route)) {
+                                
+                                // Jika route cocok, cek parameter (query string)
+                                if (!empty($child->params)) {
+                                    $allParamsMatch = true;
+                                    foreach ($child->params as $key => $value) {
+                                        // Bandingkan query string di URL dengan database
+                                        if (request()->query($key) != $value) {
+                                            $allParamsMatch = false;
+                                            break; 
+                                        }
+                                    }
+                                    if ($allParamsMatch) {
+                                        $isOpen = true; // Buka induknya
+                                        break; // Gak usah cek anak lain, udah ketemu
+                                    }
+                                } else {
+                                    // Jika anak gak punya params spesifik, pastikan URL juga bersih
+                                    // (Misal menu 'Data Umum' gak boleh nyala pas buka 'Mutasi')
+                                    if (count(request()->query()) == 0) {
+                                        $isOpen = true;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                @endphp
+
+                {{-- 3. RENDER MENU ITEM --}}
+                <li class="menu-item {{ $isActive ? 'active' : '' }} {{ $isOpen ? 'open' : '' }}">
+
+                    {{-- Tentukan Link Induk --}}
+                    @php
+                        $menuUrl = 'javascript:void(0);';
+                        // Hanya kasih link kalau dia single menu
+                        if ($menu->children->isEmpty() && $menu->route && Route::has($menu->route)) {
+                            $menuUrl = route($menu->route, $menu->params ?? []);
+                        }
+                    @endphp
+
+                    <a href="{{ $menuUrl }}"
+                        class="menu-link {{ $menu->children->isNotEmpty() ? 'menu-toggle' : '' }}">
+
+                        @if ($menu->icon)
+                            <i class="menu-icon tf-icons {{ $menu->icon }}"></i>
+                        @endif
+
+                        <div data-i18n="{{ $menu->title }}">{{ $menu->title }}</div>
+
+                        {{-- BADGE INDUK --}}
+                        @if (isset($menu->badge_value) && $menu->badge_value > 0)
+                            <span class="badge rounded-pill bg-danger ms-auto">{{ $menu->badge_value }}</span>
+                        @endif
+                    </a>
+
+                    {{-- 4. RENDER SUBMENU --}}
+                    @if ($menu->children->isNotEmpty())
+                        <ul class="menu-sub">
+                            @foreach ($menu->children as $child)
+                                @php
+                                    $isChildActive = false;
+
+                                    if ($child->route && Route::has($child->route) && request()->routeIs($child->route)) {
+                                        // Cek Params Anak
+                                        if (!empty($child->params)) {
+                                            $paramsMatch = true;
+                                            foreach ($child->params as $key => $value) {
+                                                if (request()->query($key) != $value) {
+                                                    $paramsMatch = false;
+                                                    break;
+                                                }
+                                            }
+                                            if ($paramsMatch) $isChildActive = true;
+                                        } else {
+                                            // Jika anak gak punya params, URL juga harus bersih
+                                            if (count(request()->query()) == 0) $isChildActive = true;
+                                        }
+                                    }
+                                @endphp
+
+                                <li class="menu-item {{ $isChildActive ? 'active' : '' }}">
+                                    <a href="{{ $child->route && Route::has($child->route) ? route($child->route, $child->params ?? []) : 'javascript:void(0);' }}"
+                                        class="menu-link d-flex justify-content-between align-items-center">
+
+                                        <div data-i18n="{{ $child->title }}">{{ $child->title }}</div>
+
+                                        {{-- BADGE ANAK --}}
+                                        @if (isset($child->badge_value) && $child->badge_value > 0)
+                                            <span class="badge rounded-pill bg-danger"
+                                                style="font-size: 0.75rem;">{{ $child->badge_value }}</span>
+                                        @endif
+                                    </a>
+                                </li>
+                            @endforeach
+                        </ul>
+                    @endif
+                </li>
+            @endforeach
+        @endif
+
+        {{-- ================= TOMBOL LOGOUT ================= --}}
+        <li class="menu-item mt-3">
             <form id="form-logout-sidebar" action="{{ route('logout') }}" method="POST" style="display: none;">
                 @csrf
             </form>
 
-            <a href="javascript:void(0);" class="menu-link text-danger" onclick="event.preventDefault(); document.getElementById('form-logout-sidebar').submit();">
+            <a href="javascript:void(0);" class="menu-link text-danger"
+                onclick="event.preventDefault(); document.getElementById('form-logout-sidebar').submit();">
                 <i class="menu-icon tf-icons bx bx-power-off text-danger"></i>
                 <div data-i18n="Keluar">Keluar</div>
             </a>
