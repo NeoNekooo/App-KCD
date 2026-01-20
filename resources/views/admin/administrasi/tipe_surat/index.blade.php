@@ -125,6 +125,11 @@
             transform: translateX(-50%) translateY(0);
             opacity: 1;
         }
+
+        /* Fix Button Group Form */
+        .btn-group form .btn {
+            border-radius: 0;
+        }
     </style>
 
     <div class="container-xxl flex-grow-1 container-p-y">
@@ -391,18 +396,40 @@
                                         <h6 class="mb-1 text-truncate" style="max-width: 140px;">{{ $t->judul_surat }}</h6>
                                         <div class="d-flex gap-1 flex-wrap">
                                             <small class="badge bg-label-secondary">{{ $t->ukuran_kertas }}</small>
+                                            
                                             @if($t->sub_kategori)
                                                 <small class="badge bg-label-info">{{ ucwords(str_replace('-', ' ', $t->sub_kategori)) }}</small>
+                                            @endif
+
+                                            {{-- 🔥 BADGE COPY (CP) OTOMATIS 🔥 --}}
+                                            @if(str_contains($t->judul_surat, '(Salinan)'))
+                                                <small class="badge bg-label-warning fw-bold" data-bs-toggle="tooltip" title="Template Salinan">
+                                                    <i class='bx bx-copy-alt' style="font-size: 0.7rem;"></i> CP
+                                                </small>
                                             @endif
                                         </div>
                                     </div>
                                     <div class="btn-group btn-group-sm">
+                                        {{-- EDIT --}}
                                         <a href="{{ route('admin.administrasi.tipe-surat.edit', ['tipe_surat' => $t->id, 'kategori' => $kategoriAktif]) }}"
-                                            class="btn btn-primary"><i class="bx bx-pencil"></i></a>
+                                            class="btn btn-primary" data-bs-toggle="tooltip" title="Edit">
+                                            <i class="bx bx-pencil"></i>
+                                        </a>
+
+                                        {{-- DUPLICATE / COPY --}}
+                                        <form action="{{ route('admin.administrasi.tipe-surat.duplicate', $t->id) }}" method="POST" class="d-inline">
+                                            @csrf
+                                            <button type="submit" class="btn btn-warning" data-bs-toggle="tooltip" title="Duplikasi">
+                                                <i class='bx bx-copy'></i>
+                                            </button>
+                                        </form>
+
+                                        {{-- DELETE --}}
                                         <button type="button" class="btn btn-danger" data-bs-toggle="modal"
                                             data-bs-target="#deleteModal"
-                                            data-action="{{ route('admin.administrasi.tipe-surat.destroy', $t->id) }}"><i
-                                                class="bx bx-trash"></i></button>
+                                            data-action="{{ route('admin.administrasi.tipe-surat.destroy', $t->id) }}" title="Hapus">
+                                            <i class="bx bx-trash"></i>
+                                        </button>
                                     </div>
                                 </div>
                             </li>
@@ -476,6 +503,12 @@
             window.activeEditorId = 'editor_page_0';
 
             document.addEventListener('DOMContentLoaded', function() {
+                // Inisialisasi Tooltip Bootstrap (Penting untuk title hover)
+                var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+                var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                  return new bootstrap.Tooltip(tooltipTriggerEl)
+                })
+
                 if (typeof tinymce === 'undefined') return;
                 document.querySelectorAll('.page-editor').forEach(el => initTinyMCE(el.id));
             });

@@ -46,10 +46,10 @@ Route::get('/', function () {
     return view('auth.login-custom');
 })->name('landing');
 
-// --- CETAK SK (Global Auth) ---
-Route::middleware(['auth'])->group(function() {
-    Route::get('/cetak-sk/{uuid}', [CetakSkController::class, 'cetakSk'])->name('cetak.sk');
-});
+// --- [FIX 1] CETAK SK (PUBLIC / TANPA LOGIN) ---
+// Dikeluarkan dari middleware 'auth' biar Sekolah bisa download file-nya
+Route::get('/cetak-sk/{uuid}', [CetakSkController::class, 'cetakSk'])->name('cetak.sk');
+
 
 /*
 |--------------------------------------------------------------------------
@@ -143,7 +143,13 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
     Route::prefix('administrasi')->name('administrasi.')
         ->middleware('check_menu:administrasi-surat')
         ->group(function () {
+            
+            // 🔥 [FITUR BARU] ROUTE COPY SURAT 🔥
+            Route::post('tipe-surat/{id}/duplicate', [TipeSuratController::class, 'duplicate'])->name('tipe-surat.duplicate');
+            
+            // Resource standar
             Route::resource('tipe-surat', TipeSuratController::class);
+            
             Route::get('surat-keluar-siswa/get-siswa/{nama_rombel}', [SuratKeluarSiswaController::class, 'getSiswaByKelas'])->name('surat-keluar-siswa.get-siswa');
             Route::resource('surat-keluar-siswa', SuratKeluarSiswaController::class)->only(['index', 'store']);
             Route::resource('surat-keluar-guru', SuratKeluarGuruController::class)->only(['index', 'store']);
@@ -168,6 +174,9 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
         Route::post('/{id}/approve-initial', [VerifikasiController::class, 'approveInitial'])->name('approve_initial');
         Route::post('/{id}/reject', [VerifikasiController::class, 'reject'])->name('reject');
         
+        // --- [FIX 2] RUTE RESEND ACC (YANG TADI HILANG) ---
+        Route::post('/{id}/resend-acc', [VerifikasiController::class, 'resendAcc'])->name('resend_acc');
+
         // --- RUTE PROSES LANJUTAN ---
         Route::put('/{id}/set-syarat', [VerifikasiController::class, 'setSyarat'])->name('set_syarat');
         Route::put('/{id}/process', [VerifikasiController::class, 'verifyProcess'])->name('process');

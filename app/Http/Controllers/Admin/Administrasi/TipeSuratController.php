@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\TipeSurat;
 use App\Models\Tapel;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str; // Tambahkan Str untuk fitur duplikasi yang rapi
 
 class TipeSuratController extends Controller
 {
@@ -14,7 +15,7 @@ class TipeSuratController extends Controller
         // Default ke 'siswa' jika kosong
         $kategori = $request->get('kategori', 'siswa');
 
-        // Query data
+        // Query data berdasarkan kategori
         $templates = TipeSurat::where('kategori', $kategori)
                              ->latest()
                              ->get();
@@ -52,7 +53,6 @@ class TipeSuratController extends Controller
             ->with('success', 'Template surat berhasil diperbarui!');
     }
 
-    // ... method edit & destroy tetap sama ...
     public function edit($id)
     {
         $template = TipeSurat::findOrFail($id);
@@ -71,6 +71,27 @@ class TipeSuratController extends Controller
         return redirect()
                 ->route('admin.administrasi.tipe-surat.index', ['kategori' => $kategori])
                 ->with('success', 'Template surat berhasil dihapus.');
+    }
+
+    // --- FITUR BARU: DUPLICATE / COPY SURAT ---
+    public function duplicate($id)
+    {
+        // 1. Cari data aslinya
+        $original = TipeSurat::findOrFail($id);
+
+        // 2. Replicate (Copy data tanpa ID dan Timestamp)
+        $copy = $original->replicate();
+
+        // 3. Ubah Judul biar ketahuan kalau ini copy-an
+        $copy->judul_surat = $original->judul_surat . ' (Salinan)';
+        
+        // (Opsional) Jika di model ada slug, generate slug baru
+        // $copy->slug = Str::slug($copy->judul_surat) . '-' . time();
+
+        // 4. Simpan baris baru
+        $copy->save();
+
+        return back()->with('success', 'Template surat berhasil diduplikasi!');
     }
 
     private function validateRequest(Request $request)

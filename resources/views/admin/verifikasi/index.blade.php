@@ -142,6 +142,7 @@
                                         <span class="fw-bold d-block text-dark small">{{ $item->nama_sekolah }}</span>
                                         <small class="text-muted d-block">{{ $item->nama_guru }}</small>
                                         @if($item->file_permohonan)
+                                            {{-- FIX: Hapus asset() agar link benar --}}
                                             <a href="{{ $item->file_permohonan }}" target="_blank" class="extra-small fw-bold text-primary mt-1 d-inline-flex align-items-center">
                                                 <i class='bx bx-file-find me-1'></i> Lihat Surat Sekolah
                                             </a>
@@ -209,10 +210,22 @@
                                         <i class='bx bx-info-circle me-1'></i> Detail
                                     </button>
 
+                                {{-- 🔥 FITUR BARU: TOMBOL KIRIM ULANG & CETAK 🔥 --}}
                                 @elseif($st == 'acc' || $st == 'selesai' || $st == 'selesai (acc)')
-                                    <a href="{{ route('cetak.sk', $item->uuid) }}" target="_blank" class="btn btn-sm btn-outline-success rounded-pill px-3">
-                                        <i class='bx bx-printer me-1'></i> Cetak SK
-                                    </a>
+                                    <div class="d-flex justify-content-end gap-1">
+                                        {{-- 1. Tombol Cetak SK --}}
+                                        <a href="{{ route('cetak.sk', $item->uuid) }}" target="_blank" class="btn btn-sm btn-outline-success rounded-pill px-3" data-bs-toggle="tooltip" title="Download SK">
+                                            <i class='bx bx-printer'></i> Cetak SK
+                                        </a>
+
+                                        {{-- 2. Tombol Kirim Ulang Notifikasi --}}
+                                        <form action="{{ route('admin.verifikasi.resend_acc', $item->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Kirim ulang notifikasi ACC & Link SK ke sekolah?');">
+                                            @csrf
+                                            <button type="submit" class="btn btn-sm btn-warning rounded-pill px-3 text-white" data-bs-toggle="tooltip" title="Kirim Ulang Notifikasi ke Sekolah">
+                                                <i class='bx bx-send'></i>
+                                            </button>
+                                        </form>
+                                    </div>
                                 @endif
                             </td>
                         </tr>
@@ -252,6 +265,7 @@
                 <div class="modal-body px-4 py-4 text-dark text-center">
                     <div class="p-3 bg-light rounded-4 mb-4 border-start border-4 border-info text-start">
                         <label class="fw-bold extra-small text-muted text-uppercase d-block mb-1">Cek Surat Sekolah:</label>
+                        {{-- FIX: Hapus asset() --}}
                         <a href="{{ $item->file_permohonan }}" target="_blank" class="fw-bold text-primary">
                             <i class='bx bx-link-external'></i> Klik Untuk Lihat Surat Permohonan
                         </a>
@@ -302,6 +316,7 @@
                             <i class='bx bx-info-circle text-primary fs-4'></i>
                             <div class="flex-grow-1">
                                 <small class="text-muted d-block" style="font-size: 0.6rem;">REVIEW PERMOHONAN:</small>
+                                {{-- FIX: Hapus asset() --}}
                                 <a href="{{ $item->file_permohonan }}" target="_blank" class="fw-bold text-dark extra-small">Buka Surat Permohonan.pdf</a>
                             </div>
                         </div>
@@ -353,13 +368,44 @@
                         <button type="button" class="btn-close shadow-none" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body bg-light-subtle px-4 py-4">
+                        
+                        {{-- 🔥 LOGIC FILTER TEMPLATE (KHUSUS KEPALA) 🔥 --}}
                         @if($st == 'verifikasi kepala' && $isMyTurn)
                         <div class="card border-0 shadow-xs mb-4 rounded-4 border-start border-primary border-4 bg-white p-3">
                             <label class="fw-bold extra-small text-primary text-uppercase d-block mb-2">Konfigurasi Penerbitan SK</label>
+                            
                             <select name="template_id" class="form-select border-0 bg-light-subtle fw-bold" required>
-                                <option value="" selected disabled>-- Pilih Format SK --</option>
-                                @foreach ($templates as $tpl) <option value="{{ $tpl->id }}">{{ $tpl->judul_surat }}</option> @endforeach
+                                <option value="" selected disabled>-- Pilih Format SK ({{ ucwords(str_replace('-', ' ', $item->kategori)) }}) --</option>
+                                
+                                @php
+                                    // 1. FILTER TEMPLATE SESUAI KATEGORI PENGAJUAN
+                                    $filteredTemplates = $templates->where('sub_kategori', $item->kategori);
+                                @endphp
+
+                                {{-- 2. TAMPILKAN TEMPLATE YANG COCOK --}}
+                                @forelse ($filteredTemplates as $tpl) 
+                                    <option value="{{ $tpl->id }}">{{ $tpl->judul_surat }}</option> 
+                                @empty
+                                    {{-- Kalau kosong, tampilkan opsi disable --}}
+                                    <option value="" disabled class="text-danger fw-bold">⚠ Tidak ada template untuk {{ $item->kategori }}</option>
+                                @endforelse
+
+                                {{-- 3. FALLBACK: Tampilkan Template Umum / Lainnya jika diperlukan --}}
+                                @if($filteredTemplates->isEmpty())
+                                     <optgroup label="Template Umum (Fallback)">
+                                        @foreach($templates->where('sub_kategori', 'verifikasi-surat') as $tpl)
+                                            <option value="{{ $tpl->id }}">{{ $tpl->judul_surat }}</option>
+                                        @endforeach
+                                     </optgroup>
+                                @endif
                             </select>
+
+                            @if($filteredTemplates->isEmpty())
+                                <div class="mt-2 text-danger extra-small">
+                                    <i class='bx bx-error-circle'></i> Template surat untuk layanan <b>{{ $item->kategori }}</b> belum dibuat.
+                                    <a href="{{ route('admin.administrasi.tipe-surat.index', ['kategori' => 'layanan']) }}" target="_blank">Buat Sekarang</a>
+                                </div>
+                            @endif
                         </div>
                         @endif
 
@@ -376,7 +422,8 @@
                                             <div class="flex-grow-1">
                                                 <div class="fw-bold text-dark small">{{ $doc['nama'] }}</div>
                                                 @if(!empty($doc['file']))
-                                                    <a href="{{ asset('storage/' . $doc['file']) }}" target="_blank" class="text-primary extra-small fw-bold"><i class='bx bx-link-external me-1'></i> Lihat Dokumen</a>
+                                                    {{-- FIX: Langsung variabel tanpa asset() --}}
+                                                    <a href="{{ $doc['file'] }}" target="_blank" class="text-primary extra-small fw-bold"><i class='bx bx-link-external me-1'></i> Lihat Dokumen</a>
                                                 @else
                                                     <span class="text-muted extra-small italic">Belum ada file</span>
                                                 @endif

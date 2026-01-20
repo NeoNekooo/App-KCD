@@ -19,7 +19,6 @@ class VerifikasiController extends Controller
 {
     /**
      * 1. HALAMAN UTAMA (INDEX)
-     * FIXED: Menghapus batasan status agar data tetap terlihat di semua level.
      */
     public function index(Request $request)
     {
@@ -47,13 +46,10 @@ class VerifikasiController extends Controller
             }
         }
 
-        // --- B. FILTER STATUS (DIBUAT TERBUKA AGAR DATA TIDAK HILANG) ---
-        // Jika ada filter manual dari dropdown status, gunakan itu.
+        // --- B. FILTER STATUS ---
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         } else {
-            // JIKA TIDAK ADA FILTER: Semua role bisa melihat semua data di kategorinya.
-            // Data tidak akan menghilang saat status berubah.
             $query->whereNotNull('status'); 
         }
 
@@ -71,9 +67,11 @@ class VerifikasiController extends Controller
         $count_verifikasi = (clone $statQuery)->whereIn('status', ['Verifikasi Berkas', 'Verifikasi Kasubag', 'Verifikasi Kepala', 'Perlu Revisi'])->count();
         $count_selesai    = (clone $statQuery)->where('status', 'ACC')->count(); 
 
-        // Urutkan data terbaru di atas
         $data = $query->latest()->paginate(10)->withQueryString();
-        $templates = TipeSurat::where('kategori', 'sk')->get();
+        
+        $templates = TipeSurat::where('kategori', 'layanan')
+                              ->orWhere('kategori', 'sk') 
+                              ->get();
 
         return view('admin.verifikasi.index', compact(
             'data', 'title', 'templates', 'isKasubag', 'isKepala',
@@ -117,8 +115,8 @@ class VerifikasiController extends Controller
         } else {
             $pengajuan->update([
                 'dokumen_syarat' => $dokumenList,
-                'status'         => 'Verifikasi Kasubag',
-                'acc_admin_at'   => now()
+                'status'        => 'Verifikasi Kasubag',
+                'acc_admin_at'  => now()
             ]);
             $this->notifySchool($pengajuan, 'Diteruskan ke Kasubag');
             return back()->with('success', 'Berkas valid! Berhasil diteruskan ke Kasubag.');
@@ -133,14 +131,12 @@ class VerifikasiController extends Controller
         $pengajuan = PengajuanSekolah::findOrFail($id);
 
         if ($request->input('action') == 'reject') {
-            // Kembali ke Staf
             $pengajuan->update([
                 'status' => 'Verifikasi Berkas',
                 'catatan_internal' => 'DITOLAK KASUBAG: ' . $request->input('catatan_internal')
             ]);
             return back()->with('warning', 'Data dikembalikan ke meja staf.');
         } else {
-            // Lanjut ke Kepala
             $pengajuan->update([
                 'status' => 'Verifikasi Kepala',
                 'catatan_internal' => $request->input('catatan_internal'),
@@ -159,7 +155,6 @@ class VerifikasiController extends Controller
         $pengajuan = PengajuanSekolah::findOrFail($id);
         
         if ($request->input('action') == 'reject') {
-            // Kembali ke Kasubag
             $pengajuan->update([
                 'status' => 'Verifikasi Kasubag',
                 'catatan_internal' => 'DITOLAK KEPALA: ' . $request->input('catatan_internal')
@@ -178,7 +173,7 @@ class VerifikasiController extends Controller
         }
 
         $pengajuan->update([
-            'status'         => 'ACC',
+            'status'        => 'ACC',
             'acc_kepala_at' => now(),
             'nomor_sk'      => $nomorBaru, 
             'tgl_selesai'   => date('Y-m-d'),
@@ -225,7 +220,27 @@ class VerifikasiController extends Controller
     }
 
     /**
-     * 6. WEBHOOK NOTIFIKASI KE SEKOLAH
+     * 6. KIRIM ULANG NOTIFIKASI ACC (MANUAL TRIGGER) - NEW METHOD
+     * Ini fungsi baru yang dipanggil tombol pesawat kertas.
+     */
+    public function resendAcc($id)
+    {
+        $pengajuan = PengajuanSekolah::findOrFail($id);
+
+        // Pastikan statusnya memang sudah ACC / Selesai
+        $status = strtolower($pengajuan->status);
+        if (!in_array($status, ['acc', 'selesai', 'selesai (acc)'])) {
+            return back()->with('error', 'Hanya pengajuan berstatus ACC yang bisa dikirim ulang.');
+        }
+
+        // Panggil lagi fungsi notifikasi di bawah
+        $this->notifySchool($pengajuan, 'Selesai (ACC)');
+
+        return back()->with('success', 'Notifikasi ACC & Link SK berhasil dikirim ulang ke sekolah!');
+    }
+
+    /**
+     * 7. WEBHOOK NOTIFIKASI KE SEKOLAH
      */
     private function notifySchool($pengajuan, $statusLabel)
     {
@@ -240,9 +255,11 @@ class VerifikasiController extends Controller
                 'updated_at'     => now()->toDateTimeString()
             ];
 
+            // Kalau ACC, lampirkan link downloadnya
             if ($pengajuan->status == 'ACC') {
                 $payload['hasil_sk'] = [
                     'nomor_sk'     => $pengajuan->nomor_sk,
+                    // Route 'cetak.sk' ini route di KCD buat download PDF hasil generate
                     'download_url' => route('cetak.sk', $pengajuan->uuid) 
                 ];
             }

@@ -12,12 +12,6 @@
         $isAdmin = $user->role === 'Admin' || $user->role === 'Operator KCD';
         $isPegawai = !$isAdmin; // Kebalikan dari Admin
     @endphp
-
-    <div class="container-xxl flex-grow-1 container-p-y">
-
-        {{-- =================================================================== --}}
-        {{-- SECTION 1: HERO HEADER (JAM + IDENTITAS)                            --}}
-        {{-- =================================================================== --}}
         <div class="row mb-4">
             <div class="col-12">
                 <div class="card overflow-hidden border-0 shadow-sm" style="border-radius: 1rem;">
@@ -310,8 +304,6 @@
                 </div>
             </div>
         @endif
-
-    </div>
 @endsection
 
 {{-- =================================================================== --}}
