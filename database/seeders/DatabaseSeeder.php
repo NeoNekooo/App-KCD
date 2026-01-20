@@ -18,6 +18,7 @@ class DatabaseSeeder extends Seeder
             TingkatSeeder::class,
             // DatabaseSeeder.php
             AdminSeeder::class,
+            KasubagUserSeeder::class
 
 
         ]);

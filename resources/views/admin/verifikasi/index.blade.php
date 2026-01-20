@@ -3,9 +3,7 @@
 @section('content')
 <div class="container-xxl flex-grow-1 container-p-y">
 
-    {{-- =================================================================== --}}
     {{-- 1. HEADER PAGE --}}
-    {{-- =================================================================== --}}
     <div class="d-flex justify-content-between align-items-center py-3 mb-2">
         <div>
             <h4 class="fw-bold m-0 text-primary">
@@ -25,9 +23,7 @@
         </div>
     </div>
 
-    {{-- =================================================================== --}}
     {{-- 2. STATISTIK CARDS --}}
-    {{-- =================================================================== --}}
     <div class="row mb-4 g-3">
         <div class="col-sm-6 col-xl-3">
             <div class="card border-0 shadow-sm h-100">
@@ -86,9 +82,7 @@
         </div>
     </div>
 
-    {{-- =================================================================== --}}
     {{-- 3. MAIN TABLE CARD --}}
-    {{-- =================================================================== --}}
     <div class="card shadow-sm border-0 rounded-4">
         <div class="card-header border-bottom bg-white py-3 text-dark">
             <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
@@ -103,6 +97,7 @@
                         <select name="status" class="form-select border-0 bg-transparent shadow-none small fw-bold" onchange="this.form.submit()">
                             <option value="">Semua Status</option>
                             <option value="Proses" {{ request('status') == 'Proses' ? 'selected' : '' }}>Tiket Baru</option>
+                            <option value="Atur Syarat" {{ request('status') == 'Atur Syarat' ? 'selected' : '' }}>Atur Syarat</option>
                             <option value="Verifikasi Berkas" {{ request('status') == 'Verifikasi Berkas' ? 'selected' : '' }}>Verifikasi Berkas</option>
                             <option value="Verifikasi Kasubag" {{ request('status') == 'Verifikasi Kasubag' ? 'selected' : '' }}>Di Meja Kasubag</option>
                             <option value="Verifikasi Kepala" {{ request('status') == 'Verifikasi Kepala' ? 'selected' : '' }}>Di Meja Kepala</option>
@@ -126,9 +121,10 @@
                 <tbody class="table-border-bottom-0">
                     @forelse ($data as $item)
                         @php 
-                            $st = strtolower($item->status);
+                            $st = trim(strtolower($item->status));
                             $isMyTurn = false;
-                            if (!$isKasubag && !$isKepala && in_array($st, ['proses', 'verifikasi berkas'])) {
+                            // Tambahkan pengecekan status bahasa Indonesia
+                            if (!$isKasubag && !$isKepala && in_array($st, ['proses', 'atur syarat', 'verifikasi berkas', 'revisi', 'need_revision', 'perlu revisi'])) {
                                 $isMyTurn = true;
                             } elseif ($isKasubag && $st == 'verifikasi kasubag') {
                                 $isMyTurn = true;
@@ -144,7 +140,12 @@
                                     </div>
                                     <div>
                                         <span class="fw-bold d-block text-dark small">{{ $item->nama_sekolah }}</span>
-                                        <small class="text-muted">{{ $item->nama_guru }}</small>
+                                        <small class="text-muted d-block">{{ $item->nama_guru }}</small>
+                                        @if($item->file_permohonan)
+                                            <a href="{{ $item->file_permohonan }}" target="_blank" class="extra-small fw-bold text-primary mt-1 d-inline-flex align-items-center">
+                                                <i class='bx bx-file-find me-1'></i> Lihat Surat Sekolah
+                                            </a>
+                                        @endif
                                     </div>
                                 </div>
                             </td>
@@ -158,22 +159,38 @@
                             </td>
                             <td class="text-center">
                                 <span class="badge rounded-pill px-3 
-                                    @if($st == 'proses' || $st == 'verifikasi berkas') bg-label-primary
+                                    @if($st == 'proses') bg-label-primary
+                                    @elseif($st == 'atur syarat') bg-label-info
+                                    @elseif($st == 'verifikasi berkas') bg-label-primary
                                     @elseif($st == 'verifikasi kasubag') bg-label-warning
                                     @elseif($st == 'verifikasi kepala') bg-label-info
-                                    @elseif($st == 'acc' || $st == 'selesai (acc)') bg-label-success
-                                    @elseif($st == 'revisi' || $st == 'perbaikan') bg-label-danger
+                                    @elseif($st == 'acc' || $st == 'selesai' || $st == 'selesai (acc)') bg-label-success
+                                    @elseif(str_contains($st, 'revisi') || str_contains($st, 'tolak') || str_contains($st, 'rejected')) bg-label-danger
                                     @else bg-label-secondary
                                     @endif">
                                     {{ $item->status }}
                                 </span>
+                                {{-- Menampilkan alasan penolakan singkat di bawah badge jika ada --}}
+                                @if((str_contains($st, 'revisi') || str_contains($st, 'tolak')) && $item->alasan_tolak)
+                                    <div class="mt-1">
+                                        <small class="text-danger fw-bold italic" style="font-size: 0.65rem;">
+                                            Alasan: {{ \Illuminate\Support\Str::limit($item->alasan_tolak, 30) }}
+                                        </small>
+                                    </div>
+                                @endif
                             </td>
                             <td class="text-end pe-4">
                                 @if($st == 'proses' && $isMyTurn)
+                                    <button class="btn btn-sm btn-info rounded-pill px-3 shadow-none" data-bs-toggle="modal" data-bs-target="#modalPeriksaAwal{{ $item->id }}">
+                                        Periksa
+                                    </button>
+                                
+                                @elseif($st == 'atur syarat' && $isMyTurn)
                                     <button class="btn btn-sm btn-primary rounded-pill px-3 shadow-none" data-bs-toggle="modal" data-bs-target="#modalSyarat{{ $item->id }}">
                                         Atur Syarat
                                     </button>
-                                @elseif(in_array($st, ['verifikasi berkas', 'verifikasi kasubag', 'verifikasi kepala']))
+
+                                @elseif(in_array($st, ['verifikasi berkas', 'verifikasi kasubag', 'verifikasi kepala', 'revisi', 'perlu revisi', 'need_revision']))
                                     @if($isMyTurn)
                                         @php
                                             $btnColor = ($st == 'verifikasi kasubag') ? 'btn-warning' : (($st == 'verifikasi kepala') ? 'btn-info' : 'btn-primary');
@@ -186,7 +203,13 @@
                                             <i class='bx bx-show me-1'></i> Detail
                                         </button>
                                     @endif
-                                @elseif($st == 'acc' || $st == 'selesai (acc)')
+
+                                @elseif(str_contains($st, 'tolak') || str_contains($st, 'rejected'))
+                                    <button class="btn btn-sm btn-outline-danger rounded-pill px-3 shadow-none" data-bs-toggle="modal" data-bs-target="#modalDetailReject{{ $item->id }}">
+                                        <i class='bx bx-info-circle me-1'></i> Detail
+                                    </button>
+
+                                @elseif($st == 'acc' || $st == 'selesai' || $st == 'selesai (acc)')
                                     <a href="{{ route('cetak.sk', $item->uuid) }}" target="_blank" class="btn btn-sm btn-outline-success rounded-pill px-3">
                                         <i class='bx bx-printer me-1'></i> Cetak SK
                                     </a>
@@ -203,14 +226,12 @@
     </div>
 </div>
 
-{{-- =================================================================== --}}
-{{-- 4. MODALS CONTAINER --}}
-{{-- =================================================================== --}}
+{{-- MODALS CONTAINER --}}
 @foreach($data as $item)
     @php 
-        $st = strtolower($item->status); 
+        $st = trim(strtolower($item->status)); 
         $isMyTurn = false;
-        if (!$isKasubag && !$isKepala && in_array($st, ['proses', 'verifikasi berkas'])) {
+        if (!$isKasubag && !$isKepala && in_array($st, ['proses', 'atur syarat', 'verifikasi berkas', 'revisi', 'need_revision', 'perlu revisi'])) {
             $isMyTurn = true;
         } elseif ($isKasubag && $st == 'verifikasi kasubag') {
             $isMyTurn = true;
@@ -219,39 +240,80 @@
         }
     @endphp
 
-    {{-- MODAL ATUR SYARAT --}}
+    {{-- MODAL 1: PERIKSA PERMOHONAN AWAL --}}
     @if($st == 'proses')
+    <div class="modal fade" id="modalPeriksaAwal{{ $item->id }}" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg rounded-4">
+                <div class="modal-header border-0 pb-0 px-4 pt-4 bg-white">
+                    <h5 class="modal-title fw-bold text-dark">Validasi Permohonan Awal</h5>
+                    <button type="button" class="btn-close shadow-none" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body px-4 py-4 text-dark text-center">
+                    <div class="p-3 bg-light rounded-4 mb-4 border-start border-4 border-info text-start">
+                        <label class="fw-bold extra-small text-muted text-uppercase d-block mb-1">Cek Surat Sekolah:</label>
+                        <a href="{{ $item->file_permohonan }}" target="_blank" class="fw-bold text-primary">
+                            <i class='bx bx-link-external'></i> Klik Untuk Lihat Surat Permohonan
+                        </a>
+                    </div>
+                    <p class="small text-muted">Apakah surat permohonan dari sekolah ini sudah benar?</p>
+                    
+                    <div id="formTolakAwal{{ $item->id }}" class="d-none mt-3 text-start">
+                        <form action="{{ route('admin.verifikasi.reject', $item->id) }}" method="POST">
+                            @csrf
+                            <label class="form-label extra-small fw-bold text-danger">ALASAN PENOLAKAN</label>
+                            <textarea name="alasan_tolak" class="form-control mb-2" placeholder="Sebutkan alasan..." required></textarea>
+                            <div class="d-flex gap-2">
+                                <button type="submit" class="btn btn-danger btn-sm w-100 rounded-pill shadow-sm">Kirim Penolakan</button>
+                                <button type="button" class="btn btn-light btn-sm w-50 rounded-pill" onclick="toggleTolakAwal('{{ $item->id }}', false)">Batal</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div id="btnGroupAwal{{ $item->id }}" class="d-flex gap-2">
+                        <button type="button" class="btn btn-label-danger w-50 rounded-pill" onclick="toggleTolakAwal('{{ $item->id }}', true)">Tolak</button>
+                        <form action="{{ route('admin.verifikasi.approve_initial', $item->id) }}" method="POST" class="w-50">
+                            @csrf
+                            <button type="submit" class="btn btn-success w-100 rounded-pill shadow-sm">Setuju</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
+
+    {{-- MODAL 2: ATUR SYARAT --}}
+    @if($st == 'atur syarat')
     <div class="modal fade" id="modalSyarat{{ $item->id }}" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
                 <div class="modal-header border-0 pb-0 px-4 pt-4 bg-white">
                     <div class="d-flex align-items-center">
-                        <div class="avatar bg-label-primary p-2 rounded-3 me-3">
-                            <i class="bx bx-list-plus fs-3"></i>
-                        </div>
-                        <div>
-                            <h5 class="modal-title fw-bold mb-0 text-dark">Daftar Persyaratan</h5>
-                            <p class="text-muted extra-small mb-0">GTK: {{ $item->nama_guru }}</p>
-                        </div>
+                        <div class="avatar bg-label-primary p-2 rounded-3 me-3"><i class="bx bx-list-plus fs-3"></i></div>
+                        <div><h5 class="modal-title fw-bold mb-0 text-dark">Daftar Persyaratan</h5><p class="text-muted extra-small mb-0">GTK: {{ $item->nama_guru }}</p></div>
                     </div>
                     <button type="button" class="btn-close shadow-none" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <form action="{{ route('admin.verifikasi.set_syarat', $item->id) }}" method="POST">
                     @csrf @method('PUT')
                     <div class="modal-body px-4 py-4 text-dark">
-                        {{-- Pilihan Cepat --}}
+                        <div class="p-2 bg-light rounded-3 mb-3 d-flex align-items-center gap-2 border">
+                            <i class='bx bx-info-circle text-primary fs-4'></i>
+                            <div class="flex-grow-1">
+                                <small class="text-muted d-block" style="font-size: 0.6rem;">REVIEW PERMOHONAN:</small>
+                                <a href="{{ $item->file_permohonan }}" target="_blank" class="fw-bold text-dark extra-small">Buka Surat Permohonan.pdf</a>
+                            </div>
+                        </div>
+
                         <div class="mb-3">
                             <label class="form-label extra-small fw-bold text-muted text-uppercase mb-2">Pilihan Cepat</label>
                             <div class="d-flex flex-wrap gap-1">
                                 <button type="button" class="btn btn-outline-primary btn-xs rounded-pill" onclick="addPreset('{{ $item->id }}', 'Surat Pengantar')">+ Surat Pengantar</button>
                                 <button type="button" class="btn btn-outline-primary btn-xs rounded-pill" onclick="addPreset('{{ $item->id }}', 'SK Pembagian Tugas')">+ SK Tugas</button>
                                 <button type="button" class="btn btn-outline-primary btn-xs rounded-pill" onclick="addPreset('{{ $item->id }}', 'Ijazah Terakhir')">+ Ijazah</button>
-                                <button type="button" class="btn btn-outline-primary btn-xs rounded-pill" onclick="addPreset('{{ $item->id }}', 'KTP / NUPTK')">+ Identitas</button>
                             </div>
                         </div>
-
-                        <div class="divider my-3"><div class="divider-text extra-small text-muted">Input Dokumen Wajib</div></div>
-
                         <div id="containerManual{{ $item->id }}">
                             <div class="input-group shadow-none border rounded-3 mb-2 bg-white overflow-hidden">
                                 <span class="input-group-text border-0 bg-white"><i class='bx bx-file text-muted'></i></span>
@@ -263,11 +325,7 @@
                         </button>
                     </div>
                     <div class="modal-footer border-0 px-4 pb-4 pt-0">
-                        @if($isMyTurn)
-                            <button type="submit" class="btn btn-primary w-100 rounded-pill py-2 shadow-sm fw-bold">Kirim Permintaan ke Sekolah</button>
-                        @else
-                            <button type="button" class="btn btn-label-secondary w-100 rounded-pill" disabled>Hanya Untuk Verifikator</button>
-                        @endif
+                        <button type="submit" class="btn btn-primary w-100 rounded-pill py-2 shadow-sm fw-bold">Kirim Permintaan ke Sekolah</button>
                     </div>
                 </form>
             </div>
@@ -275,8 +333,8 @@
     </div>
     @endif
 
-    {{-- MODAL CEK BERKAS (DESIGN PROFESIONAL UNTUK SEMUA ROLE) --}}
-    @if(in_array($st, ['verifikasi berkas', 'verifikasi kasubag', 'verifikasi kepala', 'acc', 'selesai (acc)']))
+    {{-- MODAL 3: CEK BERKAS / DETAIL REVISI --}}
+    @if(in_array($st, ['verifikasi berkas', 'verifikasi kasubag', 'verifikasi kepala', 'revisi', 'need_revision', 'perlu revisi']))
     <div class="modal fade" id="modalCek{{ $item->id }}" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-centered">
             <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
@@ -289,44 +347,19 @@
                     @csrf @method('PUT')
                     <div class="modal-header border-bottom py-3 px-4 bg-white">
                         <div class="d-flex align-items-center">
-                            <div class="avatar bg-label-info p-2 rounded-3 me-3 text-info">
-                                <i class="bx bx-shield-quarter fs-3"></i>
-                            </div>
-                            <div>
-                                <h5 class="modal-title fw-bold mb-0 text-dark">Pemeriksaan Dokumen</h5>
-                                <p class="text-muted extra-small mb-0">Status Berkas: <span class="badge bg-label-info px-2 py-0 rounded-pill">{{ strtoupper($item->status) }}</span></p>
-                            </div>
+                            <div class="avatar bg-label-info p-2 rounded-3 me-3 text-info"><i class="bx bx-shield-quarter fs-3"></i></div>
+                            <div><h5 class="modal-title fw-bold mb-0 text-dark">Pemeriksaan Dokumen</h5><p class="text-muted extra-small mb-0">Status: <span class="badge bg-label-info px-2 py-0 rounded-pill">{{ strtoupper($item->status) }}</span></p></div>
                         </div>
                         <button type="button" class="btn-close shadow-none" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body bg-light-subtle px-4 py-4">
-                        
-                        {{-- Resume Internal untuk Kepala/Kasubag --}}
-                        @if(($isKasubag || $isKepala) && !empty($item->catatan_internal))
-                        <div class="alert alert-soft-dark border-0 shadow-xs mb-4 rounded-4 d-flex align-items-start">
-                            <i class="bx bx-info-circle me-3 fs-4 mt-1"></i>
-                            <div>
-                                <label class="fw-bold extra-small text-muted text-uppercase d-block mb-1">Catatan Pemeriksa Sebelumnya:</label>
-                                <p class="mb-0 small italic text-dark text-decoration-underline">"{{ $item->catatan_internal }}"</p>
-                            </div>
-                        </div>
-                        @endif
-
-                        {{-- Area Khusus Kepala: Memilih Template SK --}}
                         @if($st == 'verifikasi kepala' && $isMyTurn)
-                        <div class="card border-0 shadow-xs mb-4 rounded-4 border-start border-primary border-4 bg-white overflow-hidden">
-                            <div class="card-body p-3">
-                                <label class="fw-bold extra-small text-primary text-uppercase d-block mb-2">Konfigurasi Penerbitan SK</label>
-                                <div class="input-group input-group-merge">
-                                    <span class="input-group-text border-0 bg-light-subtle px-3"><i class='bx bx-layout text-muted'></i></span>
-                                    <select name="template_id" class="form-select border-0 bg-light-subtle shadow-none rounded-end-3 fw-bold" required>
-                                        <option value="" selected disabled>-- Pilih Format SK Yang Akan Dicetak --</option>
-                                        @foreach ($templates as $tpl)
-                                            <option value="{{ $tpl->id }}">{{ $tpl->judul_surat }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                            </div>
+                        <div class="card border-0 shadow-xs mb-4 rounded-4 border-start border-primary border-4 bg-white p-3">
+                            <label class="fw-bold extra-small text-primary text-uppercase d-block mb-2">Konfigurasi Penerbitan SK</label>
+                            <select name="template_id" class="form-select border-0 bg-light-subtle fw-bold" required>
+                                <option value="" selected disabled>-- Pilih Format SK --</option>
+                                @foreach ($templates as $tpl) <option value="{{ $tpl->id }}">{{ $tpl->judul_surat }}</option> @endforeach
+                            </select>
                         </div>
                         @endif
 
@@ -334,69 +367,36 @@
                             @foreach($item->dokumen_syarat ?? [] as $doc)
                                 @php 
                                     $uniq = $item->id . '_' . $loop->index; 
-                                    $hasCatatan = !empty($doc['catatan']);
-                                    $hasFile = !empty($doc['file']);
                                     $isValid = isset($doc['valid']) && ($doc['valid'] == true || $doc['valid'] == 1);
-                                    $isRevised = (!$isValid && $hasFile && $hasCatatan);
-
-                                    // Logika Penting: Kepala, Kasubag, dan Staf bisa menginterupsi validasi saat giliran mereka
-                                    $canInteract = $isMyTurn;
                                 @endphp
                                 <div class="col-12" id="cardDoc{{ $uniq }}">
-                                    <div class="bg-white p-3 rounded-4 border shadow-xs d-flex align-items-center justify-content-between gap-3 border-light transition-all">
+                                    <div class="bg-white p-3 rounded-4 border d-flex align-items-center justify-content-between gap-3 shadow-xs">
                                         <div class="d-flex align-items-center flex-grow-1 overflow-hidden">
-                                            <div class="avatar bg-label-{{ $isRevised ? 'warning' : ($isValid ? 'success' : 'secondary') }} bg-opacity-10 p-2 rounded-3 me-3 text-{{ $isRevised ? 'warning' : ($isValid ? 'success' : 'secondary') }}">
-                                                <i class='bx {{ $isRevised ? 'bx-refresh bx-spin-hover' : ($isValid ? 'bx-check-double' : 'bx-file') }} fs-4'></i>
-                                            </div>
-                                            <div class="flex-grow-1 overflow-hidden">
-                                                <div class="d-flex align-items-center gap-2">
-                                                    <div class="fw-bold text-dark small text-truncate">{{ $doc['nama'] }}</div>
-                                                    @if($isRevised)
-                                                        <span class="badge bg-warning text-dark extra-small py-0 px-2 rounded-pill fw-bold" style="font-size: 0.6rem;">REVISI BARU</span>
-                                                    @endif
-                                                </div>
-                                                @if($hasFile)
-                                                    <a href="{{ asset('storage/' . $doc['file']) }}" target="_blank" class="text-primary extra-small fw-bold text-decoration-none d-flex align-items-center mt-1">
-                                                        <i class='bx bx-link-external me-1'></i> Lihat Dokumen
-                                                    </a>
+                                            <div class="avatar bg-label-secondary bg-opacity-10 p-2 rounded-3 me-3 text-secondary"><i class='bx bx-file fs-4'></i></div>
+                                            <div class="flex-grow-1">
+                                                <div class="fw-bold text-dark small">{{ $doc['nama'] }}</div>
+                                                @if(!empty($doc['file']))
+                                                    <a href="{{ asset('storage/' . $doc['file']) }}" target="_blank" class="text-primary extra-small fw-bold"><i class='bx bx-link-external me-1'></i> Lihat Dokumen</a>
                                                 @else
                                                     <span class="text-muted extra-small italic">Belum ada file</span>
                                                 @endif
                                             </div>
                                         </div>
-
-                                        {{-- VALIDASI PILIHAN (Fleksibel untuk semua Role yang sedang bertugas) --}}
-                                        @if ($canInteract)
-                                            <div class="btn-group btn-group-sm shadow-none" role="group">
+                                        @if ($isMyTurn)
+                                            <div class="btn-group btn-group-sm" role="group">
                                                 <input type="radio" class="btn-check" name="status_toggle_{{ $uniq }}" id="valid{{ $uniq }}" autocomplete="off" {{ $isValid ? 'checked' : '' }} onchange="setDocStatus('{{ $uniq }}', true)">
-                                                <label class="btn btn-outline-success border-0 px-3 py-2 fw-bold d-flex align-items-center rounded-start-pill" for="valid{{ $uniq }}">
-                                                    <i class='bx bx-check me-1'></i> Terima
-                                                </label>
-
+                                                <label class="btn btn-outline-success border-0 px-3 py-2 fw-bold rounded-start-pill" for="valid{{ $uniq }}"><i class='bx bx-check me-1'></i> Terima</label>
                                                 <input type="radio" class="btn-check" name="status_toggle_{{ $uniq }}" id="revisi{{ $uniq }}" autocomplete="off" {{ !$isValid ? 'checked' : '' }} onchange="setDocStatus('{{ $uniq }}', false)">
-                                                <label class="btn btn-outline-danger border-0 px-3 py-2 fw-bold d-flex align-items-center rounded-end-pill" for="revisi{{ $uniq }}">
-                                                    <i class='bx bx-x me-1'></i> Tolak
-                                                </label>
-                                            </div>
-                                        @else
-                                            <div class="text-{{ $isValid ? 'success' : 'danger' }} extra-small fw-bold d-flex align-items-center bg-{{ $isValid ? 'success' : 'danger' }} bg-opacity-10 px-3 py-1 rounded-pill">
-                                                <i class="bx {{ $isValid ? 'bx-check-circle' : 'bx-error-circle' }} me-1"></i> 
-                                                {{ $isValid ? 'VALID' : 'REVISI' }}
+                                                <label class="btn btn-outline-danger border-0 px-3 py-2 fw-bold rounded-end-pill" for="revisi{{ $uniq }}"><i class='bx bx-x me-1'></i> Tolak</label>
                                             </div>
                                         @endif
                                     </div>
-                                    
-                                    {{-- Kolom Input Catatan Penolakan --}}
-                                    @if ($canInteract)
-                                        <div id="note{{ $uniq }}" class="{{ $isValid ? 'd-none' : '' }} mt-2 animate__animated animate__fadeIn">
-                                            <div class="p-3 bg-light-danger rounded-4 border border-danger border-opacity-25 shadow-sm mx-2">
-                                                <label class="form-label extra-small fw-bold text-danger text-uppercase mb-1"><i class='bx bx-error-circle me-1'></i> Alasan Mengapa Ditolak?</label>
-                                                <input type="text" name="catatan[{{ $doc['id'] }}]" id="inputNote{{ $uniq }}" value="{{ $doc['catatan'] ?? '' }}" class="form-control form-control-sm border-0 bg-white text-danger extra-small rounded-3 py-2 px-3 shadow-xs" placeholder="Misal: Tanda tangan basah tidak terlihat...">
+                                    @if ($isMyTurn)
+                                        <div id="note{{ $uniq }}" class="{{ $isValid ? 'd-none' : '' }} mt-2">
+                                            <div class="p-3 bg-light-danger rounded-4 border border-danger border-opacity-25 mx-2 shadow-xs">
+                                                <label class="form-label extra-small fw-bold text-danger text-uppercase mb-1">Alasan Penolakan</label>
+                                                <input type="text" name="catatan[{{ $doc['id'] }}]" value="{{ $doc['catatan'] ?? '' }}" class="form-control form-control-sm text-danger border-0 bg-white" placeholder="Kenapa dokumen ini ditolak?">
                                             </div>
-                                        </div>
-                                    @elseif($hasCatatan && !$isValid)
-                                        <div class="mt-1 px-3 py-2 bg-light-danger rounded-3 mx-4 mb-2">
-                                            <p class="text-danger extra-small mb-0"><strong>Alasan Penolakan:</strong> "{{ $doc['catatan'] }}"</p>
                                         </div>
                                     @endif
                                 </div>
@@ -404,22 +404,16 @@
                         </div>
 
                         <div class="mt-4">
-                            <label class="form-label fw-bold extra-small text-muted text-uppercase mb-2"><i class='bx bx-message-square-dots me-1'></i> @if($isKepala) Catatan Final / Instruksi @else Catatan Internal / Pesan Lanjutan @endif</label>
-                            <textarea name="catatan_internal" class="form-control border-0 shadow-xs rounded-4 bg-white p-3 extra-small" rows="2" 
-                                placeholder="{{ $isMyTurn ? 'Berikan catatan untuk jenjang berikutnya...' : 'Tidak ada catatan internal.' }}" 
-                                {{ !$isMyTurn ? 'disabled' : '' }}>{{ $item->catatan_internal }}</textarea>
+                            <label class="form-label fw-bold extra-small text-muted text-uppercase mb-2">Catatan Internal / Pesan Lanjutan</label>
+                            <textarea name="catatan_internal" class="form-control border-0 shadow-xs rounded-4 bg-white p-3 extra-small" rows="2" {{ !$isMyTurn ? 'disabled' : '' }}>{{ $item->catatan_internal }}</textarea>
                         </div>
                     </div>
                     <div class="modal-footer border-0 px-4 pb-4 pt-2 bg-light-subtle d-flex justify-content-between">
                         @if($isMyTurn)
-                            <button type="submit" name="action" value="reject" class="btn btn-label-danger rounded-pill px-4 fw-bold shadow-none border-0">
-                                <i class="bx bx-undo me-1"></i> @if($isKepala) Kembalikan ke Kasubag @else Kembalikan Berkas @endif
-                            </button>
-                            <button type="submit" name="action" value="approve" class="btn btn-primary rounded-pill px-5 shadow-sm fw-bold">
-                                <i class="bx bx-check-double me-1"></i> @if($isKepala) Setujui & Terbitkan SK @else Setujui & Teruskan @endif
-                            </button>
+                            <button type="submit" name="action" value="reject" class="btn btn-label-danger rounded-pill px-4 fw-bold shadow-none border-0">Kembalikan Berkas</button>
+                            <button type="submit" name="action" value="approve" class="btn btn-primary rounded-pill px-5 shadow-sm fw-bold">Setujui & Teruskan</button>
                         @else
-                            <button type="button" class="btn btn-label-secondary w-100 rounded-pill" data-bs-dismiss="modal">Tutup Pratinjau</button>
+                            <button type="button" class="btn btn-label-secondary w-100 rounded-pill" data-bs-dismiss="modal">Tutup</button>
                         @endif
                     </div>
                 </form>
@@ -427,9 +421,38 @@
         </div>
     </div>
     @endif
+
+    {{-- MODAL 4: DETAIL PENOLAKAN PERMANEN --}}
+    @if(str_contains($st, 'tolak') || str_contains($st, 'rejected'))
+    <div class="modal fade" id="modalDetailReject{{ $item->id }}" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden text-center">
+                <div class="modal-header bg-danger text-white border-0 py-3 justify-content-center">
+                    <h6 class="modal-title fw-bold text-white mb-0">Informasi Penolakan</h6>
+                </div>
+                <div class="modal-body p-4">
+                    <i class='bx bx-x-circle text-danger mb-3' style="font-size: 3.5rem;"></i>
+                    <h6 class="fw-bold mb-1">Alasan Penolakan:</h6>
+                    <p class="text-muted small mb-3">{{ $item->alasan_tolak ?? 'Maaf, permohonan ini tidak dapat disetujui.' }}</p>
+                    <div class="bg-light p-2 rounded small text-muted">
+                        <i class='bx bx-time me-1'></i> Tanggal: {{ $item->updated_at->format('d/m/Y') }}
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-secondary w-100 rounded-pill" data-bs-dismiss="modal">Tutup</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
 @endforeach
 
 <script>
+    function toggleTolakAwal(id, show) {
+        document.getElementById('formTolakAwal' + id).classList.toggle('d-none', !show);
+        document.getElementById('btnGroupAwal' + id).classList.toggle('d-none', show);
+    }
+
     function tambahSyaratManual(id) {
         let container = document.getElementById('containerManual' + id);
         let div = document.createElement('div');
@@ -445,29 +468,13 @@
     function addPreset(id, text) {
         let container = document.getElementById('containerManual' + id);
         let inputs = container.querySelectorAll('input');
-        if(inputs.length === 1 && inputs[0].value === "") {
-            inputs[0].value = text;
-        } else {
-            tambahSyaratManual(id);
-            let newInputs = container.querySelectorAll('input');
-            newInputs[newInputs.length - 1].value = text;
-        }
+        if(inputs.length === 1 && inputs[0].value === "") { inputs[0].value = text; } 
+        else { tambahSyaratManual(id); let newIn = container.querySelectorAll('input'); newIn[newIn.length - 1].value = text; }
     }
 
     function setDocStatus(uniqueId, isValid) {
         let note = document.getElementById('note' + uniqueId);
-        let card = document.getElementById('cardDoc' + uniqueId).querySelector('.bg-white');
-        let input = document.getElementById('inputNote' + uniqueId);
-
-        if (isValid) {
-            note.classList.add('d-none');
-            card.style.borderColor = "#eceef1";
-            if(input) input.value = ""; 
-        } else {
-            note.classList.remove('d-none');
-            card.style.borderColor = "#ff3e1d";
-            if(input) input.focus();
-        }
+        note.classList.toggle('d-none', isValid);
     }
 </script>
 
@@ -477,18 +484,8 @@
     .bg-light-danger { background-color: #fff8f7 !important; }
     .extra-small { font-size: 0.75rem !important; }
     .shadow-xs { box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.05) !important; }
-    .shadow-lg { box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.1) !important; }
-    .transition-all { transition: all 0.2s ease; }
-    .scale-125 { transform: scale(1.25); }
-    .cursor-pointer { cursor: pointer; }
-    .modal-content { border: none !important; }
     .btn-label-danger { background-color: #ffe0db; color: #ff3e1d; border: none; }
     .btn-label-secondary { background-color: #ebeef0; color: #8592a3; }
-    .alert-soft-dark { background-color: #f1f1f1; color: #444; border: 1px dashed #ccc !important; }
-    .form-control:focus, .form-select:focus { border-color: #696cff; box-shadow: none; }
-    .btn-check:checked + .btn-outline-success { background-color: #71dd37 !important; color: #fff !important; border-color: #71dd37 !important; }
-    .btn-check:checked + .btn-outline-danger { background-color: #ff3e1d !important; color: #fff !important; border-color: #ff3e1d !important; }
-    .divider-text { background: transparent !important; padding: 0 15px; }
-    .bx-spin-hover:hover { animation: bx-spin 2s infinite linear; }
+    .animate__animated { animation-duration: 0.3s; }
 </style>
 @endsection

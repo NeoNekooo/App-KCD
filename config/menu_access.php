@@ -34,6 +34,22 @@ return [
             'verifikasi-surat',
             'pengaturan-sistem-header',
         ],
+
+        'Kasubag' => [
+            'dashboard', 
+            'profil-saya',
+            'kepegawaian',           // Agar bisa melihat data pegawai yang divalidasi
+            'kepegawaian-data',
+            'layanan-gtk', 
+            'layanan-kp',
+            'layanan-kgb',
+            'layanan-mutasi',
+            'layanan-relokasi',
+            'layanan-satya',
+            'layanan-hukdis',
+            'verifikasi-surat',
+            'pengaturan-sistem-header',
+        ],
         
         'Sekolah' => [
             'dashboard', 'gtk', 'peserta-didik', 'administrasi-surat', 
@@ -47,14 +63,14 @@ return [
 
             // Menu-menu ini harus ada di sini agar sistem canAccessMenu bernilai true
             // Middleware di atas yang akan membatasi siapa yang boleh klik (Kasubag vs Pegawai Biasa)
-            'layanan-gtk', 
-            'layanan-kp',
-            'layanan-kgb',
-            'layanan-mutasi',
-            'layanan-relokasi',
-            'layanan-satya',
-            'layanan-hukdis',
-            'verifikasi-surat',
+            // 'layanan-gtk', 
+            // 'layanan-kp',
+            // 'layanan-kgb',
+            // 'layanan-mutasi',
+            // 'layanan-relokasi',
+            // 'layanan-satya',
+            // 'layanan-hukdis',
+            // 'verifikasi-surat',
             
             // Catatan: Menu 'layanan-gtk' dan sub-layanan lainnya 
             // akan otomatis disuntikkan oleh Middleware untuk Pegawai biasa.

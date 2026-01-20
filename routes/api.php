@@ -19,11 +19,19 @@ use App\Http\Controllers\Api\TerimaPengajuanController;
 Route::post('/sync/{table}', [SchoolSyncController::class, 'handle'])
      ->middleware(SyncApiAuth::class);
 
-// 2. TERIMA PENGAJUAN DARI SEKOLAH (BARU)
-// Ini endpoint yang ditembak oleh aplikasi Sekolah saat tombol kirim diklik
-Route::post('/terima-pengajuan', [TerimaPengajuanController::class, 'handle']);
-Route::post('/request-awal', [TerimaPengajuanController::class, 'terimaRequestAwal']);
-Route::post('/terima-berkas', [TerimaPengajuanController::class, 'terimaBerkas']);
+     Route::prefix('v1')->group(function () {
+    
+        // 1. Menerima permohonan awal dan surat permohonan dari sekolah
+        // URL: http://alamat-kcd.test/api/v1/request-awal
+        Route::post('/request-awal', [TerimaPengajuanController::class, 'terimaRequestAwal']);
+        
+        // 2. Menerima unggahan berkas persyaratan yang sudah dilengkapi sekolah
+        // URL: http://alamat-kcd.test/api/v1/terima-berkas
+        Route::post('/terima-berkas', [TerimaPengajuanController::class, 'terimaBerkas']);
+        
+        // 3. Endpoint tambahan jika diperlukan untuk sinkronisasi lainnya
+        Route::post('/terima-pengajuan', [TerimaPengajuanController::class, 'handle']);
+    });
 
 Route::get('/user', function (Request $request) {
     return $request->user();
