@@ -240,9 +240,13 @@
                                         {{ $item->status }}
                                     </span>
                                     @if ((str_contains($st, 'revisi') || str_contains($st, 'tolak')) && $item->alasan_tolak)
-                                        <div class="mt-1">
-                                            <small class="text-danger fw-bold italic" style="font-size: 0.65rem;">
-                                                Alasan: {{ \Illuminate\Support\Str::limit($item->alasan_tolak, 30) }}
+                                        <div class="mt-2 text-start bg-light-danger p-2 rounded border border-danger border-opacity-10"
+                                            style="min-width: 150px;">
+                                            <small class="text-danger fw-bold d-block extra-small text-uppercase">
+                                                <i class='bx bx-info-circle'></i> Alasan:
+                                            </small>
+                                            <small class="text-dark d-block lh-1" style="font-size: 0.7rem;">
+                                                {{ $item->alasan_tolak }}
                                             </small>
                                         </div>
                                     @endif
@@ -533,6 +537,25 @@
 
                             <div class="modal-body bg-light-subtle px-4 py-4">
 
+                                @if ($item->alasan_tolak && (str_contains($st, 'verifikasi berkas') || str_contains($st, 'revisi')))
+                                    <div
+                                        class="card border-0 shadow-xs mb-4 rounded-4 border-start border-danger border-4 bg-white p-3">
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar bg-label-danger rounded p-2 me-3">
+                                                <i class="bx bx-error-circle fs-3"></i>
+                                            </div>
+                                            <div>
+                                                <span
+                                                    class="fw-bold extra-small text-danger text-uppercase d-block">Catatan
+                                                    Penolakan/Revisi:</span>
+                                                <p class="text-dark small mb-0 fw-semibold">{{ $item->alasan_tolak }}</p>
+                                                <small class="text-muted extra-small">Oleh: Atasan / Verifikator
+                                                    sebelumnya</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endif
+
                                 @if ($st == 'verifikasi kepala' && $isMyTurn)
                                     <div
                                         class="card border-0 shadow-xs mb-4 rounded-4 border-start border-primary border-4 bg-white p-3">
@@ -542,7 +565,8 @@
                                         <select name="template_id" class="form-select border-0 bg-light-subtle fw-bold"
                                             required>
                                             <option value="" selected disabled>-- Pilih Format SK
-                                                ({{ ucwords(str_replace('-', ' ', $item->kategori)) }}) --</option>
+                                                ({{ ucwords(str_replace('-', ' ', $item->kategori)) }})
+                                                --</option>
                                             @forelse ($templates->where('sub_kategori', $item->kategori) as $tpl)
                                                 <option value="{{ $tpl->id }}">{{ $tpl->judul_surat }}</option>
                                             @empty
@@ -598,12 +622,27 @@
                                                             onchange="setDocStatus('{{ $uniq }}', false, '{{ $item->id }}')">
                                                         <label
                                                             class="btn btn-outline-danger border-0 px-3 py-2 fw-bold rounded-end-pill"
-                                                            for="revisi{{ $uniq }}"><i
-                                                                class='bx bx-x me-1'></i>
+                                                            for="revisi{{ $uniq }}"><i class='bx bx-x me-1'></i>
                                                             Tolak</label>
                                                     </div>
                                                 @endif
                                             </div>
+                                            {{-- @if ($isMyTurn)
+                                                <div id="note{{ $uniq }}"
+                                                    class="{{ $isValid ? 'd-none' : '' }} mt-2">
+                                                    <div
+                                                        class="p-3 bg-light-danger rounded-4 border border-danger border-opacity-25 mx-2 shadow-xs">
+                                                        <label
+                                                            class="form-label extra-small fw-bold text-danger text-uppercase mb-1">Alasan
+                                                            Penolakan</label>
+                                                        <input type="text" name="catatan[{{ $doc['id'] }}]"
+                                                            value="{{ $doc['catatan'] ?? '' }}"
+                                                            class="form-control form-control-sm text-danger border-0 bg-white"
+                                                            placeholder="Kenapa dokumen ini ditolak?">
+                                                    </div>
+                                                </div>
+                                            @endif --}}
+
                                             @if ($isMyTurn)
                                                 <div id="note{{ $uniq }}"
                                                     class="{{ $isValid ? 'd-none' : '' }} mt-2">
@@ -621,6 +660,15 @@
                                             @endif
                                         </div>
                                     @endforeach
+                                </div>
+
+                                <div id="wrapperAlasan{{ $item->id }}" class="mt-4 d-none">
+                                    <label class="form-label fw-bold extra-small text-danger text-uppercase mb-2">
+                                        <i class='bx bx-error-circle me-1'></i> Alasan Revisi (Kesimpulan)
+                                    </label>
+                                    <textarea name="alasan_tolak" id="inputAlasanTolak{{ $item->id }}"
+                                        class="form-control border-0 shadow-xs rounded-4 bg-white p-3 extra-small" rows="2"
+                                        placeholder="Sebutkan alasan utama kenapa berkas dikembalikan..."></textarea>
                                 </div>
 
                                 <div class="mt-4">
@@ -726,34 +774,29 @@
             if (!form) return;
 
             let checkedRadios = form.querySelectorAll('input[type="radio"]:checked');
-
-            let groupNames = new Set();
-            form.querySelectorAll('input[type="radio"]').forEach(radio => {
-                groupNames.add(radio.name);
-            });
-            let totalDocs = groupNames.size;
-
             let allValid = true;
             let countChecked = 0;
 
             checkedRadios.forEach(radio => {
-                if (radio.value === '0') {
-                    allValid = false;
-                }
+                if (radio.value === '0') allValid = false;
                 countChecked++;
             });
 
-            let isComplete = (countChecked === totalDocs);
-
             let btnApprove = document.getElementById('btnApprove' + itemId);
             let btnReject = document.getElementById('btnReject' + itemId);
+            let inputAlasan = document.getElementById('inputAlasanTolak' + itemId);
+            let wrapperAlasan = document.getElementById('wrapperAlasan' + itemId); // <-- TAMBAHKAN DEFINISI INI
 
-            if (isComplete && allValid) {
-                btnApprove.classList.remove('d-none');
-                btnReject.classList.add('d-none');
-            } else {
-                btnApprove.classList.add('d-none');
-                btnReject.classList.remove('d-none');
+            if (countChecked > 0 && allValid) {
+                if (btnApprove) btnApprove.classList.remove('d-none');
+                if (btnReject) btnReject.classList.add('d-none');
+                if (wrapperAlasan) wrapperAlasan.classList.add('d-none');
+                if (inputAlasan) inputAlasan.removeAttribute('required');
+            } else if (countChecked > 0 && !allValid) { // Pastikan ada yang dicek & ada yang tolak
+                if (btnApprove) btnApprove.classList.add('d-none');
+                if (btnReject) btnReject.classList.remove('d-none');
+                if (wrapperAlasan) wrapperAlasan.classList.remove('d-none');
+                if (inputAlasan) inputAlasan.setAttribute('required', 'required');
             }
         }
 
