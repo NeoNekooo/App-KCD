@@ -27,6 +27,7 @@ use App\Http\Controllers\Admin\Administrasi\ArsipSuratController;
 
 // --- Controller Layanan ---
 use App\Http\Controllers\Admin\VerifikasiController;
+use App\Http\Controllers\Admin\DokumenLayananController;
 
 // --- Controller Pengaturan ---
 use App\Http\Controllers\Admin\Settings\MenuManagementController;
@@ -183,6 +184,17 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
         Route::put('/{id}/kasubag-process', [VerifikasiController::class, 'kasubagProcess'])->name('kasubag_process');
         Route::put('/{id}/kepala-process', [VerifikasiController::class, 'kepalaProcess'])->name('kepala_process');
     });
+
+    /*
+    |--------------------------------------------------------------------------
+    | ARSIP DOKUMEN LAYANAN
+    |--------------------------------------------------------------------------
+    */
+    Route::prefix('dokumen-layanan')->name('dokumen-layanan.')
+        ->middleware('check_menu:dokumen-layanan')
+        ->group(function () {
+            Route::get('/', [DokumenLayananController::class, 'index'])->name('index');
+        });
 
     /*
     |--------------------------------------------------------------------------

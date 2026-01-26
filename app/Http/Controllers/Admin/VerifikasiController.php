@@ -20,71 +20,96 @@ class VerifikasiController extends Controller
     /**
      * 1. HALAMAN UTAMA (INDEX)
      */
-    public function index(Request $request)
-    {
-        $user = Auth::user();
-        $title = 'Daftar Pengajuan Masuk';
-        $roleUser = strtolower($user->role);
-        $isKasubag = $roleUser === 'kasubag';
-        $isKepala  = $roleUser === 'kepala';
-
-        $query = PengajuanSekolah::query();
-
-        // --- A. FILTER KATEGORI (TUGAS PEGAWAI) ---
-        $kategoriTarget = $request->kategori;
-        if ($roleUser === 'pegawai' && $user->pegawai_kcd_id) {
-            $penugasan = TugasPegawaiKcd::where('pegawai_kcd_id', $user->pegawai_kcd_id)
-                ->where('is_active', 1)
-                ->first();
-
-            if ($penugasan && !empty($penugasan->kategori_layanan)) {
-                $masterKeys = ['umum', 'all', 'semua-layanan', 'koordinator'];
-                if (!in_array(strtolower($penugasan->kategori_layanan), $masterKeys)) {
-                    $kategoriTarget = $penugasan->kategori_layanan;
-                    $request->merge(['kategori' => $kategoriTarget]);
+        public function index(Request $request)
+        {
+            $user = Auth::user();
+            $title = 'Daftar Pengajuan Masuk';
+            $roleUser = strtolower($user->role);
+            $isKasubag = $roleUser === 'kasubag';
+            $isKepala  = $roleUser === 'kepala';
+    
+            $query = PengajuanSekolah::query();
+    
+            // --- A. FILTER KATEGORI (TUGAS KEPEGAWAIAN) ---
+            $kategoriTarget = $request->kategori;
+            if ($roleUser === 'kepegawaian' && $user->pegawai_kcd_id) {
+                $penugasan = TugasPegawaiKcd::where('pegawai_kcd_id', $user->pegawai_kcd_id)
+                    ->where('is_active', 1)
+                    ->first();
+    
+                if ($penugasan && !empty($penugasan->kategori_layanan)) {
+                    $masterKeys = ['umum', 'all', 'semua-layanan', 'koordinator'];
+                    if (!in_array(strtolower($penugasan->kategori_layanan), $masterKeys)) {
+                        $kategoriTarget = $penugasan->kategori_layanan;
+                        $request->merge(['kategori' => $kategoriTarget]);
+                    }
                 }
             }
+    
+            // --- B. Tentukan Status yang Diizinkan Berdasarkan Role User ---
+            $allowedStatuses = [];
+            if ($roleUser === 'kepegawaian') {
+                $allowedStatuses = ['Proses', 'Atur Syarat', 'Lengkapi Berkas', 'Verifikasi Berkas', 'Perlu Revisi', 'ACC', 'Selesai'];
+            } elseif ($roleUser === 'kasubag') {
+                $allowedStatuses = ['Verifikasi Kasubag'];
+            } elseif ($roleUser === 'kepala') {
+                $allowedStatuses = ['Verifikasi Kepala'];
+            } else {
+                // Untuk role lain (misal: Super Admin), tampilkan semua kecuali yang Ditolak Final
+                $allowedStatuses = ['Proses', 'Atur Syarat', 'Lengkapi Berkas', 'Verifikasi Berkas', 'Verifikasi Kasubag', 'Verifikasi Kepala', 'Perlu Revisi', 'ACC', 'Selesai'];
+            }
+    
+            // Terapkan filter status berdasarkan role
+            if (!empty($allowedStatuses)) {
+                $query->whereIn('status', $allowedStatuses);
+            }
+    
+            // --- C. FILTER STATUS TAMBAHAN (dari Request) ---
+            // Filter ini akan bekerja di atas filter role
+            if ($request->filled('status')) {
+                // Pastikan status yang diminta ada dalam allowedStatuses untuk role tersebut
+                if (in_array($request->status, $allowedStatuses)) {
+                    $query->where('status', $request->status);
+                } else {
+                    // Jika status yang diminta tidak valid untuk role tersebut, return empty result
+                    $query->where('status', 'INVALID_STATUS_FOR_ROLE'); 
+                }
+            }
+    
+            // Filter berdasarkan kategori yang ditugaskan
+            if ($kategoriTarget) {
+                $query->where('kategori', 'LIKE', '%' . $kategoriTarget . '%');
+            }
+    
+            // --- D. STATISTIK DASHBOARD ---
+            $statQuery = PengajuanSekolah::query();
+            if ($kategoriTarget) $statQuery->where('kategori', 'LIKE', '%' . $kategoriTarget . '%');
+            
+            // Statistik juga perlu disesuaikan per role jika diinginkan, tapi untuk sekarang pakai query yang sama
+            $count_proses     = (clone $statQuery)->whereIn('status', ['Proses'])->count();
+            $count_upload     = (clone $statQuery)->whereIn('status', ['Atur Syarat', 'Lengkapi Berkas'])->count();
+            $count_verifikasi = (clone $statQuery)->whereIn('status', ['Verifikasi Berkas', 'Verifikasi Kasubag', 'Verifikasi Kepala', 'Perlu Revisi'])->count();
+            $count_selesai    = (clone $statQuery)->where('status', 'ACC')->count();
+    
+    
+            $data = $query->latest()->paginate(10)->withQueryString();
+    
+            $templates = TipeSurat::where('kategori', 'layanan')
+                ->orWhere('kategori', 'sk')
+                ->get();
+    
+            return view('admin.verifikasi.index', compact(
+                'data',
+                'title',
+                'templates',
+                'isKasubag',
+                'isKepala',
+                'count_proses',
+                'count_upload',
+                'count_verifikasi',
+                'count_selesai'
+            ))->with('kategoriUrl', $kategoriTarget);
         }
-
-        // --- B. FILTER STATUS ---
-        if ($request->filled('status')) {
-            $query->where('status', $request->status);
-        } else {
-            $query->whereNotNull('status');
-        }
-
-        // Filter berdasarkan kategori yang ditugaskan
-        if ($kategoriTarget) {
-            $query->where('kategori', 'LIKE', '%' . $kategoriTarget . '%');
-        }
-
-        // --- C. STATISTIK DASHBOARD ---
-        $statQuery = PengajuanSekolah::query();
-        if ($kategoriTarget) $statQuery->where('kategori', 'LIKE', '%' . $kategoriTarget . '%');
-
-        $count_proses     = (clone $statQuery)->where('status', 'Proses')->count();
-        $count_upload     = (clone $statQuery)->whereIn('status', ['Atur Syarat', 'Lengkapi Berkas'])->count();
-        $count_verifikasi = (clone $statQuery)->whereIn('status', ['Verifikasi Berkas', 'Verifikasi Berkas', 'Verifikasi Kepala', 'Perlu Revisi'])->count();
-        $count_selesai    = (clone $statQuery)->where('status', 'ACC')->count();
-
-        $data = $query->latest()->paginate(10)->withQueryString();
-
-        $templates = TipeSurat::where('kategori', 'layanan')
-            ->orWhere('kategori', 'sk')
-            ->get();
-
-        return view('admin.verifikasi.index', compact(
-            'data',
-            'title',
-            'templates',
-            'isKasubag',
-            'isKepala',
-            'count_proses',
-            'count_upload',
-            'count_verifikasi',
-            'count_selesai'
-        ))->with('kategoriUrl', $kategoriTarget);
-    }
 
     /**
      * 2. VERIFIKASI BERKAS OLEH STAF (REVISI)

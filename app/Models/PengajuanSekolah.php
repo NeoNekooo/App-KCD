@@ -4,7 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo; // Tambah ini buat relasi
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class PengajuanSekolah extends Model
 {
@@ -31,5 +32,15 @@ class PengajuanSekolah extends Model
     public function template(): BelongsTo
     {
         return $this->belongsTo(TipeSurat::class, 'template_id');
+    }
+
+    /**
+     * Get all of the dokumenLayanan for the PengajuanSekolah
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function dokumenLayanan(): HasMany
+    {
+        return $this->hasMany(DokumenLayanan::class, 'pengajuan_sekolah_id');
     }
 }

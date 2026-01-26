@@ -593,8 +593,8 @@
                                                     </div>
                                                     <div class="flex-grow-1">
                                                         <div class="fw-bold text-dark small">{{ $doc['nama'] }}</div>
-                                                        @if (!empty($doc['file']))
-                                                            <a href="{{ $doc['file'] }}" target="_blank"
+                                                        @if (!empty($doc['url']))
+                                                            <a href="{{ $doc['url'] }}" target="_blank"
                                                                 class="text-primary extra-small fw-bold"><i
                                                                     class='bx bx-link-external me-1'></i> Lihat Dokumen</a>
                                                         @else
