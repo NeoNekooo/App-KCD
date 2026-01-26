@@ -130,6 +130,35 @@
         .btn-group form .btn {
             border-radius: 0;
         }
+
+        /* CSS Tombol Close Modal Floating */
+        .modal-content {
+            overflow: visible !important;
+        }
+
+        .btn-close-floating {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            z-index: 1060;
+            background-color: #fff;
+            opacity: 1;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            padding: 0;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23333'%3e%3cpath d='M.293.293a1 1 0 0 1 1.414 0L8 6.586 14.293.293a1 1 0 1 1 1.414 1.414L9.414 8l6.293 6.293a1 1 0 0 1-1.414 1.414L8 9.414l-6.293 6.293a1 1 0 0 1-1.414-1.414L6.586 8 .293 1.707a1 1 0 0 1 0-1.414z'/%3e%3c/svg%3e");
+            background-size: 12px;
+            background-repeat: no-repeat;
+            background-position: center;
+            transition: all 0.2s ease;
+        }
+
+        .btn-close-floating:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
     </style>
 
     <div class="container-xxl flex-grow-1 container-p-y">
@@ -141,7 +170,6 @@
             if (empty($reqKategori) && $isEdit) {
                 $reqKategori = $template->kategori;
             }
-            // Default kategori
             $kategoriAktif = $reqKategori ?? 'siswa';
 
             $formAction = $isEdit
@@ -158,66 +186,102 @@
                 $pages = [$fullContent ?: ''];
             }
 
-            // === DAFTAR VARIABEL ===
+            // === DAFTAR VARIABEL DINAMIS (FIXED SESUAI DB) ===
             $variableGroups = [
                 'Data Umum (Wajib)' => [
-                    ['code' => '{{no_surat}}', 'desc' => 'Nomor Surat Resmi'],
-                    ['code' => '{{tanggal}}', 'desc' => 'Tanggal Cetak (Indo)'],
-                    ['code' => '{{tahun_ajaran}}', 'desc' => 'Tahun Ajaran Aktif'],
+                    ['code' => '{{ no_surat }}', 'desc' => 'Nomor Surat Resmi'],
+                    ['code' => '{{ tanggal }}', 'desc' => 'Tanggal Cetak (Indo)'],
+                    ['code' => '{{ tahun_ajaran }}', 'desc' => 'Tahun Ajaran Aktif'],
                 ],
-                // Variabel SISWA
+
+                // 1. DATA SISWA
                 'Identitas Siswa' =>
                     $kategoriAktif == 'siswa'
                         ? [
-                            ['code' => '{{nama}}', 'desc' => 'Nama Lengkap'],
-                            ['code' => '{{nisn}}', 'desc' => 'NISN'],
-                            ['code' => '{{nipd}}', 'desc' => 'NIPD / Stambuk'],
-                            ['code' => '{{nik}}', 'desc' => 'NIK Siswa'],
-                            ['code' => '{{kelas}}', 'desc' => 'Kelas (Rombel)'],
-                            ['code' => '{{ttl}}', 'desc' => 'Tempat, Tgl Lahir'],
-                            ['code' => '{{jk}}', 'desc' => 'Jenis Kelamin'],
-                            ['code' => '{{agama}}', 'desc' => 'Agama'],
-                            ['code' => '{{alamat}}', 'desc' => 'Alamat Lengkap'],
-                            ['code' => '{{nama_ayah}}', 'desc' => 'Nama Ayah'],
-                            ['code' => '{{nama_ibu}}', 'desc' => 'Nama Ibu'],
-                            ['code' => '{{pekerjaan_ayah}}', 'desc' => 'Pekerjaan Ayah'],
-                            ['code' => '{{nama_wali}}', 'desc' => 'Nama Wali'],
+                            ['code' => '{{ nama }}', 'desc' => 'Nama Lengkap'],
+                            ['code' => '{{ nisn }}', 'desc' => 'NISN'],
+                            ['code' => '{{ nipd }}', 'desc' => 'NIPD / Stambuk'],
+                            ['code' => '{{ nik }}', 'desc' => 'NIK Siswa'],
+                            ['code' => '{{ kelas }}', 'desc' => 'Kelas (Rombel)'],
+                            ['code' => '{{ ttl }}', 'desc' => 'Tempat, Tgl Lahir'],
+                            ['code' => '{{ jk }}', 'desc' => 'Jenis Kelamin'],
+                            ['code' => '{{ agama }}', 'desc' => 'Agama'],
+                            ['code' => '{{ alamat }}', 'desc' => 'Alamat Lengkap'],
+                            ['code' => '{{ nama_ayah }}', 'desc' => 'Nama Ayah'],
+                            ['code' => '{{ nama_ibu }}', 'desc' => 'Nama Ibu'],
+                            ['code' => '{{ pekerjaan_ayah }}', 'desc' => 'Pekerjaan Ayah'],
                         ]
                         : [],
-                // Variabel GURU / LAYANAN (Biasanya Layanan juga pake data Guru)
-                'Identitas Guru/PTK' =>
-                    ($kategoriAktif == 'guru' || $kategoriAktif == 'layanan')
+
+                // 2. DATA GURU (Tabel gtks)
+                'Identitas Guru' =>
+                    $kategoriAktif == 'guru'
                         ? [
-                            ['code' => '{{nama}}', 'desc' => 'Nama Lengkap (Gelar)'],
-                            ['code' => '{{nip}}', 'desc' => 'NIP'],
-                            ['code' => '{{nuptk}}', 'desc' => 'NUPTK'],
-                            ['code' => '{{nik}}', 'desc' => 'NIK'],
-                            ['code' => '{{jabatan}}', 'desc' => 'Jabatan (Jenis PTK)'],
-                            ['code' => '{{ttl}}', 'desc' => 'Tempat, Tgl Lahir'],
-                            ['code' => '{{jk}}', 'desc' => 'Jenis Kelamin'],
-                            ['code' => '{{alamat}}', 'desc' => 'Alamat Jalan'],
-                            ['code' => '{{no_hp}}', 'desc' => 'Nomor HP'],
-                            ['code' => '{{email}}', 'desc' => 'Email'],
-                            ['code' => '{{pangkat}}', 'desc' => 'Pangkat/Golongan'],
-                            ['code' => '{{unit_kerja}}', 'desc' => 'Unit Kerja'],
+                            ['code' => '{{ nama }}', 'desc' => 'Nama Lengkap (Gelar)'],
+                            ['code' => '{{ nip }}', 'desc' => 'NIP'],
+                            ['code' => '{{ nik }}', 'desc' => 'NIK KTP'],
+                            ['code' => '{{ nuptk }}', 'desc' => 'NUPTK'],
+                            ['code' => '{{ jabatan }}', 'desc' => 'Jabatan/Jenis PTK'],
+                            ['code' => '{{ ttl }}', 'desc' => 'Tempat, Tgl Lahir'],
+                            ['code' => '{{ jk }}', 'desc' => 'Jenis Kelamin (L/P)'],
+                            ['code' => '{{ alamat }}', 'desc' => 'Alamat Rumah'],
+                            ['code' => '{{ no_hp }}', 'desc' => 'Nomor HP'],
+                            ['code' => '{{ email }}', 'desc' => 'Email'],
+                            ['code' => '{{ pangkat }}', 'desc' => 'Pangkat/Golongan'],
+                            ['code' => '{{ unit_kerja }}', 'desc' => 'Unit Kerja'],
+                        ]
+                        : [],
+
+                // 3. DATA PEGAWAI KCD (INTERNAL)
+                // Sesuai tabel: pegawai_kcds (id, nama, nik, nip, jabatan, no_hp, email_pribadi, alamat)
+                // TIDAK ADA: nuptk, pangkat_golongan, unit_kerja (di SQL tidak ada kolom ini)
+                'Identitas Pegawai KCD (Internal)' =>
+                    $kategoriAktif == 'internal' || $kategoriAktif == 'layanan'
+                        ? [
+                            ['code' => '{{ nama }}', 'desc' => 'Nama Pegawai'],
+                            ['code' => '{{ nip }}', 'desc' => 'NIP'],
+                            ['code' => '{{ nik }}', 'desc' => 'NIK'],
+                            ['code' => '{{ jabatan }}', 'desc' => 'Jabatan'],
+                            ['code' => '{{ tempat_lahir }}', 'desc' => 'Tempat Lahir'],
+                            ['code' => '{{ tanggal_lahir }}', 'desc' => 'Tanggal Lahir'],
+                            ['code' => '{{ jk }}', 'desc' => 'Jenis Kelamin'],
+                            ['code' => '{{ no_hp }}', 'desc' => 'Nomor HP'],
+                            ['code' => '{{ email }}', 'desc' => 'Email Pribadi'],
+                            ['code' => '{{ alamat }}', 'desc' => 'Alamat Rumah'],
+                        ]
+                        : [],
+
+                // 4. DATA INSTANSI (Untuk Surat Keluar ke Instansi)
+                // Sesuai tabel: instansis (nama_instansi, nama_kepala, nip_kepala, alamat, logo, tanda_tangan)
+                'Identitas Instansi (Tujuan)' =>
+                    $kategoriAktif == 'internal'
+                        ? [
+                            ['code' => '{{ nama_instansi }}', 'desc' => 'Nama Instansi'],
+                            ['code' => '{{ nama_brand }}', 'desc' => 'Nama Brand'],
+                            ['code' => '{{ nama_kepala_instansi }}', 'desc' => 'Nama Kepala Instansi'],
+                            ['code' => '{{ nip_kepala_instansi }}', 'desc' => 'NIP Kepala'],
+                            ['code' => '{{ alamat_instansi }}', 'desc' => 'Alamat Instansi'],
+                            ['code' => '{{ telepon_instansi }}', 'desc' => 'Telepon'],
+                            ['code' => '{{ email_instansi }}', 'desc' => 'Email'],
+                            ['code' => '{{ website_instansi }}', 'desc' => 'Website'],
+                            ['code' => '{{ logo_instansi }}', 'desc' => 'Logo (Gambar)'],
+                            ['code' => '{{ tanda_tangan_instansi }}', 'desc' => 'Tanda Tangan (Gambar)'],
                         ]
                         : [],
             ];
 
-            // Tentukan grup variabel utama berdasarkan kategori
+            // Tentukan grup variabel utama untuk Quick Access
             $mainVarGroup = 'Identitas Siswa';
-            if($kategoriAktif == 'guru' || $kategoriAktif == 'layanan') {
-                $mainVarGroup = 'Identitas Guru/PTK';
+            if ($kategoriAktif == 'guru') {
+                $mainVarGroup = 'Identitas Guru';
+            } elseif ($kategoriAktif == 'internal' || $kategoriAktif == 'layanan') {
+                // Prioritaskan Pegawai KCD
+                $mainVarGroup = 'Identitas Pegawai KCD (Internal)';
             }
 
-            // Ambil 6 variabel pertama untuk quick access
             $quickAccess = array_merge(
                 $variableGroups['Data Umum (Wajib)'],
-                array_slice(
-                    $variableGroups[$mainVarGroup] ?? [],
-                    0,
-                    6,
-                ),
+                array_slice($variableGroups[$mainVarGroup] ?? [], 0, 8),
             );
         @endphp
 
@@ -225,27 +289,33 @@
         <ul class="nav nav-pills mb-3">
             <li class="nav-item">
                 <a class="nav-link {{ $kategoriAktif == 'siswa' ? 'active' : '' }}"
-                   href="{{ route('admin.administrasi.tipe-surat.index', ['kategori' => 'siswa']) }}">
-                   <i class='bx bx-user me-1'></i> Siswa
+                    href="{{ route('admin.administrasi.tipe-surat.index', ['kategori' => 'siswa']) }}">
+                    <i class='bx bx-user me-1'></i> Siswa
                 </a>
             </li>
             <li class="nav-item">
                 <a class="nav-link {{ $kategoriAktif == 'guru' ? 'active' : '' }}"
-                   href="{{ route('admin.administrasi.tipe-surat.index', ['kategori' => 'guru']) }}">
-                   <i class='bx bx-briefcase-alt-2 me-1'></i> Guru
+                    href="{{ route('admin.administrasi.tipe-surat.index', ['kategori' => 'guru']) }}">
+                    <i class='bx bx-briefcase-alt-2 me-1'></i> Guru
                 </a>
             </li>
-            {{-- TAB BARU: LAYANAN --}}
             <li class="nav-item">
                 <a class="nav-link {{ $kategoriAktif == 'layanan' ? 'active' : '' }}"
-                   href="{{ route('admin.administrasi.tipe-surat.index', ['kategori' => 'layanan']) }}">
-                   <i class='bx bx-layer me-1'></i> Layanan
+                    href="{{ route('admin.administrasi.tipe-surat.index', ['kategori' => 'layanan']) }}">
+                    <i class='bx bx-layer me-1'></i> Layanan
                 </a>
             </li>
             <li class="nav-item">
                 <a class="nav-link {{ $kategoriAktif == 'sk' ? 'active' : '' }}"
-                   href="{{ route('admin.administrasi.tipe-surat.index', ['kategori' => 'sk']) }}">
-                   <i class='bx bx-file me-1'></i> SK
+                    href="{{ route('admin.administrasi.tipe-surat.index', ['kategori' => 'sk']) }}">
+                    <i class='bx bx-file me-1'></i> SK
+                </a>
+            </li>
+            {{-- 🔥 TAB BARU: INTERNAL 🔥 --}}
+            <li class="nav-item">
+                <a class="nav-link {{ $kategoriAktif == 'internal' ? 'active' : '' }}"
+                    href="{{ route('admin.administrasi.tipe-surat.index', ['kategori' => 'internal']) }}">
+                    <i class='bx bx-buildings me-1'></i> Internal
                 </a>
             </li>
         </ul>
@@ -263,8 +333,7 @@
                             @if ($isEdit)
                                 @method('PUT')
                             @endif
-                            
-                            {{-- Input Hidden Kategori --}}
+
                             <input type="hidden" name="kategori" value="{{ $kategoriAktif }}">
                             <input type="hidden" name="orientasi" value="portrait">
                             <textarea name="template_isi" id="real_template_isi" style="display:none;"></textarea>
@@ -272,35 +341,40 @@
                             <div class="bg-light p-3 rounded mx-1 mb-4">
                                 <div class="row g-3">
                                     {{-- Jika Kategori Layanan, Tampilkan Dropdown Jenis Layanan --}}
-                                    @if($kategoriAktif == 'layanan')
-                                    <div class="col-md-12">
-                                        <label class="form-label fw-bold text-primary">Jenis Layanan</label>
-                                        <select name="sub_kategori" class="form-select border-primary" required>
-                                            <option value="" disabled selected>-- Pilih Jenis Layanan --</option>
-                                            @php
-                                                $layananList = [
-                                                    'kenaikan-pangkat' => 'Kenaikan Pangkat',
-                                                    'kgb' => 'KGB (Gaji Berkala)',
-                                                    'mutasi' => 'Mutasi',
-                                                    'relokasi' => 'Relokasi / Penempatan',
-                                                    'satya-lencana' => 'Satya Lencana',
-                                                    'hukuman-disiplin' => 'Hukuman Disiplin',
-                                                    'verifikasi-surat' => 'Verifikasi Surat Lainnya'
-                                                ];
-                                                $selectedSub = old('sub_kategori', $isEdit ? $template->sub_kategori : '');
-                                            @endphp
-                                            @foreach($layananList as $key => $label)
-                                                <option value="{{ $key }}" {{ $selectedSub == $key ? 'selected' : '' }}>{{ $label }}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
+                                    @if ($kategoriAktif == 'layanan')
+                                        <div class="col-md-12">
+                                            <label class="form-label fw-bold text-primary">Jenis Layanan</label>
+                                            <select name="sub_kategori" class="form-select border-primary" required>
+                                                <option value="" disabled selected>-- Pilih Jenis Layanan --</option>
+                                                @php
+                                                    $layananList = [
+                                                        'kenaikan-pangkat' => 'Kenaikan Pangkat',
+                                                        'kgb' => 'KGB (Gaji Berkala)',
+                                                        'mutasi' => 'Mutasi',
+                                                        'relokasi' => 'Relokasi / Penempatan',
+                                                        'satya-lencana' => 'Satya Lencana',
+                                                        'hukuman-disiplin' => 'Hukuman Disiplin',
+                                                        'verifikasi-surat' => 'Verifikasi Surat Lainnya',
+                                                    ];
+                                                    $selectedSub = old(
+                                                        'sub_kategori',
+                                                        $isEdit ? $template->sub_kategori : '',
+                                                    );
+                                                @endphp
+                                                @foreach ($layananList as $key => $label)
+                                                    <option value="{{ $key }}"
+                                                        {{ $selectedSub == $key ? 'selected' : '' }}>{{ $label }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                        </div>
                                     @endif
 
                                     <div class="col-md-8">
                                         <label class="form-label fw-bold">Judul Surat / Template</label>
                                         <input type="text" name="judul_surat" class="form-control"
-                                            value="{{ old('judul_surat', $isEdit ? $template->judul_surat : '') }}" 
-                                            placeholder="Contoh: Surat Pengantar Kenaikan Pangkat" required>
+                                            value="{{ old('judul_surat', $isEdit ? $template->judul_surat : '') }}"
+                                            placeholder="Contoh: Surat Tugas Internal" required>
                                     </div>
                                     <div class="col-md-4">
                                         <label class="form-label fw-bold">Ukuran Kertas</label>
@@ -315,6 +389,7 @@
                                 </div>
                             </div>
 
+                            {{-- Area Margin --}}
                             <div class="card mb-3 border border-dashed shadow-none mx-1">
                                 <div class="card-body p-2 bg-white rounded">
                                     <div class="d-flex align-items-center mb-2">
@@ -367,8 +442,8 @@
                             </div>
 
                             <div class="text-center mb-4">
-                                <button type="button" class="btn btn-outline-secondary btn-sm" onclick="createNewPage()"><i
-                                        class='bx bx-plus'></i> Tambah Halaman Manual</button>
+                                <button type="button" class="btn btn-outline-secondary btn-sm"
+                                    onclick="createNewPage()"><i class='bx bx-plus'></i> Tambah Halaman Manual</button>
                             </div>
 
                             <div class="d-flex gap-2 pt-3 border-top">
@@ -393,43 +468,36 @@
                             <li class="list-group-item py-3">
                                 <div class="d-flex justify-content-between align-items-center">
                                     <div class="me-2 overflow-hidden">
-                                        <h6 class="mb-1 text-truncate" style="max-width: 140px;">{{ $t->judul_surat }}</h6>
+                                        <h6 class="mb-1 text-truncate" style="max-width: 140px;">{{ $t->judul_surat }}
+                                        </h6>
                                         <div class="d-flex gap-1 flex-wrap">
                                             <small class="badge bg-label-secondary">{{ $t->ukuran_kertas }}</small>
-                                            
-                                            @if($t->sub_kategori)
-                                                <small class="badge bg-label-info">{{ ucwords(str_replace('-', ' ', $t->sub_kategori)) }}</small>
+                                            @if ($t->sub_kategori)
+                                                <small
+                                                    class="badge bg-label-info">{{ ucwords(str_replace('-', ' ', $t->sub_kategori)) }}</small>
                                             @endif
-
-                                            {{-- 🔥 BADGE COPY (CP) OTOMATIS 🔥 --}}
-                                            @if(str_contains($t->judul_surat, '(Salinan)'))
-                                                <small class="badge bg-label-warning fw-bold" data-bs-toggle="tooltip" title="Template Salinan">
+                                            @if (str_contains($t->judul_surat, '(Salinan)'))
+                                                <small class="badge bg-label-warning fw-bold" data-bs-toggle="tooltip"
+                                                    title="Template Salinan">
                                                     <i class='bx bx-copy-alt' style="font-size: 0.7rem;"></i> CP
                                                 </small>
                                             @endif
                                         </div>
                                     </div>
                                     <div class="btn-group btn-group-sm">
-                                        {{-- EDIT --}}
                                         <a href="{{ route('admin.administrasi.tipe-surat.edit', ['tipe_surat' => $t->id, 'kategori' => $kategoriAktif]) }}"
-                                            class="btn btn-primary" data-bs-toggle="tooltip" title="Edit">
-                                            <i class="bx bx-pencil"></i>
-                                        </a>
-
-                                        {{-- DUPLICATE / COPY --}}
-                                        <form action="{{ route('admin.administrasi.tipe-surat.duplicate', $t->id) }}" method="POST" class="d-inline">
+                                            class="btn btn-primary" data-bs-toggle="tooltip" title="Edit"><i
+                                                class="bx bx-pencil"></i></a>
+                                        <form action="{{ route('admin.administrasi.tipe-surat.duplicate', $t->id) }}"
+                                            method="POST" class="d-inline">
                                             @csrf
-                                            <button type="submit" class="btn btn-warning" data-bs-toggle="tooltip" title="Duplikasi">
-                                                <i class='bx bx-copy'></i>
-                                            </button>
+                                            <button type="submit" class="btn btn-warning" data-bs-toggle="tooltip"
+                                                title="Duplikasi"><i class='bx bx-copy'></i></button>
                                         </form>
-
-                                        {{-- DELETE --}}
                                         <button type="button" class="btn btn-danger" data-bs-toggle="modal"
                                             data-bs-target="#deleteModal"
-                                            data-action="{{ route('admin.administrasi.tipe-surat.destroy', $t->id) }}" title="Hapus">
-                                            <i class="bx bx-trash"></i>
-                                        </button>
+                                            data-action="{{ route('admin.administrasi.tipe-surat.destroy', $t->id) }}"
+                                            title="Hapus"><i class="bx bx-trash"></i></button>
                                     </div>
                                 </div>
                             </li>
@@ -442,13 +510,14 @@
         </div>
     </div>
 
-    {{-- MODAL & TOAST (SAMA SEPERTI SEBELUMNYA) --}}
+    {{-- MODAL VARIABLE --}}
     <div class="modal fade" id="variableModal" tabindex="-1">
         <div class="modal-dialog modal-lg modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title text-white">Daftar Variabel</h5><button type="button"
-                        class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            {{-- 🔥 MODAL CONTENT TANPA ROUNDED-4 & TOMBOL CLOSE FLOATING 🔥 --}}
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header bg-primary text-white border-0 position-relative">
+                    <h5 class="modal-title text-white">Daftar Variabel</h5>
+                    <button type="button" class="btn-close btn-close-floating" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body bg-light p-4">
                     @foreach ($variableGroups as $groupName => $vars)
@@ -471,42 +540,60 @@
             </div>
         </div>
     </div>
+
+    {{-- MODAL DELETE --}}
     <div class="modal fade" id="deleteModal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Hapus?</h5><button type="button" class="btn-close"
-                        data-bs-dismiss="modal"></button>
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header border-0 position-relative">
+                    <h5 class="modal-title">Hapus Template?</h5>
+                    <button type="button" class="btn-close btn-close-floating" data-bs-dismiss="modal"></button>
                 </div>
                 <form id="deleteForm" method="POST"> @csrf @method('DELETE')
-                    <div class="modal-body">Hapus data ini?</div>
-                    <div class="modal-footer"><button type="button" class="btn btn-outline-secondary"
-                            data-bs-dismiss="modal">Batal</button><button type="submit"
-                            class="btn btn-danger">Hapus</button></div>
+                    <div class="modal-body text-center">
+                        <p>Apakah Anda yakin ingin menghapus template surat ini?</p>
+                        <small class="text-danger">Tindakan ini tidak dapat dibatalkan.</small>
+                    </div>
+                    <div class="modal-footer border-0 justify-content-center">
+                        <button type="button" class="btn btn-outline-secondary rounded-pill px-4"
+                            data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-danger rounded-pill px-4">Hapus</button>
+                    </div>
                 </form>
             </div>
         </div>
     </div>
+
     <div id="action-toast"><span>Variabel disisipkan!</span></div>
 
     @push('scripts')
         <script>
-            // ... (Kode Javascript sama persis dengan yang kamu kirim, tidak perlu diubah) ...
             const paperConfig = {
-                'A4': { width: '210mm', heightVal: 297 },
-                'F4': { width: '215mm', heightVal: 330 },
-                'Legal': { width: '216mm', heightVal: 356 },
-                'Letter': { width: '216mm', heightVal: 279 }
+                'A4': {
+                    width: '210mm',
+                    heightVal: 297
+                },
+                'F4': {
+                    width: '215mm',
+                    heightVal: 330
+                },
+                'Legal': {
+                    width: '216mm',
+                    heightVal: 356
+                },
+                'Letter': {
+                    width: '216mm',
+                    heightVal: 279
+                }
             };
 
             let pageCount = {{ count($pages) }};
             window.activeEditorId = 'editor_page_0';
 
             document.addEventListener('DOMContentLoaded', function() {
-                // Inisialisasi Tooltip Bootstrap (Penting untuk title hover)
                 var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-                var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-                  return new bootstrap.Tooltip(tooltipTriggerEl)
+                var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
+                    return new bootstrap.Tooltip(tooltipTriggerEl)
                 })
 
                 if (typeof tinymce === 'undefined') return;
@@ -520,8 +607,13 @@
                     height: '800px',
                     plugins: 'preview searchreplace autolink autosave save directionality code visualblocks visualchars fullscreen image link media table nonbreaking anchor lists wordcount help',
                     toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline | alignleft aligncenter alignright alignjustify | numlist bullist | table',
-                    table_default_attributes: { border: '1' },
-                    table_default_styles: { 'width': '100%', 'border-collapse': 'collapse' },
+                    table_default_attributes: {
+                        border: '1'
+                    },
+                    table_default_styles: {
+                        'width': '100%',
+                        'border-collapse': 'collapse'
+                    },
                     content_style: `
                         html { background-color: #525659 !important; padding: 2rem 0; margin: 0; }
                         body { background-color: white !important; color: black; margin: 0 auto !important; box-shadow: 0 4px 15px rgba(0,0,0,0.3); box-sizing: border-box; display: block !important; font-family: 'Times New Roman', serif; font-size: 12pt; overflow-wrap: break-word; word-wrap: break-word; overflow-y: auto !important; }
@@ -529,10 +621,19 @@
                         td, th { word-wrap: break-word; vertical-align: top; }
                     `,
                     setup: function(editor) {
-                        editor.on('init', function() { updateEditorVisuals(); });
-                        editor.on('focus', function() { window.activeEditorId = editor.id; });
-                        editor.on('keyup', function(e) { checkPageOverflow(editor); editor.selection.scrollIntoView(); });
-                        editor.on('paste', function(e) { setTimeout(() => checkPageOverflow(editor), 100); });
+                        editor.on('init', function() {
+                            updateEditorVisuals();
+                        });
+                        editor.on('focus', function() {
+                            window.activeEditorId = editor.id;
+                        });
+                        editor.on('keyup', function(e) {
+                            checkPageOverflow(editor);
+                            editor.selection.scrollIntoView();
+                        });
+                        editor.on('paste', function(e) {
+                            setTimeout(() => checkPageOverflow(editor), 100);
+                        });
                     }
                 });
             }
@@ -583,7 +684,8 @@
                 document.querySelectorAll('.page-editor').forEach((el) => {
                     const editorInstance = tinymce.get(el.id);
                     if (editorInstance) {
-                        if (!first) combinedContent += '<div class="mce-pagebreak" contenteditable="false"></div>';
+                        if (!first) combinedContent +=
+                            '<div class="mce-pagebreak" contenteditable="false"></div>';
                         combinedContent += editorInstance.getContent();
                         first = false;
                     }

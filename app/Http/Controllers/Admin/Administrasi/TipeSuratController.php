@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\TipeSurat;
 use App\Models\Tapel;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str; // Tambahkan Str untuk fitur duplikasi yang rapi
+use Illuminate\Support\Str;
 
 class TipeSuratController extends Controller
 {
@@ -73,22 +73,11 @@ class TipeSuratController extends Controller
                 ->with('success', 'Template surat berhasil dihapus.');
     }
 
-    // --- FITUR BARU: DUPLICATE / COPY SURAT ---
     public function duplicate($id)
     {
-        // 1. Cari data aslinya
         $original = TipeSurat::findOrFail($id);
-
-        // 2. Replicate (Copy data tanpa ID dan Timestamp)
         $copy = $original->replicate();
-
-        // 3. Ubah Judul biar ketahuan kalau ini copy-an
         $copy->judul_surat = $original->judul_surat . ' (Salinan)';
-        
-        // (Opsional) Jika di model ada slug, generate slug baru
-        // $copy->slug = Str::slug($copy->judul_surat) . '-' . time();
-
-        // 4. Simpan baris baru
         $copy->save();
 
         return back()->with('success', 'Template surat berhasil diduplikasi!');
@@ -98,9 +87,9 @@ class TipeSuratController extends Controller
     {
         $request->validate([
             'judul_surat'   => 'required|string|max:255',
-            // Tambahkan 'layanan' di validasi in:
-            'kategori'      => 'required|in:siswa,guru,sk,layanan',
-            'sub_kategori'  => 'nullable|string|max:100', // Validasi sub kategori
+            // 🔥 UPDATE: Tambahkan 'internal' di sini
+            'kategori'      => 'required|in:siswa,guru,sk,layanan,internal', 
+            'sub_kategori'  => 'nullable|string|max:100',
             'template_isi'  => 'required',
             'ukuran_kertas' => 'required',
             'margin_top'    => 'nullable|integer',
@@ -115,7 +104,7 @@ class TipeSuratController extends Controller
         return [
             'judul_surat'   => $request->judul_surat,
             'kategori'      => $request->kategori,
-            'sub_kategori'  => $request->sub_kategori, // Simpan sub kategori
+            'sub_kategori'  => $request->sub_kategori,
             'template_isi'  => $request->template_isi,
             'ukuran_kertas' => $request->ukuran_kertas,
             'tapel_id'      => $tapelId,

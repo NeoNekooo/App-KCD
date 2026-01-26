@@ -21,6 +21,8 @@ use App\Http\Controllers\Admin\Kesiswaan\SiswaController;
 use App\Http\Controllers\Admin\Administrasi\TipeSuratController;
 use App\Http\Controllers\Admin\Administrasi\SuratKeluarSiswaController;
 use App\Http\Controllers\Admin\Administrasi\SuratKeluarGuruController;
+// 🔥 [UPDATE] Import Controller Baru 🔥
+use App\Http\Controllers\Admin\Administrasi\SuratKeluarInternalController; 
 use App\Http\Controllers\Admin\Administrasi\SuratMasukController;
 use App\Http\Controllers\Admin\Administrasi\NomorSuratSettingController;
 use App\Http\Controllers\Admin\Administrasi\ArsipSuratController;
@@ -47,8 +49,7 @@ Route::get('/', function () {
     return view('auth.login-custom');
 })->name('landing');
 
-// --- [FIX 1] CETAK SK (PUBLIC / TANPA LOGIN) ---
-// Dikeluarkan dari middleware 'auth' biar Sekolah bisa download file-nya
+// --- CETAK SK (PUBLIC) ---
 Route::get('/cetak-sk/{uuid}', [CetakSkController::class, 'cetakSk'])->name('cetak.sk');
 
 
@@ -68,7 +69,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
     |--------------------------------------------------------------------------
     */
     
-    // A. Tugas Pegawai (Penugasan Layanan)
+    // A. Tugas Pegawai
     Route::controller(TugasPegawaiKcdController::class)
         ->prefix('kepegawaian/tugas-internal')
         ->name('kepegawaian.tugas-kcd.')
@@ -145,18 +146,32 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
         ->middleware('check_menu:administrasi-surat')
         ->group(function () {
             
-            // 🔥 [FITUR BARU] ROUTE COPY SURAT 🔥
+            // Route Copy Template
             Route::post('tipe-surat/{id}/duplicate', [TipeSuratController::class, 'duplicate'])->name('tipe-surat.duplicate');
-            
-            // Resource standar
             Route::resource('tipe-surat', TipeSuratController::class);
             
+            // Surat Keluar Siswa & Guru
             Route::get('surat-keluar-siswa/get-siswa/{nama_rombel}', [SuratKeluarSiswaController::class, 'getSiswaByKelas'])->name('surat-keluar-siswa.get-siswa');
             Route::resource('surat-keluar-siswa', SuratKeluarSiswaController::class)->only(['index', 'store']);
             Route::resource('surat-keluar-guru', SuratKeluarGuruController::class)->only(['index', 'store']);
+
+            // 🔥 [FITUR BARU] SURAT KELUAR INTERNAL 🔥
+            Route::controller(SuratKeluarInternalController::class)
+                ->prefix('surat-keluar-internal')
+                ->name('surat-keluar-internal.')
+                ->group(function() {
+                    Route::get('/', 'index')->name('index');
+                    Route::post('/', 'store')->name('store');
+                    Route::post('/cetak', 'cetak')->name('cetak');
+                    Route::post('/pdf', 'downloadPdf')->name('pdf');
+                });
+            
+            // Surat Masuk & Pengaturan Nomor
             Route::resource('surat-masuk', SuratMasukController::class);
             Route::post('pengaturan-nomor/reset/{id}', [NomorSuratSettingController::class, 'resetCounter'])->name('pengaturan-nomor.reset');
             Route::resource('pengaturan-nomor', NomorSuratSettingController::class)->except(['create', 'edit', 'show']);
+            
+            // Arsip
             Route::resource('arsip-surat', ArsipSuratController::class)->only(['index', 'destroy']);
             Route::get('arsip-surat/{id}/cetak', [ArsipSuratController::class, 'cetak'])->name('arsip-surat.cetak');
         });
@@ -167,18 +182,11 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
     |--------------------------------------------------------------------------
     */
     
-    // Rute Verifikasi Utama
     Route::middleware('check_menu:layanan-gtk')->prefix('verifikasi')->name('verifikasi.')->group(function () {
         Route::get('/', [VerifikasiController::class, 'index'])->name('index');
-        
-        // --- RUTE BARU UNTUK VALIDASI AWAL (PERIKSA -> SETUJU/TOLAK) ---
         Route::post('/{id}/approve-initial', [VerifikasiController::class, 'approveInitial'])->name('approve_initial');
         Route::post('/{id}/reject', [VerifikasiController::class, 'reject'])->name('reject');
-        
-        // --- [FIX 2] RUTE RESEND ACC (YANG TADI HILANG) ---
         Route::post('/{id}/resend-acc', [VerifikasiController::class, 'resendAcc'])->name('resend_acc');
-
-        // --- RUTE PROSES LANJUTAN ---
         Route::put('/{id}/set-syarat', [VerifikasiController::class, 'setSyarat'])->name('set_syarat');
         Route::put('/{id}/process', [VerifikasiController::class, 'verifyProcess'])->name('process');
         Route::put('/{id}/kasubag-process', [VerifikasiController::class, 'kasubagProcess'])->name('kasubag_process');
