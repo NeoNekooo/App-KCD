@@ -77,7 +77,7 @@ class PegawaiKcdController extends Controller
                     
                     // 🔥 [FIX]: Role User mengikuti Input Jabatan dari Form
                     // Apapun yang dipilih (Kasubag, Staff, dll) akan masuk sini.
-                    'role'     => $request->jabatan, 
+                    'role'     => $request->jabatan === 'Administrator' ? 'Admin' : $request->jabatan, 
                 ]);
 
                 // 4. BUAT DATA PEGAWAI (BIODATA)
@@ -159,7 +159,7 @@ class PegawaiKcdController extends Controller
                     $userUpdate = [
                         'name' => $request->nama,
                         // 🔥 [FIX]: Update Role juga agar sinkron dengan Jabatan baru
-                        'role' => $request->jabatan 
+                        'role' => $request->jabatan === 'Administrator' ? 'Admin' : $request->jabatan 
                     ];
 
                     if ($request->email_pribadi) {
