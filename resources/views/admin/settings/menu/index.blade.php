@@ -305,20 +305,24 @@
         document.getElementById('urutan').value = menu.urutan;
         document.getElementById('parent_id').value = menu.parent_id || "";
 
-        if(menu.icon) document.getElementById('iconPreviewAddon').innerHTML = `<i class='${menu.icon}'></i>`;
+        if(menu.icon) {
+            document.getElementById('iconPreviewAddon').innerHTML = `<i class='${menu.icon}'></i>`;
+        } else {
+            document.getElementById('iconPreviewAddon').innerHTML = `<i class='bx bx-cube'></i>`;
+        }
 
         document.getElementById('is_header').checked = menu.is_header == 1;
         toggleHeaderFields();
+        toggleIconField(); // Adjust icon field visibility
 
         // Checkbox Role Logic
         document.querySelectorAll('.role-check').forEach(el => el.checked = false);
         roles.forEach(roleName => {
-            // Karena value-nya 'Admin' (dari Controller), maka dia nyari checkbox dgn value 'Admin'
             let chk = document.querySelector(`input[value="${roleName}"]`);
             if(chk) chk.checked = true;
         });
 
-        document.getElementById('menuForm').scrollIntoView({ behavior: 'smooth' });
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     // --- RESET FORM ---
@@ -330,6 +334,26 @@
         document.getElementById('menuForm').reset();
         document.getElementById('iconPreviewAddon').innerHTML = "<i class='bx bx-cube'></i>";
         toggleHeaderFields();
+        toggleIconField(); // Adjust icon field visibility
     }
+
+    // --- HIDE/SHOW ICON FIELD BASED ON PARENT ---
+    function toggleIconField() {
+        const parentId = document.getElementById('parent_id').value;
+        const iconField = document.querySelector('#icon').closest('.mb-3');
+
+        if (parentId) { // If a parent is selected, it's a submenu, so hide icon.
+            iconField.style.display = 'none';
+            document.getElementById('icon').value = null; 
+        } else { // If it's a top-level menu, show icon.
+            iconField.style.display = 'block';
+        }
+    }
+
+    // --- INITIALIZE ---
+    document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('parent_id').addEventListener('change', toggleIconField);
+        toggleIconField(); // Initial check
+    });
 </script>
 @endsection

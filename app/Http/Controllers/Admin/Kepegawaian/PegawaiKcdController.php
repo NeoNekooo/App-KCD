@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin\Kepegawaian;
 
 use App\Http\Controllers\Controller;
+use App\Models\JabatanKcd;
 use App\Models\PegawaiKcd;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -14,11 +15,28 @@ use Illuminate\Support\Facades\Storage;
 
 class PegawaiKcdController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $pegawais = PegawaiKcd::with('user')->latest()->paginate(10);
-        // ✅ [FIX]: Path View Sesuai Request (admin.kepegawaian_kcd.index)
-        return view('admin.kepegawaian_kcd.index', compact('pegawais'));
+        $query = PegawaiKcd::with('user', 'jabatanKcd');
+
+        // Logic Sorting
+        switch ($request->get('sort')) {
+            case 'alpha':
+                $query->orderBy('nama', 'asc');
+                break;
+            case 'latest':
+                $query->orderBy('created_at', 'desc');
+                break;
+            default:
+                // Default sorting (terlama)
+                $query->orderBy('created_at', 'asc');
+                break;
+        }
+
+        $pegawais = $query->paginate(10)->appends($request->query());
+        $jabatans = JabatanKcd::all();
+
+        return view('admin.kepegawaian_kcd.index', compact('pegawais', 'jabatans', 'request'));
     }
 
     public function showMe()
@@ -38,7 +56,7 @@ class PegawaiKcdController extends Controller
     {
         $request->validate([
             'nama'          => 'required|string|max:255',
-            'jabatan'       => 'required|string',
+            'jabatan_kcd_id' => 'required|exists:jabatan_kcd,id',
             'nip'           => 'nullable|string|max:50|unique:pegawai_kcds,nip',
             'nik'           => 'nullable|numeric|digits:16|unique:pegawai_kcds,nik',
             'jenis_kelamin' => 'required|in:L,P',
@@ -54,6 +72,8 @@ class PegawaiKcdController extends Controller
         try {
             DB::transaction(function () use ($request) {
                 
+                $jabatan = JabatanKcd::find($request->jabatan_kcd_id);
+
                 // 1. Handle Upload Foto
                 $fotoPath = null;
                 if ($request->hasFile('foto')) {
@@ -74,10 +94,7 @@ class PegawaiKcdController extends Controller
                     'username' => $username,
                     'email'    => $emailLogin,
                     'password' => Hash::make($passwordFix),
-                    
-                    // 🔥 [FIX]: Role User mengikuti Input Jabatan dari Form
-                    // Apapun yang dipilih (Kasubag, Staff, dll) akan masuk sini.
-                    'role'     => $request->jabatan === 'Administrator' ? 'Admin' : $request->jabatan, 
+                    'role'     => $jabatan->role, 
                 ]);
 
                 // 4. BUAT DATA PEGAWAI (BIODATA)
@@ -86,7 +103,8 @@ class PegawaiKcdController extends Controller
                     'nama'          => $request->nama,
                     'nip'           => $request->nip,
                     'nik'           => $request->nik,
-                    'jabatan'       => $request->jabatan,
+                    'jabatan'       => $jabatan->nama, // backward compatibility
+                    'jabatan_kcd_id' => $jabatan->id,
                     'jenis_kelamin' => $request->jenis_kelamin,
                     'tempat_lahir'  => $request->tempat_lahir,
                     'tanggal_lahir' => $request->tanggal_lahir,
@@ -100,7 +118,8 @@ class PegawaiKcdController extends Controller
                 $user->update(['pegawai_kcd_id' => $pegawai->id]);
             });
 
-            return back()->with('success', "Pegawai berhasil dibuat dengan Role: " . $request->jabatan);
+            $jabatan = JabatanKcd::find($request->jabatan_kcd_id);
+            return back()->with('success', "Pegawai berhasil dibuat dengan Role: " . $jabatan->role);
 
         } catch (\Exception $e) {
             return back()->with('error', 'Gagal: ' . $e->getMessage())->withInput();
@@ -133,7 +152,7 @@ class PegawaiKcdController extends Controller
             'nama'          => 'required|string|max:255',
             'nik'           => 'nullable|numeric|digits:16|unique:pegawai_kcds,nik,' . $id,
             'nip'           => 'nullable|string|max:50|unique:pegawai_kcds,nip,' . $id,
-            'jabatan'       => 'required|string',
+            'jabatan_kcd_id' => 'required|exists:jabatan_kcd,id',
             'foto'          => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
             'password'      => 'nullable|string|min:6', 
         ]);
@@ -141,7 +160,10 @@ class PegawaiKcdController extends Controller
         try {
             DB::transaction(function () use ($request, $pegawai) {
                 
-                $dataUpdate = $request->except(['foto', 'password']); 
+                $jabatan = JabatanKcd::find($request->jabatan_kcd_id);
+                $dataUpdate = $request->except(['foto', 'password', 'jabatan']); 
+                $dataUpdate['jabatan_kcd_id'] = $jabatan->id;
+                $dataUpdate['jabatan'] = $jabatan->nama; // Backward compatibility
 
                 // 1. Handle Ganti Foto
                 if ($request->hasFile('foto')) {
@@ -158,8 +180,7 @@ class PegawaiKcdController extends Controller
                 if ($pegawai->user) {
                     $userUpdate = [
                         'name' => $request->nama,
-                        // 🔥 [FIX]: Update Role juga agar sinkron dengan Jabatan baru
-                        'role' => $request->jabatan === 'Administrator' ? 'Admin' : $request->jabatan 
+                        'role' => $jabatan->role
                     ];
 
                     if ($request->email_pribadi) {

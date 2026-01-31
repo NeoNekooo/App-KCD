@@ -9,29 +9,24 @@ use Illuminate\Support\Facades\DB;
 
 class RoleAccessController extends Controller
 {
-    // 🔥 DAFTAR ROLE PASTI (Hardcode)
-    // Jadi tab-nya bakal selalu muncul, siap disetting kapan aja.
-    private $roles = [
-        'Admin',       // Sesuai Seeder terakhir
-        'Kepala',
-        'Kasubag',
-        'Kepegawaian',
-        'Kesiswaan',
-        'Sarpras',
-        'Divisi IT',
-        'Staff'
-    ];
-
     public function index()
     {
-        // 1. Ambil Menu (Urut dari atas ke bawah)
+        // 1. Ambil Role secara dinamis dari Jabatan yang ada
+        $dbRoles = DB::table('jabatan_kcd')->select('role')->distinct()->pluck('role')->toArray();
+        
+        // 2. Gabungkan dengan role default & pastikan unik
+        $defaultRoles = ['Admin']; // Role super admin yang mungkin tidak ada di tabel jabatan
+        $allRoles = array_unique(array_merge($defaultRoles, $dbRoles));
+        sort($allRoles); // Urutkan alphabet
+
+        // 3. Ambil Menu (Urut dari atas ke bawah)
         $menus = Menu::orderBy('urutan', 'asc')->get();
 
-        // 2. Ambil data akses yang sudah tersimpan di database
+        // 4. Ambil data akses yang sudah tersimpan di database
         $allAccess = DB::table('menu_accesses')->get();
         
         $currentAccess = [];
-        foreach ($this->roles as $role) {
+        foreach ($allRoles as $role) {
             // Kita cari apakah role ini sudah punya akses di database
             // Pakai strtolower biar pencariannya tidak sensitif huruf besar/kecil
             $roleIds = $allAccess->filter(function($item) use ($role) {
@@ -41,9 +36,9 @@ class RoleAccessController extends Controller
             $currentAccess[$role] = $roleIds;
         }
 
-        // Kirim $this->roles ke view biar jadi Tab
+        // Kirim roles dinamis ke view biar jadi Tab
         return view('admin.settings.role_access.index', [
-            'roles' => $this->roles, 
+            'roles' => $allRoles, 
             'menus' => $menus,
             'currentAccess' => $currentAccess
         ]);

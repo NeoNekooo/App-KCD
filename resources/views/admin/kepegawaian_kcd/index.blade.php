@@ -48,11 +48,25 @@
             {{-- Header: Search & Buttons --}}
             <div class="card-header bg-white py-3 border-bottom">
                 <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
-                    <div class="input-group input-group-merge rounded-pill" style="max-width: 300px;">
-                        <span class="input-group-text border-light bg-light ps-3"><i
-                                class="bx bx-search text-muted"></i></span>
-                        <input type="text" class="form-control border-light bg-light shadow-none"
-                            placeholder="Cari Pegawai..." id="searchPegawai">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="input-group input-group-merge rounded-pill" style="max-width: 300px;">
+                            <span class="input-group-text border-light bg-light ps-3"><i
+                                    class="bx bx-search text-muted"></i></span>
+                            <input type="text" class="form-control border-light bg-light shadow-none"
+                                placeholder="Cari Pegawai..." id="searchPegawai">
+                        </div>
+
+                        {{-- Tombol Sorting --}}
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-label-secondary rounded-pill dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bx bx-sort-down me-1"></i> Urutkan
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0">
+                                <li><a class="dropdown-item {{ !$request->get('sort') || $request->get('sort') == 'oldest' ? 'active' : '' }}" href="{{ route('admin.kepegawaian.index', ['sort' => 'oldest']) }}">Terlama</a></li>
+                                <li><a class="dropdown-item {{ $request->get('sort') == 'latest' ? 'active' : '' }}" href="{{ route('admin.kepegawaian.index', ['sort' => 'latest']) }}">Terbaru</a></li>
+                                <li><a class="dropdown-item {{ $request->get('sort') == 'alpha' ? 'active' : '' }}" href="{{ route('admin.kepegawaian.index', ['sort' => 'alpha']) }}">Nama [A-Z]</a></li>
+                            </ul>
+                        </div>
                     </div>
 
                     <div class="d-flex gap-2">
@@ -77,7 +91,7 @@
                             <th class="py-3 text-uppercase small fw-bold text-muted">Jabatan</th>
                             <th class="py-3 text-uppercase small fw-bold text-muted">Kontak</th>
                             <th class="py-3 text-uppercase small fw-bold text-muted">Akun Login</th>
-                            <th class="pe-4 py-3 text-end text-uppercase small fw-bold text-muted">Opsi</th>
+                            <th class="py-3 text-uppercase small fw-bold text-muted text-center">Aksi</th>
                         </tr>
                     </thead>
                     <tbody class="bg-white">
@@ -113,7 +127,7 @@
                                 <td>
                                     <span class="badge bg-label-info rounded px-2 text-uppercase fw-bold"
                                         style="font-size: 0.65rem;">
-                                        {{ $item->jabatan }}
+                                        {{ $item->jabatanKcd->nama ?? $item->jabatan }}
                                     </span>
                                 </td>
 
@@ -143,41 +157,35 @@
                                     @endif
                                 </td>
 
-                                {{-- Opsi --}}
-                                <td class="pe-4 text-end">
-                                    <div class="dropdown">
-                                        <button type="button"
-                                            class="btn btn-sm btn-icon btn-light rounded-circle shadow-sm dropdown-toggle hide-arrow"
-                                            data-bs-toggle="dropdown">
-                                            <i class="bx bx-dots-vertical-rounded text-muted"></i>
+                                {{-- Aksi --}}
+                                <td class="text-center">
+                                    <div class="d-flex justify-content-center gap-1">
+                                        <a href="{{ route('admin.kepegawaian.show', $item->id) }}"
+                                            class="btn btn-xs btn-icon btn-label-primary" title="Detail Profil">
+                                            <i class="bx bx-show"></i>
+                                        </a>
+                                        <button type="button" class="btn btn-xs btn-icon btn-label-warning"
+                                            data-bs-toggle="modal" data-bs-target="#modalEdit{{ $item->id }}"
+                                            title="Edit Cepat">
+                                            <i class="bx bx-edit-alt"></i>
                                         </button>
-                                        <div class="dropdown-menu dropdown-menu-end border-0 shadow-lg p-1">
-                                            <a class="dropdown-item py-2 small"
-                                                href="{{ route('admin.kepegawaian.show', $item->id) }}">
-                                                <i class="bx bx-show me-2 text-primary"></i> Detail Profil
-                                            </a>
-                                            <a class="dropdown-item py-2 small" href="javascript:void(0);"
-                                                data-bs-toggle="modal" data-bs-target="#modalEdit{{ $item->id }}">
-                                                <i class="bx bx-edit-alt me-2 text-warning"></i> Edit Cepat
-                                            </a>
-                                            <div class="dropdown-divider my-1"></div>
-                                            <form action="{{ route('admin.kepegawaian.reset', $item->id) }}" method="POST"
-                                                class="d-inline">
-                                                @csrf @method('PUT')
-                                                <button type="submit" class="dropdown-item py-2 small"
-                                                    onclick="return confirm('Reset password jadi kcd123?')">
-                                                    <i class="bx bx-key me-2 text-info"></i> Reset Pass
-                                                </button>
-                                            </form>
-                                            <form action="{{ route('admin.kepegawaian.destroy', $item->id) }}"
-                                                method="POST" class="d-inline">
-                                                @csrf @method('DELETE')
-                                                <button type="submit" class="dropdown-item py-2 small text-danger"
-                                                    onclick="return confirm('Hapus permanen?')">
-                                                    <i class="bx bx-trash me-2"></i> Hapus
-                                                </button>
-                                            </form>
-                                        </div>
+                                        <form action="{{ route('admin.kepegawaian.reset', $item->id) }}" method="POST"
+                                            class="d-inline">
+                                            @csrf @method('PUT')
+                                            <button type="submit" class="btn btn-xs btn-icon btn-label-info"
+                                                title="Reset Password"
+                                                onclick="return confirm('Reset password jadi kcd123?')">
+                                                <i class="bx bx-key"></i>
+                                            </button>
+                                        </form>
+                                        <form action="{{ route('admin.kepegawaian.destroy', $item->id) }}" method="POST"
+                                            class="d-inline">
+                                            @csrf @method('DELETE')
+                                            <button type="submit" class="btn btn-xs btn-icon btn-label-danger"
+                                                title="Hapus Permanen" onclick="return confirm('Hapus permanen?')">
+                                                <i class="bx bx-trash"></i>
+                                            </button>
+                                        </form>
                                     </div>
 
                                     {{-- MODAL EDIT CEPAT --}}
@@ -208,11 +216,11 @@
                                                             </div>
                                                             <div class="col-6">
                                                                 <label class="form-label small fw-bold">Jabatan</label>
-                                                                <select name="jabatan" class="form-select" required>
-                                                                    @foreach (['Administrator', 'Kepala', 'Kasubag', 'Kepegawaian', 'Kesiswaan', 'Sarpras', 'Divisi IT', 'Staff'] as $jab)
-                                                                        <option value="{{ $jab }}"
-                                                                            {{ $item->jabatan == $jab ? 'selected' : '' }}>
-                                                                            {{ $jab }}</option>
+                                                                <select name="jabatan_kcd_id" class="form-select" required>
+                                                                    @foreach ($jabatans as $jab)
+                                                                        <option value="{{ $jab->id }}"
+                                                                            {{ $item->jabatan_kcd_id == $jab->id ? 'selected' : '' }}>
+                                                                            {{ $jab->nama }}</option>
                                                                     @endforeach
                                                                 </select>
                                                             </div>
@@ -287,16 +295,11 @@
                             <div class="col-md-6">
                                 <label class="form-label small fw-bold text-muted">Jabatan <span
                                         class="text-danger">*</span></label>
-                                <select name="jabatan" class="form-select" required>
+                                <select name="jabatan_kcd_id" class="form-select" required>
                                     <option value="">-- Pilih --</option>
-                                    <option value="Administrator">Administrator</option>
-                                    <option value="Kepala">Kepala</option>
-                                    <option value="Kasubag">Kasubag</option>
-                                    <option value="Kepegawaian">Kepegawaian</option>
-                                    <option value="Kesiswaan">Kesiswaan</option>
-                                    <option value="Sarpras">Sarpras</option>
-                                    <option value="Divisi IT">Divisi IT</option>
-                                    <option value="Staff">Staff</option>
+                                    @foreach ($jabatans as $jab)
+                                    <option value="{{ $jab->id }}">{{ $jab->nama }}</option>
+                                    @endforeach
                                 </select>
                             </div>
                             <div class="col-md-6">
@@ -385,44 +388,6 @@
             });
         });
     </script>
-
-    <style>
-        .table-responsive {
-            overflow-x: auto;
-        }
-
-        .text-truncate {
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-
-        tr.border-bottom {
-            border-bottom: 1px solid #f1f3f5 !important;
-        }
-
-        .hover-bg-soft:hover {
-            background-color: #fafbfc !important;
-        }
-
-        .small-pagination .pagination {
-            margin-bottom: 0;
-        }
-
-        .small-pagination .page-link {
-            padding: 0.25rem 0.5rem;
-            font-size: 0.8rem;
-        }
-
-        .avatar-initial {
-            display: flex !important;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .hover-primary:hover {
-            color: #696cff !important;
-            text-decoration: underline !important;
-        }
-    </style>
 @endsection
+
+

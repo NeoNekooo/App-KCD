@@ -18,6 +18,7 @@ class PegawaiKcd extends Model
         'nik', 
         'nip', 
         'jabatan', 
+        'jabatan_kcd_id',
         'tempat_lahir', 
         'tanggal_lahir', 
         'jenis_kelamin', 
@@ -35,5 +36,11 @@ class PegawaiKcd extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    // Relasi ke Jabatan KCD
+    public function jabatanKcd()
+    {
+        return $this->belongsTo(JabatanKcd::class);
     }
 }

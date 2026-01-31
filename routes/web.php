@@ -11,6 +11,7 @@ use App\Http\Controllers\CetakSkController;
 // --- Controller Internal KCD ---
 use App\Http\Controllers\Admin\Kepegawaian\PegawaiKcdController;
 use App\Http\Controllers\Admin\Kepegawaian\TugasPegawaiKcdController;
+use App\Http\Controllers\Admin\JabatanKcdController;
 
 // --- Controller Monitoring ---
 use App\Http\Controllers\Admin\Sekolah\SekolahController as SekolahMonitoringController;
@@ -93,6 +94,11 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
             Route::delete('/{id}', 'destroy')->name('destroy');
             Route::put('/{id}/reset', 'resetPassword')->name('reset');
         });
+    });
+
+    // C. Pengaturan Jabatan KCD
+    Route::group(['prefix' => 'kepegawaian_kcd', 'as' => 'kepegawaian_kcd.', 'middleware' => 'check_menu:kepegawaian-jabatan'], function() {
+        Route::resource('jabatan', JabatanKcdController::class)->except(['show']);
     });
 
     /*
