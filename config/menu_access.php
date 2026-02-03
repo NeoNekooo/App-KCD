@@ -95,7 +95,7 @@ return [
             'title' => 'Profil Saya',
             'slug'  => 'profil-saya',
             'icon'  => 'bx bxs-user-detail', 
-            'route' => 'admin.kepegawaian.me', 
+            'route' => 'admin.profil-saya.show', 
         ],
 
         // 3. PROFIL INSTANSI

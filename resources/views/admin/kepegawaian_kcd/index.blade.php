@@ -342,7 +342,7 @@
                     <h6 class="modal-title fw-bold">Ganti Password</h6>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <form action="{{ route('admin.kepegawaian.change-password') }}" method="POST">
+                <form action="{{ route('admin.profil-saya.change-password') }}" method="POST">
                     @csrf @method('PUT')
                     <div class="modal-body p-4">
                         <div class="mb-3">

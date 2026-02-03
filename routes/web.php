@@ -9,6 +9,7 @@ use App\Http\Controllers\InstansiController;
 use App\Http\Controllers\CetakSkController;
 
 // --- Controller Internal KCD ---
+use App\Http\Controllers\Admin\MyProfileController;
 use App\Http\Controllers\Admin\Kepegawaian\PegawaiKcdController;
 use App\Http\Controllers\Admin\Kepegawaian\TugasPegawaiKcdController;
 use App\Http\Controllers\Admin\JabatanKcdController;
@@ -81,12 +82,15 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
             Route::delete('/{id}', 'destroy')->name('destroy');
         });
 
-    // B. Data Pegawai Internal
-    Route::prefix('kepegawaian')->name('kepegawaian.')->controller(PegawaiKcdController::class)->group(function() {
-        Route::get('/profil-saya', 'showMe')->name('me');
+    // B. My Profile (Separated)
+    Route::prefix('profil-saya')->name('profil-saya.')->middleware('auth')->controller(MyProfileController::class)->group(function() {
+        Route::get('/', 'show')->name('show');
+        Route::put('/', 'update')->name('update');
         Route::put('/change-password', 'changePassword')->name('change-password');
-        Route::put('/{id}', 'update')->name('update');
-        
+    });
+
+    // C. Data Pegawai Internal (Admin-only)
+    Route::prefix('kepegawaian')->name('kepegawaian.')->controller(PegawaiKcdController::class)->group(function() {
         Route::middleware('check_menu:kepegawaian-data')->group(function() {
             Route::get('/', 'index')->name('index');
             Route::post('/', 'store')->name('store');
@@ -96,7 +100,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
         });
     });
 
-    // C. Pengaturan Jabatan KCD
+    // D. Pengaturan Jabatan KCD
     Route::group(['prefix' => 'kepegawaian_kcd', 'as' => 'kepegawaian_kcd.', 'middleware' => 'check_menu:kepegawaian-jabatan'], function() {
         Route::resource('jabatan', JabatanKcdController::class)->except(['show']);
     });

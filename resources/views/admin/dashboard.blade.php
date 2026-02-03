@@ -259,7 +259,7 @@
                                     class="btn btn-primary px-4 shadow-sm hover-up">
                                     <i class='bx bx-task me-2'></i> Mulai Tugas
                                 </a>
-                                <a href="{{ route('admin.kepegawaian.me') }}"
+                                <a href="{{ route('admin.profil-saya.show') }}"
                                     class="btn btn-outline-secondary px-4 hover-up">
                                     <i class='bx bx-user me-2'></i> Profil Saya
                                 </a>
