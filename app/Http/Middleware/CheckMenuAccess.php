@@ -43,9 +43,8 @@ class CheckMenuAccess
         }
 
         // ==================================================================
-        // B. FILTER TAMBAHAN: BERLAKU UNTUK SEMUA ROLE KECUALI ADMIN
-        // ==================================================================
-        if (!in_array($role, ['admin', 'administrator'])) {
+        // B. FILTER TAMBAHAN: HANYA BERLAKU UNTUK ROLE PEGAWAI (atau role spesifik lainnya)
+        if (!in_array($role, ['admin', 'administrator', 'kepala', 'kasubag'])) {
             
             // Mapping dari kategori di DB ke slug menu (dipindahkan ke sini agar bisa dipakai lebih awal)
             $mapKategoriToSlug = [
