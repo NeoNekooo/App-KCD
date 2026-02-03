@@ -129,85 +129,108 @@ class PegawaiKcdController extends Controller
     public function show($id)
     {
         $pegawai = PegawaiKcd::with('user')->findOrFail($id);
-        
+        $jabatans = JabatanKcd::all();
+
         // Validasi Akses: Hanya Admin atau pemilik data yang boleh lihat
         if (Auth::user()->role !== 'Admin' && $pegawai->user_id !== Auth::id()) {
             abort(403, 'Anda tidak memiliki akses ke profil ini.');
         }
 
-        return view('admin.kepegawaian_kcd.show', compact('pegawai'));
+        return view('admin.kepegawaian_kcd.show', compact('pegawai', 'jabatans'));
     }
 
     // --- UPDATE: EDIT DATA ---
-    public function update(Request $request, $id)
-    {
-        $pegawai = PegawaiKcd::findOrFail($id);
-
-        // Validasi Akses
-        if (Auth::user()->role !== 'Admin' && $pegawai->user_id !== Auth::id()) {
-            abort(403, 'Akses Ditolak.');
-        }
-
-        $request->validate([
-            'nama'          => 'required|string|max:255',
-            'nik'           => 'nullable|numeric|digits:16|unique:pegawai_kcds,nik,' . $id,
-            'nip'           => 'nullable|string|max:50|unique:pegawai_kcds,nip,' . $id,
-            'jabatan_kcd_id' => 'required|exists:jabatan_kcd,id',
-            'foto'          => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
-            'password'      => 'nullable|string|min:6', 
-        ]);
-
-        try {
-            DB::transaction(function () use ($request, $pegawai) {
-                
-                $jabatan = JabatanKcd::find($request->jabatan_kcd_id);
-                $dataUpdate = $request->except(['foto', 'password', 'jabatan']); 
-                $dataUpdate['jabatan_kcd_id'] = $jabatan->id;
-                $dataUpdate['jabatan'] = $jabatan->nama; // Backward compatibility
-
-                // 1. Handle Ganti Foto
-                if ($request->hasFile('foto')) {
-                    if ($pegawai->foto && Storage::disk('public')->exists($pegawai->foto)) {
-                        Storage::disk('public')->delete($pegawai->foto);
-                    }
-                    $dataUpdate['foto'] = $request->file('foto')->store('foto_pegawai', 'public');
+        public function update(Request $request, $id)
+        {
+            $pegawai = PegawaiKcd::findOrFail($id);
+    
+            // Validasi Akses
+            if (Auth::user()->role !== 'Admin' && $pegawai->user_id !== Auth::id()) {
+                abort(403, 'Akses Ditolak.');
+            }
+    
+            $rules = [
+                'nama'          => 'required|string|max:255',
+                'nik'           => 'nullable|numeric|digits:16|unique:pegawai_kcds,nik,' . $id,
+                'foto'          => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+                'password'      => 'nullable|string|min:6',
+            ];
+    
+            if (Auth::user()->role === 'Admin') {
+                $rules['nip'] = 'nullable|string|max:50|unique:pegawai_kcds,nip,' . $id;
+                $rules['jabatan_kcd_id'] = 'required|exists:jabatan_kcd,id';
+            }
+    
+            $validator = \Illuminate\Support\Facades\Validator::make($request->all(), $rules);
+    
+            if ($validator->fails()) {
+                if ($validator->errors()->has('nik')) {
+                    $nikError = $validator->errors()->first('nik');
+                    return redirect()->back()->withInput()->with('error', $nikError);
                 }
-
-                // 2. Update Data Pegawai
-                $pegawai->update($dataUpdate);
-
-                // 3. Update Akun User (Sinkronisasi)
-                if ($pegawai->user) {
-                    $userUpdate = [
-                        'name' => $request->nama,
-                        'role' => $jabatan->role
+                return redirect()->back()->withErrors($validator)->withInput();
+            }
+    
+            try {
+                DB::transaction(function () use ($request, $pegawai) {
+                    
+                    $allowedFields = [
+                        'nama', 'email_pribadi', 'no_hp', 'alamat', 'nik', 'jenis_kelamin', 'tempat_lahir', 'tanggal_lahir'
                     ];
-
-                    if ($request->email_pribadi) {
-                        $userUpdate['email'] = $request->email_pribadi;
+                    $dataUpdate = $request->only($allowedFields);
+    
+                    // 1. Handle Ganti Foto
+                    if ($request->hasFile('foto')) {
+                        if ($pegawai->foto && Storage::disk('public')->exists($pegawai->foto)) {
+                            Storage::disk('public')->delete($pegawai->foto);
+                        }
+                        $dataUpdate['foto'] = $request->file('foto')->store('foto_pegawai', 'public');
                     }
-
-                    // Update Username jika NIP berubah (Khusus Admin)
-                    if (Auth::user()->role === 'Admin' && $request->nip) {
-                        $userUpdate['username'] = $request->nip;
+    
+                    // Update protected fields only if Admin
+                    if (Auth::user()->role === 'Admin') {
+                        $jabatan = JabatanKcd::find($request->jabatan_kcd_id);
+                        $dataUpdate['jabatan_kcd_id'] = $jabatan->id;
+                        $dataUpdate['jabatan'] = $jabatan->nama; 
+                        $dataUpdate['nip'] = $request->nip;
                     }
-
-                    // Update Password jika diisi
-                    if ($request->filled('password')) {
-                        $userUpdate['password'] = Hash::make($request->password);
+    
+                    // 2. Update Data Pegawai
+                    $pegawai->update($dataUpdate);
+    
+                    // 3. Update Akun User (Sinkronisasi)
+                    if ($pegawai->user) {
+                        $userUpdate = [
+                            'name' => $request->nama,
+                        ];
+    
+                        if (Auth::user()->role === 'Admin') {
+                            $jabatan = JabatanKcd::find($request->jabatan_kcd_id);
+                            $userUpdate['role'] = $jabatan->role;
+                            if ($request->nip) {
+                                $userUpdate['username'] = $request->nip;
+                            }
+                        }
+    
+                        if ($request->email_pribadi) {
+                            $userUpdate['email'] = $request->email_pribadi;
+                        }
+    
+                        // Update Password jika diisi
+                        if ($request->filled('password')) {
+                            $userUpdate['password'] = Hash::make($request->password);
+                        }
+    
+                        $pegawai->user->update($userUpdate);
                     }
-
-                    $pegawai->user->update($userUpdate);
-                }
-            });
-
-            return back()->with('success', 'Data Profil & Akun berhasil diperbarui.');
-
-        } catch (\Exception $e) {
-            return back()->with('error', 'Gagal update: ' . $e->getMessage());
+                });
+    
+                return back()->with('success', 'Data Profil & Akun berhasil diperbarui.');
+    
+            } catch (\Exception $e) {
+                return back()->with('error', 'Gagal update: ' . $e->getMessage());
+            }
         }
-    }
-
     public function destroy($id)
     {
         if (Auth::user()->role !== 'Admin') {

@@ -9,6 +9,22 @@
     </h4>
 
     {{-- FORM WRAPPER (Membungkus seluruh halaman agar bisa di-submit) --}}
+    
+    {{-- Display Validation Errors --}}
+    @if ($errors->any())
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <h4 class="alert-heading"><i class="bx bx-error-alt me-2"></i> Gagal Menyimpan Data!</h4>
+            <p>Terdapat beberapa kesalahan pada input yang Anda masukkan. Silakan periksa kembali di bawah:</p>
+            <hr>
+            <ul>
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
+
     <form action="{{ route('admin.kepegawaian.update', $pegawai->id) }}" method="POST" enctype="multipart/form-data"
         id="formProfil">
         @csrf @method('PUT')
@@ -330,12 +346,12 @@
                                         {{-- TAMPILAN EDIT MODE --}}
                                         @if (Auth::user()->role === 'Admin')
                                             {{-- Jika Admin: Bisa Edit (Select Option) --}}
-                                            <select name="jabatan"
+                                            <select name="jabatan_kcd_id"
                                                 class="form-select border-0 p-0 edit-element d-none fw-semibold">
-                                                @foreach (['Administrator', 'Kepala', 'Kasubag', 'Kepegawaian', 'Kesiswaan', 'Sarpras', 'Divisi IT', 'Staff'] as $jab)
-                                                    <option value="{{ $jab }}"
-                                                        {{ $pegawai->jabatan == $jab ? 'selected' : '' }}>
-                                                        {{ $jab }}</option>
+                                                @foreach ($jabatans as $jab)
+                                                    <option value="{{ $jab->id }}"
+                                                        {{ $pegawai->jabatan_kcd_id == $jab->id ? 'selected' : '' }}>
+                                                        {{ $jab->nama }}</option>
                                                 @endforeach
                                             </select>
                                         @else

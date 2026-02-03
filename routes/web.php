@@ -83,14 +83,14 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
 
     // B. Data Pegawai Internal
     Route::prefix('kepegawaian')->name('kepegawaian.')->controller(PegawaiKcdController::class)->group(function() {
+        Route::get('/profil-saya', 'showMe')->name('me');
+        Route::put('/change-password', 'changePassword')->name('change-password');
+        Route::put('/{id}', 'update')->name('update');
+        
         Route::middleware('check_menu:kepegawaian-data')->group(function() {
-            Route::get('/profil-saya', 'showMe')->name('me');
-            Route::put('/change-password', 'changePassword')->name('change-password');
-            
             Route::get('/', 'index')->name('index');
             Route::post('/', 'store')->name('store');
             Route::get('/{id}', 'show')->name('show');
-            Route::put('/{id}', 'update')->name('update');
             Route::delete('/{id}', 'destroy')->name('destroy');
             Route::put('/{id}/reset', 'resetPassword')->name('reset');
         });
@@ -216,7 +216,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
     |--------------------------------------------------------------------------
     */
     Route::prefix('settings')->name('settings.')
-        ->middleware('check_menu:settings-menu')
+        ->middleware('is_admin')
         ->group(function() {
             Route::resource('menus', MenuManagementController::class)->except(['show']);
             Route::get('role-access', [RoleAccessController::class, 'index'])->name('role-access.index');
