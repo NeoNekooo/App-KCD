@@ -95,6 +95,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
             Route::get('/', 'index')->name('index');
             Route::post('/', 'store')->name('store');
             Route::get('/{id}', 'show')->name('show');
+            Route::put('/{id}', 'update')->name('update'); // Re-added update route for other employees
             Route::delete('/{id}', 'destroy')->name('destroy');
             Route::put('/{id}/reset', 'resetPassword')->name('reset');
         });
