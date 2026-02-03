@@ -100,13 +100,9 @@ class CheckMenuAccess
                     return $mapKategoriToSlug[$kategori] ?? null;
                 })->filter()->all();
                 
-                // If user has general task access AND the current request is for general access verification page, allow
-                if ($hasGeneralTaskAccess && $slugToCheck === 'layanan-gtk-general-access') {
+                // If user has general task access OR the current request is for general access verification page, allow
+                if ($hasGeneralTaskAccess || $slugToCheck === 'layanan-gtk-general-access') {
                     return $next($request); 
-                } 
-                // If no general task access and trying to access general page, deny
-                elseif (!$hasGeneralTaskAccess && $slugToCheck === 'layanan-gtk-general-access') {
-                    abort(403, "AKSES DITOLAK. ANDA TIDAK MEMILIKI AKSES UMUM KE LAYANAN VERIFIKASI.");
                 } 
                 // If not general access check, and specific slug not in list, deny
                 elseif (!in_array($slugToCheck, $allowedSlugsFromTasks)) {
