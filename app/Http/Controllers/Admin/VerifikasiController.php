@@ -51,21 +51,9 @@ class VerifikasiController extends Controller
             if ($roleUser === 'kepegawaian') {
                 $allowedStatuses = ['Proses', 'Atur Syarat', 'Lengkapi Berkas', 'Verifikasi Berkas', 'Perlu Revisi', 'ACC', 'Selesai'];
             } elseif ($roleUser === 'kasubag') {
-                $allowedStatuses = [
-                    'Verifikasi Kasubag', // Items currently awaiting their approval
-                    'Verifikasi Berkas',  // Items sent back to staf for revision
-                    'Verifikasi Kepala',  // Items they have approved and forwarded
-                    'Perlu Revisi',       // Items previously rejected by staf, potentially needing Kasubag oversight
-                    'ACC',                // Items fully approved by Kepala
-                    'Selesai'             // Final completed status
-                ];
+                $allowedStatuses = ['Verifikasi Kasubag'];
             } elseif ($roleUser === 'kepala') {
-                $allowedStatuses = [
-                    'Verifikasi Kepala',  // Items currently awaiting their approval
-                    'Verifikasi Kasubag', // Items they have sent back for revision
-                    'ACC',                // Items they have fully approved
-                    'Selesai'             // Final completed status
-                ];
+                $allowedStatuses = ['Verifikasi Kepala'];
             } else {
                 // Untuk role lain (misal: Super Admin), tampilkan semua kecuali yang Ditolak Final
                 $allowedStatuses = ['Proses', 'Atur Syarat', 'Lengkapi Berkas', 'Verifikasi Berkas', 'Verifikasi Kasubag', 'Verifikasi Kepala', 'Perlu Revisi', 'ACC', 'Selesai'];
