@@ -97,6 +97,34 @@ class DashboardController extends Controller
 
             $data['chartCategories'] = $dataChart->pluck('kecamatan')->toArray(); 
             $data['chartData']       = $dataChart->pluck('total')->toArray();
+        } else { // Ini berarti $isPegawai
+            $data['verifikasiLink'] = route('admin.verifikasi.index'); // Default link
+            $data['kategoriTugasUser'] = []; // Default ke array kosong
+
+            if ($user->pegawai_kcd_id) {
+                $tugas = \App\Models\TugasPegawaiKcd::where('pegawai_kcd_id', $user->pegawai_kcd_id)
+                                                    ->where('is_active', 1)
+                                                    ->first();
+
+                if ($tugas) {
+                    $kategoriUser = $tugas->kategori_layanan; // Ini adalah array
+                    $data['kategoriTugasUser'] = $kategoriUser;
+
+                    // Cek untuk tugas akses umum
+                    $hasGeneralAccess = collect($kategoriUser)->contains(fn($k) => in_array(strtolower($k), ['umum', 'all']));
+
+                    if ($hasGeneralAccess) {
+                        $data['verifikasiLink'] = route('admin.verifikasi.index'); // Link ke halaman verifikasi umum
+                    } elseif (!empty($kategoriUser)) {
+                        // Jika ada tugas spesifik, gunakan yang pertama untuk tombol utama
+                        $firstKategori = $kategoriUser[0];
+                        $data['verifikasiLink'] = route('admin.verifikasi.index', ['kategori' => $firstKategori]);
+                    } else {
+                        // Tidak ada kategori spesifik dan tidak ada akses umum, fallback ke halaman verifikasi umum
+                        $data['verifikasiLink'] = route('admin.verifikasi.index'); 
+                    }
+                }
+            }
         }
 
         // 3. Return View dengan Data yang sudah disiapkan

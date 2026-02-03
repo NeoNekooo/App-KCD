@@ -40,10 +40,12 @@
                         
                         {{-- Kolom Kategori Layanan --}}
                         <td>
-                            @if($item->kategori_layanan)
-                                <span class="badge bg-label-primary">
-                                    {{ strtoupper(str_replace('-', ' ', $item->kategori_layanan)) }}
-                                </span>
+                            @if(!empty($item->kategori_layanan))
+                                @foreach($item->kategori_layanan as $kategori)
+                                    <span class="badge bg-label-primary me-1 mb-1">
+                                        {{ strtoupper(str_replace('-', ' ', $kategori)) }}
+                                    </span>
+                                @endforeach
                             @else
                                 <span class="text-muted small fst-italic">- Tugas Umum -</span>
                             @endif
@@ -101,15 +103,17 @@
 
                     {{-- 3. PILIH KATEGORI LAYANAN (PENTING) --}}
                     <div class="mb-3 p-3 bg-label-primary rounded">
-                        <label class="form-label fw-bold text-primary">Hak Akses Layanan (Spesifik)</label>
-                        <select name="kategori_layanan" class="form-select border-primary">
-                            <option value="">-- Tugas Umum / Tidak Ada --</option>
-                            @foreach($listKategori as $slug => $label)
-                                <option value="{{ $slug }}">{{ $label }}</option>
-                            @endforeach
-                        </select>
+                        <label class="form-label fw-bold text-primary mb-2">Hak Akses Layanan (Bisa lebih dari satu)</label>
+                        @foreach($listKategori as $slug => $label)
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="kategori_layanan[]" value="{{ $slug }}" id="kategori_{{ $slug }}">
+                                <label class="form-check-label" for="kategori_{{ $slug }}">
+                                    {{ $label }}
+                                </label>
+                            </div>
+                        @endforeach
                         <div class="form-text mt-2 small text-dark">
-                            <i class='bx bx-info-circle'></i> Jika dipilih, pegawai ini akan memiliki akses khusus untuk memverifikasi layanan tersebut.
+                            <i class='bx bx-info-circle'></i> Jika dipilih, pegawai ini akan memiliki akses khusus untuk memverifikasi layanan tersebut. Kosongkan jika ini tugas umum.
                         </div>
                     </div>
 

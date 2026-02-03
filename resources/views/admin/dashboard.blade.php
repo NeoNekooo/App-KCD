@@ -255,7 +255,7 @@
 
                             <div class="d-flex justify-content-center gap-3 mt-4">
                                 {{-- Tombol Pintas ke Layanan Verifikasi --}}
-                                <a href="{{ route('admin.verifikasi.index', ['kategori' => 'mutasi']) }}"
+                                <a href="{{ $verifikasiLink }}"
                                     class="btn btn-primary px-4 shadow-sm hover-up">
                                     <i class='bx bx-task me-2'></i> Mulai Tugas
                                 </a>

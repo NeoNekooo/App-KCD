@@ -29,7 +29,7 @@ class TugasPegawaiKcdController extends Controller
             'verifikasi-surat' => 'Verifikasi Surat Lainnya',
         ];
 
-        return view('admin.kepegawaian.tugas_kcd.index', compact('tugas', 'pegawais', 'listKategori'));
+        return view('admin.kepegawaian_kcd.tugas_kcd.index', compact('tugas', 'pegawais', 'listKategori'));
     }
 
     public function store(Request $request)
@@ -38,7 +38,7 @@ class TugasPegawaiKcdController extends Controller
         $validator = Validator::make($request->all(), [
             'pegawai_kcd_id'   => 'required|exists:pegawai_kcds,id',
             'nama_tugas'       => 'required|string|max:255',
-            'kategori_layanan' => 'nullable|string', // Boleh kosong
+            'kategori_layanan' => 'nullable|array', // Diubah menjadi array
             'no_sk'            => 'nullable|string',
         ]);
 
@@ -50,7 +50,7 @@ class TugasPegawaiKcdController extends Controller
             TugasPegawaiKcd::create([
                 'pegawai_kcd_id'   => $request->pegawai_kcd_id,
                 'nama_tugas'       => $request->nama_tugas,
-                'kategori_layanan' => $request->kategori_layanan,
+                'kategori_layanan' => $request->kategori_layanan, // Ini sudah array
                 'no_sk'            => $request->no_sk,
                 'deskripsi'        => $request->deskripsi,
                 'is_active'        => 1

@@ -78,10 +78,12 @@ class AppServiceProvider extends ServiceProvider
                 $baseQuery = PengajuanSekolah::whereIn('status', $targetStatus);
 
                 // Jika Staf memiliki spesialisasi tugas, batasi query hanya pada kategori tugasnya
-                if ($kategoriTugas) {
+                if ($kategoriTugas && is_array($kategoriTugas)) {
                     $baseQuery->where(function($q) use ($kategoriTugas) {
-                        $q->where('kategori', 'LIKE', '%' . $kategoriTugas . '%')
-                          ->orWhere('kategori', 'LIKE', '%' . str_replace('-', ' ', $kategoriTugas) . '%');
+                        foreach ($kategoriTugas as $kategori) {
+                            $q->orWhere('kategori', 'LIKE', '%' . $kategori . '%')
+                              ->orWhere('kategori', 'LIKE', '%' . str_replace('-', ' ', $kategori) . '%');
+                        }
                     });
                 }
 

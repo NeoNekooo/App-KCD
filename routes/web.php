@@ -83,10 +83,10 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
 
     // B. Data Pegawai Internal
     Route::prefix('kepegawaian')->name('kepegawaian.')->controller(PegawaiKcdController::class)->group(function() {
-        Route::get('/profil-saya', 'showMe')->name('me');
-        Route::put('/change-password', 'changePassword')->name('change-password');
-        
         Route::middleware('check_menu:kepegawaian-data')->group(function() {
+            Route::get('/profil-saya', 'showMe')->name('me');
+            Route::put('/change-password', 'changePassword')->name('change-password');
+            
             Route::get('/', 'index')->name('index');
             Route::post('/', 'store')->name('store');
             Route::get('/{id}', 'show')->name('show');

@@ -20,6 +20,10 @@ class TugasPegawaiKcd extends Model
         'is_active'
     ];
 
+    protected $casts = [
+        'kategori_layanan' => 'array',
+    ];
+
     // Relasi ke data Pegawai
     public function pegawai()
     {

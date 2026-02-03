@@ -6,6 +6,9 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Models\Sekolah;
+use App\Models\Siswa;
+use App\Models\Gtk;
+use App\Models\Rombel;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\SekolahExport;
 
@@ -90,45 +93,37 @@ class SekolahController extends Controller
         // 2. Ambil UUID Sekolah (Kunci Relasi di tabel penggunas)
         $uuidSekolah = $sekolah->sekolah_id;
 
-        // --- HITUNG STATISTIK ---
+        // --- HITUNG STATISTIK (using direct sekolah_id) ---
         
-        // A. HITUNG GURU
-        $totalGuru = DB::table('penggunas')
-            ->join('gtks', 'penggunas.ptk_id', '=', 'gtks.ptk_id')
-            ->where('penggunas.sekolah_id', $uuidSekolah)
-            ->where('gtks.jenis_ptk_id_str', 'like', '%Guru%') 
+        // A. HITUNG SISWA AKTIF
+        $totalSiswa = Siswa::where('sekolah_id', $uuidSekolah)
+            ->where('status', 'Aktif')
             ->count();
 
-        // B. HITUNG SISWA
-        $totalSiswa = DB::table('penggunas')
-            ->join('siswas', 'penggunas.peserta_didik_id', '=', 'siswas.peserta_didik_id')
-            ->where('penggunas.sekolah_id', $uuidSekolah)
-            ->where('siswas.status', 'Aktif')
+        // B. HITUNG GURU
+        $totalGuru = Gtk::where('sekolah_id', $uuidSekolah)
+            ->where('jenis_ptk_id_str', 'like', '%Guru%') 
             ->count();
 
         // C. HITUNG TENDIK
-        $totalTendik = DB::table('penggunas')
-            ->join('gtks', 'penggunas.ptk_id', '=', 'gtks.ptk_id')
-            ->where('penggunas.sekolah_id', $uuidSekolah)
+        $totalTendik = Gtk::where('sekolah_id', $uuidSekolah)
             ->where(function($q) {
-                $q->where('gtks.jenis_ptk_id_str', 'not like', '%Guru%')
-                  ->orWhereNull('gtks.jenis_ptk_id_str');
+                $q->where('jenis_ptk_id_str', 'not like', '%Guru%')
+                  ->orWhereNull('jenis_ptk_id_str');
             })
             ->count();
 
         // D. CARI KEPALA SEKOLAH
-        $kepalaSekolah = DB::table('penggunas')
-            ->join('gtks', 'penggunas.ptk_id', '=', 'gtks.ptk_id')
-            ->where('penggunas.sekolah_id', $uuidSekolah)
+        $kepalaSekolah = Gtk::where('sekolah_id', $uuidSekolah)
             ->where(function($query) {
-                $query->where('gtks.jenis_ptk_id_str', 'LIKE', '%Kepala Sekolah%')
-                      ->orWhere('gtks.jabatan_ptk_id_str', 'LIKE', '%Kepala Sekolah%'); 
+                $query->where('jenis_ptk_id_str', 'LIKE', '%Kepala Sekolah%')
+                      ->orWhere('jabatan_ptk_id_str', 'LIKE', '%Kepala Sekolah%'); 
             })
-            ->select('gtks.nama', 'gtks.nip', 'gtks.nuptk', 'gtks.no_hp')
+            ->select('nama', 'nip', 'nuptk', 'no_hp')
             ->first();
 
         // E. Total Rombel
-        $totalRombel = 0; 
+        $totalRombel = Rombel::where('sekolah_id', $uuidSekolah)->count(); 
 
         return view('admin.sekolah.show', compact(
             'sekolah', 'totalSiswa', 'totalGuru', 'totalTendik', 'totalRombel', 'kepalaSekolah'
@@ -143,3 +138,4 @@ class SekolahController extends Controller
         return Excel::download(new SekolahExport($request), 'Data_Satuan_Pendidikan.xlsx');
     }
 }
+
