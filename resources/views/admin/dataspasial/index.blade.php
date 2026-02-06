@@ -10,14 +10,15 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
 
     <style>
-        /* --- LAYOUT UTAMA --- */
+        /* --- MAP WRAPPER --- */
         #map-container {
             position: relative;
             border-radius: 20px;
             overflow: hidden;
-            box-shadow: 0 15px 35px rgba(50, 50, 93, 0.1), 0 5px 15px rgba(0, 0, 0, 0.07);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
             border: 4px solid #fff;
-            height: 75vh;
+            height: calc(100vh - 170px);
+            min-height: 500px;
             width: 100%;
         }
 
@@ -29,21 +30,21 @@
             font-family: 'Public Sans', sans-serif;
         }
 
-        /* --- GLASS UI --- */
+        /* --- UI ELEMENTS (GLASS EFFECT) --- */
         .glass {
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(8px);
             border: 1px solid rgba(255, 255, 255, 0.6);
-            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
         }
 
-        /* --- HUD --- */
+        /* --- HUD STATS (KIRI BAWAH) --- */
         .map-stats {
             position: absolute;
-            bottom: 30px;
+            bottom: 25px;
             left: 20px;
             z-index: 1000;
-            padding: 10px 20px;
+            padding: 8px 16px;
             border-radius: 50px;
             display: flex;
             align-items: center;
@@ -52,18 +53,18 @@
         }
 
         .stats-icon {
-            width: 36px;
-            height: 36px;
+            width: 34px;
+            height: 34px;
             background: linear-gradient(135deg, #696cff, #4e51e0);
             color: white;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 4px 10px rgba(105, 108, 255, 0.4);
+            box-shadow: 0 4px 8px rgba(105, 108, 255, 0.4);
         }
 
-        /* --- FAB MENU --- */
+        /* --- FAB MENU (KANAN ATAS) --- */
         .fab-container {
             position: absolute;
             top: 20px;
@@ -77,14 +78,14 @@
         }
 
         .btn-fab {
-            width: 48px;
-            height: 48px;
-            border-radius: 14px;
+            width: 45px;
+            height: 45px;
+            border-radius: 12px;
             border: none;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.3rem;
+            font-size: 1.2rem;
             color: #566a7f;
             cursor: pointer;
             transition: all 0.2s ease;
@@ -92,7 +93,7 @@
         }
 
         .btn-fab:hover {
-            transform: translateY(-3px);
+            transform: translateY(-2px);
             color: #696cff;
             background: white;
         }
@@ -100,29 +101,35 @@
         .main-fab {
             background: #fff;
             color: #696cff;
-            font-size: 1.6rem;
+            font-size: 1.5rem;
             z-index: 2001;
-        }
-
-        .main-fab.open i {
-            transform: rotate(135deg);
         }
 
         .main-fab i {
             transition: transform 0.3s ease;
         }
 
+        .main-fab.open i {
+            transform: rotate(135deg);
+        }
+
+        .btn-fab.active-measure {
+            background-color: #ff3e1d !important;
+            color: white !important;
+            animation: pulse-red 1.5s infinite;
+        }
+
         /* Tooltip */
         .btn-fab[data-tooltip]:hover::after {
             content: attr(data-tooltip);
             position: absolute;
-            right: 60px;
+            right: 55px;
             top: 50%;
             transform: translateY(-50%);
             background: #2b2c40;
             color: #fff;
-            padding: 6px 12px;
-            border-radius: 8px;
+            padding: 5px 10px;
+            border-radius: 6px;
             font-size: 0.75rem;
             font-weight: 600;
             white-space: nowrap;
@@ -131,14 +138,7 @@
             animation: fadeInRight 0.2s;
         }
 
-        /* Active State Measure */
-        .btn-fab.active-measure {
-            background-color: #ff3e1d !important;
-            color: white !important;
-            animation: pulse-red 1.5s infinite;
-        }
-
-        /* Sub Menu Animation */
+        /* Search & Options */
         .fab-options {
             display: flex;
             flex-direction: column;
@@ -156,18 +156,17 @@
             transform: translateY(0);
         }
 
-        /* Search Input */
         .search-wrapper {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
         }
 
         .search-input {
             width: 0;
             opacity: 0;
             padding: 0;
-            height: 48px;
+            height: 45px;
             border: none;
             border-radius: 12px;
             transition: all 0.4s ease;
@@ -176,25 +175,25 @@
         }
 
         .search-input.active {
-            width: 240px;
+            width: 220px;
             opacity: 1;
             padding: 0 15px;
         }
 
-        /* Modal Overlay */
+        /* Modals */
         .map-overlay-modal {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(43, 44, 64, 0.6);
+            background: rgba(43, 44, 64, 0.5);
             z-index: 9999;
             display: none;
             justify-content: center;
             align-items: center;
-            backdrop-filter: blur(4px);
-            padding: 20px;
+            backdrop-filter: blur(3px);
+            padding: 15px;
         }
 
         .map-modal-content {
@@ -202,18 +201,18 @@
             padding: 25px;
             border-radius: 16px;
             width: 100%;
-            max-width: 450px;
+            max-width: 420px;
             box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
             animation: zoomIn 0.25s;
         }
 
         /* Legend */
         .legend-card {
-            padding: 15px;
+            padding: 12px 15px;
             border-radius: 12px;
-            width: 220px;
+            width: 200px;
             display: none;
-            margin-right: 15px;
+            margin-right: 12px;
         }
 
         .legend-card.show {
@@ -224,7 +223,7 @@
         .legend-item {
             display: flex;
             align-items: center;
-            margin-bottom: 6px;
+            margin-bottom: 5px;
             font-size: 0.8rem;
             font-weight: 500;
         }
@@ -236,7 +235,7 @@
             margin-right: 10px;
         }
 
-        /* Colors */
+        /* Colors & Styles */
         .bg-legend-sma,
         .bg-header-sma {
             background: #2A81CB;
@@ -257,20 +256,20 @@
             background: #2AAD27;
         }
 
-        /* Popup */
         .leaflet-popup-content-wrapper {
-            border-radius: 14px;
+            border-radius: 12px;
             padding: 0;
+            border: none;
             overflow: hidden;
         }
 
         .leaflet-popup-content {
             margin: 0;
-            width: 280px !important;
+            width: 260px !important;
         }
 
         .popup-header {
-            padding: 12px 15px;
+            padding: 10px 15px;
             color: white;
             display: flex;
             justify-content: space-between;
@@ -279,22 +278,6 @@
 
         .popup-body {
             padding: 15px;
-        }
-
-        .bg-header-sma {
-            background: linear-gradient(135deg, #2A81CB, #4facfe);
-        }
-
-        .bg-header-smk {
-            background: linear-gradient(135deg, #CB2B3E, #fc6767);
-        }
-
-        .bg-header-slb {
-            background: linear-gradient(135deg, #9C2BC3, #c471ed);
-        }
-
-        .bg-header-other {
-            background: linear-gradient(135deg, #2AAD27, #f093fb);
         }
 
         .info-row {
@@ -306,10 +289,9 @@
             color: #555;
         }
 
-        /* Distance Result Style */
         .distance-result-box {
             background: #f8f9fa;
-            border-radius: 12px;
+            border-radius: 10px;
             padding: 15px;
             margin-top: 15px;
             border: 1px dashed #696cff;
@@ -318,12 +300,11 @@
         }
 
         .distance-value {
-            font-size: 1.5rem;
+            font-size: 1.4rem;
             font-weight: 800;
             color: #696cff;
         }
 
-        /* Animation */
         @keyframes pulse-red {
             0% {
                 box-shadow: 0 0 0 0 rgba(255, 62, 29, 0.7);
@@ -362,12 +343,17 @@
             }
         }
 
-        /* Hide Default Controls (Kita Ganti Pakai Custom) */
+        /* CUSTOMIZE LEAFLET CONTROLS */
         .leaflet-control-polyline-measure {
             display: none !important;
         }
 
         .leaflet-control-fullscreen-button {
+            display: none !important;
+        }
+
+        /* Hapus control layer default */
+        .leaflet-control-layers {
             display: none !important;
         }
 
@@ -384,7 +370,7 @@
         <div id="map-container">
             <div id="map">
 
-                {{-- HUD STATS --}}
+                {{-- 1. HUD STATS (Kiri Bawah) --}}
                 <div class="map-stats glass">
                     <div class="stats-icon"><i class='bx bx-map-alt'></i></div>
                     <div class="d-flex flex-column" style="line-height: 1.2;">
@@ -393,37 +379,44 @@
                     </div>
                 </div>
 
-                {{-- FAB MENU --}}
+                {{-- 2. FAB MENU (Kanan Atas) --}}
                 <div class="fab-container" id="customFab">
-                    {{-- Main Toggle --}}
                     <button class="btn-fab main-fab shadow-lg" id="btnToggleMenu" data-tooltip="Menu">
                         <i class='bx bx-grid-alt'></i>
                     </button>
 
                     <div class="fab-options" id="fabOptions">
+                        {{-- Search --}}
                         <div class="search-wrapper">
                             <input type="text" id="searchBox" class="form-control search-input glass"
-                                placeholder="Cari nama sekolah...">
+                                placeholder="Ketik nama sekolah...">
                             <button class="btn-fab glass" id="btnShowSearch" data-tooltip="Cari"><i
                                     class='bx bx-search'></i></button>
                         </div>
 
+                        {{-- GPS --}}
                         <button class="btn-fab glass text-primary" id="btnMyLocation" data-tooltip="Lokasi Saya"><i
                                 class='bx bx-crosshair'></i></button>
 
-                        {{-- Fullscreen Custom (INI YANG HILANG TADI) --}}
+                        {{-- Fullscreen Custom --}}
                         <button class="btn-fab glass" id="btnFullscreenCustom" data-tooltip="Layar Penuh"><i
                                 class='bx bx-fullscreen'></i></button>
 
+                        {{-- 🔥 TOMBOL GANTI LAYER (BARU) 🔥 --}}
+                        <button class="btn-fab glass text-info" id="btnChangeLayer" data-tooltip="Ganti Mode Peta"><i
+                                class='bx bx-layer'></i></button>
+
+                        {{-- Filter --}}
                         <button class="btn-fab glass" id="btnShowFilter" data-tooltip="Filter Data"><i
                                 class='bx bx-filter-alt'></i></button>
 
-                        {{-- 2 FITUR UKUR JARAK DIPISAH --}}
-                        <button class="btn-fab glass text-warning" id="btnShowCalculator"
-                            data-tooltip="Kalkulator Jarak (A ke B)"><i class='bx bx-calculator'></i></button>
-                        <button class="btn-fab glass" id="btnMeasureToggle" data-tooltip="Ukur Manual (Penggaris)"><i
+                        {{-- Tools --}}
+                        <button class="btn-fab glass text-warning" id="btnShowCalculator" data-tooltip="Kalkulator Jarak"><i
+                                class='bx bx-calculator'></i></button>
+                        <button class="btn-fab glass" id="btnMeasureToggle" data-tooltip="Penggaris Manual"><i
                                 class='bx bx-ruler'></i></button>
 
+                        {{-- Legend --}}
                         <div class="d-flex align-items-center">
                             <div class="legend-card glass" id="legendBox">
                                 <h6 class="fw-bold mb-2 small text-uppercase text-muted border-bottom pb-1">Legenda</h6>
@@ -443,6 +436,8 @@
                             <button class="btn-fab glass" id="btnToggleLegend" data-tooltip="Legenda"><i
                                     class='bx bx-palette'></i></button>
                         </div>
+
+                        {{-- Reset --}}
                         <button class="btn-fab glass text-danger" id="btnResetAll" data-tooltip="Reset Normal"><i
                                 class='bx bx-refresh'></i></button>
                     </div>
@@ -503,18 +498,16 @@
                     </div>
                 </div>
 
-                {{-- MODAL CALCULATOR JARAK --}}
+                {{-- MODAL CALCULATOR --}}
                 <div id="customDistanceModal" class="map-overlay-modal">
                     <div class="map-modal-content">
                         <div class="d-flex justify-content-between align-items-center mb-3">
                             <h5 class="m-0 fw-bold text-warning"><i class='bx bx-calculator me-2'></i>Analisis Jarak</h5>
                             <button type="button" class="btn-close" id="btnCloseCalculator"></button>
                         </div>
-
                         <div class="alert alert-info py-2 px-3 mb-3" style="font-size: 0.8rem;">
                             <i class='bx bx-info-circle me-1'></i> Pilih dua sekolah untuk dihitung jaraknya.
                         </div>
-
                         <form id="distanceForm">
                             <div class="mb-3">
                                 <label class="form-label small fw-bold text-muted">📍 Sekolah Asal (Titik A)</label>
@@ -556,7 +549,7 @@
     <script>
         document.addEventListener("DOMContentLoaded", function() {
 
-            // --- DATA & CONFIG ---
+            // --- CONFIG ---
             var allSchools = @json($sekolahs);
             var baseIcon = {
                 shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
@@ -584,7 +577,7 @@
                 })
             };
 
-            // Populate Datalist
+            // Datalist
             var dataList = document.getElementById('schoolOptions');
             allSchools.forEach(s => {
                 var option = document.createElement('option');
@@ -603,6 +596,7 @@
                     attribution: '© Esri',
                     maxZoom: 18
                 });
+
             var southWest = L.latLng(-11.0, 94.0),
                 northEast = L.latLng(6.0, 142.0);
             var bounds = L.latLngBounds(southWest, northEast);
@@ -621,19 +615,10 @@
             L.control.zoom({
                 position: 'topleft'
             }).addTo(map);
-            L.control.layers({
-                "Peta Bersih": streetLayer,
-                "Satelit": satelliteLayer
-            }, null, {
-                position: 'bottomright'
-            }).addTo(map);
-
-            // Fullscreen Plugin (Control asli di-hidden, kita trigger manual)
+            // KITA TIDAK PAKAI L.control.layers LAGI
             map.addControl(new L.Control.Fullscreen({
                 position: 'topleft'
             }));
-
-            // Measure Plugin (Control asli di-hidden, kita trigger manual)
             var polylineMeasure = L.control.polylineMeasure({
                 position: 'topleft',
                 unit: 'kilometres',
@@ -657,14 +642,13 @@
             var statsText = document.getElementById('statsText');
             var distanceLine = null;
 
-            // --- RENDER FUNCTION ---
+            // --- RENDER ---
             function renderMarkers(data) {
                 markers.clearLayers();
                 markerList = [];
-
                 data.forEach(function(s) {
-                    var lat = parseFloat(s.lintang);
-                    var lng = parseFloat(s.bujur);
+                    var lat = parseFloat(s.lintang),
+                        lng = parseFloat(s.bujur);
                     if (!isNaN(lat) && !isNaN(lng)) {
                         var jenjang = s.bentuk_pendidikan_id_str;
                         var icon = icons['OTHER'];
@@ -680,23 +664,8 @@
                             headerClass = 'bg-header-slb';
                         }
 
-                        var popupContent = `
-                            <div class="popup-header ${headerClass}">
-                                <span class="fw-bold">${jenjang}</span>
-                                <span class="badge bg-white text-dark" style="font-size:0.65rem">${s.status_sekolah_str}</span>
-                            </div>
-                            <div class="popup-body">
-                                <h6 class="fw-bold text-dark mb-2" style="font-size:0.9rem">${s.nama}</h6>
-                                <div class="info-row"><i class='bx bx-id-card'></i> <span>NPSN: <b>${s.npsn}</b></span></div>
-                                <div class="info-row"><i class='bx bx-map'></i> <span style="line-height:1.2">${s.alamat_jalan}, ${s.kecamatan}</span></div>
-                                <div class="d-grid mt-3">
-                                    <a href="https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}" target="_blank" class="btn btn-sm btn-primary rounded-pill" style="font-size:0.75rem">
-                                        <i class='bx bx-navigation me-1'></i> Rute Lokasi
-                                    </a>
-                                </div>
-                            </div>
-                        `;
-
+                        var popupContent =
+                            `<div class="popup-header ${headerClass}"><span class="fw-bold">${jenjang}</span><span class="badge bg-white text-dark" style="font-size:0.65rem">${s.status_sekolah_str}</span></div><div class="popup-body"><h6 class="fw-bold text-dark mb-2" style="font-size:0.9rem">${s.nama}</h6><div class="info-row"><i class='bx bx-id-card'></i> <span>NPSN: <b>${s.npsn}</b></span></div><div class="info-row"><i class='bx bx-map'></i> <span style="line-height:1.2">${s.alamat_jalan}, ${s.kecamatan}</span></div><div class="d-grid mt-3"><a href="https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}" target="_blank" class="btn btn-sm btn-primary rounded-pill" style="font-size:0.75rem"><i class='bx bx-navigation me-1'></i> Rute Lokasi</a></div></div>`;
                         var marker = L.marker([lat, lng], {
                             icon: icon
                         });
@@ -711,7 +680,7 @@
             }
             renderMarkers(allSchools);
 
-            // --- UI ACTIONS ---
+            // --- UI INTERACTIONS ---
             const btnToggle = document.getElementById('btnToggleMenu');
             const options = document.getElementById('fabOptions');
             btnToggle.addEventListener('click', () => {
@@ -719,7 +688,17 @@
                 btnToggle.classList.toggle('open');
             });
 
-            // Search
+            // 🔥 TOGGLE MAP LAYER (BUTTON) 🔥
+            document.getElementById('btnChangeLayer').addEventListener('click', () => {
+                if (map.hasLayer(streetLayer)) {
+                    map.removeLayer(streetLayer);
+                    map.addLayer(satelliteLayer);
+                } else {
+                    map.removeLayer(satelliteLayer);
+                    map.addLayer(streetLayer);
+                }
+            });
+
             const btnSearch = document.getElementById('btnShowSearch');
             const searchInput = document.getElementById('searchBox');
             btnSearch.addEventListener('click', () => {
@@ -727,12 +706,10 @@
                 if (searchInput.classList.contains('active')) searchInput.focus();
             });
 
-            // 1. Tombol FULLSCREEN (Baru ditambahkan kembali)
             document.getElementById('btnFullscreenCustom').addEventListener('click', () => {
                 map.toggleFullscreen();
             });
 
-            // 2. Tombol MANUAL RULER (Dikembalikan)
             const btnMeasure = document.getElementById('btnMeasureToggle');
             btnMeasure.addEventListener('click', () => {
                 btnMeasure.classList.toggle('active-measure');
@@ -742,7 +719,6 @@
                 if (!e.statu) btnMeasure.classList.remove('active-measure');
             });
 
-            // GPS
             document.getElementById('btnMyLocation').addEventListener('click', () => {
                 map.locate({
                     setView: true,
@@ -757,23 +733,21 @@
                 }).addTo(map);
             });
 
-            // Modal Logic
+            // Modals
             const customModal = document.getElementById('customFilterModal');
+            const modalCalc = document.getElementById('customDistanceModal');
             document.getElementById('btnToggleLegend').addEventListener('click', () => document.getElementById(
                 'legendBox').classList.toggle('show'));
             document.getElementById('btnShowFilter').addEventListener('click', () => customModal.style.display =
                 'flex');
             document.getElementById('btnCloseFilter').addEventListener('click', () => customModal.style.display =
                 'none');
-
-            // 3. Tombol CALCULATOR (MODAL)
-            const modalCalc = document.getElementById('customDistanceModal');
             document.getElementById('btnShowCalculator').addEventListener('click', () => modalCalc.style.display =
                 'flex');
             document.getElementById('btnCloseCalculator').addEventListener('click', () => modalCalc.style.display =
                 'none');
 
-            // Calculate Logic
+            // Distance Calc
             document.getElementById('btnCalculateDistance').addEventListener('click', () => {
                 var nameA = document.getElementById('inputSchoolA').value;
                 var nameB = document.getElementById('inputSchoolB').value;
@@ -791,7 +765,7 @@
 
                 document.getElementById('distVal').innerText = distKm + " km";
                 document.getElementById('distTime').innerText = "Estimasi Lurus: " + (distKm * 10).toFixed(
-                    0) + " menit (jalan kaki)";
+                    0) + " menit";
                 document.getElementById('distanceResult').style.display = 'block';
 
                 if (distanceLine) map.removeLayer(distanceLine);
@@ -801,7 +775,6 @@
                     opacity: 0.8,
                     dashArray: '10, 10'
                 }).addTo(map);
-
                 var midLat = (latLngA.lat + latLngB.lat) / 2;
                 var midLng = (latLngA.lng + latLngB.lng) / 2;
                 distanceLine.bindPopup(`<b>Jarak: ${distKm} km</b>`).openPopup();
@@ -816,37 +789,32 @@
                 var f_kec = document.getElementById('f_kecamatan').value;
                 var f_jenjang = document.getElementById('f_jenjang').value;
                 var f_status = document.getElementById('f_status').value;
-
                 var filteredData = allSchools.filter(s => {
-                    return (f_kab === "" || s.kabupaten_kota === f_kab) &&
-                        (f_kec === "" || s.kecamatan === f_kec) &&
-                        (f_jenjang === "" || s.bentuk_pendidikan_id_str === f_jenjang) &&
-                        (f_status === "" || s.status_sekolah_str === f_status);
+                    return (f_kab === "" || s.kabupaten_kota === f_kab) && (f_kec === "" || s
+                        .kecamatan === f_kec) && (f_jenjang === "" || s
+                        .bentuk_pendidikan_id_str === f_jenjang) && (f_status === "" || s
+                        .status_sekolah_str === f_status);
                 });
-
                 renderMarkers(filteredData);
                 if (filteredData.length > 0) map.fitBounds(new L.featureGroup(markerList).getBounds());
                 else alert("Data tidak ditemukan.");
                 customModal.style.display = 'none';
             });
 
-            // Reset All
+            // Reset
             function resetAll() {
                 document.getElementById("filterForm").reset();
                 document.getElementById("distanceForm").reset();
                 document.getElementById("distanceResult").style.display = 'none';
                 if (distanceLine) map.removeLayer(distanceLine);
-
                 searchInput.value = '';
                 searchInput.classList.remove('active');
                 renderMarkers(allSchools);
                 map.setView([-6.85, 107.35], 10);
                 map.closePopup();
-
                 customModal.style.display = 'none';
                 modalCalc.style.display = 'none';
                 document.getElementById('legendBox').classList.remove('show');
-
                 if (btnMeasure.classList.contains('active-measure')) btnMeasure.click();
             }
             document.getElementById('btnResetAll').addEventListener('click', resetAll);
