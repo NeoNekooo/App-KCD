@@ -18,12 +18,13 @@ use App\Http\Controllers\Admin\JabatanKcdController;
 use App\Http\Controllers\Admin\Sekolah\SekolahController as SekolahMonitoringController;
 use App\Http\Controllers\Admin\Kepegawaian\GtkController;
 use App\Http\Controllers\Admin\Kesiswaan\SiswaController;
+// 🔥 [UPDATE] Import Controller Data Spasial 🔥
+use App\Http\Controllers\Admin\DataSpasialController;
 
 // --- Controller Administrasi ---
 use App\Http\Controllers\Admin\Administrasi\TipeSuratController;
 use App\Http\Controllers\Admin\Administrasi\SuratKeluarSiswaController;
 use App\Http\Controllers\Admin\Administrasi\SuratKeluarGuruController;
-// 🔥 [UPDATE] Import Controller Baru 🔥
 use App\Http\Controllers\Admin\Administrasi\SuratKeluarInternalController; 
 use App\Http\Controllers\Admin\Administrasi\SuratMasukController;
 use App\Http\Controllers\Admin\Administrasi\NomorSuratSettingController;
@@ -95,7 +96,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
             Route::get('/', 'index')->name('index');
             Route::post('/', 'store')->name('store');
             Route::get('/{id}', 'show')->name('show');
-            Route::put('/{id}', 'update')->name('update'); // Re-added update route for other employees
+            Route::put('/{id}', 'update')->name('update'); 
             Route::delete('/{id}', 'destroy')->name('destroy');
             Route::put('/{id}/reset', 'resetPassword')->name('reset');
         });
@@ -150,6 +151,15 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
 
     /*
     |--------------------------------------------------------------------------
+    | 🔥 DATA SPASIAL (PETA) 🔥
+    |--------------------------------------------------------------------------
+    */
+    // Jika nanti mau dipasang permission menu, tambahkan middleware check_menu disini
+    Route::get('dataspasial', [DataSpasialController::class, 'index'])->name('dataspasial.index');
+
+
+    /*
+    |--------------------------------------------------------------------------
     | ADMINISTRASI SURAT
     |--------------------------------------------------------------------------
     */
@@ -166,7 +176,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
             Route::resource('surat-keluar-siswa', SuratKeluarSiswaController::class)->only(['index', 'store']);
             Route::resource('surat-keluar-guru', SuratKeluarGuruController::class)->only(['index', 'store']);
 
-            // 🔥 [FITUR BARU] SURAT KELUAR INTERNAL 🔥
+            // Surat Keluar Internal
             Route::controller(SuratKeluarInternalController::class)
                 ->prefix('surat-keluar-internal')
                 ->name('surat-keluar-internal.')
