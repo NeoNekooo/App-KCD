@@ -33,7 +33,9 @@ class InstansiController extends Controller
             'social_media'  => 'nullable|array',
             'logo'          => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
             // UPDATE: Sekarang support JPG/JPEG selain PNG
-            'tanda_tangan'  => 'nullable|image|mimes:png,jpg,jpeg|max:1024', 
+            'tanda_tangan'  => 'nullable|image|mimes:png,jpg,jpeg|max:1024',
+            'lintang'       => 'nullable|numeric',
+            'bujur'         => 'nullable|numeric',
         ]);
 
         // 2. Ambil data input KECUALI logo, ttd, & social_media

@@ -489,6 +489,16 @@
                                             <textarea class="form-control" name="alamat" rows="3">{{ old('alamat', $instansi->alamat) }}</textarea>
                                         </div>
                                     </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-bold">Lintang (Latitude)</label>
+                                        <input type="text" class="form-control" name="lintang"
+                                            value="{{ old('lintang', $instansi->lintang) }}" placeholder="-6.12345">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-bold">Bujur (Longitude)</label>
+                                        <input type="text" class="form-control" name="bujur"
+                                            value="{{ old('bujur', $instansi->bujur) }}" placeholder="106.12345">
+                                    </div>
                                     <div class="col-12">
                                         <label class="form-label fw-bold">Embed Code Google Maps</label>
                                         <textarea class="form-control font-monospace small bg-light" id="petaInput" name="peta" rows="5"

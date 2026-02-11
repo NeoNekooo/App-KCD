@@ -21,6 +21,8 @@ class Instansi extends Model
         'email',
         'telepon',
         'website',
+        'lintang',
+        'bujur',
         'social_media',
         'logo',
         'tanda_tangan', // <-- Tambahkan Kolom Baru Ini Bre!
