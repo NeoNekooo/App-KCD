@@ -32,6 +32,7 @@ use App\Http\Controllers\Admin\Administrasi\ArsipSuratController;
 
 // --- Controller Layanan ---
 use App\Http\Controllers\Admin\VerifikasiController;
+use App\Http\Controllers\Admin\VerifikasiPdController;
 use App\Http\Controllers\Admin\DokumenLayananController;
 
 // --- Controller Pengaturan ---
@@ -212,6 +213,29 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
         Route::put('/{id}/process', [VerifikasiController::class, 'verifyProcess'])->name('process');
         Route::put('/{id}/kasubag-process', [VerifikasiController::class, 'kasubagProcess'])->name('kasubag_process');
         Route::put('/{id}/kepala-process', [VerifikasiController::class, 'kepalaProcess'])->name('kepala_process');
+    });
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | 🔥 [NEW] LAYANAN & VERIFIKASI PESERTA DIDIK (PD) 🔥
+    |--------------------------------------------------------------------------
+    */
+    Route::middleware('check_menu:layanan-pd')->prefix('verifikasi-pd')->name('verifikasi_pd.')->group(function () {
+        // Halaman Utama Daftar Pengajuan PD
+        Route::get('/', [VerifikasiPdController::class, 'index'])->name('index');
+
+        // Validasi Awal (Setujui Permohonan Sekolah)
+        Route::post('/{id}/approve-initial', [VerifikasiPdController::class, 'approveInitial'])->name('approve_initial');
+
+        // Simpan Daftar Persyaratan
+        Route::put('/{id}/set-syarat', [VerifikasiPdController::class, 'setSyarat'])->name('set_syarat');
+
+        // Proses Verifikasi Akhir (ACC / Revisi Berkas)
+        Route::put('/{id}/process', [VerifikasiPdController::class, 'verifyProcess'])->name('process');
+        
+        // Opsional: Jika butuh route reject mandiri di tahap awal
+        Route::post('/{id}/reject', [VerifikasiPdController::class, 'reject'])->name('reject');
     });
 
     /*
