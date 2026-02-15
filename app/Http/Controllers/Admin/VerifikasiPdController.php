@@ -53,7 +53,7 @@ class VerifikasiPdController extends Controller
         $data = $query->latest()->paginate(10)->withQueryString();
     
         // 7. Ambil Template SK
-        $templates = TipeSurat::where('kategori', 'sk')->get();
+        $templates = TipeSurat::where('kategori', 'siswa')->get();
     
         return view('admin.verifikasi_pd.index', compact(
             'data', 'title', 'templates', 'list_kategori',

@@ -83,22 +83,74 @@ class CetakSkController extends Controller
 
         // 4. SIAPKAN DATA REPLACE (Mail Merge)
         $replacements = [
-            '[NAMA_GURU]'    => Str::title(strtolower($data->nama_guru)),
+            // Basic data from PengajuanSekolah model
+            '[NAMA_GURU]'    => Str::title(strtolower($data->nama_guru)), // Still using this for compatibility
             '[NAMA_SEKOLAH]' => $data->nama_sekolah,
             '[JUDUL]'        => strtoupper($data->judul),
             '[KATEGORI]'     => ucwords($data->kategori),
-            
-            // [FIXED] Pake nomor_sk sesuai DB
-            '[NOMOR_SURAT]'  => $data->nomor_sk ?? '...', 
-            
-            // Format Tanggal Indonesia (contoh: 25 Desember 2025)
+            '[NOMOR_SURAT]'  => $data->nomor_sk ?? '...',
             '[TANGGAL_ACC]'  => $data->tgl_selesai ? Carbon::parse($data->tgl_selesai)->isoFormat('D MMMM Y') : date('d F Y'),
-            
-            // Support format lama (double curly braces)
             '{{no_surat}}'   => $data->nomor_sk,
-            '{{nama}}'       => Str::title(strtolower($data->nama_guru)),
             '{{sekolah}}'    => $data->nama_sekolah,
         ];
+
+        // Add student-specific data from data_siswa_json if available
+        if ($data->data_siswa_json && is_array($data->data_siswa_json)) {
+            $siswa = (object) $data->data_siswa_json; // Cast to object for easier access
+
+            $replacements['{{nama}}'] = $siswa->nama ?? $replacements['{{nama}}']; // Prioritize siswa->nama
+            $replacements['{{nisn}}'] = $siswa->nisn ?? '-';
+            $replacements['{{nipd}}'] = $siswa->nipd ?? '-';
+            $replacements['{{nik}}'] = $siswa->nik ?? '-';
+            $replacements['{{kelas}}'] = $siswa->nama_rombel ?? '-';
+
+            // Composite fields
+            $tempatLahir = $siswa->tempat_lahir ?? '-';
+            $tanggalLahir = isset($siswa->tanggal_lahir) ? Carbon::parse($siswa->tanggal_lahir)->isoFormat('D MMMM Y') : '-';
+            $replacements['{{ttl}}'] = $tempatLahir . ', ' . $tanggalLahir;
+
+            $replacements['{{jk}}'] = $siswa->jenis_kelamin ?? '-';
+            $replacements['{{agama}}'] = $siswa->agama_id_str ?? '-';
+
+            // Construct full address
+            $alamatParts = [];
+            if (!empty($siswa->alamat_jalan)) $alamatParts[] = $siswa->alamat_jalan;
+            if (!empty($siswa->rt) && !empty($siswa->rw)) $alamatParts[] = 'RT ' . $siswa->rt . '/RW ' . $siswa->rw;
+            if (!empty($siswa->desa_kelurahan)) $alamatParts[] = $siswa->desa_kelurahan;
+            if (!empty($siswa->kecamatan)) $alamatParts[] = $siswa->kecamatan;
+            if (!empty($siswa->kabupaten_kota)) $alamatParts[] = $siswa->kabupaten_kota;
+            if (!empty($siswa->provinsi)) $alamatParts[] = $siswa->provinsi;
+            if (!empty($siswa->kode_pos)) $alamatParts[] = ' (' . $siswa->kode_pos . ')';
+            $replacements['{{alamat}}'] = implode(', ', $alamatParts);
+
+            $replacements['{{nama_ayah}}'] = $siswa->nama_ayah ?? '-';
+            $replacements['{{nama_ibu}}'] = $siswa->nama_ibu ?? '-';
+            $replacements['{{pekerjaan_ayah}}'] = $siswa->pekerjaan_ayah_id_str ?? '-';
+            
+            // New additional student fields
+            $replacements['{{sekolah_asal}}'] = $siswa->sekolah_asal ?? '-';
+            $replacements['{{no_kk}}'] = $siswa->no_kk ?? '-';
+            $replacements['{{no_hp}}'] = $siswa->nomor_telepon_seluler ?? '-';
+            $replacements['{{no_wa}}'] = $siswa->no_wa ?? '-';
+            $replacements['{{nama_wali}}'] = $siswa->nama_wali ?? '-';
+            $replacements['{{pekerjaan_wali}}'] = $siswa->pekerjaan_wali_id_str ?? '-';
+            $replacements['{{tinggi_badan}}'] = $siswa->tinggi_badan ?? '-';
+            $replacements['{{berat_badan}}'] = $siswa->berat_badan ?? '-';
+            $replacements['{{kurikulum}}'] = $siswa->kurikulum_id_str ?? '-';
+            $replacements['{{npsn_sekolah_asal}}'] = $siswa->npsn_sekolah_asal ?? '-';
+            $replacements['{{no_seri_ijazah}}'] = $siswa->no_seri_ijazah ?? '-';
+            $replacements['{{no_seri_skhun}}'] = $siswa->no_seri_skhun ?? '-';
+            $replacements['{{pendidikan_ayah}}'] = $siswa->pendidikan_ayah_id_str ?? '-';
+            $replacements['{{penghasilan_ayah}}'] = $siswa->penghasilan_ayah_id_str ?? '-';
+            $replacements['{{pendidikan_ibu}}'] = $siswa->pendidikan_ibu_id_str ?? '-';
+            $replacements['{{penghasilan_ibu}}'] = $siswa->penghasilan_ibu_id_str ?? '-';
+            $replacements['{{alat_transportasi}}'] = $siswa->alat_transportasi_id_str ?? '-';
+            $replacements['{{jenis_tinggal}}'] = $siswa->jenis_tinggal_id_str ?? '-';
+            $replacements['{{jarak_sekolah}}'] = $siswa->jarak_rumah_ke_sekolah_km ?? '-';
+            $replacements['{{waktu_tempuh}}'] = $siswa->waktu_tempuh_menit ?? '-';
+            $replacements['{{jumlah_saudara}}'] = $siswa->jumlah_saudara_kandung ?? '-';
+            $replacements['{{hobi}}'] = $siswa->hobi ?? '-';
+            $replacements['{{cita_cita}}'] = $siswa->cita_cita ?? '-';        }
 
         $finalContent = $isiSuratRaw;
         foreach ($replacements as $key => $val) {

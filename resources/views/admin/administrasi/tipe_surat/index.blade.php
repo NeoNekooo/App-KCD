@@ -187,88 +187,137 @@
             }
 
             // === DAFTAR VARIABEL DINAMIS (FIXED SESUAI DB) ===
-            $variableGroups = [
+            // Define all student variables first
+            $siswaVariables = [
+                ['code' => '{{nama}}', 'desc' => 'Nama Lengkap'],
+                ['code' => '{{nisn}}', 'desc' => 'NISN'],
+                ['code' => '{{nipd}}', 'desc' => 'NIPD / Stambuk'],
+                ['code' => '{{nik}}', 'desc' => 'NIK Siswa'],
+                ['code' => '{{kelas}}', 'desc' => 'Kelas (Rombel)'],
+                ['code' => '{{ttl}}', 'desc' => 'Tempat, Tgl Lahir'],
+                ['code' => '{{jk}}', 'desc' => 'Jenis Kelamin'],
+                ['code' => '{{agama}}', 'desc' => 'Agama'],
+                ['code' => '{{alamat}}', 'desc' => 'Alamat Lengkap'],
+                ['code' => '{{nama_ayah}}', 'desc' => 'Nama Ayah'], // 10
+                ['code' => '{{nama_ibu}}', 'desc' => 'Nama Ibu'],
+                ['code' => '{{pekerjaan_ayah}}', 'desc' => 'Pekerjaan Ayah'],
+                ['code' => '{{sekolah_asal}}', 'desc' => 'Sekolah Asal'],
+                ['code' => '{{no_kk}}', 'desc' => 'Nomor Kartu Keluarga'],
+                ['code' => '{{no_hp}}', 'desc' => 'Nomor Telepon Seluler'],
+                ['code' => '{{no_wa}}', 'desc' => 'Nomor WhatsApp'],
+                ['code' => '{{nama_wali}}', 'desc' => 'Nama Wali'],
+                ['code' => '{{pekerjaan_wali}}', 'desc' => 'Pekerjaan Wali'],
+                ['code' => '{{tinggi_badan}}', 'desc' => 'Tinggi Badan (cm)'],
+                ['code' => '{{berat_badan}}', 'desc' => 'Berat Badan (kg)'], // 20
+                ['code' => '{{kurikulum}}', 'desc' => 'Kurikulum Digunakan'],
+                ['code' => '{{npsn_sekolah_asal}}', 'desc' => 'NPSN Sekolah Asal'],
+                ['code' => '{{no_seri_ijazah}}', 'desc' => 'No. Seri Ijazah'],
+                ['code' => '{{no_seri_skhun}}', 'desc' => 'No. Seri SKHUN'],
+                ['code' => '{{pendidikan_ayah}}', 'desc' => 'Pendidikan Ayah'],
+                ['code' => '{{penghasilan_ayah}}', 'desc' => 'Penghasilan Ayah'],
+                ['code' => '{{pendidikan_ibu}}', 'desc' => 'Pendidikan Ibu'],
+                ['code' => '{{penghasilan_ibu}}', 'desc' => 'Penghasilan Ibu'],
+                ['code' => '{{alat_transportasi}}', 'desc' => 'Alat Transportasi ke Sekolah'],
+                ['code' => '{{jenis_tinggal}}', 'desc' => 'Jenis Tinggal'], // 30
+                ['code' => '{{jarak_sekolah}}', 'desc' => 'Jarak Rumah ke Sekolah (km)'],
+                ['code' => '{{waktu_tempuh}}', 'desc' => 'Waktu Tempuh ke Sekolah (menit)'],
+                ['code' => '{{jumlah_saudara}}', 'desc' => 'Jumlah Saudara Kandung'],
+                ['code' => '{{hobi}}', 'desc' => 'Hobi Siswa'],
+                ['code' => '{{cita_cita}}', 'desc' => 'Cita-cita Siswa'], // 35
+            ];
+
+            // Split student variables into chunks of 10
+            $siswaVarsChunk1 = array_slice($siswaVariables, 0, 10);
+            $siswaVarsChunk2 = array_slice($siswaVariables, 10, 10);
+            $siswaVarsChunk3 = array_slice($siswaVariables, 20, 10);
+            $siswaVarsChunk4 = array_slice($siswaVariables, 30); // Remaining
+
+            $allVariableGroups = [
                 'Data Umum (Wajib)' => [
-                    ['code' => '{{ no_surat }}', 'desc' => 'Nomor Surat Resmi'],
-                    ['code' => '{{ tanggal }}', 'desc' => 'Tanggal Cetak (Indo)'],
-                    ['code' => '{{ tahun_ajaran }}', 'desc' => 'Tahun Ajaran Aktif'],
+                    ['code' => '{{no_surat}}', 'desc' => 'Nomor Surat Resmi'],
+                    ['code' => '{{tanggal}}', 'desc' => 'Tanggal Cetak (Indo)'],
+                    ['code' => '{{tahun_ajaran}}', 'desc' => 'Tahun Ajaran Aktif'],
                 ],
 
-                // 1. DATA SISWA
-                'Identitas Siswa' =>
-                    $kategoriAktif == 'siswa'
-                        ? [
-                            ['code' => '{{ nama }}', 'desc' => 'Nama Lengkap'],
-                            ['code' => '{{ nisn }}', 'desc' => 'NISN'],
-                            ['code' => '{{ nipd }}', 'desc' => 'NIPD / Stambuk'],
-                            ['code' => '{{ nik }}', 'desc' => 'NIK Siswa'],
-                            ['code' => '{{ kelas }}', 'desc' => 'Kelas (Rombel)'],
-                            ['code' => '{{ ttl }}', 'desc' => 'Tempat, Tgl Lahir'],
-                            ['code' => '{{ jk }}', 'desc' => 'Jenis Kelamin'],
-                            ['code' => '{{ agama }}', 'desc' => 'Agama'],
-                            ['code' => '{{ alamat }}', 'desc' => 'Alamat Lengkap'],
-                            ['code' => '{{ nama_ayah }}', 'desc' => 'Nama Ayah'],
-                            ['code' => '{{ nama_ibu }}', 'desc' => 'Nama Ibu'],
-                            ['code' => '{{ pekerjaan_ayah }}', 'desc' => 'Pekerjaan Ayah'],
-                        ]
-                        : [],
+                // 1. DATA SISWA (Bagian 1)
+                'Identitas Siswa (Bagian 1)' => ($kategoriAktif == 'siswa') ? $siswaVarsChunk1 : [],
+
+                // 1. DATA SISWA (Bagian 2)
+                'Identitas Siswa (Bagian 2)' => ($kategoriAktif == 'siswa') ? $siswaVarsChunk2 : [],
+                
+                // 1. DATA SISWA (Bagian 3)
+                'Identitas Siswa (Bagian 3)' => ($kategoriAktif == 'siswa') ? $siswaVarsChunk3 : [],
+
+                // 1. DATA SISWA (Bagian 4)
+                'Identitas Siswa (Bagian 4)' => ($kategoriAktif == 'siswa') ? $siswaVarsChunk4 : [],
 
                 // 2. DATA GURU (Tabel gtks)
                 'Identitas Guru' =>
                     $kategoriAktif == 'guru'
                         ? [
-                            ['code' => '{{ nama }}', 'desc' => 'Nama Lengkap (Gelar)'],
-                            ['code' => '{{ nip }}', 'desc' => 'NIP'],
-                            ['code' => '{{ nik }}', 'desc' => 'NIK KTP'],
-                            ['code' => '{{ nuptk }}', 'desc' => 'NUPTK'],
-                            ['code' => '{{ jabatan }}', 'desc' => 'Jabatan/Jenis PTK'],
-                            ['code' => '{{ ttl }}', 'desc' => 'Tempat, Tgl Lahir'],
-                            ['code' => '{{ jk }}', 'desc' => 'Jenis Kelamin (L/P)'],
-                            ['code' => '{{ alamat }}', 'desc' => 'Alamat Rumah'],
-                            ['code' => '{{ no_hp }}', 'desc' => 'Nomor HP'],
-                            ['code' => '{{ email }}', 'desc' => 'Email'],
-                            ['code' => '{{ pangkat }}', 'desc' => 'Pangkat/Golongan'],
-                            ['code' => '{{ unit_kerja }}', 'desc' => 'Unit Kerja'],
+                            ['code' => '{{nama}}', 'desc' => 'Nama Lengkap (Gelar)'],
+                            ['code' => '{{nip}}', 'desc' => 'NIP'],
+                            ['code' => '{{nik}}', 'desc' => 'NIK KTP'],
+                            ['code' => '{{nuptk}}', 'desc' => 'NUPTK'],
+                            ['code' => '{{jabatan}}', 'desc' => 'Jabatan/Jenis PTK'],
+                            ['code' => '{{ttl}}', 'desc' => 'Tempat, Tgl Lahir'],
+                            ['code' => '{{jk}}', 'desc' => 'Jenis Kelamin'],
+                            ['code' => '{{alamat}}', 'desc' => 'Alamat Rumah'],
+                            ['code' => '{{no_hp}}', 'desc' => 'Nomor HP'],
+                            ['code' => '{{email}}', 'desc' => 'Email'],
+                            ['code' => '{{pangkat}}', 'desc' => 'Pangkat/Golongan'],
+                            ['code' => '{{unit_kerja}}', 'desc' => 'Unit Kerja'],
                         ]
                         : [],
 
                 // 3. DATA PEGAWAI KCD (INTERNAL)
-                // Sesuai tabel: pegawai_kcds (id, nama, nik, nip, jabatan, no_hp, email_pribadi, alamat)
-                // TIDAK ADA: nuptk, pangkat_golongan, unit_kerja (di SQL tidak ada kolom ini)
                 'Identitas Pegawai KCD (Internal)' =>
                     $kategoriAktif == 'internal' || $kategoriAktif == 'layanan'
                         ? [
-                            ['code' => '{{ nama }}', 'desc' => 'Nama Pegawai'],
-                            ['code' => '{{ nip }}', 'desc' => 'NIP'],
-                            ['code' => '{{ nik }}', 'desc' => 'NIK'],
-                            ['code' => '{{ jabatan }}', 'desc' => 'Jabatan'],
-                            ['code' => '{{ tempat_lahir }}', 'desc' => 'Tempat Lahir'],
-                            ['code' => '{{ tanggal_lahir }}', 'desc' => 'Tanggal Lahir'],
-                            ['code' => '{{ jk }}', 'desc' => 'Jenis Kelamin'],
-                            ['code' => '{{ no_hp }}', 'desc' => 'Nomor HP'],
-                            ['code' => '{{ email }}', 'desc' => 'Email Pribadi'],
-                            ['code' => '{{ alamat }}', 'desc' => 'Alamat Rumah'],
+                            ['code' => '{{nama}}', 'desc' => 'Nama Pegawai'],
+                            ['code' => '{{nip}}', 'desc' => 'NIP'],
+                            ['code' => '{{nik}}', 'desc' => 'NIK'],
+                            ['code' => '{{jabatan}}', 'desc' => 'Jabatan'],
+                            ['code' => '{{tempat_lahir}}', 'desc' => 'Tempat Lahir'],
+                            ['code' => '{{tanggal_lahir}}', 'desc' => 'Tanggal Lahir'],
+                            ['code' => '{{jk}}', 'desc' => 'Jenis Kelamin'],
+                            ['code' => '{{no_hp}}', 'desc' => 'Nomor HP'],
+                            ['code' => '{{email}}', 'desc' => 'Email Pribadi'],
+                            ['code' => '{{alamat}}', 'desc' => 'Alamat Rumah'],
                         ]
                         : [],
 
                 // 4. DATA INSTANSI (Untuk Surat Keluar ke Instansi)
-                // Sesuai tabel: instansis (nama_instansi, nama_kepala, nip_kepala, alamat, logo, tanda_tangan)
                 'Identitas Instansi (Tujuan)' =>
                     $kategoriAktif == 'internal'
                         ? [
-                            ['code' => '{{ nama_instansi }}', 'desc' => 'Nama Instansi'],
-                            ['code' => '{{ nama_brand }}', 'desc' => 'Nama Brand'],
-                            ['code' => '{{ nama_kepala_instansi }}', 'desc' => 'Nama Kepala Instansi'],
-                            ['code' => '{{ nip_kepala_instansi }}', 'desc' => 'NIP Kepala'],
-                            ['code' => '{{ alamat_instansi }}', 'desc' => 'Alamat Instansi'],
-                            ['code' => '{{ telepon_instansi }}', 'desc' => 'Telepon'],
-                            ['code' => '{{ email_instansi }}', 'desc' => 'Email'],
-                            ['code' => '{{ website_instansi }}', 'desc' => 'Website'],
-                            ['code' => '{{ logo_instansi }}', 'desc' => 'Logo (Gambar)'],
-                            ['code' => '{{ tanda_tangan_instansi }}', 'desc' => 'Tanda Tangan (Gambar)'],
+                            ['code' => '{{nama_instansi}}', 'desc' => 'Nama Instansi'],
+                            ['code' => '{{nama_brand}}', 'desc' => 'Nama Brand'],
+                            ['code' => '{{nama_kepala_instansi}}', 'desc' => 'Nama Kepala Instansi'],
+                            ['code' => '{{nip_kepala_instansi}}', 'desc' => 'NIP Kepala'],
+                            ['code' => '{{alamat_instansi}}', 'desc' => 'Alamat Instansi'],
+                            ['code' => '{{telepon_instansi}}', 'desc' => 'Telepon'],
+                            ['code' => '{{email_instansi}}', 'desc' => 'Email'],
+                            ['code' => '{{website_instansi}}', 'desc' => 'Website'],
+                            ['code' => '{{logo_instansi}}', 'desc' => 'Logo (Gambar)'],
+                            ['code' => '{{tanda_tangan_instansi}}', 'desc' => 'Tanda Tangan (Gambar)'],
                         ]
                         : [],
             ];
+            
+            // Split variable groups for pagination-like display in modal
+            $groupKeys = array_keys($allVariableGroups);
+            
+            if ($kategoriAktif == 'siswa') {
+                // For 'siswa' category, ensure Identitas Siswa (Bagian 3) and (Bagian 4) go to the second tab
+                $variableGroupsPage1 = array_slice($allVariableGroups, 0, 3, true); // Data Umum + Siswa Bagian 1 + Siswa Bagian 2
+                $variableGroupsPage2 = array_slice($allVariableGroups, 3, null, true); // Siswa Bagian 3, Siswa Bagian 4, Guru, Pegawai KCD, Instansi
+            } else {
+                // For other categories, apply a general even split
+                $halfPoint = ceil(count($groupKeys) / 2);
+                $variableGroupsPage1 = array_slice($allVariableGroups, 0, $halfPoint, true);
+                $variableGroupsPage2 = array_slice($allVariableGroups, $halfPoint, null, true);
+            }
 
             // Tentukan grup variabel utama untuk Quick Access
             $mainVarGroup = 'Identitas Siswa';
@@ -279,9 +328,10 @@
                 $mainVarGroup = 'Identitas Pegawai KCD (Internal)';
             }
 
+            // quickAccess should use the full list of groups to avoid missing variables
             $quickAccess = array_merge(
-                $variableGroups['Data Umum (Wajib)'],
-                array_slice($variableGroups[$mainVarGroup] ?? [], 0, 8),
+                $allVariableGroups['Data Umum (Wajib)'],
+                array_slice($allVariableGroups[$mainVarGroup] ?? [], 0, 8),
             );
         @endphp
 
@@ -520,22 +570,52 @@
                     <button type="button" class="btn-close btn-close-floating" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body bg-light p-4">
-                    @foreach ($variableGroups as $groupName => $vars)
-                        @if (!empty($vars))
-                            <div class="mb-4">
-                                <h6 class="fw-bold border-bottom pb-2">{{ $groupName }}</h6>
-                                <div class="d-flex flex-wrap gap-2">
-                                    @foreach ($vars as $var)
-                                        <div class="var-chip shadow-sm modal-var-chip"
-                                            onclick="insertVariable('{{ $var['code'] }}')">
-                                            <span>{{ $var['desc'] }}</span><span
-                                                class="var-code">{{ $var['code'] }}</span>
+                    <ul class="nav nav-tabs" id="variableTab" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="variable-tab-1" data-bs-toggle="tab" data-bs-target="#variable-pane-1" type="button" role="tab" aria-controls="variable-pane-1" aria-selected="true">Variabel Dasar</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="variable-tab-2" data-bs-toggle="tab" data-bs-target="#variable-pane-2" type="button" role="tab" aria-controls="variable-pane-2" aria-selected="false">Variabel Lanjutan</button>
+                        </li>
+                    </ul>
+                    <div class="tab-content pt-3" id="variableTabContent">
+                        <div class="tab-pane fade show active" id="variable-pane-1" role="tabpanel" aria-labelledby="variable-tab-1" tabindex="0">
+                            @foreach ($variableGroupsPage1 as $groupName => $vars)
+                                @if (!empty($vars))
+                                    <div class="mb-4 variable-group" data-group-name="{{ $groupName }}">
+                                        <h6 class="fw-bold border-bottom pb-2">{{ $groupName }}</h6>
+                                        <div class="d-flex flex-wrap gap-2">
+                                            @foreach ($vars as $var)
+                                                <div class="var-chip shadow-sm modal-var-chip"
+                                                    onclick="insertVariable('{{ $var['code'] }}')">
+                                                    <span>{{ $var['desc'] }}</span><span
+                                                        class="var-code">{{ $var['code'] }}</span>
+                                                </div>
+                                            @endforeach
                                         </div>
-                                    @endforeach
-                                </div>
-                            </div>
-                        @endif
-                    @endforeach
+                                    </div>
+                                @endif
+                            @endforeach
+                        </div>
+                        <div class="tab-pane fade" id="variable-pane-2" role="tabpanel" aria-labelledby="variable-tab-2" tabindex="0">
+                            @foreach ($variableGroupsPage2 as $groupName => $vars)
+                                @if (!empty($vars))
+                                    <div class="mb-4 variable-group" data-group-name="{{ $groupName }}">
+                                        <h6 class="fw-bold border-bottom pb-2">{{ $groupName }}</h6>
+                                        <div class="d-flex flex-wrap gap-2">
+                                            @foreach ($vars as $var)
+                                                <div class="var-chip shadow-sm modal-var-chip"
+                                                    onclick="insertVariable('{{ $var['code'] }}')">
+                                                    <span>{{ $var['desc'] }}</span><span
+                                                        class="var-code">{{ $var['code'] }}</span>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                @endif
+                            @endforeach
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
