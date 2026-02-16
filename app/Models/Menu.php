@@ -25,6 +25,12 @@ class Menu extends Model
                     ->orderBy('urutan', 'asc');
     }
 
+    // Relasi rekursif untuk anak-anak (nested)
+    public function childrenRecursive()
+    {
+        return $this->children()->with('childrenRecursive');
+    }
+
     // Relasi ke Parent (Induk)
     public function parent()
     {

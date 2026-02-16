@@ -25,14 +25,11 @@ class MenuManagementController extends Controller
     {
         // 1. Ambil Menu Induk & Anak (Urut berdasarkan 'urutan')
         $menus = Menu::whereNull('parent_id')
-                    ->with(['children' => function($q) {
-                        $q->orderBy('urutan', 'asc');
-                    }])
+                    ->with('childrenRecursive') // Load all children recursively
                     ->orderBy('urutan', 'asc')
                     ->get();
 
         // 2. Ambil Data Akses (Siapa boleh liat menu apa)
-        // Hasilnya: [ 1 => ['Admin', 'Staff'], 2 => ['...'] ]
         $menuAccesses = DB::table('menu_accesses')
                             ->get()
                             ->groupBy('menu_id')
@@ -40,15 +37,60 @@ class MenuManagementController extends Controller
                                 return $items->pluck('role_name')->toArray();
                             });
 
-        // 3. List Parent untuk Dropdown (Header gak boleh jadi parent)
-        $parents = Menu::whereNull('parent_id')->where('is_header', false)->get();
+        // 3. Siapkan List Menu untuk Dropdown Parent (dengan Indentasi)
+        $allPossibleParents = Menu::where('is_header', false)->orderBy('urutan', 'asc')->get();
+        $nestedParents = $this->buildNestedMenu($allPossibleParents);
+        $flattenedParents = [];
+        $this->flattenMenu($nestedParents, $flattenedParents);
 
         return view('admin.settings.menu.index', [
             'menus' => $menus,
-            'parents' => $parents,
+            'parents' => $flattenedParents, // Pass flattened parents with depth
             'roles' => $this->roles,
             'accesses' => $menuAccesses
         ]);
+    }
+
+    /**
+     * Build a nested array from a flat collection of menus.
+     *
+     * @param \Illuminate\Support\Collection $elements
+     * @param int $parentId
+     * @return array
+     */
+    private function buildNestedMenu($elements, $parentId = null)
+    {
+        $branch = [];
+        foreach ($elements as $element) {
+            if ($element->parent_id == $parentId) {
+                $children = $this->buildNestedMenu($elements, $element->id);
+                if ($children) {
+                    $element->children = $children;
+                }
+                $branch[] = $element;
+            }
+        }
+        return $branch;
+    }
+
+    /**
+     * Flatten a nested menu array into a linear list with depth information.
+     *
+     * @param array $nestedMenu
+     * @param array $flattenedList
+     * @param int $depth
+     * @return void
+     */
+    private function flattenMenu($nestedMenu, array &$flattenedList, $depth = 0)
+    {
+        foreach ($nestedMenu as $menuItem) {
+            $menuItem->depth = $depth;
+            $flattenedList[] = $menuItem;
+            if (isset($menuItem->children) && count($menuItem->children) > 0) {
+                $this->flattenMenu($menuItem->children, $flattenedList, $depth + 1);
+            }
+        }
+
     }
 
     public function store(Request $request)
