@@ -186,8 +186,9 @@
                 $pages = [$fullContent ?: ''];
             }
 
-            // === DAFTAR VARIABEL DINAMIS (FIXED SESUAI DB) ===
-            // Define all student variables first
+            // === DAFTAR VARIABEL DINAMIS (FIXED SESUAI DB, TANPA SPASI) ===
+
+            // 1. Variabel Siswa
             $siswaVariables = [
                 ['code' => '{{nama}}', 'desc' => 'Nama Lengkap'],
                 ['code' => '{{nisn}}', 'desc' => 'NISN'],
@@ -198,7 +199,7 @@
                 ['code' => '{{jk}}', 'desc' => 'Jenis Kelamin'],
                 ['code' => '{{agama}}', 'desc' => 'Agama'],
                 ['code' => '{{alamat}}', 'desc' => 'Alamat Lengkap'],
-                ['code' => '{{nama_ayah}}', 'desc' => 'Nama Ayah'], // 10
+                ['code' => '{{nama_ayah}}', 'desc' => 'Nama Ayah'],
                 ['code' => '{{nama_ibu}}', 'desc' => 'Nama Ibu'],
                 ['code' => '{{pekerjaan_ayah}}', 'desc' => 'Pekerjaan Ayah'],
                 ['code' => '{{sekolah_asal}}', 'desc' => 'Sekolah Asal'],
@@ -208,7 +209,7 @@
                 ['code' => '{{nama_wali}}', 'desc' => 'Nama Wali'],
                 ['code' => '{{pekerjaan_wali}}', 'desc' => 'Pekerjaan Wali'],
                 ['code' => '{{tinggi_badan}}', 'desc' => 'Tinggi Badan (cm)'],
-                ['code' => '{{berat_badan}}', 'desc' => 'Berat Badan (kg)'], // 20
+                ['code' => '{{berat_badan}}', 'desc' => 'Berat Badan (kg)'],
                 ['code' => '{{kurikulum}}', 'desc' => 'Kurikulum Digunakan'],
                 ['code' => '{{npsn_sekolah_asal}}', 'desc' => 'NPSN Sekolah Asal'],
                 ['code' => '{{no_seri_ijazah}}', 'desc' => 'No. Seri Ijazah'],
@@ -218,19 +219,44 @@
                 ['code' => '{{pendidikan_ibu}}', 'desc' => 'Pendidikan Ibu'],
                 ['code' => '{{penghasilan_ibu}}', 'desc' => 'Penghasilan Ibu'],
                 ['code' => '{{alat_transportasi}}', 'desc' => 'Alat Transportasi ke Sekolah'],
-                ['code' => '{{jenis_tinggal}}', 'desc' => 'Jenis Tinggal'], // 30
+                ['code' => '{{jenis_tinggal}}', 'desc' => 'Jenis Tinggal'],
                 ['code' => '{{jarak_sekolah}}', 'desc' => 'Jarak Rumah ke Sekolah (km)'],
                 ['code' => '{{waktu_tempuh}}', 'desc' => 'Waktu Tempuh ke Sekolah (menit)'],
                 ['code' => '{{jumlah_saudara}}', 'desc' => 'Jumlah Saudara Kandung'],
                 ['code' => '{{hobi}}', 'desc' => 'Hobi Siswa'],
-                ['code' => '{{cita_cita}}', 'desc' => 'Cita-cita Siswa'], // 35
+                ['code' => '{{cita_cita}}', 'desc' => 'Cita-cita Siswa'],
             ];
 
-            // Split student variables into chunks of 10
             $siswaVarsChunk1 = array_slice($siswaVariables, 0, 10);
             $siswaVarsChunk2 = array_slice($siswaVariables, 10, 10);
             $siswaVarsChunk3 = array_slice($siswaVariables, 20, 10);
-            $siswaVarsChunk4 = array_slice($siswaVariables, 30); // Remaining
+            $siswaVarsChunk4 = array_slice($siswaVariables, 30);
+
+            // 2. Variabel Layanan (Sesuai JSON PTK, Tanpa Spasi)
+            $layananVariables = [
+                ['code' => '{{nama}}', 'desc' => 'Nama Pegawai'],
+                ['code' => '{{nip}}', 'desc' => 'NIP (Jika Ada)'],
+                ['code' => '{{nik}}', 'desc' => 'NIK'],
+                ['code' => '{{nuptk}}', 'desc' => 'NUPTK'],
+                ['code' => '{{jenis_kelamin}}', 'desc' => 'Jenis Kelamin (L/P)'],
+                ['code' => '{{tempat_lahir}}', 'desc' => 'Tempat Lahir'],
+                ['code' => '{{tanggal_lahir}}', 'desc' => 'Tanggal Lahir'],
+                ['code' => '{{agama_id_str}}', 'desc' => 'Agama'],
+                ['code' => '{{jenis_ptk_id_str}}', 'desc' => 'Jenis PTK (Misal: Tenaga Kependidikan)'],
+                ['code' => '{{jabatan_ptk_id_str}}', 'desc' => 'Jabatan PTK (Misal: Pesuruh)'],
+                ['code' => '{{status_kepegawaian_id_str}}', 'desc' => 'Status Kepegawaian (GTY/PTY)'],
+                ['code' => '{{pendidikan_terakhir}}', 'desc' => 'Pendidikan Terakhir'],
+                ['code' => '{{bidang_studi_terakhir}}', 'desc' => 'Bidang Studi Terakhir'],
+                ['code' => '{{pangkat_golongan_terakhir}}', 'desc' => 'Pangkat/Golongan'],
+                ['code' => '{{sk_pengangkatan}}', 'desc' => 'SK Pengangkatan'],
+                ['code' => '{{tmt_pengangkatan}}', 'desc' => 'TMT Pengangkatan'],
+                ['code' => '{{no_hp}}', 'desc' => 'No HP'],
+                ['code' => '{{email}}', 'desc' => 'Email'],
+                ['code' => '{{alamat_jalan}}', 'desc' => 'Alamat Jalan'],
+            ];
+
+            $layananVarsChunk1 = array_slice($layananVariables, 0, 10);
+            $layananVarsChunk2 = array_slice($layananVariables, 10);
 
             $allVariableGroups = [
                 'Data Umum (Wajib)' => [
@@ -239,19 +265,13 @@
                     ['code' => '{{tahun_ajaran}}', 'desc' => 'Tahun Ajaran Aktif'],
                 ],
 
-                // 1. DATA SISWA (Bagian 1)
-                'Identitas Siswa (Bagian 1)' => ($kategoriAktif == 'siswa') ? $siswaVarsChunk1 : [],
+                // DATA SISWA
+                'Identitas Siswa (Bagian 1)' => $kategoriAktif == 'siswa' ? $siswaVarsChunk1 : [],
+                'Identitas Siswa (Bagian 2)' => $kategoriAktif == 'siswa' ? $siswaVarsChunk2 : [],
+                'Identitas Siswa (Bagian 3)' => $kategoriAktif == 'siswa' ? $siswaVarsChunk3 : [],
+                'Identitas Siswa (Bagian 4)' => $kategoriAktif == 'siswa' ? $siswaVarsChunk4 : [],
 
-                // 1. DATA SISWA (Bagian 2)
-                'Identitas Siswa (Bagian 2)' => ($kategoriAktif == 'siswa') ? $siswaVarsChunk2 : [],
-                
-                // 1. DATA SISWA (Bagian 3)
-                'Identitas Siswa (Bagian 3)' => ($kategoriAktif == 'siswa') ? $siswaVarsChunk3 : [],
-
-                // 1. DATA SISWA (Bagian 4)
-                'Identitas Siswa (Bagian 4)' => ($kategoriAktif == 'siswa') ? $siswaVarsChunk4 : [],
-
-                // 2. DATA GURU (Tabel gtks)
+                // DATA GURU
                 'Identitas Guru' =>
                     $kategoriAktif == 'guru'
                         ? [
@@ -270,9 +290,13 @@
                         ]
                         : [],
 
-                // 3. DATA PEGAWAI KCD (INTERNAL)
+                // DATA LAYANAN
+                'Identitas Pegawai/Layanan (Bagian 1)' => $kategoriAktif == 'layanan' ? $layananVarsChunk1 : [],
+                'Identitas Pegawai/Layanan (Bagian 2)' => $kategoriAktif == 'layanan' ? $layananVarsChunk2 : [],
+
+                // DATA PEGAWAI KCD (INTERNAL)
                 'Identitas Pegawai KCD (Internal)' =>
-                    $kategoriAktif == 'internal' || $kategoriAktif == 'layanan'
+                    $kategoriAktif == 'internal'
                         ? [
                             ['code' => '{{nama}}', 'desc' => 'Nama Pegawai'],
                             ['code' => '{{nip}}', 'desc' => 'NIP'],
@@ -287,7 +311,7 @@
                         ]
                         : [],
 
-                // 4. DATA INSTANSI (Untuk Surat Keluar ke Instansi)
+                // DATA INSTANSI
                 'Identitas Instansi (Tujuan)' =>
                     $kategoriAktif == 'internal'
                         ? [
@@ -304,31 +328,30 @@
                         ]
                         : [],
             ];
-            
+
             // Split variable groups for pagination-like display in modal
             $groupKeys = array_keys($allVariableGroups);
-            
+
             if ($kategoriAktif == 'siswa') {
-                // For 'siswa' category, ensure Identitas Siswa (Bagian 3) and (Bagian 4) go to the second tab
-                $variableGroupsPage1 = array_slice($allVariableGroups, 0, 3, true); // Data Umum + Siswa Bagian 1 + Siswa Bagian 2
-                $variableGroupsPage2 = array_slice($allVariableGroups, 3, null, true); // Siswa Bagian 3, Siswa Bagian 4, Guru, Pegawai KCD, Instansi
+                $variableGroupsPage1 = array_slice($allVariableGroups, 0, 3, true);
+                $variableGroupsPage2 = array_slice($allVariableGroups, 3, null, true);
             } else {
-                // For other categories, apply a general even split
                 $halfPoint = ceil(count($groupKeys) / 2);
                 $variableGroupsPage1 = array_slice($allVariableGroups, 0, $halfPoint, true);
                 $variableGroupsPage2 = array_slice($allVariableGroups, $halfPoint, null, true);
             }
 
             // Tentukan grup variabel utama untuk Quick Access
-            $mainVarGroup = 'Identitas Siswa';
+            $mainVarGroup = 'Identitas Siswa (Bagian 1)';
             if ($kategoriAktif == 'guru') {
                 $mainVarGroup = 'Identitas Guru';
-            } elseif ($kategoriAktif == 'internal' || $kategoriAktif == 'layanan') {
-                // Prioritaskan Pegawai KCD
+            } elseif ($kategoriAktif == 'layanan') {
+                $mainVarGroup = 'Identitas Pegawai/Layanan (Bagian 1)';
+            } elseif ($kategoriAktif == 'internal') {
                 $mainVarGroup = 'Identitas Pegawai KCD (Internal)';
             }
 
-            // quickAccess should use the full list of groups to avoid missing variables
+            // Quick Access menggunakan data yang sesuai tab aktif
             $quickAccess = array_merge(
                 $allVariableGroups['Data Umum (Wajib)'],
                 array_slice($allVariableGroups[$mainVarGroup] ?? [], 0, 8),
@@ -361,7 +384,6 @@
                     <i class='bx bx-file me-1'></i> SK
                 </a>
             </li>
-            {{-- 🔥 TAB BARU: INTERNAL 🔥 --}}
             <li class="nav-item">
                 <a class="nav-link {{ $kategoriAktif == 'internal' ? 'active' : '' }}"
                     href="{{ route('admin.administrasi.tipe-surat.index', ['kategori' => 'internal']) }}">
@@ -563,7 +585,6 @@
     {{-- MODAL VARIABLE --}}
     <div class="modal fade" id="variableModal" tabindex="-1">
         <div class="modal-dialog modal-lg modal-dialog-centered">
-            {{-- 🔥 MODAL CONTENT TANPA ROUNDED-4 & TOMBOL CLOSE FLOATING 🔥 --}}
             <div class="modal-content border-0 shadow-lg">
                 <div class="modal-header bg-primary text-white border-0 position-relative">
                     <h5 class="modal-title text-white">Daftar Variabel</h5>
@@ -572,14 +593,19 @@
                 <div class="modal-body bg-light p-4">
                     <ul class="nav nav-tabs" id="variableTab" role="tablist">
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link active" id="variable-tab-1" data-bs-toggle="tab" data-bs-target="#variable-pane-1" type="button" role="tab" aria-controls="variable-pane-1" aria-selected="true">Variabel Dasar</button>
+                            <button class="nav-link active" id="variable-tab-1" data-bs-toggle="tab"
+                                data-bs-target="#variable-pane-1" type="button" role="tab"
+                                aria-controls="variable-pane-1" aria-selected="true">Variabel Dasar</button>
                         </li>
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link" id="variable-tab-2" data-bs-toggle="tab" data-bs-target="#variable-pane-2" type="button" role="tab" aria-controls="variable-pane-2" aria-selected="false">Variabel Lanjutan</button>
+                            <button class="nav-link" id="variable-tab-2" data-bs-toggle="tab"
+                                data-bs-target="#variable-pane-2" type="button" role="tab"
+                                aria-controls="variable-pane-2" aria-selected="false">Variabel Lanjutan</button>
                         </li>
                     </ul>
                     <div class="tab-content pt-3" id="variableTabContent">
-                        <div class="tab-pane fade show active" id="variable-pane-1" role="tabpanel" aria-labelledby="variable-tab-1" tabindex="0">
+                        <div class="tab-pane fade show active" id="variable-pane-1" role="tabpanel"
+                            aria-labelledby="variable-tab-1" tabindex="0">
                             @foreach ($variableGroupsPage1 as $groupName => $vars)
                                 @if (!empty($vars))
                                     <div class="mb-4 variable-group" data-group-name="{{ $groupName }}">
@@ -597,7 +623,8 @@
                                 @endif
                             @endforeach
                         </div>
-                        <div class="tab-pane fade" id="variable-pane-2" role="tabpanel" aria-labelledby="variable-tab-2" tabindex="0">
+                        <div class="tab-pane fade" id="variable-pane-2" role="tabpanel" aria-labelledby="variable-tab-2"
+                            tabindex="0">
                             @foreach ($variableGroupsPage2 as $groupName => $vars)
                                 @if (!empty($vars))
                                     <div class="mb-4 variable-group" data-group-name="{{ $groupName }}">
