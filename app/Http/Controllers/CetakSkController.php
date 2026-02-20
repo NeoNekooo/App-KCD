@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\PengajuanSekolah;
 use App\Models\TipeSurat;
+use App\Models\Instansi; // <-- IMPORT MODEL INSTANSI BRE!
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -78,6 +79,26 @@ class CetakSkController extends Controller
             }, $isiSuratRaw);
         }
 
+        // 🔥 AMBIL DATA INSTANSI KCD 🔥
+        $kcd = Instansi::first();
+
+        // 🔥 LOGIC RENDER FOTO TANDA TANGAN UNTUK DOMPDF 🔥
+        $tandaTanganHtml = '';
+        if ($kcd && $kcd->tanda_tangan) {
+            // Gunakan Base64 agar DomPDF 100% bisa render tanpa error path
+            // Asumsi file tersimpan di storage/app/public/ (via php artisan storage:link)
+            $imagePath = public_path('storage/' . $kcd->tanda_tangan);
+            
+            if (file_exists($imagePath)) {
+                $ext = pathinfo($imagePath, PATHINFO_EXTENSION);
+                $imgBase64 = base64_encode(file_get_contents($imagePath));
+                $tandaTanganHtml = '<img src="data:image/'.$ext.';base64,'.$imgBase64.'" style="max-height: 120px; width: auto;" alt="Tanda Tangan">';
+            } else {
+                // Fallback jika pakai path URL asset biasa
+                $tandaTanganHtml = '<img src="'.asset('storage/' . $kcd->tanda_tangan).'" style="max-height: 120px; width: auto;" alt="Tanda Tangan">';
+            }
+        }
+
         // 4. SIAPKAN DATA REPLACE (Mail Merge)
         $replacements = [
             // Data Global
@@ -88,11 +109,22 @@ class CetakSkController extends Controller
             '[NOMOR_SURAT]'  => $data->nomor_sk ?? '...',
             '[TANGGAL_ACC]'  => $data->tgl_selesai ? Carbon::parse($data->tgl_selesai)->isoFormat('D MMMM Y') : date('d F Y'),
             
-            // Variabel Dasar Template (Tanpa Spasi)
+            // Variabel Dasar Template
             '{{no_surat}}'   => $data->nomor_sk ?? '-',
             '{{tanggal}}'    => $data->tgl_selesai ? Carbon::parse($data->tgl_selesai)->isoFormat('D MMMM Y') : date('d F Y'),
             '{{sekolah}}'    => $data->nama_sekolah,
-            '{{tahun_ajaran}}'=> '2023/2024', // Sesuaikan logika tapel
+            '{{tahun_ajaran}}'=> '2023/2024', 
+
+            // 🔥 VARIABEL INSTANSI KCD 🔥
+            '{{nama_instansi}}'   => $kcd->nama_instansi ?? 'CABANG DINAS PENDIDIKAN',
+            '{{nama_brand}}'      => $kcd->nama_brand ?? '',
+            '{{nama_kepala}}'     => $kcd->nama_kepala ?? 'Nama Kepala KCD',
+            '{{nip_kepala}}'      => $kcd->nip_kepala ?? '-',
+            '{{alamat_instansi}}' => $kcd->alamat ?? '-',
+            '{{email_instansi}}'  => $kcd->email ?? '-',
+            '{{telepon_instansi}}'=> $kcd->telepon ?? '-',
+            '{{website_instansi}}'=> $kcd->website ?? '-',
+            '{{tanda_tangan}}'    => $tandaTanganHtml, // Hasil render tag <img> dari atas
         ];
 
         // 🔥 DECODE JSON DARI KOLOM data_siswa_json 🔥
@@ -162,8 +194,6 @@ class CetakSkController extends Controller
                 
                 $replacements['{{tempat_lahir}}'] = $parsedData->tempat_lahir ?? '-';
                 $replacements['{{tanggal_lahir}}'] = isset($parsedData->tanggal_lahir) ? Carbon::parse($parsedData->tanggal_lahir)->isoFormat('D MMMM Y') : '-';
-                
-                // INI YANG MEMPERBAIKI KODE {{jenis_kelamin}} AGAR MUNCUL L/P
                 $replacements['{{jenis_kelamin}}'] = $parsedData->jenis_kelamin ?? '-'; 
                 
                 $replacements['{{agama_id_str}}'] = $parsedData->agama_id_str ?? '-';

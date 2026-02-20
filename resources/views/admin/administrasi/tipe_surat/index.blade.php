@@ -258,12 +258,29 @@
             $layananVarsChunk1 = array_slice($layananVariables, 0, 10);
             $layananVarsChunk2 = array_slice($layananVariables, 10);
 
+            // 3. 🔥 Variabel Instansi KCD (Sesuai Model, Termasuk Tanda Tangan) 🔥
+            $instansiVariables = [
+                ['code' => '{{nama_instansi}}', 'desc' => 'Nama Instansi (KCD)'],
+                ['code' => '{{nama_brand}}', 'desc' => 'Nama Brand KCD'],
+                ['code' => '{{nama_kepala}}', 'desc' => 'Nama Kepala KCD'],
+                ['code' => '{{nip_kepala}}', 'desc' => 'NIP Kepala KCD'],
+                // INI VARIABEL UNTUK GAMBAR TANDA TANGAN
+                ['code' => '{{tanda_tangan}}', 'desc' => 'Tanda Tangan Instansi (Gambar)'], 
+                ['code' => '{{alamat_instansi}}', 'desc' => 'Alamat KCD'],
+                ['code' => '{{email_instansi}}', 'desc' => 'Email KCD'],
+                ['code' => '{{telepon_instansi}}', 'desc' => 'Telepon KCD'],
+                ['code' => '{{website_instansi}}', 'desc' => 'Website KCD'],
+            ];
+
             $allVariableGroups = [
                 'Data Umum (Wajib)' => [
                     ['code' => '{{no_surat}}', 'desc' => 'Nomor Surat Resmi'],
                     ['code' => '{{tanggal}}', 'desc' => 'Tanggal Cetak (Indo)'],
                     ['code' => '{{tahun_ajaran}}', 'desc' => 'Tahun Ajaran Aktif'],
                 ],
+
+                // 🔥 TAMBAHAN GROUP KCD (Akan muncul di semua tab karena selalu dibutuhkan) 🔥
+                'Identitas Instansi (KCD)' => $instansiVariables,
 
                 // DATA SISWA
                 'Identitas Siswa (Bagian 1)' => $kategoriAktif == 'siswa' ? $siswaVarsChunk1 : [],
@@ -311,20 +328,14 @@
                         ]
                         : [],
 
-                // DATA INSTANSI
-                'Identitas Instansi (Tujuan)' =>
+                // DATA INSTANSI INTERNAL 
+                'Identitas Instansi (Tujuan Internal)' =>
                     $kategoriAktif == 'internal'
                         ? [
-                            ['code' => '{{nama_instansi}}', 'desc' => 'Nama Instansi'],
-                            ['code' => '{{nama_brand}}', 'desc' => 'Nama Brand'],
-                            ['code' => '{{nama_kepala_instansi}}', 'desc' => 'Nama Kepala Instansi'],
-                            ['code' => '{{nip_kepala_instansi}}', 'desc' => 'NIP Kepala'],
-                            ['code' => '{{alamat_instansi}}', 'desc' => 'Alamat Instansi'],
-                            ['code' => '{{telepon_instansi}}', 'desc' => 'Telepon'],
-                            ['code' => '{{email_instansi}}', 'desc' => 'Email'],
-                            ['code' => '{{website_instansi}}', 'desc' => 'Website'],
-                            ['code' => '{{logo_instansi}}', 'desc' => 'Logo (Gambar)'],
-                            ['code' => '{{tanda_tangan_instansi}}', 'desc' => 'Tanda Tangan (Gambar)'],
+                            ['code' => '{{nama_instansi_tujuan}}', 'desc' => 'Nama Instansi Tujuan'],
+                            ['code' => '{{nama_kepala_tujuan}}', 'desc' => 'Nama Kepala Instansi'],
+                            ['code' => '{{nip_kepala_tujuan}}', 'desc' => 'NIP Kepala'],
+                            ['code' => '{{alamat_instansi_tujuan}}', 'desc' => 'Alamat Instansi'],
                         ]
                         : [],
             ];
@@ -351,10 +362,15 @@
                 $mainVarGroup = 'Identitas Pegawai KCD (Internal)';
             }
 
-            // Quick Access menggunakan data yang sesuai tab aktif
+            // Quick Access menggunakan data yang sesuai tab aktif + Ditambah Nama, NIP & Tanda Tangan
             $quickAccess = array_merge(
                 $allVariableGroups['Data Umum (Wajib)'],
-                array_slice($allVariableGroups[$mainVarGroup] ?? [], 0, 8),
+                [
+                    ['code' => '{{nama_kepala}}', 'desc' => 'Nama Kepala KCD'],
+                    ['code' => '{{nip_kepala}}', 'desc' => 'NIP Kepala KCD'],
+                    ['code' => '{{tanda_tangan}}', 'desc' => 'Tanda Tangan']
+                ],
+                array_slice($allVariableGroups[$mainVarGroup] ?? [], 0, 5)
             );
         @endphp
 
@@ -595,7 +611,7 @@
                         <li class="nav-item" role="presentation">
                             <button class="nav-link active" id="variable-tab-1" data-bs-toggle="tab"
                                 data-bs-target="#variable-pane-1" type="button" role="tab"
-                                aria-controls="variable-pane-1" aria-selected="true">Variabel Dasar</button>
+                                aria-controls="variable-pane-1" aria-selected="true">Variabel Dasar & KCD</button>
                         </li>
                         <li class="nav-item" role="presentation">
                             <button class="nav-link" id="variable-tab-2" data-bs-toggle="tab"
@@ -676,22 +692,10 @@
     @push('scripts')
         <script>
             const paperConfig = {
-                'A4': {
-                    width: '210mm',
-                    heightVal: 297
-                },
-                'F4': {
-                    width: '215mm',
-                    heightVal: 330
-                },
-                'Legal': {
-                    width: '216mm',
-                    heightVal: 356
-                },
-                'Letter': {
-                    width: '216mm',
-                    heightVal: 279
-                }
+                'A4': { width: '210mm', heightVal: 297 },
+                'F4': { width: '215mm', heightVal: 330 },
+                'Legal': { width: '216mm', heightVal: 356 },
+                'Letter': { width: '216mm', heightVal: 279 }
             };
 
             let pageCount = {{ count($pages) }};
