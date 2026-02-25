@@ -31,7 +31,7 @@
                         <th>No</th>
                         <th>NPSN</th>
                         <th>Nama Sekolah</th>
-                        <th>Status</th>
+                        <th>Status Data</th>
                         <th>Waktu Sinkronisasi</th>
                     </tr>
                 </thead>
