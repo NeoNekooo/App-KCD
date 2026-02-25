@@ -52,13 +52,14 @@
             border-left: 4px solid #696cff;
             transition: all 0.3s ease;
         }
+
         .switch-box:hover {
             background-color: #fff;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
         }
 
         /* Table Enhancements */
-        .table > :not(caption) > * > * {
+        .table> :not(caption)>*>* {
             padding: 1rem 1.25rem;
         }
     </style>
@@ -74,15 +75,17 @@
             {{-- KOLOM KIRI: FORM INPUT --}}
             <div class="col-lg-4 col-md-5">
                 <div class="card shadow-sm border-0 sticky-top" style="top: 80px; z-index: 10;">
-                    <div class="card-header d-flex justify-content-between align-items-center bg-transparent border-bottom pt-4 pb-3">
+                    <div
+                        class="card-header d-flex justify-content-between align-items-center bg-transparent border-bottom pt-4 pb-3">
                         <h5 class="mb-0 text-primary fw-bold d-flex align-items-center" id="formTitle">
                             <i class='bx bx-plus-circle fs-4 me-2'></i> Tambah Menu Baru
                         </h5>
-                        <button type="button" class="btn btn-sm btn-light text-danger fw-bold d-none rounded-pill px-3" id="btnReset" onclick="resetForm()">
+                        <button type="button" class="btn btn-sm btn-light text-danger fw-bold d-none rounded-pill px-3"
+                            id="btnReset" onclick="resetForm()">
                             <i class='bx bx-x fs-5'></i> Batal
                         </button>
                     </div>
-                    
+
                     <div class="card-body pt-4">
                         <form id="menuForm" action="{{ route('admin.settings.menus.store') }}" method="POST">
                             @csrf
@@ -90,28 +93,36 @@
 
                             {{-- 1. JUDUL & SLUG --}}
                             <div class="mb-4">
-                                <label class="form-label fw-semibold text-dark">Judul Menu <span class="text-danger">*</span></label>
+                                <label class="form-label fw-semibold text-dark">Judul Menu <span
+                                        class="text-danger">*</span></label>
                                 <div class="input-group input-group-merge">
                                     <span class="input-group-text"><i class="bx bx-text"></i></span>
-                                    <input type="text" class="form-control" name="title" id="title" required placeholder="Contoh: Data Pegawai" onkeyup="generateSlug()">
+                                    <input type="text" class="form-control" name="title" id="title" required
+                                        placeholder="Contoh: Data Pegawai" onkeyup="generateSlug()">
                                 </div>
                             </div>
 
                             <div class="mb-4">
-                                <label class="form-label fw-semibold text-dark">Slug (ID Sistem) <span class="text-danger">*</span></label>
+                                <label class="form-label fw-semibold text-dark">Slug (ID Sistem) <span
+                                        class="text-danger">*</span></label>
                                 <div class="input-group input-group-merge">
                                     <span class="input-group-text bg-light"><i class="bx bx-link"></i></span>
-                                    <input type="text" class="form-control bg-light" name="slug" id="slug" required readonly placeholder="terisi-otomatis">
+                                    <input type="text" class="form-control bg-light" name="slug" id="slug"
+                                        required readonly placeholder="terisi-otomatis">
                                 </div>
                             </div>
 
                             {{-- 2. HEADER TOGGLE --}}
                             <div class="mb-4">
                                 <div class="form-check form-switch p-3 rounded switch-box d-flex align-items-start gap-3">
-                                    <input class="form-check-input mt-1 ms-0" type="checkbox" name="is_header" id="is_header" onchange="toggleHeaderFields()" style="width: 2.5rem; height: 1.25rem; cursor: pointer;">
+                                    <input class="form-check-input mt-1 ms-0" type="checkbox" name="is_header"
+                                        id="is_header" onchange="toggleHeaderFields()"
+                                        style="width: 2.5rem; height: 1.25rem; cursor: pointer;">
                                     <div class="ms-2">
-                                        <label class="form-check-label fw-bold text-dark mb-1" for="is_header" style="cursor: pointer;">Jadikan Judul Pembatas (Header)</label>
-                                        <p class="text-muted small mb-0">Jika aktif, menu ini hanya berfungsi sebagai tulisan pemisah (Misal: "DATA MASTER").</p>
+                                        <label class="form-check-label fw-bold text-dark mb-1" for="is_header"
+                                            style="cursor: pointer;">Jadikan Judul Pembatas (Header)</label>
+                                        <p class="text-muted small mb-0">Jika aktif, menu ini hanya berfungsi sebagai
+                                            tulisan pemisah (Misal: "DATA MASTER").</p>
                                     </div>
                                 </div>
                             </div>
@@ -119,21 +130,14 @@
                             {{-- 3. FIELD REGULAR (Icon, Route, Parent) --}}
                             <div id="regularFields">
                                 <div class="mb-4">
-                                    <label class="form-label fw-semibold text-dark">Icon Menu</label>
-                                    <div class="input-group">
-                                        <span class="input-group-text bg-white text-primary" id="iconPreviewAddon"><i class='bx bx-cube fs-5'></i></span>
-                                        <input type="text" class="form-control" name="icon" id="icon" placeholder="Pilih icon..." readonly onclick="openIconModal()" style="cursor: pointer; background-color: #fff;">
-                                        <button class="btn btn-primary px-4" type="button" onclick="openIconModal()">Pilih</button>
-                                    </div>
-                                </div>
-
-                                <div class="mb-4">
                                     <label class="form-label fw-semibold text-dark">Route Laravel</label>
                                     <div class="input-group input-group-merge">
                                         <span class="input-group-text"><i class="bx bx-navigation"></i></span>
-                                        <input type="text" class="form-control font-monospace text-primary" name="route_name" id="route_name" placeholder="admin.dashboard">
+                                        <input type="text" class="form-control font-monospace text-primary"
+                                            name="route_name" id="route_name" placeholder="admin.dashboard">
                                     </div>
-                                    <div class="form-text text-muted mt-2"><i class="bx bx-info-circle"></i> Kosongkan jika ini menu induk yang punya submenu.</div>
+                                    <div class="form-text text-muted mt-2"><i class="bx bx-info-circle"></i> Kosongkan jika
+                                        ini menu induk yang punya submenu.</div>
                                 </div>
 
                                 <div class="mb-4">
@@ -152,20 +156,38 @@
                                 </div>
                             </div>
 
+                            <div class="mb-4">
+                                <label class="form-label fw-semibold text-dark">Icon Menu</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-white text-primary" id="iconPreviewAddon"><i
+                                            class='bx bx-cube fs-5'></i></span>
+                                    <input type="text" class="form-control" name="icon" id="icon"
+                                        placeholder="Pilih icon..." readonly onclick="openIconModal()"
+                                        style="cursor: pointer; background-color: #fff;">
+                                    <button class="btn btn-primary px-4" type="button"
+                                        onclick="openIconModal()">Pilih</button>
+                                </div>
+                            </div>
+
                             {{-- 4. URUTAN --}}
                             <div class="mb-4">
                                 <label class="form-label fw-semibold text-dark">Urutan Tampil</label>
-                                <input type="number" class="form-control" name="urutan" id="urutan" value="1" min="1">
+                                <input type="number" class="form-control" name="urutan" id="urutan" value="1"
+                                    min="1">
                             </div>
 
                             {{-- 5. HAK AKSES (CHIPS) --}}
                             <div class="mb-4">
-                                <label class="form-label fw-semibold text-dark d-block mb-2"><i class="bx bx-shield-quarter text-primary"></i> Siapa yang boleh akses?</label>
+                                <label class="form-label fw-semibold text-dark d-block mb-2"><i
+                                        class="bx bx-shield-quarter text-primary"></i> Siapa yang boleh akses?</label>
                                 <div class="d-flex flex-wrap gap-2 mt-2">
                                     @foreach ($roles as $role)
                                         <div>
-                                            <input type="checkbox" class="btn-check role-check" name="roles[]" id="role_{{ Str::slug($role) }}" value="{{ $role }}" autocomplete="off">
-                                            <label class="btn btn-outline-primary rounded-pill role-label px-3 py-1" for="role_{{ Str::slug($role) }}">
+                                            <input type="checkbox" class="btn-check role-check" name="roles[]"
+                                                id="role_{{ Str::slug($role) }}" value="{{ $role }}"
+                                                autocomplete="off">
+                                            <label class="btn btn-outline-primary rounded-pill role-label px-3 py-1"
+                                                for="role_{{ Str::slug($role) }}">
                                                 {{ $role }}
                                             </label>
                                         </div>
@@ -175,7 +197,8 @@
 
                             <hr class="my-4">
 
-                            <button type="submit" class="btn btn-primary w-100 fw-bold py-2 shadow-sm d-flex align-items-center justify-content-center gap-2">
+                            <button type="submit"
+                                class="btn btn-primary w-100 fw-bold py-2 shadow-sm d-flex align-items-center justify-content-center gap-2">
                                 <i class='bx bx-save fs-5'></i> Simpan Konfigurasi Menu
                             </button>
                         </form>
@@ -191,7 +214,7 @@
                             <i class='bx bx-list-ul text-primary fs-4 me-2'></i> Struktur Menu Aplikasi Saat Ini
                         </h5>
                     </div>
-                    
+
                     <div class="table-responsive text-nowrap">
                         <table class="table table-hover align-middle mb-0">
                             <thead class="table-light">
@@ -246,14 +269,14 @@
     <script>
         // --- ICON LIST (Ditambah biar makin kaya pilihan) ---
         const icons = [
-            'bx-home-circle', 'bx-home-alt', 'bx-user', 'bx-user-circle', 'bx-group', 
-            'bx-grid-alt', 'bx-category', 'bx-folder', 'bx-folder-open', 'bx-file', 
-            'bx-file-blank', 'bx-envelope', 'bx-cog', 'bx-wrench', 'bx-shield', 
-            'bx-shield-quarter', 'bx-lock', 'bx-key', 'bx-bar-chart-alt-2', 'bx-line-chart', 
-            'bx-pie-chart-alt', 'bx-briefcase-alt-2', 'bx-id-card', 'bx-buildings', 
-            'bx-store-alt', 'bx-check-shield', 'bx-paper-plane', 'bx-wallet', 'bx-money', 
-            'bx-medal', 'bx-bell', 'bx-calendar', 'bx-calendar-event', 'bx-star', 
-            'bx-archive', 'bx-trash', 'bx-printer', 'bx-search', 'bx-filter', 
+            'bx-home-circle', 'bx-home-alt', 'bx-user', 'bx-user-circle', 'bx-group',
+            'bx-grid-alt', 'bx-category', 'bx-folder', 'bx-folder-open', 'bx-file',
+            'bx-file-blank', 'bx-envelope', 'bx-cog', 'bx-wrench', 'bx-shield',
+            'bx-shield-quarter', 'bx-lock', 'bx-key', 'bx-bar-chart-alt-2', 'bx-line-chart',
+            'bx-pie-chart-alt', 'bx-briefcase-alt-2', 'bx-id-card', 'bx-buildings',
+            'bx-store-alt', 'bx-check-shield', 'bx-paper-plane', 'bx-wallet', 'bx-money',
+            'bx-medal', 'bx-bell', 'bx-calendar', 'bx-calendar-event', 'bx-star',
+            'bx-archive', 'bx-trash', 'bx-printer', 'bx-search', 'bx-filter',
             'bx-list-ul', 'bx-menu', 'bx-dots-vertical-rounded'
         ];
 
@@ -294,7 +317,8 @@
         }
 
         function editMenu(menu, roles) {
-            document.getElementById('formTitle').innerHTML = "<i class='bx bx-edit fs-4 me-2'></i> Edit Menu: <span class='text-dark ms-1'>" + menu.title + "</span>";
+            document.getElementById('formTitle').innerHTML =
+                "<i class='bx bx-edit fs-4 me-2'></i> Edit Menu: <span class='text-dark ms-1'>" + menu.title + "</span>";
             document.getElementById('btnReset').classList.remove('d-none');
 
             let url = "{{ route('admin.settings.menus.update', ':id') }}".replace(':id', menu.id);
