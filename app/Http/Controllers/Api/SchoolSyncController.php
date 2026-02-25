@@ -111,8 +111,10 @@ class SchoolSyncController extends Controller
             }
         }
 
-        // 🔥 5. REKAM LOG (1 SEKOLAH = 1 BARIS AJA) 🔥
-        $this->recordSimpleLog($request, $firstRow, $tableName, $processed, count($errors));
+        // 🔥 5. CUMA REKAM LOG JIKA YANG SINKRON ADALAH TABEL 'sekolahs' 🔥
+        if ($tableName === 'sekolahs') {
+            $this->recordSimpleLog($request, $firstRow, $processed, count($errors));
+        }
 
         $msg = "Berhasil memproses $processed data.";
         if (count($errors) > 0) {
@@ -128,48 +130,46 @@ class SchoolSyncController extends Controller
     /**
      * 🔥 FUNGSI BARU: 1 SEKOLAH CUMA 1 BARIS DATA LOG
      */
-    private function recordSimpleLog($request, $firstRow, $tableName, $processedCount, $errorCount)
+    private function recordSimpleLog($request, $firstRow, $processedCount, $errorCount)
     {
+        // Pake kolom 'nama' sesuai permintaan lu
         $npsn = $request->input('npsn') ?? ($firstRow['npsn'] ?? '-');
-        $namaSekolah = $request->input('nama_sekolah') ?? ($firstRow['nama_sekolah'] ?? 'Tidak Diketahui');
+        $namaSekolah = $request->input('nama') ?? ($firstRow['nama'] ?? 'Tidak Diketahui');
 
         // Bikin tabel sync_logs super simpel kalau belum ada
         if (!Schema::hasTable('sync_logs')) {
             Schema::create('sync_logs', function ($blueprint) {
                 $blueprint->id();
-                $blueprint->string('npsn')->nullable();
+                $blueprint->string('npsn')->nullable()->index();
                 $blueprint->string('nama_sekolah')->nullable();
-                $blueprint->string('tabel_tujuan')->nullable();
                 $blueprint->string('status')->nullable();
                 $blueprint->timestamps(); 
             });
         }
 
-        // Penentuan teks status
+        // Teks status super simpel
         $statusText = ($errorCount == 0) 
-            ? "Masuk Semua ($processedCount data)" 
+            ? "Masuk Semua" 
             : "Masuk: $processedCount, Gagal: $errorCount";
 
-        // 🔥 Cek apakah sekolah ini sudah pernah nge-sync sebelumnya
-        $exists = DB::table('sync_logs')->where('nama_sekolah', $namaSekolah)->first();
+        // 🔥 Cek berdasarkan NPSN (Biar paten 1 sekolah 1 baris)
+        $exists = DB::table('sync_logs')->where('npsn', $npsn)->first();
 
         if ($exists) {
-            // Kalo udah ada, UPDATE data barisnya aja (Gak akan nambah baris baru kebawah)
+            // Update barisnya aja, kolom updated_at otomatis jalan jadi patokan "Terakhir Sinkron"
             DB::table('sync_logs')->where('id', $exists->id)->update([
-                'npsn'         => $npsn,
-                'tabel_tujuan' => $tableName,
+                'nama_sekolah' => $namaSekolah, // Update jaga-jaga kalo namanya berubah
                 'status'       => $statusText,
-                'updated_at'   => now(), // WAKTU TERAKHIR SINKRONISASI UPDATE DI SINI
+                'updated_at'   => now(), 
             ]);
         } else {
-            // Kalo ini pertama kalinya sekolah tersebut nge-sync, baru kita INSERT
+            // Insert baru kalo sekolah ini blm pernah sync sama sekali
             DB::table('sync_logs')->insert([
                 'npsn'         => $npsn,
                 'nama_sekolah' => $namaSekolah,
-                'tabel_tujuan' => $tableName,
                 'status'       => $statusText,
                 'created_at'   => now(),
-                'updated_at'   => now(), // WAKTU TERAKHIR SINKRONISASI
+                'updated_at'   => now(), 
             ]);
         }
     }
