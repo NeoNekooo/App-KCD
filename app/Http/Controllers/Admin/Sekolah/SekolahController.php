@@ -19,7 +19,15 @@ class SekolahController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Sekolah::query();
+        // 🔥 AKAL-AKALAN SUBQUERY: Ambil data sekolah + tanggal terakhir sinkron dari tabel sync_logs
+        $query = Sekolah::select('sekolahs.*')
+            ->addSelect([
+                'terakhir_sinkron' => DB::table('sync_logs')
+                    ->select('updated_at')
+                    ->whereColumn('sync_logs.npsn', 'sekolahs.npsn')
+                    ->orderByDesc('updated_at')
+                    ->limit(1)
+            ]);
 
         // --- 1. FILTER DATA UTAMA (Query untuk Tabel) ---
         $query->when($request->filled('kabupaten_kota'), fn($q) => $q->where('kabupaten_kota', $request->kabupaten_kota));
@@ -138,4 +146,3 @@ class SekolahController extends Controller
         return Excel::download(new SekolahExport($request), 'Data_Satuan_Pendidikan.xlsx');
     }
 }
-

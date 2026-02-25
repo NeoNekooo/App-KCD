@@ -128,6 +128,8 @@
                     <th>Jenjang</th>
                     <th>Status</th>
                     <th>Lokasi</th>
+                    {{-- 🔥 TAMBAH KOLOM TERAKHIR SINKRON 🔥 --}}
+                    <th>Terakhir Sinkron</th>
                     <th class="text-center">Detail</th>
                 </tr>
             </thead>
@@ -163,13 +165,30 @@
                             <small class="text-muted" style="font-size: 0.75rem;">{{ $sekolah->kabupaten_kota ?? '-' }}</small>
                         </div>
                     </td>
+                    
+                    {{-- 🔥 TAMPILAN TERAKHIR SINKRON 🔥 --}}
+                    <td>
+                        @if($sekolah->terakhir_sinkron)
+                            <div class="d-flex flex-column">
+                                <span class="badge bg-label-success mb-1" style="width: fit-content;">
+                                    <i class="bx bx-check-circle me-1"></i> {{ \Carbon\Carbon::parse($sekolah->terakhir_sinkron)->diffForHumans() }}
+                                </span>
+                                <small class="text-muted" style="font-size: 0.7rem;">
+                                    {{ \Carbon\Carbon::parse($sekolah->terakhir_sinkron)->format('d M Y, H:i') }}
+                                </small>
+                            </div>
+                        @else
+                            <span class="badge bg-label-secondary" data-bs-toggle="tooltip" title="Sekolah ini belum pernah melakukan sinkronisasi data">Belum Sinkron</span>
+                        @endif
+                    </td>
+
                     <td class="text-center">
                         <a href="{{ route('admin.sekolah.show', $sekolah->id) }}" class="btn btn-sm btn-icon btn-label-info"><i class="bx bx-show-alt"></i></a>
                     </td>
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="7" class="text-center py-5">
+                    <td colspan="8" class="text-center py-5">
                         <div class="d-flex flex-column align-items-center"><i class="bx bx-buildings bx-lg text-muted mb-3"></i><h6 class="text-muted">Data tidak ditemukan.</h6></div>
                     </td>
                 </tr>
