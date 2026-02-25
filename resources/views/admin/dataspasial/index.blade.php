@@ -731,9 +731,20 @@
                     attribution: '© Esri',
                     maxZoom: 18
                 });
+
+            // 🔥 BATAS KOORDINAT INDONESIA 🔥
+            // Array: [[Selatan, Barat], [Utara, Timur]]
+            var boundsIndonesia = [
+                [-11.00, 94.00], // Barat Daya (Dekat Samudra Hindia)
+                [6.00, 141.00]   // Timur Laut (Dekat Papua/Filipina)
+            ];
+
             var map = L.map('map', {
                 center: [-6.85, 107.35],
                 zoom: 10,
+                minZoom: 5, // Batas zoom out agar tidak terlalu jauh
+                maxBounds: boundsIndonesia, // Kunci peta hanya di area Indonesia
+                maxBoundsViscosity: 1.0, // Efek mentok/nabrak batas (1.0 = tidak bisa ditarik sama sekali)
                 layers: [streetLayer],
                 zoomControl: false
             });
@@ -755,8 +766,7 @@
             }).addTo(map);
 
             // UI Elements Injection
-            var mapContainer = document.getElementById(
-            'map-container'); // Inject ke map-container biar ikut fullscreen
+            var mapContainer = document.getElementById('map-container'); // Inject ke map-container biar ikut fullscreen
             ['customFab', 'customFilterModal', 'customDistanceModal', '.map-stats', 'schoolDetailCard'].forEach(
                 sel => {
                     var el = sel.startsWith('.') ? document.querySelector(sel) : document.getElementById(sel);
@@ -977,13 +987,17 @@
                 });
             });
 
-            // GPS & Measure
-            document.getElementById('btnMyLocation').addEventListener('click', () => {
-                map.locate({
-                    setView: true,
-                    maxZoom: 15
+            // Handle My Location Button if it exists
+            const btnMyLocation = document.getElementById('btnMyLocation');
+            if(btnMyLocation) {
+                btnMyLocation.addEventListener('click', () => {
+                    map.locate({
+                        setView: true,
+                        maxZoom: 15
+                    });
                 });
-            });
+            }
+            
             map.on('locationfound', e => {
                 L.popup().setLatLng(e.latlng).setContent("📍 Lokasi Anda").openOn(map);
                 L.circle(e.latlng, {
