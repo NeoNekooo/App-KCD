@@ -18,6 +18,9 @@ use App\Http\Controllers\Admin\JabatanKcdController;
 use App\Http\Controllers\Admin\Sekolah\SekolahController as SekolahMonitoringController;
 use App\Http\Controllers\Admin\Kepegawaian\GtkController;
 use App\Http\Controllers\Admin\Kesiswaan\SiswaController;
+// 🔥 Import Controller Monitoring Sync 🔥
+use App\Http\Controllers\Admin\SyncLogController;
+
 // 🔥 [UPDATE] Import Controller Data Spasial 🔥
 use App\Http\Controllers\Admin\DataSpasialController;
 
@@ -128,6 +131,9 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
     |--------------------------------------------------------------------------
     */
     
+    // 🔥 Route Monitoring Sync Log 🔥
+    Route::get('monitoring-sync', [SyncLogController::class, 'index'])->name('monitoring-sync.index');
+
     Route::middleware('check_menu:satuan-pendidikan')->group(function() {
         Route::get('sekolah/export-excel', [SekolahMonitoringController::class, 'exportExcel'])->name('sekolah.export-excel');
         Route::resource('sekolah', SekolahMonitoringController::class)->only(['index', 'show']);
