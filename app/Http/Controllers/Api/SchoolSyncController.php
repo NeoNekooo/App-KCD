@@ -12,118 +12,141 @@ class SchoolSyncController extends Controller
 {
     public function handle(Request $request, $table)
     {
-        // 1. Ambil Data
-        $input = $request->input('rows');
+        // 🔥 DOPING SERVER: Biar kuat nampung ribuan data Siswa tanpa Time-Out! 🔥
+        set_time_limit(0); 
+        ini_set('memory_limit', '-1');
 
-        if (empty($input) || !is_array($input)) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Format data tidak valid. Harapkan key "rows" berisi array data.'
-            ], 400);
-        }
+        try {
+            // 1. Ambil Data
+            $input = $request->input('rows');
 
-        // 2. Normalisasi Nama Tabel
-        $tableName = Str::plural($table); 
+            // Cek apakah payload terlalu besar sampai gagal dibaca PHP
+            if ($input === null && $request->getContent() !== '') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Ukuran data terlalu besar. Hubungi Admin KCD untuk menaikkan limit upload (post_max_size).'
+                ], 413);
+            }
 
-        // 3. Auto-Migration (Buat tabel jika belum ada)
-        $firstRow = (array) $input[0];
-        $columns = array_keys($firstRow);
+            if (empty($input) || !is_array($input)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Format data tidak valid atau kosong. Harapkan key "rows" berisi array data.'
+                ], 400);
+            }
 
-        if (!Schema::hasTable($tableName)) {
-            Schema::create($tableName, function ($blueprint) use ($columns) {
-                $blueprint->id(); 
-                foreach ($columns as $col) {
-                    if ($col === 'id') continue;
-                    $this->defineColumn($blueprint, $col);
-                }
-                $blueprint->timestamps();
-            });
-        } else {
-            $existingCols = Schema::getColumnListing($tableName);
-            $newCols = array_diff($columns, $existingCols);
-            if (!empty($newCols)) {
-                Schema::table($tableName, function ($blueprint) use ($newCols) {
-                    foreach ($newCols as $col) {
+            // 2. Normalisasi Nama Tabel
+            $tableName = Str::plural($table); 
+
+            // 3. Auto-Migration (Buat tabel jika belum ada)
+            $firstRow = (array) $input[0];
+            $columns = array_keys($firstRow);
+
+            if (!Schema::hasTable($tableName)) {
+                Schema::create($tableName, function ($blueprint) use ($columns) {
+                    $blueprint->id(); 
+                    foreach ($columns as $col) {
+                        if ($col === 'id') continue;
                         $this->defineColumn($blueprint, $col);
                     }
+                    $blueprint->timestamps();
                 });
-            }
-        }
-
-        // 4. Tentukan Primary Key untuk UpdateOrInsert
-        $primaryKey = 'id';
-        if (isset($firstRow[$table . '_id'])) {
-            $primaryKey = $table . '_id';
-        } elseif (isset($firstRow[Str::singular($table) . '_id'])) {
-            $primaryKey = Str::singular($table) . '_id';
-        }
-
-        $processed = 0;
-        $errors = [];
-
-        foreach ($input as $index => $row) {
-            try {
-                $row = (array) $row;
-                
-                // Encode array/json
-                foreach ($row as $k => $v) {
-                    if (is_array($v)) $row[$k] = json_encode($v);
-                }
-
-                if (!isset($row['updated_at'])) {
-                    $row['updated_at'] = now();
-                }
-
-                $conditions = [];
-                if (isset($row[$primaryKey])) {
-                    $conditions[$primaryKey] = $row[$primaryKey];
-                } elseif (isset($row['id'])) {
-                     $conditions['id'] = $row['id'];
-                }
-
-                if (empty($conditions)) {
-                    if (!isset($row['created_at'])) $row['created_at'] = now();
-                    DB::table($tableName)->insert($row);
-                    $processed++;
-                    continue;
-                }
-
-                // Coba UpdateOrInsert Normal
-                try {
-                    DB::table($tableName)->updateOrInsert($conditions, $row);
-                    $processed++;
-                } catch (\Exception $e) {
-                    // HANDLING KHUSUS: Duplicate Entry
-                    if (str_contains($e->getMessage(), 'Duplicate entry') && ($table === 'penggunas' || $table === 'pengguna')) {
-                        if (isset($row['email']) && !empty($row['email'])) {
-                            DB::table($tableName)->updateOrInsert(['email' => $row['email']], $row);
-                            $processed++;
-                        } else {
-                            throw $e;
+            } else {
+                $existingCols = Schema::getColumnListing($tableName);
+                $newCols = array_diff($columns, $existingCols);
+                if (!empty($newCols)) {
+                    Schema::table($tableName, function ($blueprint) use ($newCols) {
+                        foreach ($newCols as $col) {
+                            $this->defineColumn($blueprint, $col);
                         }
-                    } else {
-                        throw $e; 
-                    }
+                    });
                 }
-
-            } catch (\Exception $e) {
-                $errors[] = $e->getMessage();
             }
+
+            // 4. Tentukan Primary Key untuk UpdateOrInsert
+            $primaryKey = 'id';
+            if (isset($firstRow[$table . '_id'])) {
+                $primaryKey = $table . '_id';
+            } elseif (isset($firstRow[Str::singular($table) . '_id'])) {
+                $primaryKey = Str::singular($table) . '_id';
+            } elseif (isset($firstRow['peserta_didik_id']) && $tableName === 'siswas') {
+                // Spesial fallback buat tabel siswa (jika ngirim peserta_didik_id)
+                $primaryKey = 'peserta_didik_id'; 
+            }
+
+            $processed = 0;
+            $errors = [];
+
+            foreach ($input as $index => $row) {
+                try {
+                    $row = (array) $row;
+                    
+                    // Encode array/json
+                    foreach ($row as $k => $v) {
+                        if (is_array($v)) $row[$k] = json_encode($v);
+                    }
+
+                    if (!isset($row['updated_at'])) {
+                        $row['updated_at'] = now();
+                    }
+
+                    $conditions = [];
+                    if (isset($row[$primaryKey])) {
+                        $conditions[$primaryKey] = $row[$primaryKey];
+                    } elseif (isset($row['id'])) {
+                         $conditions['id'] = $row['id'];
+                    }
+
+                    if (empty($conditions)) {
+                        if (!isset($row['created_at'])) $row['created_at'] = now();
+                        DB::table($tableName)->insert($row);
+                        $processed++;
+                        continue;
+                    }
+
+                    // Coba UpdateOrInsert Normal
+                    try {
+                        DB::table($tableName)->updateOrInsert($conditions, $row);
+                        $processed++;
+                    } catch (\Exception $e) {
+                        // HANDLING KHUSUS: Duplicate Entry
+                        if (str_contains($e->getMessage(), 'Duplicate entry') && ($table === 'penggunas' || $table === 'pengguna')) {
+                            if (isset($row['email']) && !empty($row['email'])) {
+                                DB::table($tableName)->updateOrInsert(['email' => $row['email']], $row);
+                                $processed++;
+                            } else {
+                                throw $e;
+                            }
+                        } else {
+                            throw $e; 
+                        }
+                    }
+
+                } catch (\Exception $e) {
+                    $errors[] = $e->getMessage();
+                }
+            }
+
+            // 🔥 5. REKAM LOG HISTORY 🔥
+            $this->recordSimpleLog($request, $firstRow, $processed, count($errors));
+
+            $msg = "Berhasil memproses $processed data.";
+            if (count($errors) > 0) {
+                $msg .= " Gagal: " . count($errors) . " data.";
+            }
+
+            return response()->json([
+                'success' => true, 
+                'message' => $msg,
+            ]);
+
+        } catch (\Exception $e) {
+            // 🔥 Tangkap error fatal biar nggak jadi 500 HTML Page 🔥
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan sistem: ' . $e->getMessage()
+            ], 500);
         }
-
-        // 🔥 FIX ERROR: REKAM LOG UNTUK SEMUA TABEL YANG MASUK (Bukan cuma sekolahs) 🔥
-        // Hapus "if ($tableName === 'sekolahs')", biar setiap aplikasi sekolah ngirim data, KCD tau sekolah mana yg ngirim.
-        $this->recordSimpleLog($request, $firstRow, $processed, count($errors));
-
-        $msg = "Berhasil memproses $processed data.";
-        if (count($errors) > 0) {
-            $msg .= " Gagal: " . count($errors) . " data.";
-        }
-
-        return response()->json([
-            'success' => true, 
-            'message' => $msg,
-        ]);
     }
 
     /**
@@ -131,11 +154,9 @@ class SchoolSyncController extends Controller
      */
     private function recordSimpleLog($request, $firstRow, $processedCount, $errorCount)
     {
-        // Cari NPSN dan Nama Sekolah, kalau gak ada di request/firstRow, kita balikin default
         $npsn = $request->input('npsn') ?? ($firstRow['npsn'] ?? 'UNKNOWN');
         $namaSekolah = $request->input('nama_sekolah') ?? ($request->input('nama') ?? ($firstRow['nama_sekolah'] ?? ($firstRow['nama'] ?? 'Sekolah Tidak Diketahui')));
 
-        // Biar nggak nge-log data sampah kalau bener-bener kosong
         if ($npsn === 'UNKNOWN') return;
 
         // Bikin tabel sync_logs super simpel kalau belum ada
@@ -149,23 +170,19 @@ class SchoolSyncController extends Controller
             });
         }
 
-        // Teks status super simpel
         $statusText = ($errorCount == 0) 
-            ? "Berhasil ($processedCount data)" 
+            ? "Masuk Semua ($processedCount)" 
             : "Masuk: $processedCount, Gagal: $errorCount";
 
-        // 🔥 Cek berdasarkan NPSN (Biar paten 1 sekolah 1 baris)
         $exists = DB::table('sync_logs')->where('npsn', $npsn)->first();
 
         if ($exists) {
-            // Update barisnya aja, kolom updated_at otomatis jalan jadi patokan "Terakhir Sinkron"
             DB::table('sync_logs')->where('id', $exists->id)->update([
-                'nama_sekolah' => $namaSekolah, // Update jaga-jaga kalo namanya berubah
+                'nama_sekolah' => $namaSekolah, 
                 'status'       => $statusText,
                 'updated_at'   => now(), 
             ]);
         } else {
-            // Insert baru kalo sekolah ini blm pernah sync sama sekali
             DB::table('sync_logs')->insert([
                 'npsn'         => $npsn,
                 'nama_sekolah' => $namaSekolah,
@@ -182,12 +199,12 @@ class SchoolSyncController extends Controller
             $blueprint->string($colName)->nullable()->index();
         } elseif (Str::contains($colName, ['tanggal', 'date'])) {
             $blueprint->date($colName)->nullable();
-        } elseif (Str::contains($colName, ['keterangan', 'alamat', 'deskripsi'])) {
-            $blueprint->text($colName)->nullable();
+        } elseif (Str::contains($colName, ['keterangan', 'alamat', 'deskripsi', 'riwayat', 'catatan'])) {
+            $blueprint->text($colName)->nullable(); // Pakai Text untuk data panjang
         } elseif (in_array($colName, ['created_at', 'updated_at'])) {
             // Skip
         } else {
-            $blueprint->string($colName)->nullable();
+            $blueprint->text($colName)->nullable(); // 🔥 UBAH JADI TEXT SEMENTARA BIAR DATA SISWA GAK KEPOTONG/ERROR 🔥
         }
     }
 }
