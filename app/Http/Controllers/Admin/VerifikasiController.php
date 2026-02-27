@@ -354,11 +354,8 @@ class VerifikasiController extends Controller
 
             // Kalau ACC, lampirkan link downloadnya
             if ($pengajuan->status == 'ACC') {
-                $payload['hasil_sk'] = [
-                    'nomor_sk'     => $pengajuan->nomor_sk,
-                    // Route 'cetak.sk' ini route di KCD buat download PDF hasil generate
-                    'download_url' => route('cetak.sk', $pengajuan->uuid)
-                ];
+                $payload['sk_download_url'] = route('cetak.sk', $pengajuan->uuid);
+                $payload['nomor_sk'] = $pengajuan->nomor_sk;
             }
 
             Http::withHeaders(['X-API-KEY' => env('API_SECRET_KEY')])
