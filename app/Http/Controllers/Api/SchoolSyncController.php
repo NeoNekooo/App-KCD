@@ -111,10 +111,9 @@ class SchoolSyncController extends Controller
             }
         }
 
-        // 🔥 5. CUMA REKAM LOG JIKA YANG SINKRON ADALAH TABEL 'sekolahs' 🔥
-        if ($tableName === 'sekolahs') {
-            $this->recordSimpleLog($request, $firstRow, $processed, count($errors));
-        }
+        // 🔥 FIX ERROR: REKAM LOG UNTUK SEMUA TABEL YANG MASUK (Bukan cuma sekolahs) 🔥
+        // Hapus "if ($tableName === 'sekolahs')", biar setiap aplikasi sekolah ngirim data, KCD tau sekolah mana yg ngirim.
+        $this->recordSimpleLog($request, $firstRow, $processed, count($errors));
 
         $msg = "Berhasil memproses $processed data.";
         if (count($errors) > 0) {
@@ -132,9 +131,12 @@ class SchoolSyncController extends Controller
      */
     private function recordSimpleLog($request, $firstRow, $processedCount, $errorCount)
     {
-        // Pake kolom 'nama' sesuai permintaan lu
-        $npsn = $request->input('npsn') ?? ($firstRow['npsn'] ?? '-');
-        $namaSekolah = $request->input('nama') ?? ($firstRow['nama'] ?? 'Tidak Diketahui');
+        // Cari NPSN dan Nama Sekolah, kalau gak ada di request/firstRow, kita balikin default
+        $npsn = $request->input('npsn') ?? ($firstRow['npsn'] ?? 'UNKNOWN');
+        $namaSekolah = $request->input('nama_sekolah') ?? ($request->input('nama') ?? ($firstRow['nama_sekolah'] ?? ($firstRow['nama'] ?? 'Sekolah Tidak Diketahui')));
+
+        // Biar nggak nge-log data sampah kalau bener-bener kosong
+        if ($npsn === 'UNKNOWN') return;
 
         // Bikin tabel sync_logs super simpel kalau belum ada
         if (!Schema::hasTable('sync_logs')) {
@@ -149,7 +151,7 @@ class SchoolSyncController extends Controller
 
         // Teks status super simpel
         $statusText = ($errorCount == 0) 
-            ? "Masuk Semua" 
+            ? "Berhasil ($processedCount data)" 
             : "Masuk: $processedCount, Gagal: $errorCount";
 
         // 🔥 Cek berdasarkan NPSN (Biar paten 1 sekolah 1 baris)
