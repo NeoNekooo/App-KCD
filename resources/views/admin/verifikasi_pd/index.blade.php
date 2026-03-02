@@ -2,7 +2,7 @@
 
 @section('content')
 
-    {{-- 🔥 CSS PREMIUM: ROUNDED & MODERN 🔥 --}}
+    {{-- 🔥 CSS PREMIUM: DISAMAKAN PERSIS DENGAN LAYANAN SISWA 🔥 --}}
     <style>
         .rounded-4 { border-radius: 1rem !important; }
         .bg-light-subtle { background-color: #f8f9fa !important; }
@@ -12,6 +12,7 @@
         .shadow-xs { box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.05) !important; }
         .btn-label-danger { background-color: #ffe0db; color: #ff3e1d; border: none; }
         .btn-label-success { background-color: #e8fadf; color: #71dd37; border: none; }
+        .btn-label-secondary { background-color: #ebeef0; color: #8592a3; border: none; }
         .nav-tabs-custom .nav-link { border: none; border-bottom: 3px solid transparent; font-weight: 600; color: #8592a3; padding: 1rem 1.2rem; }
         .nav-tabs-custom .nav-link.active { border-bottom-color: #696cff; color: #696cff; background: transparent; }
     </style>
@@ -220,7 +221,7 @@
                         </div>
                         <div class="modal-body bg-light-subtle px-4 py-4">
                             
-                            {{-- 🔥 TAMBAHAN: PROFIL LENGKAP SISWA 🔥 --}}
+                            {{-- 🔥 PROFIL LENGKAP SISWA 🔥 --}}
                             <div class="card border-0 shadow-xs mb-4 p-3 rounded-4 bg-white">
                                 <div class="row g-3">
                                     <div class="col-md-12 mb-2">
@@ -314,27 +315,62 @@
             </div>
         </div>
 
-        {{-- 3. MODAL ATUR SYARAT --}}
+        {{-- 🔥 3. MODAL ATUR SYARAT (DENGAN CHECKBOX DEFAULT SISWA) 🔥 --}}
         <div class="modal fade" id="modalSyarat{{ $item->id }}" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content border-0 shadow-lg rounded-4">
                     <div class="modal-header bg-primary text-white py-3 px-4">
-                        <h5 class="modal-title fw-bold text-white mb-0">Atur Persyaratan</h5>
+                        <h5 class="modal-title fw-bold text-white mb-0">Atur Persyaratan Siswa</h5>
                         <button type="button" class="btn-close bg-white" data-bs-dismiss="modal"></button>
                     </div>
                     <form action="{{ route('admin.verifikasi.set_syarat', $item->id) }}" method="POST">
                         @csrf @method('PUT')
                         <div class="modal-body px-4 py-4">
-                            <div id="containerManual{{ $item->id }}">
-                                <div class="input-group border rounded-3 mb-2 bg-white overflow-hidden shadow-none">
-                                    <span class="input-group-text border-0 bg-white"><i class='bx bx-chevron-right text-primary'></i></span>
-                                    <input type="text" name="syarat[]" class="form-control border-0 py-2 small" placeholder="Nama dokumen..." required>
-                                </div>
+                            
+                            {{-- PILIHAN SYARAT DEFAULT SISWA (CHECKBOX) --}}
+                            <label class="form-label fw-bold extra-small text-muted text-uppercase mb-2">Pilih Syarat Default</label>
+                            <div class="d-flex flex-wrap gap-2 mb-4 bg-light p-3 rounded-4 border">
+                                @php
+                                    // Daftar dokumen yang sering dipakai urusan kesiswaan
+                                    $defaultSyarat = [
+                                        'Akte' => 'Scan Akta Kelahiran Siswa',
+                                        'KK' => 'Fotokopi Kartu Keluarga',
+                                        'Rapor' => 'Scan Asli Rapor Terakhir',
+                                        'Ijazah' => 'Scan Ijazah SMP/MTS',
+                                        'Surat_Pindah' => 'Surat Keterangan Pindah Sekolah',
+                                        'Surat_Terima' => 'Surat Keterangan Diterima Sekolah Tujuan',
+                                        'Pengantar' => 'Surat Pengantar Kepala Sekolah'
+                                    ];
+                                @endphp
+                                @foreach($defaultSyarat as $idSyarat => $namaSyarat)
+                                    <div class="form-check form-check-inline m-0">
+                                        <input class="form-check-input default-syarat-checkbox" type="checkbox" 
+                                            id="chk_{{ $item->id }}_{{ $idSyarat }}" 
+                                            value="{{ $namaSyarat }}" 
+                                            data-target="{{ $item->id }}"
+                                            onchange="toggleDefaultSyarat(this, '{{ $item->id }}')">
+                                        <label class="form-check-label small" for="chk_{{ $item->id }}_{{ $idSyarat }}">{{ $idSyarat }}</label>
+                                    </div>
+                                @endforeach
                             </div>
-                            <button type="button" class="btn btn-link text-primary btn-sm p-0 mt-1 fw-bold text-decoration-none" onclick="tambahSyaratManual({{ $item->id }})">+ Tambah Syarat</button>
+
+                            <hr class="my-3">
+
+                            {{-- CONTAINER INPUT SYARAT --}}
+                            <label class="form-label fw-bold extra-small text-primary text-uppercase mb-2">Daftar Syarat yang Diminta</label>
+                            <div id="containerManual{{ $item->id }}">
+                                {{-- Inputan dari checkbox atau manual akan muncul di sini --}}
+                            </div>
+                            
+                            {{-- Tombol Tambah Syarat Baru --}}
+                            <div class="text-end mt-2">
+                                <button type="button" class="btn btn-label-primary btn-sm fw-bold rounded-pill" onclick="tambahSyaratManual({{ $item->id }})">
+                                    <i class='bx bx-plus-circle me-1'></i> Ketik Syarat Manual
+                                </button>
+                            </div>
                         </div>
                         <div class="modal-footer border-0 px-4 pb-4 pt-0">
-                            <button type="submit" class="btn btn-primary w-100 rounded-pill py-2 fw-bold">Kirim ke Sekolah</button>
+                            <button type="submit" class="btn btn-primary w-100 rounded-pill py-2 fw-bold shadow-sm">Kirim Daftar Syarat ke Sekolah</button>
                         </div>
                     </form>
                 </div>
@@ -342,6 +378,7 @@
         </div>
     @endforeach
 
+    {{-- 🔥 SCRIPTS (TERMASUK LOGIKA CHECKBOX) 🔥 --}}
     <script>
         function toggleTolakAwal(id, show) {
             document.getElementById('formTolakAwal' + id).classList.toggle('d-none', !show);
@@ -384,12 +421,41 @@
             }
         }
 
+        // 🔥 Logic Checkbox Syarat Default 🔥
+        function toggleDefaultSyarat(checkbox, itemId) {
+            let container = document.getElementById('containerManual' + itemId);
+            let value = checkbox.value;
+            let inputId = 'input_' + itemId + '_' + value.replace(/\s+/g, '-').toLowerCase();
+
+            if (checkbox.checked) {
+                let div = document.createElement('div');
+                div.className = 'input-group border rounded-3 mb-2 bg-white overflow-hidden shadow-none item-syarat';
+                div.id = inputId;
+                div.innerHTML = `
+                    <span class="input-group-text border-0 bg-white"><i class='bx bx-check-circle text-success'></i></span>
+                    <input type="text" name="syarat[]" class="form-control border-0 py-2 small fw-bold text-dark" value="${value}" readonly required>
+                    <button class="btn btn-outline-danger border-0 bg-white" type="button" onclick="hapusSyaratDefault(this, '${checkbox.id}')" data-bs-toggle="tooltip" title="Hapus"><i class='bx bx-trash'></i></button>
+                `;
+                container.appendChild(div);
+            } else {
+                let elToRemove = document.getElementById(inputId);
+                if (elToRemove) elToRemove.remove();
+            }
+        }
+
+        // 🔥 Menghapus inputan lewat tombol Tong Sampah & Uncheck Checkboxnya 🔥
+        function hapusSyaratDefault(btn, checkboxId) {
+            let checkbox = document.getElementById(checkboxId);
+            if (checkbox) checkbox.checked = false;
+            btn.parentElement.remove(); 
+        }
+
         function tambahSyaratManual(id) {
             let container = document.getElementById('containerManual' + id);
             let div = document.createElement('div');
             div.className = 'input-group border rounded-3 mb-2 bg-white overflow-hidden';
             div.innerHTML = `<span class="input-group-text border-0 bg-white px-3"><i class='bx bx-chevron-right text-primary'></i></span>
-                <input type="text" name="syarat[]" class="form-control border-0 py-2 small" placeholder="Nama dokumen..." required>
+                <input type="text" name="syarat[]" class="form-control border-0 py-2 small" placeholder="Nama dokumen..." required autofocus>
                 <button class="btn btn-outline-danger border-0 bg-white" type="button" onclick="this.parentElement.remove()"><i class='bx bx-trash'></i></button>`;
             container.appendChild(div);
         }
