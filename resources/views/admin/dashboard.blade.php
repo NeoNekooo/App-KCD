@@ -3,17 +3,10 @@
 @section('content')
     @php
         $user = Auth::user();
-
-        // -------------------------------------------------------------
-        // LOGIC ROLE CHECK
-        // Admin = Role 'Admin' atau 'Operator KCD'
-        // Pegawai = Semua user selain Admin/Operator (Kasubag, Staff, dll)
-        // -------------------------------------------------------------
         $isAdmin = $user->role === 'Admin' || $user->role === 'Operator KCD';
-        $isPegawai = !$isAdmin; // Kebalikan dari Admin
+        $isPegawai = !$isAdmin; 
     @endphp
 
-    {{-- 🔥 CSS PREMIUM: ROUNDED, ANIMATED & MODERN 🔥 --}}
     @push('styles')
     <style>
         .rounded-4 { border-radius: 1rem !important; }
@@ -21,18 +14,15 @@
         .shadow-xs { box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.05) !important; }
         .shadow-soft { box-shadow: 0 8px 25px rgba(105, 108, 255, 0.08) !important; }
         
-        /* Card Hover Effect */
         .stat-card { transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.3s ease; }
         .stat-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important; }
 
-        /* Animation Keyframes */
         @keyframes fadeInUp {
             from { opacity: 0; transform: translateY(15px); }
             to { opacity: 1; transform: translateY(0); }
         }
         .animate-fade-in-up { animation: fadeInUp 0.5s ease-out forwards; }
         
-        /* Glassmorphism Widget */
         .glass-widget {
             background: rgba(255, 255, 255, 0.05);
             backdrop-filter: blur(10px);
@@ -40,7 +30,6 @@
             border-radius: 1rem;
         }
 
-        /* Utility Custom Colors */
         .bg-label-primary { background-color: rgba(105, 108, 255, 0.1) !important; color: #696cff !important; }
         .bg-label-success { background-color: rgba(113, 221, 55, 0.1) !important; color: #71dd37 !important; }
         .bg-label-info { background-color: rgba(3, 195, 236, 0.1) !important; color: #03c3ec !important; }
@@ -52,7 +41,6 @@
         .hover-white:hover { color: white !important; }
         .list-group-item-action:hover { background-color: #f8f9fa; color: #696cff; }
         
-        /* Floating Animation */
         @keyframes float {
             0% { transform: translateY(0px); }
             50% { transform: translateY(-10px); }
@@ -62,7 +50,7 @@
     </style>
     @endpush
 
-    <div class="container-xxl flex-grow-1 container-p-y">
+    <div class="flex-grow-1 container-p-y">
         
         {{-- =================================================================== --}}
         {{-- SECTION 1: HERO BANNER UTAMA                                        --}}
@@ -72,13 +60,10 @@
                 <div class="card overflow-hidden border-0 shadow-soft rounded-4">
                     <div class="card-body p-4 p-md-5 text-white position-relative" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);">
 
-                        {{-- Dekorasi Background --}}
                         <div style="position: absolute; top: -50px; right: -50px; width: 250px; height: 250px; background: radial-gradient(circle, rgba(105,108,255,0.15) 0%, rgba(0,0,0,0) 70%); border-radius: 50%;"></div>
                         <div style="position: absolute; bottom: -50px; left: 20%; width: 200px; height: 200px; background: radial-gradient(circle, rgba(3,195,236,0.1) 0%, rgba(0,0,0,0) 70%); border-radius: 50%;"></div>
 
                         <div class="d-flex flex-column flex-xl-row justify-content-between align-items-xl-center position-relative z-1 gap-4">
-
-                            {{-- BAGIAN KIRI: IDENTITAS INSTANSI --}}
                             <div class="d-flex align-items-center gap-4">
                                 <div class="bg-white p-1 rounded-circle d-flex align-items-center justify-content-center shadow-lg" style="width: 100px; height: 100px; flex-shrink: 0;">
                                     @if (!empty($instansi->logo) && \Storage::disk('public')->exists($instansi->logo))
@@ -107,10 +92,7 @@
                                 </div>
                             </div>
 
-                            {{-- BAGIAN KANAN: JAM REALTIME & STATISTIK WILAYAH --}}
                             <div class="d-flex flex-column flex-sm-row align-items-stretch align-items-sm-center gap-3">
-                                
-                                {{-- 1. STATISTIK WILAYAH (KHUSUS ADMIN) --}}
                                 @if ($isAdmin)
                                     <div class="d-flex gap-3 glass-widget px-4 py-3 align-items-center">
                                         <div class="text-center border-end border-white border-opacity-25 pe-3">
@@ -123,13 +105,10 @@
                                         </div>
                                     </div>
                                 @endif
-
-                                {{-- 2. JAM REALTIME WIDGET --}}
                                 <div class="glass-widget px-4 py-3 text-center text-sm-end d-flex flex-column justify-content-center">
                                     <h3 class="mb-0 fw-bolder text-white lh-1" id="realtime-clock" style="font-family: monospace; letter-spacing: 2px;">--:--:--</h3>
                                     <span class="text-info fw-medium mt-1" id="realtime-date" style="font-size: 0.75rem;">Loading...</span>
                                 </div>
-
                             </div>
                         </div>
                     </div>
@@ -235,13 +214,26 @@
                 </div>
             </div>
 
-            {{-- CHART & PINTASAN MENU --}}
+            {{-- CHART & PINTASAN MENU TERBARU --}}
             <div class="row g-4 animate-fade-in-up" style="animation-delay: 0.2s;">
-                {{-- KIRI: CHART --}}
+                
+                {{-- KIRI: CHART BAR (FILTER ENABLED) --}}
                 <div class="col-lg-8">
                     <div class="card border-0 shadow-soft h-100 rounded-4">
-                        <div class="card-header bg-transparent border-bottom p-4">
-                            <h5 class="card-title mb-0 fw-bold text-dark"><i class="bx bx-bar-chart-alt-2 text-primary me-2"></i>Sebaran Sekolah per Kecamatan</h5>
+                        <div class="card-header bg-transparent border-bottom p-4 d-flex justify-content-between align-items-center flex-wrap gap-2">
+                            <h5 class="card-title mb-0 fw-bold text-dark"><i class="bx bx-bar-chart-alt-2 text-primary me-2"></i>Sebaran Sekolah</h5>
+                            
+                            {{-- Form Filter Kota/Kab --}}
+                            <form action="{{ url()->current() }}" method="GET" class="m-0" id="formFilterChart">
+                                <select name="filter_kabupaten" class="form-select form-select-sm border-1 shadow-sm" onchange="document.getElementById('formFilterChart').submit()" style="border-radius: 20px; font-weight: 600; color: #566a7f;">
+                                    <option value="">- Semua Kab/Kota -</option>
+                                    @foreach($listKabupaten as $kab)
+                                        <option value="{{ $kab }}" {{ request('filter_kabupaten') == $kab ? 'selected' : '' }}>
+                                            {{ str_replace(['Kab. ', 'Kota '], '', $kab) }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </form>
                         </div>
                         <div class="card-body p-4">
                             <div id="chartWilayah" style="min-height: 350px;"></div>
@@ -249,45 +241,46 @@
                     </div>
                 </div>
 
-                {{-- KANAN: QUICK LINKS --}}
-                <div class="col-lg-4">
-                    <div class="card border-0 shadow-soft h-100 rounded-4">
-                        <div class="card-header bg-transparent border-bottom p-4">
-                            <h5 class="card-title mb-0 fw-bold text-dark"><i class="bx bx-link text-primary me-2"></i>Pintasan Cepat</h5>
+                {{-- KANAN: CHART DONUT & PINTASAN --}}
+                <div class="col-lg-4 d-flex flex-column gap-4">
+                    
+                    {{-- DONUT CHART (BARU) --}}
+                    <div class="card border-0 shadow-soft rounded-4">
+                        <div class="card-header bg-transparent border-bottom p-3">
+                            <h6 class="card-title mb-0 fw-bold text-dark"><i class="bx bx-pie-chart-alt text-success me-2"></i>Proporsi Jenjang</h6>
                         </div>
-                        <div class="list-group list-group-flush rounded-bottom-4">
-                            <a href="{{ route('admin.kesiswaan.siswa.index') }}" class="list-group-item list-group-item-action p-4 border-bottom-0 d-flex gap-3 align-items-center transition-all">
-                                <div class="avatar avatar-md bg-label-primary rounded-circle d-flex justify-content-center align-items-center flex-shrink-0">
-                                    <i class='bx bx-search fs-4'></i>
-                                </div>
-                                <div class="flex-grow-1">
-                                    <h6 class="mb-1 fw-bold text-dark">Pencarian Siswa</h6>
-                                    <small class="text-muted d-block lh-sm">Cari data spesifik peserta didik</small>
-                                </div>
-                                <i class="bx bx-chevron-right text-muted"></i>
-                            </a>
-                            <a href="{{ route('admin.sekolah.export-excel') }}" target="_blank" class="list-group-item list-group-item-action p-4 border-bottom-0 d-flex gap-3 align-items-center border-top transition-all">
-                                <div class="avatar avatar-md bg-label-success rounded-circle d-flex justify-content-center align-items-center flex-shrink-0">
-                                    <i class='bx bx-file text-success fs-4'></i>
-                                </div>
-                                <div class="flex-grow-1">
-                                    <h6 class="mb-1 fw-bold text-dark">Unduh Data Sekolah</h6>
-                                    <small class="text-muted d-block lh-sm">Export rekapitulasi format Excel</small>
-                                </div>
-                                <i class="bx bx-chevron-right text-muted"></i>
-                            </a>
-                            {{-- <a href="{{ route('admin.monitoring-sync.index') }}" class="list-group-item list-group-item-action p-4 border-bottom-0 d-flex gap-3 align-items-center border-top transition-all">
-                                <div class="avatar avatar-md bg-label-warning rounded-circle d-flex justify-content-center align-items-center flex-shrink-0">
-                                    <i class='bx bx-refresh text-warning fs-4'></i>
-                                </div>
-                                <div class="flex-grow-1">
-                                    <h6 class="mb-1 fw-bold text-dark">Log Sinkronisasi</h6>
-                                    <small class="text-muted d-block lh-sm">Pantau tarikan data Dapodik</small>
-                                </div>
-                                <i class="bx bx-chevron-right text-muted"></i>
-                            </a> --}}
+                        <div class="card-body p-3 d-flex align-items-center justify-content-center">
+                            <div id="chartJenjang" style="min-height: 260px; width: 100%;"></div>
                         </div>
                     </div>
+
+                    {{-- QUICK LINKS --}}
+                    <div class="card border-0 shadow-soft rounded-4 flex-grow-1">
+                        <div class="card-header bg-transparent border-bottom p-3">
+                            <h6 class="card-title mb-0 fw-bold text-dark"><i class="bx bx-link text-primary me-2"></i>Pintasan Cepat</h6>
+                        </div>
+                        <div class="list-group list-group-flush rounded-bottom-4">
+                            <a href="{{ route('admin.kesiswaan.siswa.index') }}" class="list-group-item list-group-item-action p-3 border-bottom-0 d-flex gap-3 align-items-center transition-all">
+                                <div class="avatar avatar-sm bg-label-primary rounded-circle d-flex justify-content-center align-items-center flex-shrink-0">
+                                    <i class='bx bx-search'></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-0 fw-bold text-dark" style="font-size: 0.9rem;">Pencarian Siswa</h6>
+                                </div>
+                                <i class="bx bx-chevron-right text-muted"></i>
+                            </a>
+                            <a href="{{ route('admin.sekolah.export-excel') }}" target="_blank" class="list-group-item list-group-item-action p-3 border-bottom-0 d-flex gap-3 align-items-center border-top transition-all">
+                                <div class="avatar avatar-sm bg-label-success rounded-circle d-flex justify-content-center align-items-center flex-shrink-0">
+                                    <i class='bx bx-file text-success'></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-0 fw-bold text-dark" style="font-size: 0.9rem;">Unduh Data Sekolah</h6>
+                                </div>
+                                <i class="bx bx-chevron-right text-muted"></i>
+                            </a>
+                        </div>
+                    </div>
+
                 </div>
             </div>
         @endif
@@ -297,11 +290,8 @@
         {{-- =================================================================== --}}
         @if ($isPegawai)
             <div class="row g-4 animate-fade-in-up" style="animation-delay: 0.1s;">
-
-                {{-- KARTU UTAMA: WELCOME & ACTION --}}
                 <div class="col-md-8">
                     <div class="card border-0 shadow-soft h-100 bg-white rounded-4 overflow-hidden position-relative">
-                        {{-- Ornamen --}}
                         <div style="position: absolute; right: -50px; top: -50px; opacity: 0.03;">
                             <i class='bx bx-check-shield' style="font-size: 300px;"></i>
                         </div>
@@ -327,10 +317,8 @@
                     </div>
                 </div>
 
-                {{-- KARTU STATUS --}}
                 <div class="col-md-4">
                     <div class="card border-0 shadow-soft h-100 bg-primary text-white position-relative overflow-hidden rounded-4">
-                        {{-- Decoration Gradient --}}
                         <div style="position: absolute; bottom: 0; right: 0; width: 100%; height: 100%; background: linear-gradient(to top right, rgba(255,255,255,0.2), transparent);"></div>
 
                         <div class="card-body p-4 p-xl-5 d-flex flex-column justify-content-between position-relative z-1">
@@ -367,15 +355,11 @@
 
 @endsection
 
-{{-- =================================================================== --}}
-{{-- SCRIPTS (CHART & JAM REALTIME)                                      --}}
-{{-- =================================================================== --}}
 @push('scripts')
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
     <script>
         document.addEventListener("DOMContentLoaded", function() {
 
-            // Inisialisasi Tooltip
             var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
             tooltipTriggerList.map(function (tooltipTriggerEl) {
                 return new bootstrap.Tooltip(tooltipTriggerEl)
@@ -410,72 +394,66 @@
             setInterval(updateClock, 1000);
             updateClock();
 
-            // 2. CHART APEXCHARTS (KHUSUS ADMIN)
+            // 2. CHART BAR APEXCHARTS
             if (document.querySelector("#chartWilayah")) {
                 var categories = {!! json_encode($chartCategories ?? []) !!};
                 var dataValues = {!! json_encode($chartData ?? []) !!};
 
                 var options = {
                     chart: {
-                        type: 'bar',
-                        height: 350,
-                        toolbar: { show: false },
-                        fontFamily: 'inherit',
-                        animations: {
-                            enabled: true,
-                            easing: 'easeinout',
-                            speed: 800,
-                            animateGradually: { enabled: true, delay: 150 },
-                            dynamicAnimation: { enabled: true, speed: 350 }
-                        }
+                        type: 'bar', height: 350, toolbar: { show: false }, fontFamily: 'inherit',
+                        animations: { enabled: true, easing: 'easeinout', speed: 800 }
                     },
-                    series: [{
-                        name: 'Jumlah Sekolah',
-                        data: dataValues
-                    }],
+                    series: [{ name: 'Jumlah Sekolah', data: dataValues }],
                     colors: ['#696cff'],
                     plotOptions: {
-                        bar: {
-                            borderRadius: 6,
-                            horizontal: true,
-                            barHeight: '60%',
-                            dataLabels: { position: 'bottom' }
-                        }
+                        bar: { borderRadius: 6, horizontal: true, barHeight: '60%', dataLabels: { position: 'bottom' } }
                     },
                     dataLabels: {
-                        enabled: true,
-                        textAnchor: 'start',
-                        style: {
-                            colors: ['#fff'],
-                            fontSize: '12px',
-                            fontWeight: 600,
-                        },
-                        formatter: function (val, opt) {
-                            return val + " Sekolah"
-                        },
+                        enabled: true, textAnchor: 'start',
+                        style: { colors: ['#fff'], fontSize: '12px', fontWeight: 600 },
+                        formatter: function (val) { return val + " Sekolah" },
                         offsetX: 10
                     },
-                    xaxis: {
-                        categories: categories,
-                        labels: { style: { colors: '#a1acb8', fontSize: '12px' } }
-                    },
-                    yaxis: {
-                        labels: { style: { colors: '#566a7f', fontSize: '13px', fontWeight: 500 } }
-                    },
-                    grid: {
-                        borderColor: '#f1f5f9',
-                        strokeDashArray: 4,
-                        xaxis: { lines: { show: true } },
-                        yaxis: { lines: { show: false } },
-                    },
-                    tooltip: {
-                        theme: 'light',
-                        y: { formatter: function (val) { return val + " Sekolah" } }
-                    }
+                    xaxis: { categories: categories, labels: { style: { colors: '#a1acb8', fontSize: '12px' } } },
+                    yaxis: { labels: { style: { colors: '#566a7f', fontSize: '13px', fontWeight: 500 } } },
+                    grid: { borderColor: '#f1f5f9', strokeDashArray: 4, xaxis: { lines: { show: true } }, yaxis: { lines: { show: false } } },
+                    tooltip: { theme: 'light', y: { formatter: function (val) { return val + " Sekolah" } } }
                 };
 
                 var chart = new ApexCharts(document.querySelector("#chartWilayah"), options);
                 chart.render();
+            }
+
+            // 3. CHART DONUT (JENJANG PENDIDIKAN)
+            if (document.querySelector("#chartJenjang")) {
+                var jenjangCategories = {!! json_encode($jenjangCategories ?? []) !!};
+                var jenjangData = {!! json_encode($jenjangData ?? []) !!};
+
+                var donutOptions = {
+                    series: jenjangData,
+                    chart: { type: 'donut', height: 280, fontFamily: 'inherit' },
+                    labels: jenjangCategories,
+                    colors: ['#696cff', '#71dd37', '#03c3ec', '#ffab00', '#ff3e1d'],
+                    plotOptions: {
+                        pie: {
+                            donut: {
+                                size: '75%',
+                                labels: {
+                                    show: true,
+                                    name: { show: true, fontSize: '12px', color: '#a1acb8' },
+                                    value: { show: true, fontSize: '20px', fontWeight: 700, color: '#32475c' },
+                                    total: { show: true, showAlways: true, label: 'Total', fontSize: '12px', color: '#a1acb8' }
+                                }
+                            }
+                        }
+                    },
+                    dataLabels: { enabled: false },
+                    stroke: { width: 3, colors: ['#fff'] },
+                    legend: { position: 'bottom', markers: { radius: 12 } }
+                };
+                var chartJenjang = new ApexCharts(document.querySelector("#chartJenjang"), donutOptions);
+                chartJenjang.render();
             }
         });
     </script>

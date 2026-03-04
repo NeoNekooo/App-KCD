@@ -7,7 +7,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 
-// Pastikan Model di-import dengan benar
 use App\Models\Siswa;
 use App\Models\Gtk;
 use App\Models\Sekolah;
@@ -15,31 +14,26 @@ use App\Models\Instansi;
 
 class DashboardController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $user = Auth::user();
         
-        // Cek Role (Sama seperti logic di View)
-        // Admin & Operator butuh data statistik lengkap
+        // Cek Role (Admin & Operator butuh data statistik lengkap)
         $isAdmin = ($user->role === 'Admin' || $user->role === 'Operator KCD');
 
         // ------------------------------------------------------------------
-        // 1. DATA UMUM (Wajib ada untuk SEMUA user: Admin & Pegawai)
+        // 1. DATA UMUM (Wajib ada untuk SEMUA user)
         // ------------------------------------------------------------------
-        
-        // Ambil Profil Instansi (untuk Logo & Judul Dashboard)
         $instansi = Instansi::first(); 
         if (!$instansi) {
             $instansi = new Instansi();
             $instansi->nama_instansi = 'KCD Wilayah';
         }
 
-        // Hitung Tahun Ajaran (Untuk ditampilkan di view jika perlu)
         $currMonth = date('n');
         $currYear = date('Y');
         $tahunAjaran = ($currMonth > 6) ? "$currYear/" . ($currYear + 1) : ($currYear - 1) . "/$currYear";
 
-        // Siapkan variabel dasar untuk dikirim ke View
         $data = [
             'instansi'    => $instansi,
             'tahunAjaran' => $tahunAjaran,
@@ -49,8 +43,6 @@ class DashboardController extends Controller
         // ------------------------------------------------------------------
         // 2. LOGIC KHUSUS ADMIN / OPERATOR (Heavy Queries)
         // ------------------------------------------------------------------
-        // Kalau Pegawai login, blok kode ini DILONCATI (Skipped) biar ringan.
-        
         if ($isAdmin) {
             
             // A. DATA WILAYAH (Header)
@@ -64,18 +56,15 @@ class DashboardController extends Controller
 
             // C. STATISTIK GURU (ASN vs Non-ASN)
             $data['totalGuru'] = Gtk::where('jenis_ptk_id_str', 'like', '%Guru%')->count();
-            
             $data['guruASN'] = Gtk::where('jenis_ptk_id_str', 'like', '%Guru%')
                 ->where(function($q) {
                     $q->where('status_kepegawaian_id_str', 'like', '%PNS%')
                       ->orWhere('status_kepegawaian_id_str', 'like', '%PPPK%')
                       ->orWhere('status_kepegawaian_id_str', 'like', '%CPNS%');
                 })->count();
-            
             $data['guruNonASN'] = $data['totalGuru'] - $data['guruASN'];
 
             // D. STATISTIK TENDIK
-            // Mengambil GTK yang BUKAN Guru
             $data['totalTendik'] = Gtk::where(function($q) {
                 $q->where('jenis_ptk_id_str', 'not like', '%Guru%')
                   ->orWhereNull('jenis_ptk_id_str');
@@ -86,9 +75,22 @@ class DashboardController extends Controller
             $data['siswaLaki']  = Siswa::where('status', 'Aktif')->whereIn('jenis_kelamin', ['L', 'Laki-laki'])->count();
             $data['siswaPerempuan'] = Siswa::where('status', 'Aktif')->whereIn('jenis_kelamin', ['P', 'Perempuan'])->count();
 
-            // F. CHART DATA (Query Grouping)
-            // Mengambil Top 10 Kecamatan dengan sekolah terbanyak untuk grafik
-            $dataChart = Sekolah::select('kecamatan', DB::raw('count(*) as total'))
+            // F. DATA DROPDOWN FILTER CHART
+            $data['listKabupaten'] = Sekolah::select('kabupaten_kota')
+                ->whereNotNull('kabupaten_kota')
+                ->distinct()
+                ->orderBy('kabupaten_kota')
+                ->pluck('kabupaten_kota');
+
+            // G. CHART DATA: Sebaran Sekolah per Kecamatan
+            $chartQuery = Sekolah::query();
+            
+            // Terapkan filter jika user memilih kabupaten dari dropdown
+            if ($request->filled('filter_kabupaten')) {
+                $chartQuery->where('kabupaten_kota', $request->filter_kabupaten);
+            }
+
+            $dataChart = $chartQuery->select('kecamatan', DB::raw('count(*) as total'))
                 ->whereNotNull('kecamatan')
                 ->groupBy('kecamatan')
                 ->orderByDesc('total')
@@ -97,9 +99,26 @@ class DashboardController extends Controller
 
             $data['chartCategories'] = $dataChart->pluck('kecamatan')->toArray(); 
             $data['chartData']       = $dataChart->pluck('total')->toArray();
-        } else { // Ini berarti $isPegawai
-            $data['verifikasiLink'] = route('admin.verifikasi.index'); // Default link
-            $data['kategoriTugasUser'] = []; // Default ke array kosong
+
+            // H. CHART DATA BARU: Proporsi Jenjang (Bentuk Pendidikan)
+            $jenjangQuery = Sekolah::query();
+            if ($request->filled('filter_kabupaten')) {
+                $jenjangQuery->where('kabupaten_kota', $request->filter_kabupaten);
+            }
+            $jenjangChart = $jenjangQuery->select('bentuk_pendidikan_id_str', DB::raw('count(*) as total'))
+                ->whereNotNull('bentuk_pendidikan_id_str')
+                ->groupBy('bentuk_pendidikan_id_str')
+                ->get();
+                
+            $data['jenjangCategories'] = $jenjangChart->pluck('bentuk_pendidikan_id_str')->toArray();
+            $data['jenjangData']       = $jenjangChart->pluck('total')->toArray();
+
+        } else { 
+            // ------------------------------------------------------------------
+            // 3. LOGIC KHUSUS PEGAWAI (Verifikator)
+            // ------------------------------------------------------------------
+            $data['verifikasiLink'] = route('admin.verifikasi.index'); 
+            $data['kategoriTugasUser'] = []; 
 
             if ($user->pegawai_kcd_id) {
                 $tugas = \App\Models\TugasPegawaiKcd::where('pegawai_kcd_id', $user->pegawai_kcd_id)
@@ -107,28 +126,21 @@ class DashboardController extends Controller
                                                     ->first();
 
                 if ($tugas) {
-                    $kategoriUser = $tugas->kategori_layanan; // Ini adalah array
+                    $kategoriUser = $tugas->kategori_layanan; 
                     $data['kategoriTugasUser'] = $kategoriUser;
 
-                    // Cek untuk tugas akses umum
                     $hasGeneralAccess = collect($kategoriUser)->contains(fn($k) => in_array(strtolower($k), ['umum', 'all']));
 
                     if ($hasGeneralAccess) {
-                        $data['verifikasiLink'] = route('admin.verifikasi.index'); // Link ke halaman verifikasi umum
+                        $data['verifikasiLink'] = route('admin.verifikasi.index'); 
                     } elseif (!empty($kategoriUser)) {
-                        // Jika ada tugas spesifik, gunakan yang pertama untuk tombol utama
                         $firstKategori = $kategoriUser[0];
                         $data['verifikasiLink'] = route('admin.verifikasi.index', ['kategori' => $firstKategori]);
-                    } else {
-                        // Tidak ada kategori spesifik dan tidak ada akses umum, fallback ke halaman verifikasi umum
-                        $data['verifikasiLink'] = route('admin.verifikasi.index'); 
                     }
                 }
             }
         }
 
-        // 3. Return View dengan Data yang sudah disiapkan
-        // Sesuaikan nama view dengan struktur folder kamu (admin.dashboard)
         return view('admin.dashboard', $data);
     }
 }
