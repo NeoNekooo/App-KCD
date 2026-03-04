@@ -12,80 +12,123 @@
         $isAdmin = $user->role === 'Admin' || $user->role === 'Operator KCD';
         $isPegawai = !$isAdmin; // Kebalikan dari Admin
     @endphp
-        <div class="row mb-4">
+
+    {{-- 🔥 CSS PREMIUM: ROUNDED, ANIMATED & MODERN 🔥 --}}
+    @push('styles')
+    <style>
+        .rounded-4 { border-radius: 1rem !important; }
+        .rounded-5 { border-radius: 1.25rem !important; }
+        .shadow-xs { box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.05) !important; }
+        .shadow-soft { box-shadow: 0 8px 25px rgba(105, 108, 255, 0.08) !important; }
+        
+        /* Card Hover Effect */
+        .stat-card { transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.3s ease; }
+        .stat-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important; }
+
+        /* Animation Keyframes */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in-up { animation: fadeInUp 0.5s ease-out forwards; }
+        
+        /* Glassmorphism Widget */
+        .glass-widget {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 1rem;
+        }
+
+        /* Utility Custom Colors */
+        .bg-label-primary { background-color: rgba(105, 108, 255, 0.1) !important; color: #696cff !important; }
+        .bg-label-success { background-color: rgba(113, 221, 55, 0.1) !important; color: #71dd37 !important; }
+        .bg-label-info { background-color: rgba(3, 195, 236, 0.1) !important; color: #03c3ec !important; }
+        .bg-label-warning { background-color: rgba(255, 171, 0, 0.1) !important; color: #ffab00 !important; }
+        .bg-label-danger { background-color: rgba(255, 62, 29, 0.1) !important; color: #ff3e1d !important; }
+
+        .hover-up { transition: transform 0.3s ease; }
+        .hover-up:hover { transform: translateY(-3px); }
+        .hover-white:hover { color: white !important; }
+        .list-group-item-action:hover { background-color: #f8f9fa; color: #696cff; }
+        
+        /* Floating Animation */
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+        .animate-float { animation: float 4s ease-in-out infinite; }
+    </style>
+    @endpush
+
+    <div class="container-xxl flex-grow-1 container-p-y">
+        
+        {{-- =================================================================== --}}
+        {{-- SECTION 1: HERO BANNER UTAMA                                        --}}
+        {{-- =================================================================== --}}
+        <div class="row mb-4 animate-fade-in-up">
             <div class="col-12">
-                <div class="card overflow-hidden border-0 shadow-sm" style="border-radius: 1rem;">
-                    <div class="card-body p-4 text-white"
-                        style="background: linear-gradient(135deg, #0f172a 0%, #334155 100%); position: relative;">
+                <div class="card overflow-hidden border-0 shadow-soft rounded-4">
+                    <div class="card-body p-4 p-md-5 text-white position-relative" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);">
 
                         {{-- Dekorasi Background --}}
-                        <div
-                            style="position: absolute; top: -50px; right: -50px; width: 200px; height: 200px; background: rgba(255,255,255,0.05); border-radius: 50%;">
-                        </div>
+                        <div style="position: absolute; top: -50px; right: -50px; width: 250px; height: 250px; background: radial-gradient(circle, rgba(105,108,255,0.15) 0%, rgba(0,0,0,0) 70%); border-radius: 50%;"></div>
+                        <div style="position: absolute; bottom: -50px; left: 20%; width: 200px; height: 200px; background: radial-gradient(circle, rgba(3,195,236,0.1) 0%, rgba(0,0,0,0) 70%); border-radius: 50%;"></div>
 
-                        <div
-                            class="d-flex flex-column flex-xl-row justify-content-between align-items-center position-relative z-1">
+                        <div class="d-flex flex-column flex-xl-row justify-content-between align-items-xl-center position-relative z-1 gap-4">
 
                             {{-- BAGIAN KIRI: IDENTITAS INSTANSI --}}
-                            <div class="d-flex align-items-center gap-4 mb-4 mb-xl-0">
-                                <div class="bg-white p-1 rounded-circle d-flex align-items-center justify-content-center shadow-lg"
-                                    style="width: 90px; height: 90px; flex-shrink: 0;">
+                            <div class="d-flex align-items-center gap-4">
+                                <div class="bg-white p-1 rounded-circle d-flex align-items-center justify-content-center shadow-lg" style="width: 100px; height: 100px; flex-shrink: 0;">
                                     @if (!empty($instansi->logo) && \Storage::disk('public')->exists($instansi->logo))
-                                        <img src="{{ \Storage::url($instansi->logo) }}"
-                                            class="img-fluid rounded-circle w-100 h-100 object-fit-cover" alt="Logo">
+                                        <img src="{{ \Storage::url($instansi->logo) }}" class="img-fluid rounded-circle w-100 h-100 object-fit-cover" alt="Logo">
                                     @else
-                                        <img src="https://ui-avatars.com/api/?name={{ urlencode($instansi->nama_instansi ?? 'KCD') }}&background=0d6efd&color=fff&size=128"
-                                            class="img-fluid rounded-circle" alt="Logo">
+                                        <img src="https://ui-avatars.com/api/?name={{ urlencode($instansi->nama_instansi ?? 'KCD') }}&background=696cff&color=fff&size=128&font-size=0.33" class="img-fluid rounded-circle" alt="Logo">
                                     @endif
                                 </div>
                                 <div>
                                     <div class="d-flex align-items-center gap-2 mb-1">
-                                        <h6 class="text-warning mb-0 text-uppercase fw-bold ls-1"
-                                            style="letter-spacing: 1px; font-size: 0.75rem;">
+                                        <span class="badge bg-label-warning text-uppercase fw-bold" style="letter-spacing: 1px; font-size: 0.7rem;">
                                             {{ $isPegawai ? 'PORTAL PEGAWAI' : 'SISTEM MONITORING WILAYAH' }}
-                                        </h6>
+                                        </span>
                                         @if ($isAdmin)
-                                            <a href="{{ route('admin.instansi.index') }}" class="text-white-50 hover-white"
-                                                data-bs-toggle="tooltip" title="Edit Profil Instansi">
-                                                <i class='bx bx-edit-alt fs-6'></i>
+                                            <a href="{{ route('admin.instansi.index') }}" class="text-white-50 hover-white" data-bs-toggle="tooltip" title="Edit Profil Instansi">
+                                                <i class='bx bx-edit-alt fs-5'></i>
                                             </a>
                                         @endif
                                     </div>
-                                    <h3 class="fw-bold mb-0 text-white text-uppercase">
+                                    <h3 class="fw-bolder mb-1 text-white text-uppercase" style="letter-spacing: -0.5px;">
                                         {{ $instansi->nama_instansi ?? 'DASHBOARD KCD' }}
                                     </h3>
-                                    <p class="text-white-50 mb-0 mt-1">
-                                        <i class='bx bx-calendar me-1'></i> <span id="greeting-text">Halo</span>,
-                                        <strong>{{ $user->name }}</strong>
+                                    <p class="text-white-50 mb-0 fs-6">
+                                        <span id="greeting-text">Halo</span>, <strong>{{ $user->name }}</strong> 👋
                                     </p>
                                 </div>
                             </div>
 
                             {{-- BAGIAN KANAN: JAM REALTIME & STATISTIK WILAYAH --}}
-                            <div class="d-flex flex-column flex-md-row align-items-center gap-4 text-center text-md-end">
-
-                                {{-- 1. JAM REALTIME --}}
-                                <div class="{{ $isAdmin ? 'pe-md-4 border-end-md border-white border-opacity-25' : '' }}">
-                                    <h2 class="mb-0 fw-bold text-white" id="realtime-clock"
-                                        style="font-family: monospace; letter-spacing: 1px;">--:--:--</h2>
-                                    <small class="text-white-50" id="realtime-date">Loading...</small>
-                                </div>
-
-                                {{-- 2. STATISTIK WILAYAH (KHUSUS ADMIN) --}}
+                            <div class="d-flex flex-column flex-sm-row align-items-stretch align-items-sm-center gap-3">
+                                
+                                {{-- 1. STATISTIK WILAYAH (KHUSUS ADMIN) --}}
                                 @if ($isAdmin)
-                                    <div class="d-flex gap-4 animate__animated animate__fadeIn">
-                                        <div class="px-2">
-                                            <h2 class="mb-0 fw-bold text-warning">{{ $totalKabupaten ?? 0 }}</h2>
-                                            <small class="text-white-50 text-uppercase fw-semibold"
-                                                style="font-size: 0.7rem;">Kab/Kota</small>
+                                    <div class="d-flex gap-3 glass-widget px-4 py-3 align-items-center">
+                                        <div class="text-center border-end border-white border-opacity-25 pe-3">
+                                            <h3 class="mb-0 fw-bolder text-warning lh-1">{{ $totalKabupaten ?? 0 }}</h3>
+                                            <span class="text-white-50 text-uppercase fw-semibold" style="font-size: 0.65rem; letter-spacing: 0.5px;">Kab/Kota</span>
                                         </div>
-                                        <div class="ps-2">
-                                            <h2 class="mb-0 fw-bold text-info">{{ $totalKecamatan ?? 0 }}</h2>
-                                            <small class="text-white-50 text-uppercase fw-semibold"
-                                                style="font-size: 0.7rem;">Kecamatan</small>
+                                        <div class="text-center">
+                                            <h3 class="mb-0 fw-bolder text-info lh-1">{{ $totalKecamatan ?? 0 }}</h3>
+                                            <span class="text-white-50 text-uppercase fw-semibold" style="font-size: 0.65rem; letter-spacing: 0.5px;">Kecamatan</span>
                                         </div>
                                     </div>
                                 @endif
+
+                                {{-- 2. JAM REALTIME WIDGET --}}
+                                <div class="glass-widget px-4 py-3 text-center text-sm-end d-flex flex-column justify-content-center">
+                                    <h3 class="mb-0 fw-bolder text-white lh-1" id="realtime-clock" style="font-family: monospace; letter-spacing: 2px;">--:--:--</h3>
+                                    <span class="text-info fw-medium mt-1" id="realtime-date" style="font-size: 0.75rem;">Loading...</span>
+                                </div>
 
                             </div>
                         </div>
@@ -98,24 +141,24 @@
         {{-- SECTION 2: TAMPILAN KHUSUS ADMIN (DATA STATISTIK LENGKAP)           --}}
         {{-- =================================================================== --}}
         @if ($isAdmin)
-            <div class="row g-4 mb-4 animate__animated animate__fadeIn">
+            <div class="row g-4 mb-4 animate-fade-in-up" style="animation-delay: 0.1s;">
 
                 {{-- 1. SATUAN PENDIDIKAN --}}
                 <div class="col-xl-3 col-md-6">
-                    <div class="card h-100 border-0 shadow-sm hover-up">
+                    <div class="card h-100 border-0 shadow-sm stat-card rounded-4">
                         <div class="card-body p-4">
-                            <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
                                 <div>
-                                    <p class="text-muted mb-1 text-uppercase fw-bold small">Satuan Pendidikan</p>
-                                    <h2 class="mb-0 fw-bold text-info">{{ number_format($totalSekolah ?? 0) }}</h2>
+                                    <p class="text-muted mb-1 text-uppercase fw-bold small" style="letter-spacing: 0.5px;">Satuan Pendidikan</p>
+                                    <h2 class="mb-0 fw-bolder text-info">{{ number_format($totalSekolah ?? 0) }}</h2>
                                 </div>
-                                <div class="avatar avatar-md bg-label-info rounded p-2">
-                                    <i class="bx bx-home-alt fs-4"></i>
+                                <div class="avatar avatar-md bg-label-info rounded-circle d-flex align-items-center justify-content-center shadow-xs">
+                                    <i class="bx bx-buildings fs-4"></i>
                                 </div>
                             </div>
-                            <div class="mt-3 d-flex gap-2">
-                                <span class="badge bg-label-success rounded-pill">Negeri: {{ $totalNegeri ?? 0 }}</span>
-                                <span class="badge bg-label-warning rounded-pill">Swasta: {{ $totalSwasta ?? 0 }}</span>
+                            <div class="d-flex gap-2">
+                                <span class="badge bg-label-success rounded-pill px-3 py-2"><i class="bx bx-check-shield me-1"></i> Negeri: {{ $totalNegeri ?? 0 }}</span>
+                                <span class="badge bg-label-warning rounded-pill px-3 py-2"><i class="bx bx-home-heart me-1"></i> Swasta: {{ $totalSwasta ?? 0 }}</span>
                             </div>
                         </div>
                     </div>
@@ -123,20 +166,20 @@
 
                 {{-- 2. GURU --}}
                 <div class="col-xl-3 col-md-6">
-                    <div class="card h-100 border-0 shadow-sm hover-up">
+                    <div class="card h-100 border-0 shadow-sm stat-card rounded-4">
                         <div class="card-body p-4">
-                            <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
                                 <div>
-                                    <p class="text-muted mb-1 text-uppercase fw-bold small">Guru</p>
-                                    <h2 class="mb-0 fw-bold text-success">{{ number_format($totalGuru ?? 0) }}</h2>
+                                    <p class="text-muted mb-1 text-uppercase fw-bold small" style="letter-spacing: 0.5px;">Tenaga Pendidik</p>
+                                    <h2 class="mb-0 fw-bolder text-success">{{ number_format($totalGuru ?? 0) }}</h2>
                                 </div>
-                                <div class="avatar avatar-md bg-label-success rounded p-2">
-                                    <i class="bx bx-id-card fs-4"></i>
+                                <div class="avatar avatar-md bg-label-success rounded-circle d-flex align-items-center justify-content-center shadow-xs">
+                                    <i class="bx bx-chalkboard fs-4"></i>
                                 </div>
                             </div>
-                            <div class="mt-3 d-flex gap-2">
-                                <span class="badge bg-label-success rounded-pill">ASN: {{ $guruASN ?? 0 }}</span>
-                                <span class="badge bg-label-warning rounded-pill">Non: {{ $guruNonASN ?? 0 }}</span>
+                            <div class="d-flex gap-2">
+                                <span class="badge bg-label-success rounded-pill px-3 py-2">ASN: {{ $guruASN ?? 0 }}</span>
+                                <span class="badge bg-label-secondary rounded-pill px-3 py-2">Non-ASN: {{ $guruNonASN ?? 0 }}</span>
                             </div>
                         </div>
                     </div>
@@ -144,33 +187,33 @@
 
                 {{-- 3. TENDIK --}}
                 <div class="col-xl-3 col-md-6">
-                    <div class="card h-100 border-0 shadow-sm hover-up">
+                    <div class="card h-100 border-0 shadow-sm stat-card rounded-4">
                         <div class="card-body p-4">
-                            <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
                                 <div>
-                                    <p class="text-muted mb-1 text-uppercase fw-bold small">Tendik</p>
-                                    <h2 class="mb-0 fw-bold text-warning">{{ number_format($totalTendik ?? 0) }}</h2>
+                                    <p class="text-muted mb-1 text-uppercase fw-bold small" style="letter-spacing: 0.5px;">Tenaga Kependidikan</p>
+                                    <h2 class="mb-0 fw-bolder text-warning">{{ number_format($totalTendik ?? 0) }}</h2>
                                 </div>
-                                <div class="avatar avatar-md bg-label-warning rounded p-2">
+                                <div class="avatar avatar-md bg-label-warning rounded-circle d-flex align-items-center justify-content-center shadow-xs">
                                     <i class="bx bx-support fs-4"></i>
                                 </div>
                             </div>
-                            <p class="text-muted small mt-3 mb-0">Tenaga Kependidikan & Staff</p>
+                            <p class="text-muted small mb-0 fw-medium mt-2"><i class="bx bx-info-circle me-1"></i> Staff Tata Usaha & Honorer</p>
                         </div>
                     </div>
                 </div>
 
                 {{-- 4. SISWA --}}
                 <div class="col-xl-3 col-md-6">
-                    <div class="card h-100 border-0 shadow-sm hover-up">
+                    <div class="card h-100 border-0 shadow-sm stat-card rounded-4">
                         <div class="card-body p-4">
-                            <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div class="d-flex justify-content-between align-items-start mb-1">
                                 <div>
-                                    <p class="text-muted mb-1 text-uppercase fw-bold small">Peserta Didik</p>
-                                    <h2 class="mb-0 fw-bold text-primary">{{ number_format($totalSiswa ?? 0) }}</h2>
+                                    <p class="text-muted mb-1 text-uppercase fw-bold small" style="letter-spacing: 0.5px;">Peserta Didik</p>
+                                    <h2 class="mb-0 fw-bolder text-primary">{{ number_format($totalSiswa ?? 0) }}</h2>
                                 </div>
-                                <div class="avatar avatar-md bg-label-primary rounded p-2">
-                                    <i class="bx bx-user fs-4"></i>
+                                <div class="avatar avatar-md bg-label-primary rounded-circle d-flex align-items-center justify-content-center shadow-xs">
+                                    <i class="bx bx-group fs-4"></i>
                                 </div>
                             </div>
                             @php
@@ -179,13 +222,13 @@
                                 $tPerempuan = $siswaPerempuan ?? 0;
                                 $persenL = $tSiswa > 0 ? ($tLaki / $tSiswa) * 100 : 0;
                             @endphp
-                            <div class="progress mt-3" style="height: 6px;">
-                                <div class="progress-bar bg-info" style="width: {{ $persenL }}%"></div>
-                                <div class="progress-bar bg-danger" style="width: {{ 100 - $persenL }}%"></div>
+                            <div class="progress mt-3 rounded-pill" style="height: 8px;">
+                                <div class="progress-bar bg-info" style="width: {{ $persenL }}%" data-bs-toggle="tooltip" title="Laki-laki: {{ number_format($tLaki) }}"></div>
+                                <div class="progress-bar bg-danger" style="width: {{ 100 - $persenL }}%" data-bs-toggle="tooltip" title="Perempuan: {{ number_format($tPerempuan) }}"></div>
                             </div>
-                            <div class="d-flex justify-content-between text-muted small mt-2">
-                                <span>L: {{ number_format($tLaki) }}</span>
-                                <span>P: {{ number_format($tPerempuan) }}</span>
+                            <div class="d-flex justify-content-between text-muted mt-2 fw-semibold" style="font-size: 0.7rem;">
+                                <span class="text-info"><i class="bx bx-male"></i> {{ number_format($tLaki) }}</span>
+                                <span class="text-danger"><i class="bx bx-female"></i> {{ number_format($tPerempuan) }}</span>
                             </div>
                         </div>
                     </div>
@@ -193,11 +236,12 @@
             </div>
 
             {{-- CHART & PINTASAN MENU --}}
-            <div class="row g-4 animate__animated animate__fadeInUp">
+            <div class="row g-4 animate-fade-in-up" style="animation-delay: 0.2s;">
+                {{-- KIRI: CHART --}}
                 <div class="col-lg-8">
-                    <div class="card border-0 shadow-sm h-100">
+                    <div class="card border-0 shadow-soft h-100 rounded-4">
                         <div class="card-header bg-transparent border-bottom p-4">
-                            <h5 class="card-title mb-0 fw-bold">Sebaran Sekolah per Kecamatan</h5>
+                            <h5 class="card-title mb-0 fw-bold text-dark"><i class="bx bx-bar-chart-alt-2 text-primary me-2"></i>Sebaran Sekolah per Kecamatan</h5>
                         </div>
                         <div class="card-body p-4">
                             <div id="chartWilayah" style="min-height: 350px;"></div>
@@ -205,27 +249,43 @@
                     </div>
                 </div>
 
+                {{-- KANAN: QUICK LINKS --}}
                 <div class="col-lg-4">
-                    <div class="card border-0 shadow-sm h-100">
+                    <div class="card border-0 shadow-soft h-100 rounded-4">
                         <div class="card-header bg-transparent border-bottom p-4">
-                            <h5 class="card-title mb-0 fw-bold">Pintasan Menu</h5>
+                            <h5 class="card-title mb-0 fw-bold text-dark"><i class="bx bx-link text-primary me-2"></i>Pintasan Cepat</h5>
                         </div>
-                        <div class="list-group list-group-flush">
-                            <a href="{{ route('admin.kesiswaan.siswa.index') }}"
-                                class="list-group-item list-group-item-action p-4 border-bottom-0 d-flex gap-3 align-items-center hover-bg-light">
-                                <div class="p-2 bg-label-primary rounded"><i class='bx bx-search'></i></div>
-                                <div>
-                                    <h6 class="mb-0">Cari Data Siswa</h6><small class="text-muted">Pencarian
-                                        Detail</small>
+                        <div class="list-group list-group-flush rounded-bottom-4">
+                            <a href="{{ route('admin.kesiswaan.siswa.index') }}" class="list-group-item list-group-item-action p-4 border-bottom-0 d-flex gap-3 align-items-center transition-all">
+                                <div class="avatar avatar-md bg-label-primary rounded-circle d-flex justify-content-center align-items-center flex-shrink-0">
+                                    <i class='bx bx-search fs-4'></i>
                                 </div>
-                            </a>
-                            <a href="{{ route('admin.sekolah.export-excel') }}" target="_blank"
-                                class="list-group-item list-group-item-action p-4 border-bottom-0 d-flex gap-3 align-items-center hover-bg-light">
-                                <div class="p-2 bg-label-success rounded"><i class='bx bx-download'></i></div>
-                                <div>
-                                    <h6 class="mb-0">Data Sekolah</h6><small class="text-muted">Unduh Excel</small>
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-1 fw-bold text-dark">Pencarian Siswa</h6>
+                                    <small class="text-muted d-block lh-sm">Cari data spesifik peserta didik</small>
                                 </div>
+                                <i class="bx bx-chevron-right text-muted"></i>
                             </a>
+                            <a href="{{ route('admin.sekolah.export-excel') }}" target="_blank" class="list-group-item list-group-item-action p-4 border-bottom-0 d-flex gap-3 align-items-center border-top transition-all">
+                                <div class="avatar avatar-md bg-label-success rounded-circle d-flex justify-content-center align-items-center flex-shrink-0">
+                                    <i class='bx bx-file text-success fs-4'></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-1 fw-bold text-dark">Unduh Data Sekolah</h6>
+                                    <small class="text-muted d-block lh-sm">Export rekapitulasi format Excel</small>
+                                </div>
+                                <i class="bx bx-chevron-right text-muted"></i>
+                            </a>
+                            {{-- <a href="{{ route('admin.monitoring-sync.index') }}" class="list-group-item list-group-item-action p-4 border-bottom-0 d-flex gap-3 align-items-center border-top transition-all">
+                                <div class="avatar avatar-md bg-label-warning rounded-circle d-flex justify-content-center align-items-center flex-shrink-0">
+                                    <i class='bx bx-refresh text-warning fs-4'></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-1 fw-bold text-dark">Log Sinkronisasi</h6>
+                                    <small class="text-muted d-block lh-sm">Pantau tarikan data Dapodik</small>
+                                </div>
+                                <i class="bx bx-chevron-right text-muted"></i>
+                            </a> --}}
                         </div>
                     </div>
                 </div>
@@ -236,32 +296,31 @@
         {{-- SECTION 3: TAMPILAN KHUSUS PEGAWAI (WORKSPACE SIMPLE)               --}}
         {{-- =================================================================== --}}
         @if ($isPegawai)
-            <div class="row g-4 animate__animated animate__fadeIn">
+            <div class="row g-4 animate-fade-in-up" style="animation-delay: 0.1s;">
 
                 {{-- KARTU UTAMA: WELCOME & ACTION --}}
                 <div class="col-md-8">
-                    <div class="card border-0 shadow-sm h-100 bg-white">
-                        <div
-                            class="card-body p-5 text-center d-flex flex-column justify-content-center align-items-center">
-                            <div class="mb-4 bg-label-primary rounded-circle p-4 animate__animated animate__pulse animate__infinite"
-                                style="width: 120px; height: 120px; display: flex; align-items: center; justify-content: center;">
-                                <i class='bx bx-file-find' style="font-size: 60px;"></i>
+                    <div class="card border-0 shadow-soft h-100 bg-white rounded-4 overflow-hidden position-relative">
+                        {{-- Ornamen --}}
+                        <div style="position: absolute; right: -50px; top: -50px; opacity: 0.03;">
+                            <i class='bx bx-check-shield' style="font-size: 300px;"></i>
+                        </div>
+                        
+                        <div class="card-body p-5 text-center d-flex flex-column justify-content-center align-items-center position-relative z-1">
+                            <div class="mb-4 bg-label-primary rounded-circle p-4 animate-float shadow-xs" style="width: 130px; height: 130px; display: flex; align-items: center; justify-content: center;">
+                                <i class='bx bx-file-find text-primary' style="font-size: 60px;"></i>
                             </div>
-                            <h4 class="fw-bold text-dark mb-2">Selamat Bekerja, {{ Auth::user()->name }}!</h4>
-                            <p class="text-muted" style="max-width: 500px;">
-                                Anda memiliki akses sebagai <strong>Verifikator</strong>. Silakan periksa menu layanan di
-                                sidebar untuk memulai verifikasi dokumen pengajuan atau gunakan tombol cepat di bawah.
+                            <h3 class="fw-bolder text-dark mb-2">Selamat Bertugas!</h3>
+                            <p class="text-muted mb-4 fs-6" style="max-width: 550px; line-height: 1.6;">
+                                Anda login dengan hak akses sebagai <strong>Verifikator Cabang Dinas</strong>. Periksa menu layanan di sidebar untuk memproses pengajuan dokumen, atau gunakan pintasan di bawah.
                             </p>
 
-                            <div class="d-flex justify-content-center gap-3 mt-4">
-                                {{-- Tombol Pintas ke Layanan Verifikasi --}}
-                                <a href="{{ $verifikasiLink }}"
-                                    class="btn btn-primary px-4 shadow-sm hover-up">
-                                    <i class='bx bx-task me-2'></i> Mulai Tugas
+                            <div class="d-flex flex-wrap justify-content-center gap-3">
+                                <a href="{{ $verifikasiLink ?? '#' }}" class="btn btn-primary rounded-pill px-5 py-2 fw-bold shadow-sm hover-up">
+                                    <i class='bx bx-task me-2 fs-5' style="vertical-align: text-bottom;"></i> Buka Antrean Layanan
                                 </a>
-                                <a href="{{ route('admin.profil-saya.show') }}"
-                                    class="btn btn-outline-secondary px-4 hover-up">
-                                    <i class='bx bx-user me-2'></i> Profil Saya
+                                <a href="{{ route('admin.profil-saya.show') }}" class="btn btn-outline-secondary rounded-pill px-4 py-2 fw-bold shadow-xs hover-up">
+                                    <i class='bx bx-user-circle me-2 fs-5' style="vertical-align: text-bottom;"></i> Profil & Sandi
                                 </a>
                             </div>
                         </div>
@@ -270,32 +329,32 @@
 
                 {{-- KARTU STATUS --}}
                 <div class="col-md-4">
-                    <div class="card border-0 shadow-sm h-100 bg-primary text-white position-relative overflow-hidden">
-                        {{-- Decoration --}}
-                        <div style="position: absolute; right: -30px; top: -30px; opacity: 0.1;">
-                            <i class='bx bx-check-shield' style="font-size: 200px;"></i>
-                        </div>
+                    <div class="card border-0 shadow-soft h-100 bg-primary text-white position-relative overflow-hidden rounded-4">
+                        {{-- Decoration Gradient --}}
+                        <div style="position: absolute; bottom: 0; right: 0; width: 100%; height: 100%; background: linear-gradient(to top right, rgba(255,255,255,0.2), transparent);"></div>
 
-                        <div class="card-body p-4 d-flex flex-column justify-content-between position-relative z-1">
+                        <div class="card-body p-4 p-xl-5 d-flex flex-column justify-content-between position-relative z-1">
                             <div>
-                                <h5 class="fw-bold text-white mb-3 d-flex align-items-center">
-                                    <i class='bx bx-info-circle me-2'></i> Status Verifikator
-                                </h5>
-                                <p class="text-white-50 mb-0 small">
-                                    Pastikan Anda selalu memeriksa kelengkapan dokumen sesuai dengan Juknis terbaru sebelum
-                                    memberikan persetujuan (ACC).
+                                <div class="d-flex align-items-center mb-3">
+                                    <div class="bg-white rounded-circle p-2 text-primary me-3 shadow-sm">
+                                        <i class="bx bx-shield-quarter fs-3"></i>
+                                    </div>
+                                    <h5 class="fw-bold text-white mb-0">Status Sistem</h5>
+                                </div>
+                                <p class="text-white opacity-75 mb-0" style="font-size: 0.9rem; line-height: 1.5;">
+                                    Pastikan SOP dan petunjuk teknis layanan selalu diikuti. Data yang Anda verifikasi dan setujui akan tercatat dalam log aktivitas sistem.
                                 </p>
                             </div>
 
-                            <div class="mt-4">
-                                <div class="p-3 bg-white bg-opacity-10 rounded d-flex align-items-center gap-3">
-                                    <div
-                                        class="bg-white text-primary rounded p-2 d-flex align-items-center justify-content-center">
-                                        <i class='bx bx-user-check fs-4'></i>
-                                    </div>
+                            <div class="mt-4 pt-4 border-top border-white border-opacity-25">
+                                <div class="d-flex align-items-center justify-content-between">
                                     <div>
-                                        <small class="d-block text-white-50">Akun Aktif</small>
-                                        <h6 class="mb-0 fw-bold">{{ Auth::user()->name }}</h6>
+                                        <small class="d-block text-white opacity-75 text-uppercase fw-bold" style="font-size: 0.7rem; letter-spacing: 0.5px;">Sesi Pengguna</small>
+                                        <h6 class="mb-0 fw-bold text-white mt-1">{{ Auth::user()->username }}</h6>
+                                    </div>
+                                    <div class="badge bg-success bg-opacity-25 text-white border border-success border-opacity-50 rounded-pill px-3 py-2 d-flex align-items-center gap-2 shadow-xs">
+                                        <div class="rounded-circle bg-success" style="width: 8px; height: 8px; box-shadow: 0 0 10px #71dd37;"></div>
+                                        <span class="fw-bold small">Online</span>
                                     </div>
                                 </div>
                             </div>
@@ -304,54 +363,9 @@
                 </div>
             </div>
         @endif
+    </div>
+
 @endsection
-
-{{-- =================================================================== --}}
-{{-- STYLES TAMBAHAN                                                     --}}
-{{-- =================================================================== --}}
-@push('styles')
-    <style>
-        .bg-label-primary {
-            background-color: rgba(105, 108, 255, 0.1) !important;
-            color: #696cff !important;
-        }
-
-        .bg-label-success {
-            background-color: rgba(113, 221, 55, 0.1) !important;
-            color: #71dd37 !important;
-        }
-
-        .bg-label-info {
-            background-color: rgba(3, 195, 236, 0.1) !important;
-            color: #03c3ec !important;
-        }
-
-        .bg-label-warning {
-            background-color: rgba(255, 171, 0, 0.1) !important;
-            color: #ffab00 !important;
-        }
-
-        .hover-up:hover {
-            transform: translateY(-4px);
-            transition: all 0.3s ease;
-        }
-
-        .hover-white:hover {
-            color: white !important;
-        }
-
-        .hover-bg-light:hover {
-            background-color: #f8f9fa;
-        }
-
-        /* Divider responsif di header */
-        @media (min-width: 768px) {
-            .border-end-md {
-                border-right: 1px solid rgba(255, 255, 255, 0.25) !important;
-            }
-        }
-    </style>
-@endpush
 
 {{-- =================================================================== --}}
 {{-- SCRIPTS (CHART & JAM REALTIME)                                      --}}
@@ -361,20 +375,21 @@
     <script>
         document.addEventListener("DOMContentLoaded", function() {
 
-            // 1. JAM REALTIME
+            // Inisialisasi Tooltip
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+            tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl)
+            });
+
+            // 1. JAM REALTIME WIDGET
             function updateClock() {
                 const now = new Date();
                 const timeString = now.toLocaleTimeString('id-ID', {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    second: '2-digit',
-                    hour12: false
+                    hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
                 }).replace(/\./g, ':');
+                
                 const dateString = now.toLocaleDateString('id-ID', {
-                    weekday: 'long',
-                    day: 'numeric',
-                    month: 'long',
-                    year: 'numeric'
+                    weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
                 });
 
                 const hour = now.getHours();
@@ -395,7 +410,7 @@
             setInterval(updateClock, 1000);
             updateClock();
 
-            // 2. CHART (Hanya dirender jika elemennya ada / Admin Only)
+            // 2. CHART APEXCHARTS (KHUSUS ADMIN)
             if (document.querySelector("#chartWilayah")) {
                 var categories = {!! json_encode($chartCategories ?? []) !!};
                 var dataValues = {!! json_encode($chartData ?? []) !!};
@@ -404,10 +419,15 @@
                     chart: {
                         type: 'bar',
                         height: 350,
-                        toolbar: {
-                            show: false
-                        },
-                        fontFamily: 'inherit'
+                        toolbar: { show: false },
+                        fontFamily: 'inherit',
+                        animations: {
+                            enabled: true,
+                            easing: 'easeinout',
+                            speed: 800,
+                            animateGradually: { enabled: true, delay: 150 },
+                            dynamicAnimation: { enabled: true, speed: 350 }
+                        }
                     },
                     series: [{
                         name: 'Jumlah Sekolah',
@@ -416,36 +436,47 @@
                     colors: ['#696cff'],
                     plotOptions: {
                         bar: {
-                            borderRadius: 5,
+                            borderRadius: 6,
                             horizontal: true,
-                            barHeight: '50%'
+                            barHeight: '60%',
+                            dataLabels: { position: 'bottom' }
                         }
                     },
                     dataLabels: {
                         enabled: true,
                         textAnchor: 'start',
                         style: {
-                            colors: ['#fff']
+                            colors: ['#fff'],
+                            fontSize: '12px',
+                            fontWeight: 600,
                         },
-                        offsetX: 0
+                        formatter: function (val, opt) {
+                            return val + " Sekolah"
+                        },
+                        offsetX: 10
                     },
                     xaxis: {
-                        categories: categories
+                        categories: categories,
+                        labels: { style: { colors: '#a1acb8', fontSize: '12px' } }
+                    },
+                    yaxis: {
+                        labels: { style: { colors: '#566a7f', fontSize: '13px', fontWeight: 500 } }
                     },
                     grid: {
-                        borderColor: '#f1f1f1'
+                        borderColor: '#f1f5f9',
+                        strokeDashArray: 4,
+                        xaxis: { lines: { show: true } },
+                        yaxis: { lines: { show: false } },
+                    },
+                    tooltip: {
+                        theme: 'light',
+                        y: { formatter: function (val) { return val + " Sekolah" } }
                     }
                 };
 
                 var chart = new ApexCharts(document.querySelector("#chartWilayah"), options);
                 chart.render();
             }
-
-            // 3. Tooltip Bootstrap
-            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-            var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
-                return new bootstrap.Tooltip(tooltipTriggerEl)
-            })
         });
     </script>
 @endpush

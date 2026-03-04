@@ -18,6 +18,7 @@ use App\Http\Controllers\Admin\JabatanKcdController;
 use App\Http\Controllers\Admin\Sekolah\SekolahController as SekolahMonitoringController;
 use App\Http\Controllers\Admin\Kepegawaian\GtkController;
 use App\Http\Controllers\Admin\Kesiswaan\SiswaController;
+
 // 🔥 Import Controller Monitoring Sync 🔥
 use App\Http\Controllers\Admin\SyncLogController;
 
@@ -133,6 +134,13 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
     
     // 🔥 Route Monitoring Sync Log 🔥
     Route::get('monitoring-sync', [SyncLogController::class, 'index'])->name('monitoring-sync.index');
+
+    // 🔥 ROUTE AJAX FILTER BERJENJANG SEKOLAH 🔥
+    Route::prefix('ajax')->name('ajax.')->group(function() {
+        Route::get('/get-kecamatan', [SekolahMonitoringController::class, 'getKecamatan'])->name('kecamatan');
+        Route::get('/get-jenjang', [SekolahMonitoringController::class, 'getJenjang'])->name('jenjang');
+        Route::get('/get-status', [SekolahMonitoringController::class, 'getStatus'])->name('status');
+    });
 
     Route::middleware('check_menu:satuan-pendidikan')->group(function() {
         Route::get('sekolah/export-excel', [SekolahMonitoringController::class, 'exportExcel'])->name('sekolah.export-excel');

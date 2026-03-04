@@ -119,6 +119,11 @@ class Siswa extends Model
         return $this->hasOne(Pengguna::class, 'peserta_didik_id', 'peserta_didik_id');
     }
 
+    public function sekolah()
+    {
+    return $this->belongsTo(Sekolah::class, 'sekolah_id', 'sekolah_id');
+    }
+
     public function tracer(): HasOne
     {
         return $this->hasOne(TracerStudy::class, 'siswa_id', 'id');

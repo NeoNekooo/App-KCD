@@ -19,6 +19,15 @@ class PegawaiKcdController extends Controller
     {
         $query = PegawaiKcd::with('user', 'jabatanKcd');
 
+        // 🔥 Logic Pencarian (Search) se-Database 🔥
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('nama', 'like', "%{$search}%")
+                  ->orWhere('nip', 'like', "%{$search}%");
+            });
+        }
+
         // Logic Sorting
         switch ($request->get('sort')) {
             case 'alpha':
@@ -33,6 +42,7 @@ class PegawaiKcdController extends Controller
                 break;
         }
 
+        // appends() wajib biar pagination bawa param search & sort
         $pegawais = $query->paginate(10)->appends($request->query());
         $jabatans = JabatanKcd::all();
 
@@ -55,18 +65,18 @@ class PegawaiKcdController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'nama'          => 'required|string|max:255',
+            'nama'           => 'required|string|max:255',
             'jabatan_kcd_id' => 'required|exists:jabatan_kcd,id',
-            'nip'           => 'nullable|string|max:50|unique:pegawai_kcds,nip',
-            'nik'           => 'nullable|numeric|digits:16|unique:pegawai_kcds,nik',
-            'jenis_kelamin' => 'required|in:L,P',
-            'tempat_lahir'  => 'nullable|string',
-            'tanggal_lahir' => 'nullable|date',
-            'no_hp'         => 'nullable|string|max:20',
-            'email_pribadi' => 'nullable|email',
-            'alamat'        => 'nullable|string',
-            'foto'          => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
-            'password'      => 'nullable|string|min:6',
+            'nip'            => 'nullable|string|max:50|unique:pegawai_kcds,nip',
+            'nik'            => 'nullable|numeric|digits:16|unique:pegawai_kcds,nik',
+            'jenis_kelamin'  => 'required|in:L,P',
+            'tempat_lahir'   => 'nullable|string',
+            'tanggal_lahir'  => 'nullable|date',
+            'no_hp'          => 'nullable|string|max:20',
+            'email_pribadi'  => 'nullable|email',
+            'alamat'         => 'nullable|string',
+            'foto'           => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'password'       => 'nullable|string|min:6',
         ]);
 
         try {
@@ -99,19 +109,19 @@ class PegawaiKcdController extends Controller
 
                 // 4. BUAT DATA PEGAWAI (BIODATA)
                 $pegawai = PegawaiKcd::create([
-                    'user_id'       => $user->id,
-                    'nama'          => $request->nama,
-                    'nip'           => $request->nip,
-                    'nik'           => $request->nik,
-                    'jabatan'       => $jabatan->nama, // backward compatibility
+                    'user_id'        => $user->id,
+                    'nama'           => $request->nama,
+                    'nip'            => $request->nip,
+                    'nik'            => $request->nik,
+                    'jabatan'        => $jabatan->nama, // backward compatibility
                     'jabatan_kcd_id' => $jabatan->id,
-                    'jenis_kelamin' => $request->jenis_kelamin,
-                    'tempat_lahir'  => $request->tempat_lahir,
-                    'tanggal_lahir' => $request->tanggal_lahir,
-                    'no_hp'         => $request->no_hp,
-                    'email_pribadi' => $request->email_pribadi,
-                    'alamat'        => $request->alamat,
-                    'foto'          => $fotoPath,
+                    'jenis_kelamin'  => $request->jenis_kelamin,
+                    'tempat_lahir'   => $request->tempat_lahir,
+                    'tanggal_lahir'  => $request->tanggal_lahir,
+                    'no_hp'          => $request->no_hp,
+                    'email_pribadi'  => $request->email_pribadi,
+                    'alamat'         => $request->alamat,
+                    'foto'           => $fotoPath,
                 ]);
 
                 // 5. UPDATE RELASI DI TABEL USER (Agar menu muncul)
@@ -140,97 +150,98 @@ class PegawaiKcdController extends Controller
     }
 
     // --- UPDATE: EDIT DATA ---
-        public function update(Request $request, $id)
-        {
-            $pegawai = PegawaiKcd::findOrFail($id);
-    
-            // Validasi Akses
-            if (Auth::user()->role !== 'Admin' && $pegawai->user_id !== Auth::id()) {
-                abort(403, 'Akses Ditolak.');
+    public function update(Request $request, $id)
+    {
+        $pegawai = PegawaiKcd::findOrFail($id);
+
+        // Validasi Akses
+        if (Auth::user()->role !== 'Admin' && $pegawai->user_id !== Auth::id()) {
+            abort(403, 'Akses Ditolak.');
+        }
+
+        $rules = [
+            'nama'          => 'required|string|max:255',
+            'nik'           => 'nullable|numeric|digits:16|unique:pegawai_kcds,nik,' . $id,
+            'foto'          => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'password'      => 'nullable|string|min:6',
+        ];
+
+        if (Auth::user()->role === 'Admin') {
+            $rules['nip'] = 'nullable|string|max:50|unique:pegawai_kcds,nip,' . $id;
+            $rules['jabatan_kcd_id'] = 'required|exists:jabatan_kcd,id';
+        }
+
+        $validator = \Illuminate\Support\Facades\Validator::make($request->all(), $rules);
+
+        if ($validator->fails()) {
+            if ($validator->errors()->has('nik')) {
+                $nikError = $validator->errors()->first('nik');
+                return redirect()->back()->withInput()->with('error', $nikError);
             }
-    
-            $rules = [
-                'nama'          => 'required|string|max:255',
-                'nik'           => 'nullable|numeric|digits:16|unique:pegawai_kcds,nik,' . $id,
-                'foto'          => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
-                'password'      => 'nullable|string|min:6',
-            ];
-    
-            if (Auth::user()->role === 'Admin') {
-                $rules['nip'] = 'nullable|string|max:50|unique:pegawai_kcds,nip,' . $id;
-                $rules['jabatan_kcd_id'] = 'required|exists:jabatan_kcd,id';
-            }
-    
-            $validator = \Illuminate\Support\Facades\Validator::make($request->all(), $rules);
-    
-            if ($validator->fails()) {
-                if ($validator->errors()->has('nik')) {
-                    $nikError = $validator->errors()->first('nik');
-                    return redirect()->back()->withInput()->with('error', $nikError);
-                }
-                return redirect()->back()->withErrors($validator)->withInput();
-            }
-    
-            try {
-                DB::transaction(function () use ($request, $pegawai) {
-                    
-                    $allowedFields = [
-                        'nama', 'email_pribadi', 'no_hp', 'alamat', 'nik', 'jenis_kelamin', 'tempat_lahir', 'tanggal_lahir'
-                    ];
-                    $dataUpdate = $request->only($allowedFields);
-    
-                    // 1. Handle Ganti Foto
-                    if ($request->hasFile('foto')) {
-                        if ($pegawai->foto && Storage::disk('public')->exists($pegawai->foto)) {
-                            Storage::disk('public')->delete($pegawai->foto);
-                        }
-                        $dataUpdate['foto'] = $request->file('foto')->store('foto_pegawai', 'public');
+            return redirect()->back()->withErrors($validator)->withInput();
+        }
+
+        try {
+            DB::transaction(function () use ($request, $pegawai) {
+                
+                $allowedFields = [
+                    'nama', 'email_pribadi', 'no_hp', 'alamat', 'nik', 'jenis_kelamin', 'tempat_lahir', 'tanggal_lahir'
+                ];
+                $dataUpdate = $request->only($allowedFields);
+
+                // 1. Handle Ganti Foto
+                if ($request->hasFile('foto')) {
+                    if ($pegawai->foto && Storage::disk('public')->exists($pegawai->foto)) {
+                        Storage::disk('public')->delete($pegawai->foto);
                     }
-    
-                    // Update protected fields only if Admin
+                    $dataUpdate['foto'] = $request->file('foto')->store('foto_pegawai', 'public');
+                }
+
+                // Update protected fields only if Admin
+                if (Auth::user()->role === 'Admin') {
+                    $jabatan = JabatanKcd::find($request->jabatan_kcd_id);
+                    $dataUpdate['jabatan_kcd_id'] = $jabatan->id;
+                    $dataUpdate['jabatan'] = $jabatan->nama; 
+                    $dataUpdate['nip'] = $request->nip;
+                }
+
+                // 2. Update Data Pegawai
+                $pegawai->update($dataUpdate);
+
+                // 3. Update Akun User (Sinkronisasi)
+                if ($pegawai->user) {
+                    $userUpdate = [
+                        'name' => $request->nama,
+                    ];
+
                     if (Auth::user()->role === 'Admin') {
                         $jabatan = JabatanKcd::find($request->jabatan_kcd_id);
-                        $dataUpdate['jabatan_kcd_id'] = $jabatan->id;
-                        $dataUpdate['jabatan'] = $jabatan->nama; 
-                        $dataUpdate['nip'] = $request->nip;
+                        $userUpdate['role'] = $jabatan->role;
+                        if ($request->nip) {
+                            $userUpdate['username'] = $request->nip;
+                        }
                     }
-    
-                    // 2. Update Data Pegawai
-                    $pegawai->update($dataUpdate);
-    
-                    // 3. Update Akun User (Sinkronisasi)
-                    if ($pegawai->user) {
-                        $userUpdate = [
-                            'name' => $request->nama,
-                        ];
-    
-                        if (Auth::user()->role === 'Admin') {
-                            $jabatan = JabatanKcd::find($request->jabatan_kcd_id);
-                            $userUpdate['role'] = $jabatan->role;
-                            if ($request->nip) {
-                                $userUpdate['username'] = $request->nip;
-                            }
-                        }
-    
-                        if ($request->email_pribadi) {
-                            $userUpdate['email'] = $request->email_pribadi;
-                        }
-    
-                        // Update Password jika diisi
-                        if ($request->filled('password')) {
-                            $userUpdate['password'] = Hash::make($request->password);
-                        }
-    
-                        $pegawai->user->update($userUpdate);
+
+                    if ($request->email_pribadi) {
+                        $userUpdate['email'] = $request->email_pribadi;
                     }
-                });
-    
-                return back()->with('success', 'Data Profil & Akun berhasil diperbarui.');
-    
-            } catch (\Exception $e) {
-                return back()->with('error', 'Gagal update: ' . $e->getMessage());
-            }
+
+                    // Update Password jika diisi
+                    if ($request->filled('password')) {
+                        $userUpdate['password'] = Hash::make($request->password);
+                    }
+
+                    $pegawai->user->update($userUpdate);
+                }
+            });
+
+            return back()->with('success', 'Data Profil & Akun berhasil diperbarui.');
+
+        } catch (\Exception $e) {
+            return back()->with('error', 'Gagal update: ' . $e->getMessage());
         }
+    }
+
     public function destroy($id)
     {
         if (Auth::user()->role !== 'Admin') {

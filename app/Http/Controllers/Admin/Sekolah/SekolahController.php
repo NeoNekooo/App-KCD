@@ -30,8 +30,15 @@ class SekolahController extends Controller
             ]);
 
         // --- 1. FILTER DATA UTAMA (Query untuk Tabel) ---
-        $query->when($request->filled('kabupaten_kota'), fn($q) => $q->where('kabupaten_kota', $request->kabupaten_kota));
-        $query->when($request->filled('kecamatan'), fn($q) => $q->where('kecamatan', $request->kecamatan));
+        // Penyesuaian karena di frontend kita hilangkan kata "Kab.", "Kota", dan "Kec."
+        $query->when($request->filled('kabupaten_kota'), function($q) use ($request) {
+            $q->whereIn('kabupaten_kota', ['Kab. ' . $request->kabupaten_kota, 'Kota ' . $request->kabupaten_kota]);
+        });
+        
+        $query->when($request->filled('kecamatan'), function($q) use ($request) {
+            $q->where('kecamatan', 'Kec. ' . $request->kecamatan);
+        });
+
         $query->when($request->filled('jenjang'), fn($q) => $q->where('bentuk_pendidikan_id_str', $request->jenjang));
         $query->when($request->filled('status_sekolah'), fn($q) => $q->where('status_sekolah_str', $request->status_sekolah));
         
@@ -50,7 +57,7 @@ class SekolahController extends Controller
         $sekolahs = $query->orderBy('nama', 'asc')->paginate($perPage)->appends($request->all());
 
         // ==========================================================
-        // LOGIKA DROPDOWN BERANTAI (DEPENDENT DROPDOWN)
+        // LOGIKA DROPDOWN BERANTAI (DEPENDENT DROPDOWN - INITIAL LOAD)
         // ==========================================================
 
         // A. List Kabupaten (Selalu Muncul Semua)
@@ -62,21 +69,31 @@ class SekolahController extends Controller
         // B. List Kecamatan (Hanya muncul yang ada di Kabupaten terpilih)
         $kecQuery = Sekolah::whereNotNull('kecamatan');
         if($request->filled('kabupaten_kota')) {
-            $kecQuery->where('kabupaten_kota', $request->kabupaten_kota);
+            $kecQuery->whereIn('kabupaten_kota', ['Kab. ' . $request->kabupaten_kota, 'Kota ' . $request->kabupaten_kota]);
         }
         $listKecamatan = $kecQuery->distinct()->orderBy('kecamatan')->pluck('kecamatan');
 
         // C. List Jenjang (Filter by Kabupaten & Kecamatan terpilih)
         $jenjangQuery = Sekolah::whereNotNull('bentuk_pendidikan_id_str');
-        if($request->filled('kabupaten_kota')) $jenjangQuery->where('kabupaten_kota', $request->kabupaten_kota);
-        if($request->filled('kecamatan')) $jenjangQuery->where('kecamatan', $request->kecamatan);
+        if($request->filled('kabupaten_kota')) {
+            $jenjangQuery->whereIn('kabupaten_kota', ['Kab. ' . $request->kabupaten_kota, 'Kota ' . $request->kabupaten_kota]);
+        }
+        if($request->filled('kecamatan')) {
+            $jenjangQuery->where('kecamatan', 'Kec. ' . $request->kecamatan);
+        }
         $listJenjang = $jenjangQuery->distinct()->orderBy('bentuk_pendidikan_id_str', 'asc')->pluck('bentuk_pendidikan_id_str');
 
         // D. List Status (Filter by Kab, Kec, & Jenjang terpilih)
         $statusQuery = Sekolah::whereNotNull('status_sekolah_str');
-        if($request->filled('kabupaten_kota')) $statusQuery->where('kabupaten_kota', $request->kabupaten_kota);
-        if($request->filled('kecamatan')) $statusQuery->where('kecamatan', $request->kecamatan);
-        if($request->filled('jenjang')) $statusQuery->where('bentuk_pendidikan_id_str', $request->jenjang);
+        if($request->filled('kabupaten_kota')) {
+            $statusQuery->whereIn('kabupaten_kota', ['Kab. ' . $request->kabupaten_kota, 'Kota ' . $request->kabupaten_kota]);
+        }
+        if($request->filled('kecamatan')) {
+            $statusQuery->where('kecamatan', 'Kec. ' . $request->kecamatan);
+        }
+        if($request->filled('jenjang')) {
+            $statusQuery->where('bentuk_pendidikan_id_str', $request->jenjang);
+        }
         $listStatus = $statusQuery->distinct()->orderBy('status_sekolah_str', 'asc')->pluck('status_sekolah_str');
 
         // --- STATISTIK HEADER ---
@@ -144,5 +161,62 @@ class SekolahController extends Controller
     public function exportExcel(Request $request)
     {
         return Excel::download(new SekolahExport($request), 'Data_Satuan_Pendidikan.xlsx');
+    }
+
+    // ==========================================================
+    // 🔥 METHOD UNTUK RESPONSE AJAX FILTER BERJENJANG 🔥
+    // ==========================================================
+
+    public function getKecamatan(Request $request)
+    {
+        // Balikin kata "Kab." / "Kota" untuk pencarian ke DB
+        $kabupaten = 'Kab. ' . $request->kabupaten;
+        $kota = 'Kota ' . $request->kabupaten;
+
+        $kecamatan = Sekolah::whereIn('kabupaten_kota', [$kabupaten, $kota])
+                        ->select('kecamatan')
+                        ->whereNotNull('kecamatan')
+                        ->distinct()
+                        ->orderBy('kecamatan')
+                        ->pluck('kecamatan');
+        
+        return response()->json($kecamatan);
+    }
+
+    public function getJenjang(Request $request)
+    {
+        $kabupaten = 'Kab. ' . $request->kabupaten;
+        $kota = 'Kota ' . $request->kabupaten;
+        // Balikin kata "Kec." untuk pencarian ke DB
+        $kecamatan = 'Kec. ' . $request->kecamatan; 
+
+        $jenjang = Sekolah::whereIn('kabupaten_kota', [$kabupaten, $kota])
+                        ->where('kecamatan', $kecamatan)
+                        ->select('bentuk_pendidikan_id_str')
+                        ->whereNotNull('bentuk_pendidikan_id_str')
+                        ->distinct()
+                        ->orderBy('bentuk_pendidikan_id_str')
+                        ->pluck('bentuk_pendidikan_id_str');
+        
+        return response()->json($jenjang);
+    }
+
+    public function getStatus(Request $request)
+    {
+        $kabupaten = 'Kab. ' . $request->kabupaten;
+        $kota = 'Kota ' . $request->kabupaten;
+        $kecamatan = 'Kec. ' . $request->kecamatan;
+        $jenjang = $request->jenjang;
+
+        $status = Sekolah::whereIn('kabupaten_kota', [$kabupaten, $kota])
+                        ->where('kecamatan', $kecamatan)
+                        ->where('bentuk_pendidikan_id_str', $jenjang)
+                        ->select('status_sekolah_str')
+                        ->whereNotNull('status_sekolah_str')
+                        ->distinct()
+                        ->orderBy('status_sekolah_str')
+                        ->pluck('status_sekolah_str');
+        
+        return response()->json($status);
     }
 }
