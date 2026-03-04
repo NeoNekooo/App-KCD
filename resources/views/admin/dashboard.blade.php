@@ -48,6 +48,11 @@
             100% { transform: translateY(0px); }
         }
         .animate-float { animation: float 4s ease-in-out infinite; }
+
+        /* Style Table Sync Terbaru */
+        .table-sync th { font-size: 0.75rem; text-transform: uppercase; font-weight: 700; color: #a1acb8; border-bottom: 2px solid #eef0f2; }
+        .table-sync td { vertical-align: middle; border-bottom: 1px solid #f0f2f5; padding: 1rem 1.25rem; }
+        .table-sync tbody tr:hover { background-color: #fcfdfe; }
     </style>
     @endpush
 
@@ -214,16 +219,14 @@
                 </div>
             </div>
 
-            {{-- CHART, PINTASAN & SINKRONISASI --}}
-            <div class="row g-4 animate-fade-in-up" style="animation-delay: 0.2s;">
+            {{-- CHART & PINTASAN --}}
+            <div class="row g-4 mb-4 animate-fade-in-up" style="animation-delay: 0.2s;">
                 
-                {{-- KIRI: CHART BAR (FILTER ENABLED) - Dibuat flex-grow biar tingginya menyesuaikan kanan --}}
+                {{-- KIRI: CHART BAR (FILTER ENABLED) --}}
                 <div class="col-lg-8 d-flex flex-column">
                     <div class="card border-0 shadow-soft rounded-4 flex-grow-1">
                         <div class="card-header bg-transparent border-bottom p-4 d-flex justify-content-between align-items-center flex-wrap gap-2">
                             <h5 class="card-title mb-0 fw-bold text-dark"><i class="bx bx-bar-chart-alt-2 text-primary me-2"></i>Sebaran Sekolah</h5>
-                            
-                            {{-- Form Filter Kota/Kab --}}
                             <form action="{{ url()->current() }}" method="GET" class="m-0" id="formFilterChart">
                                 <select name="filter_kabupaten" class="form-select form-select-sm border-1 shadow-sm" onchange="document.getElementById('formFilterChart').submit()" style="border-radius: 20px; font-weight: 600; color: #566a7f;">
                                     <option value="">- Semua Kab/Kota -</option>
@@ -236,13 +239,12 @@
                             </form>
                         </div>
                         <div class="card-body p-4 d-flex flex-column justify-content-center">
-                            {{-- Chart akan expand sesuai sisa tinggi --}}
                             <div id="chartWilayah" style="min-height: 400px; width: 100%;"></div>
                         </div>
                     </div>
                 </div>
 
-                {{-- KANAN: QUICK LINKS + SINKRONISASI TERBARU (Ditumpuk ke bawah) --}}
+                {{-- KANAN: QUICK LINKS + SINKRONISASI TERBARU --}}
                 <div class="col-lg-4 d-flex flex-column gap-4">
                     
                     {{-- 1. QUICK LINKS --}}
@@ -272,7 +274,7 @@
                         </div>
                     </div>
 
-                    {{-- 2. SINKRONISASI TERBARU (Manjang ke bawah ngisi ruang kosong) --}}
+                    {{-- 2. SINKRONISASI TERBARU (HIGHLIGHTED) --}}
                     <div class="card border-0 shadow-soft rounded-4 flex-grow-1">
                         <div class="card-header bg-transparent border-bottom p-3 d-flex justify-content-between align-items-center">
                             <h6 class="card-title mb-0 fw-bold text-dark"><i class="bx bx-time-five text-info me-2"></i>Sinkronisasi Dapodik</h6>
@@ -284,7 +286,9 @@
                                     <li class="list-group-item px-3 py-3 border-bottom-0 border-top hover-bg-light transition-all">
                                         <div class="d-flex justify-content-between align-items-start mb-1">
                                             <h6 class="mb-0 fw-bold text-dark text-truncate pe-2" style="font-size: 0.85rem;" title="{{ $sekolah->nama }}">{{ $sekolah->nama }}</h6>
-                                            <span class="text-muted fw-medium flex-shrink-0" style="font-size: 0.65rem;">
+                                            {{-- 🔥 HIGHLIGHT WAKTU SINKRONISASI 🔥 --}}
+                                            <span class="badge bg-label-info fw-bold rounded-pill flex-shrink-0 animate-pulse" style="font-size: 0.65rem; border: 1px solid rgba(3, 195, 236, 0.2);">
+                                                <i class="bx bx-sync bx-spin-hover me-1" style="font-size: 0.7rem;"></i>
                                                 {{ $sekolah->terakhir_sinkron ? \Carbon\Carbon::parse($sekolah->terakhir_sinkron)->diffForHumans(null, true, true) : 'Baru' }}
                                             </span>
                                         </div>
@@ -296,7 +300,7 @@
                                         </div>
                                     </li>
                                 @empty
-                                    <li class="list-group-item p-4 text-center text-muted small border-top border-bottom-0">Belum ada data sekolah yang tersinkronisasi.</li>
+                                    <li class="list-group-item p-4 text-center text-muted small border-top border-bottom-0">Belum ada sinkronisasi.</li>
                                 @endforelse
                             </ul>
                         </div>
@@ -307,63 +311,42 @@
         @endif
 
         {{-- =================================================================== --}}
-        {{-- SECTION 3: TAMPILAN KHUSUS PEGAWAI (WORKSPACE SIMPLE)               --}}
+        {{-- SECTION 3: TAMPILAN KHUSUS PEGAWAI                                  --}}
         {{-- =================================================================== --}}
         @if ($isPegawai)
             <div class="row g-4 animate-fade-in-up" style="animation-delay: 0.1s;">
                 <div class="col-md-8">
                     <div class="card border-0 shadow-soft h-100 bg-white rounded-4 overflow-hidden position-relative">
-                        <div style="position: absolute; right: -50px; top: -50px; opacity: 0.03;">
-                            <i class='bx bx-check-shield' style="font-size: 300px;"></i>
-                        </div>
-                        
+                        <div style="position: absolute; right: -50px; top: -50px; opacity: 0.03;"><i class='bx bx-check-shield' style="font-size: 300px;"></i></div>
                         <div class="card-body p-5 text-center d-flex flex-column justify-content-center align-items-center position-relative z-1">
                             <div class="mb-4 bg-label-primary rounded-circle p-4 animate-float shadow-xs" style="width: 130px; height: 130px; display: flex; align-items: center; justify-content: center;">
                                 <i class='bx bx-file-find text-primary' style="font-size: 60px;"></i>
                             </div>
                             <h3 class="fw-bolder text-dark mb-2">Selamat Bertugas!</h3>
-                            <p class="text-muted mb-4 fs-6" style="max-width: 550px; line-height: 1.6;">
-                                Anda login dengan hak akses sebagai <strong>Verifikator Cabang Dinas</strong>. Periksa menu layanan di sidebar untuk memproses pengajuan dokumen, atau gunakan pintasan di bawah.
-                            </p>
-
+                            <p class="text-muted mb-4 fs-6" style="max-width: 550px; line-height: 1.6;">Anda login sebagai <strong>Verifikator Cabang Dinas</strong>. Silakan periksa menu layanan untuk memproses pengajuan.</p>
                             <div class="d-flex flex-wrap justify-content-center gap-3">
-                                <a href="{{ $verifikasiLink ?? '#' }}" class="btn btn-primary rounded-pill px-5 py-2 fw-bold shadow-sm hover-up">
-                                    <i class='bx bx-task me-2 fs-5' style="vertical-align: text-bottom;"></i> Buka Antrean Layanan
-                                </a>
-                                <a href="{{ route('admin.profil-saya.show') }}" class="btn btn-outline-secondary rounded-pill px-4 py-2 fw-bold shadow-xs hover-up">
-                                    <i class='bx bx-user-circle me-2 fs-5' style="vertical-align: text-bottom;"></i> Profil & Sandi
-                                </a>
+                                <a href="{{ $verifikasiLink ?? '#' }}" class="btn btn-primary rounded-pill px-5 py-2 fw-bold shadow-sm hover-up"><i class='bx bx-task me-2 fs-5'></i> Buka Antrean Layanan</a>
+                                <a href="{{ route('admin.profil-saya.show') }}" class="btn btn-outline-secondary rounded-pill px-4 py-2 fw-bold shadow-xs hover-up"><i class='bx bx-user-circle me-2 fs-5'></i> Profil & Sandi</a>
                             </div>
                         </div>
                     </div>
                 </div>
-
                 <div class="col-md-4">
                     <div class="card border-0 shadow-soft h-100 bg-primary text-white position-relative overflow-hidden rounded-4">
                         <div style="position: absolute; bottom: 0; right: 0; width: 100%; height: 100%; background: linear-gradient(to top right, rgba(255,255,255,0.2), transparent);"></div>
-
                         <div class="card-body p-4 p-xl-5 d-flex flex-column justify-content-between position-relative z-1">
                             <div>
                                 <div class="d-flex align-items-center mb-3">
-                                    <div class="bg-white rounded-circle p-2 text-primary me-3 shadow-sm">
-                                        <i class="bx bx-shield-quarter fs-3"></i>
-                                    </div>
+                                    <div class="bg-white rounded-circle p-2 text-primary me-3 shadow-sm"><i class="bx bx-shield-quarter fs-3"></i></div>
                                     <h5 class="fw-bold text-white mb-0">Status Sistem</h5>
                                 </div>
-                                <p class="text-white opacity-75 mb-0" style="font-size: 0.9rem; line-height: 1.5;">
-                                    Pastikan SOP dan petunjuk teknis layanan selalu diikuti. Data yang Anda verifikasi dan setujui akan tercatat dalam log aktivitas sistem.
-                                </p>
+                                <p class="text-white opacity-75 mb-0" style="font-size: 0.9rem; line-height: 1.5;">Data yang Anda verifikasi akan tercatat dalam log aktivitas sistem.</p>
                             </div>
-
                             <div class="mt-4 pt-4 border-top border-white border-opacity-25">
                                 <div class="d-flex align-items-center justify-content-between">
-                                    <div>
-                                        <small class="d-block text-white opacity-75 text-uppercase fw-bold" style="font-size: 0.7rem; letter-spacing: 0.5px;">Sesi Pengguna</small>
-                                        <h6 class="mb-0 fw-bold text-white mt-1">{{ Auth::user()->username }}</h6>
-                                    </div>
+                                    <div><small class="d-block text-white opacity-75 text-uppercase fw-bold" style="font-size: 0.7rem;">Sesi Pengguna</small><h6 class="mb-0 fw-bold text-white mt-1">{{ Auth::user()->username }}</h6></div>
                                     <div class="badge bg-success bg-opacity-25 text-white border border-success border-opacity-50 rounded-pill px-3 py-2 d-flex align-items-center gap-2 shadow-xs">
-                                        <div class="rounded-circle bg-success" style="width: 8px; height: 8px; box-shadow: 0 0 10px #71dd37;"></div>
-                                        <span class="fw-bold small">Online</span>
+                                        <div class="rounded-circle bg-success" style="width: 8px; height: 8px; box-shadow: 0 0 10px #71dd37;"></div><span class="fw-bold small">Online</span>
                                     </div>
                                 </div>
                             </div>
@@ -380,70 +363,41 @@
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
     <script>
         document.addEventListener("DOMContentLoaded", function() {
-
             var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-            tooltipTriggerList.map(function (tooltipTriggerEl) {
-                return new bootstrap.Tooltip(tooltipTriggerEl)
-            });
+            tooltipTriggerList.map(function (tooltipTriggerEl) { return new bootstrap.Tooltip(tooltipTriggerEl) });
 
-            // 1. JAM REALTIME WIDGET
             function updateClock() {
                 const now = new Date();
-                const timeString = now.toLocaleTimeString('id-ID', {
-                    hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
-                }).replace(/\./g, ':');
-                
-                const dateString = now.toLocaleDateString('id-ID', {
-                    weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
-                });
-
+                const timeString = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }).replace(/\./g, ':');
+                const dateString = now.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
                 const hour = now.getHours();
                 let greeting = 'Halo';
                 if (hour >= 4 && hour < 11) greeting = 'Selamat Pagi';
                 else if (hour >= 11 && hour < 15) greeting = 'Selamat Siang';
                 else if (hour >= 15 && hour < 18) greeting = 'Selamat Sore';
                 else greeting = 'Selamat Malam';
-
-                const clockEl = document.getElementById('realtime-clock');
-                const dateEl = document.getElementById('realtime-date');
-                const greetEl = document.getElementById('greeting-text');
-
-                if (clockEl) clockEl.innerText = timeString;
-                if (dateEl) dateEl.innerText = dateString;
-                if (greetEl) greetEl.innerText = greeting;
+                if (document.getElementById('realtime-clock')) document.getElementById('realtime-clock').innerText = timeString;
+                if (document.getElementById('realtime-date')) document.getElementById('realtime-date').innerText = dateString;
+                if (document.getElementById('greeting-text')) document.getElementById('greeting-text').innerText = greeting;
             }
             setInterval(updateClock, 1000);
             updateClock();
 
-            // 2. CHART BAR APEXCHARTS
             if (document.querySelector("#chartWilayah")) {
                 var categories = {!! json_encode($chartCategories ?? []) !!};
                 var dataValues = {!! json_encode($chartData ?? []) !!};
-
                 var options = {
-                    chart: {
-                        type: 'bar', height: 400, toolbar: { show: false }, fontFamily: 'inherit',
-                        animations: { enabled: true, easing: 'easeinout', speed: 800 }
-                    },
+                    chart: { type: 'bar', height: 400, toolbar: { show: false }, fontFamily: 'inherit', animations: { enabled: true, easing: 'easeinout', speed: 800 } },
                     series: [{ name: 'Jumlah Sekolah', data: dataValues }],
                     colors: ['#696cff'],
-                    plotOptions: {
-                        bar: { borderRadius: 6, horizontal: true, barHeight: '50%', dataLabels: { position: 'bottom' } }
-                    },
-                    dataLabels: {
-                        enabled: true, textAnchor: 'start',
-                        style: { colors: ['#fff'], fontSize: '12px', fontWeight: 600 },
-                        formatter: function (val) { return val + " Sekolah" },
-                        offsetX: 10
-                    },
+                    plotOptions: { bar: { borderRadius: 6, horizontal: true, barHeight: '50%', dataLabels: { position: 'bottom' } } },
+                    dataLabels: { enabled: true, textAnchor: 'start', style: { colors: ['#fff'], fontSize: '12px', fontWeight: 600 }, formatter: function (val) { return val + " Sekolah" }, offsetX: 10 },
                     xaxis: { categories: categories, labels: { style: { colors: '#a1acb8', fontSize: '12px' } } },
                     yaxis: { labels: { style: { colors: '#566a7f', fontSize: '13px', fontWeight: 500 } } },
                     grid: { borderColor: '#f1f5f9', strokeDashArray: 4, xaxis: { lines: { show: true } }, yaxis: { lines: { show: false } } },
                     tooltip: { theme: 'light', y: { formatter: function (val) { return val + " Sekolah" } } }
                 };
-
-                var chart = new ApexCharts(document.querySelector("#chartWilayah"), options);
-                chart.render();
+                new ApexCharts(document.querySelector("#chartWilayah"), options).render();
             }
         });
     </script>
