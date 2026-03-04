@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 
+// Pastikan Model di-import dengan benar
 use App\Models\Siswa;
 use App\Models\Gtk;
 use App\Models\Sekolah;
@@ -18,22 +19,27 @@ class DashboardController extends Controller
     {
         $user = Auth::user();
         
-        // Cek Role (Admin & Operator butuh data statistik lengkap)
+        // Cek Role (Sama seperti logic di View)
+        // Admin & Operator butuh data statistik lengkap
         $isAdmin = ($user->role === 'Admin' || $user->role === 'Operator KCD');
 
         // ------------------------------------------------------------------
-        // 1. DATA UMUM (Wajib ada untuk SEMUA user)
+        // 1. DATA UMUM (Wajib ada untuk SEMUA user: Admin & Pegawai)
         // ------------------------------------------------------------------
+        
+        // Ambil Profil Instansi (untuk Logo & Judul Dashboard)
         $instansi = Instansi::first(); 
         if (!$instansi) {
             $instansi = new Instansi();
             $instansi->nama_instansi = 'KCD Wilayah';
         }
 
+        // Hitung Tahun Ajaran (Untuk ditampilkan di view jika perlu)
         $currMonth = date('n');
         $currYear = date('Y');
         $tahunAjaran = ($currMonth > 6) ? "$currYear/" . ($currYear + 1) : ($currYear - 1) . "/$currYear";
 
+        // Siapkan variabel dasar untuk dikirim ke View
         $data = [
             'instansi'    => $instansi,
             'tahunAjaran' => $tahunAjaran,
@@ -75,7 +81,7 @@ class DashboardController extends Controller
             $data['siswaLaki']  = Siswa::where('status', 'Aktif')->whereIn('jenis_kelamin', ['L', 'Laki-laki'])->count();
             $data['siswaPerempuan'] = Siswa::where('status', 'Aktif')->whereIn('jenis_kelamin', ['P', 'Perempuan'])->count();
 
-            // F. DATA DROPDOWN FILTER CHART & LIST
+            // F. DATA DROPDOWN FILTER CHART
             $data['listKabupaten'] = Sekolah::select('kabupaten_kota')
                 ->whereNotNull('kabupaten_kota')
                 ->distinct()
@@ -85,7 +91,6 @@ class DashboardController extends Controller
             // G. CHART DATA: Sebaran Sekolah per Kecamatan
             $chartQuery = Sekolah::query();
             
-            // Terapkan filter jika user memilih kabupaten dari dropdown
             if ($request->filled('filter_kabupaten')) {
                 $chartQuery->where('kabupaten_kota', $request->filter_kabupaten);
             }
@@ -100,12 +105,22 @@ class DashboardController extends Controller
             $data['chartCategories'] = $dataChart->pluck('kecamatan')->toArray(); 
             $data['chartData']       = $dataChart->pluck('total')->toArray();
 
-            // H. INFO SEKOLAH TERBARU (Sinkronisasi Terakhir)
-            $sekolahTerbaruQuery = Sekolah::query();
+            // H. INFO SEKOLAH TERBARU (SINKRONISASI DARI SYNC_LOGS)
+            $sekolahTerbaruQuery = Sekolah::select('sekolahs.nama', 'sekolahs.kecamatan', 'sekolahs.kabupaten_kota')
+                ->addSelect([
+                    'terakhir_sinkron' => DB::table('sync_logs')
+                        ->select('updated_at')
+                        ->whereColumn('sync_logs.npsn', 'sekolahs.npsn')
+                        ->orderByDesc('updated_at')
+                        ->limit(1)
+                ])
+                ->havingNotNull('terakhir_sinkron'); 
+
             if ($request->filled('filter_kabupaten')) {
                 $sekolahTerbaruQuery->where('kabupaten_kota', $request->filter_kabupaten);
             }
-            $data['sekolahTerbaru'] = $sekolahTerbaruQuery->orderBy('updated_at', 'desc')->limit(5)->get();
+
+            $data['sekolahTerbaru'] = $sekolahTerbaruQuery->orderByDesc('terakhir_sinkron')->limit(5)->get();
 
         } else { 
             // ------------------------------------------------------------------

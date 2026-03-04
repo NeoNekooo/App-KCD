@@ -40,6 +40,7 @@
         .hover-up:hover { transform: translateY(-3px); }
         .hover-white:hover { color: white !important; }
         .list-group-item-action:hover { background-color: #f8f9fa; color: #696cff; }
+        .hover-bg-light:hover { background-color: #f8f9fa; cursor: default; }
         
         @keyframes float {
             0% { transform: translateY(0px); }
@@ -50,7 +51,7 @@
     </style>
     @endpush
 
-    <div class="container-xxl flex-grow-1 container-p-y">
+    <div class="flex-grow-1 container-p-y">
         
         {{-- =================================================================== --}}
         {{-- SECTION 1: HERO BANNER UTAMA                                        --}}
@@ -114,7 +115,6 @@
                     </div>
                 </div>
             </div>
-        </div>
 
         {{-- =================================================================== --}}
         {{-- SECTION 2: TAMPILAN KHUSUS ADMIN (DATA STATISTIK LENGKAP)           --}}
@@ -214,12 +214,12 @@
                 </div>
             </div>
 
-            {{-- CHART & SINKRONISASI SEKOLAH TERBARU --}}
+            {{-- CHART, PINTASAN & SINKRONISASI --}}
             <div class="row g-4 animate-fade-in-up" style="animation-delay: 0.2s;">
                 
-                {{-- KIRI: CHART BAR (FILTER ENABLED) --}}
-                <div class="col-lg-8">
-                    <div class="card border-0 shadow-soft h-100 rounded-4">
+                {{-- KIRI: CHART BAR (FILTER ENABLED) - Dibuat flex-grow biar tingginya menyesuaikan kanan --}}
+                <div class="col-lg-8 d-flex flex-column">
+                    <div class="card border-0 shadow-soft rounded-4 flex-grow-1">
                         <div class="card-header bg-transparent border-bottom p-4 d-flex justify-content-between align-items-center flex-wrap gap-2">
                             <h5 class="card-title mb-0 fw-bold text-dark"><i class="bx bx-bar-chart-alt-2 text-primary me-2"></i>Sebaran Sekolah</h5>
                             
@@ -235,49 +235,18 @@
                                 </select>
                             </form>
                         </div>
-                        <div class="card-body p-4">
-                            <div id="chartWilayah" style="min-height: 350px;"></div>
+                        <div class="card-body p-4 d-flex flex-column justify-content-center">
+                            {{-- Chart akan expand sesuai sisa tinggi --}}
+                            <div id="chartWilayah" style="min-height: 400px; width: 100%;"></div>
                         </div>
                     </div>
                 </div>
 
-                {{-- KANAN: SEKOLAH TERBARU SINKRON & PINTASAN --}}
+                {{-- KANAN: QUICK LINKS + SINKRONISASI TERBARU (Ditumpuk ke bawah) --}}
                 <div class="col-lg-4 d-flex flex-column gap-4">
                     
-                    {{-- SINKRONISASI TERBARU (BARU) --}}
+                    {{-- 1. QUICK LINKS --}}
                     <div class="card border-0 shadow-soft rounded-4">
-                        <div class="card-header bg-transparent border-bottom p-3 d-flex justify-content-between align-items-center">
-                            <h6 class="card-title mb-0 fw-bold text-dark"><i class="bx bx-time-five text-info me-2"></i>Sinkronisasi Terbaru</h6>
-                            <span class="badge bg-label-info rounded-pill" style="font-size: 0.65rem;">Top 5</span>
-                        </div>
-                        <div class="card-body p-0">
-                            <ul class="list-group list-group-flush rounded-bottom-4">
-                                @forelse($sekolahTerbaru as $sekolah)
-                                    <li class="list-group-item px-4 py-3 border-bottom-0 border-top d-flex justify-content-between align-items-center transition-all hover-bg-light">
-                                        <div class="d-flex align-items-center overflow-hidden">
-                                            <div class="avatar avatar-sm bg-label-primary rounded-circle me-3 d-flex justify-content-center align-items-center flex-shrink-0">
-                                                <i class="bx bx-buildings"></i>
-                                            </div>
-                                            <div class="overflow-hidden">
-                                                <h6 class="mb-0 fw-bold text-dark text-truncate" style="max-width: 150px;" title="{{ $sekolah->nama }}">{{ $sekolah->nama }}</h6>
-                                                <small class="text-muted d-block text-truncate" style="font-size: 0.7rem;">{{ $sekolah->kecamatan ?? '-' }}</small>
-                                            </div>
-                                        </div>
-                                        <div class="text-end ms-2 flex-shrink-0">
-                                            <small class="text-muted d-block fw-medium" style="font-size: 0.65rem;">
-                                                {{ $sekolah->updated_at ? \Carbon\Carbon::parse($sekolah->updated_at)->diffForHumans() : 'Belum sinkron' }}
-                                            </small>
-                                        </div>
-                                    </li>
-                                @empty
-                                    <li class="list-group-item p-4 text-center text-muted small border-top border-bottom-0">Belum ada data sekolah yang tersinkronisasi.</li>
-                                @endforelse
-                            </ul>
-                        </div>
-                    </div>
-
-                    {{-- QUICK LINKS --}}
-                    <div class="card border-0 shadow-soft rounded-4 flex-grow-1">
                         <div class="card-header bg-transparent border-bottom p-3">
                             <h6 class="card-title mb-0 fw-bold text-dark"><i class="bx bx-link text-primary me-2"></i>Pintasan Cepat</h6>
                         </div>
@@ -300,6 +269,36 @@
                                 </div>
                                 <i class="bx bx-chevron-right text-muted"></i>
                             </a>
+                        </div>
+                    </div>
+
+                    {{-- 2. SINKRONISASI TERBARU (Manjang ke bawah ngisi ruang kosong) --}}
+                    <div class="card border-0 shadow-soft rounded-4 flex-grow-1">
+                        <div class="card-header bg-transparent border-bottom p-3 d-flex justify-content-between align-items-center">
+                            <h6 class="card-title mb-0 fw-bold text-dark"><i class="bx bx-time-five text-info me-2"></i>Sinkronisasi Dapodik</h6>
+                            <span class="badge bg-label-info rounded-pill" style="font-size: 0.65rem;">Terbaru</span>
+                        </div>
+                        <div class="card-body p-0">
+                            <ul class="list-group list-group-flush rounded-bottom-4">
+                                @forelse($sekolahTerbaru as $sekolah)
+                                    <li class="list-group-item px-3 py-3 border-bottom-0 border-top hover-bg-light transition-all">
+                                        <div class="d-flex justify-content-between align-items-start mb-1">
+                                            <h6 class="mb-0 fw-bold text-dark text-truncate pe-2" style="font-size: 0.85rem;" title="{{ $sekolah->nama }}">{{ $sekolah->nama }}</h6>
+                                            <span class="text-muted fw-medium flex-shrink-0" style="font-size: 0.65rem;">
+                                                {{ $sekolah->terakhir_sinkron ? \Carbon\Carbon::parse($sekolah->terakhir_sinkron)->diffForHumans(null, true, true) : 'Baru' }}
+                                            </span>
+                                        </div>
+                                        <div class="d-flex align-items-center mt-1">
+                                            <i class="bx bx-map text-muted me-1" style="font-size: 0.75rem;"></i>
+                                            <small class="text-muted text-truncate" style="font-size: 0.7rem;">
+                                                {{ str_replace('Kec. ', '', $sekolah->kecamatan ?? '-') }}, {{ str_replace(['Kab. ', 'Kota '], '', $sekolah->kabupaten_kota ?? '-') }}
+                                            </small>
+                                        </div>
+                                    </li>
+                                @empty
+                                    <li class="list-group-item p-4 text-center text-muted small border-top border-bottom-0">Belum ada data sekolah yang tersinkronisasi.</li>
+                                @endforelse
+                            </ul>
                         </div>
                     </div>
 
@@ -423,13 +422,13 @@
 
                 var options = {
                     chart: {
-                        type: 'bar', height: 350, toolbar: { show: false }, fontFamily: 'inherit',
+                        type: 'bar', height: 400, toolbar: { show: false }, fontFamily: 'inherit',
                         animations: { enabled: true, easing: 'easeinout', speed: 800 }
                     },
                     series: [{ name: 'Jumlah Sekolah', data: dataValues }],
                     colors: ['#696cff'],
                     plotOptions: {
-                        bar: { borderRadius: 6, horizontal: true, barHeight: '60%', dataLabels: { position: 'bottom' } }
+                        bar: { borderRadius: 6, horizontal: true, barHeight: '50%', dataLabels: { position: 'bottom' } }
                     },
                     dataLabels: {
                         enabled: true, textAnchor: 'start',
