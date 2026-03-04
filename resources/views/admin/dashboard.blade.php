@@ -50,7 +50,7 @@
     </style>
     @endpush
 
-    <div class="flex-grow-1 container-p-y">
+    <div class="container-xxl flex-grow-1 container-p-y">
         
         {{-- =================================================================== --}}
         {{-- SECTION 1: HERO BANNER UTAMA                                        --}}
@@ -214,7 +214,7 @@
                 </div>
             </div>
 
-            {{-- CHART & PINTASAN MENU TERBARU --}}
+            {{-- CHART & SINKRONISASI SEKOLAH TERBARU --}}
             <div class="row g-4 animate-fade-in-up" style="animation-delay: 0.2s;">
                 
                 {{-- KIRI: CHART BAR (FILTER ENABLED) --}}
@@ -241,16 +241,38 @@
                     </div>
                 </div>
 
-                {{-- KANAN: CHART DONUT & PINTASAN --}}
+                {{-- KANAN: SEKOLAH TERBARU SINKRON & PINTASAN --}}
                 <div class="col-lg-4 d-flex flex-column gap-4">
                     
-                    {{-- DONUT CHART (BARU) --}}
+                    {{-- SINKRONISASI TERBARU (BARU) --}}
                     <div class="card border-0 shadow-soft rounded-4">
-                        <div class="card-header bg-transparent border-bottom p-3">
-                            <h6 class="card-title mb-0 fw-bold text-dark"><i class="bx bx-pie-chart-alt text-success me-2"></i>Proporsi Jenjang</h6>
+                        <div class="card-header bg-transparent border-bottom p-3 d-flex justify-content-between align-items-center">
+                            <h6 class="card-title mb-0 fw-bold text-dark"><i class="bx bx-time-five text-info me-2"></i>Sinkronisasi Terbaru</h6>
+                            <span class="badge bg-label-info rounded-pill" style="font-size: 0.65rem;">Top 5</span>
                         </div>
-                        <div class="card-body p-3 d-flex align-items-center justify-content-center">
-                            <div id="chartJenjang" style="min-height: 260px; width: 100%;"></div>
+                        <div class="card-body p-0">
+                            <ul class="list-group list-group-flush rounded-bottom-4">
+                                @forelse($sekolahTerbaru as $sekolah)
+                                    <li class="list-group-item px-4 py-3 border-bottom-0 border-top d-flex justify-content-between align-items-center transition-all hover-bg-light">
+                                        <div class="d-flex align-items-center overflow-hidden">
+                                            <div class="avatar avatar-sm bg-label-primary rounded-circle me-3 d-flex justify-content-center align-items-center flex-shrink-0">
+                                                <i class="bx bx-buildings"></i>
+                                            </div>
+                                            <div class="overflow-hidden">
+                                                <h6 class="mb-0 fw-bold text-dark text-truncate" style="max-width: 150px;" title="{{ $sekolah->nama }}">{{ $sekolah->nama }}</h6>
+                                                <small class="text-muted d-block text-truncate" style="font-size: 0.7rem;">{{ $sekolah->kecamatan ?? '-' }}</small>
+                                            </div>
+                                        </div>
+                                        <div class="text-end ms-2 flex-shrink-0">
+                                            <small class="text-muted d-block fw-medium" style="font-size: 0.65rem;">
+                                                {{ $sekolah->updated_at ? \Carbon\Carbon::parse($sekolah->updated_at)->diffForHumans() : 'Belum sinkron' }}
+                                            </small>
+                                        </div>
+                                    </li>
+                                @empty
+                                    <li class="list-group-item p-4 text-center text-muted small border-top border-bottom-0">Belum ada data sekolah yang tersinkronisasi.</li>
+                                @endforelse
+                            </ul>
                         </div>
                     </div>
 
@@ -423,37 +445,6 @@
 
                 var chart = new ApexCharts(document.querySelector("#chartWilayah"), options);
                 chart.render();
-            }
-
-            // 3. CHART DONUT (JENJANG PENDIDIKAN)
-            if (document.querySelector("#chartJenjang")) {
-                var jenjangCategories = {!! json_encode($jenjangCategories ?? []) !!};
-                var jenjangData = {!! json_encode($jenjangData ?? []) !!};
-
-                var donutOptions = {
-                    series: jenjangData,
-                    chart: { type: 'donut', height: 280, fontFamily: 'inherit' },
-                    labels: jenjangCategories,
-                    colors: ['#696cff', '#71dd37', '#03c3ec', '#ffab00', '#ff3e1d'],
-                    plotOptions: {
-                        pie: {
-                            donut: {
-                                size: '75%',
-                                labels: {
-                                    show: true,
-                                    name: { show: true, fontSize: '12px', color: '#a1acb8' },
-                                    value: { show: true, fontSize: '20px', fontWeight: 700, color: '#32475c' },
-                                    total: { show: true, showAlways: true, label: 'Total', fontSize: '12px', color: '#a1acb8' }
-                                }
-                            }
-                        }
-                    },
-                    dataLabels: { enabled: false },
-                    stroke: { width: 3, colors: ['#fff'] },
-                    legend: { position: 'bottom', markers: { radius: 12 } }
-                };
-                var chartJenjang = new ApexCharts(document.querySelector("#chartJenjang"), donutOptions);
-                chartJenjang.render();
             }
         });
     </script>

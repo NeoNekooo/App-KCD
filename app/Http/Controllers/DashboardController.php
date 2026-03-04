@@ -75,7 +75,7 @@ class DashboardController extends Controller
             $data['siswaLaki']  = Siswa::where('status', 'Aktif')->whereIn('jenis_kelamin', ['L', 'Laki-laki'])->count();
             $data['siswaPerempuan'] = Siswa::where('status', 'Aktif')->whereIn('jenis_kelamin', ['P', 'Perempuan'])->count();
 
-            // F. DATA DROPDOWN FILTER CHART
+            // F. DATA DROPDOWN FILTER CHART & LIST
             $data['listKabupaten'] = Sekolah::select('kabupaten_kota')
                 ->whereNotNull('kabupaten_kota')
                 ->distinct()
@@ -100,18 +100,12 @@ class DashboardController extends Controller
             $data['chartCategories'] = $dataChart->pluck('kecamatan')->toArray(); 
             $data['chartData']       = $dataChart->pluck('total')->toArray();
 
-            // H. CHART DATA BARU: Proporsi Jenjang (Bentuk Pendidikan)
-            $jenjangQuery = Sekolah::query();
+            // H. INFO SEKOLAH TERBARU (Sinkronisasi Terakhir)
+            $sekolahTerbaruQuery = Sekolah::query();
             if ($request->filled('filter_kabupaten')) {
-                $jenjangQuery->where('kabupaten_kota', $request->filter_kabupaten);
+                $sekolahTerbaruQuery->where('kabupaten_kota', $request->filter_kabupaten);
             }
-            $jenjangChart = $jenjangQuery->select('bentuk_pendidikan_id_str', DB::raw('count(*) as total'))
-                ->whereNotNull('bentuk_pendidikan_id_str')
-                ->groupBy('bentuk_pendidikan_id_str')
-                ->get();
-                
-            $data['jenjangCategories'] = $jenjangChart->pluck('bentuk_pendidikan_id_str')->toArray();
-            $data['jenjangData']       = $jenjangChart->pluck('total')->toArray();
+            $data['sekolahTerbaru'] = $sekolahTerbaruQuery->orderBy('updated_at', 'desc')->limit(5)->get();
 
         } else { 
             // ------------------------------------------------------------------
