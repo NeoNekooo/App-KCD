@@ -125,7 +125,7 @@
         {{-- SECTION 2: TAMPILAN KHUSUS ADMIN (DATA STATISTIK LENGKAP)           --}}
         {{-- =================================================================== --}}
         @if ($isAdmin)
-            <div class="row g-4 mb-4 animate-fade-in-up" style="animation-delay: 0.1s;">
+            <div class="row g-2 mb-2 animate-fade-in-up" style="animation-delay: 0.1s;">
 
                 {{-- 1. SATUAN PENDIDIKAN --}}
                 <div class="col-xl-3 col-md-6">
@@ -220,7 +220,7 @@
             </div>
 
             {{-- CHART & PINTASAN --}}
-            <div class="row g-4 mb-4 animate-fade-in-up" style="animation-delay: 0.2s;">
+            <div class="row g-2 mb-2 animate-fade-in-up" style="animation-delay: 0.2s;">
                 
                 {{-- KIRI: CHART BAR (FILTER ENABLED) --}}
                 <div class="col-lg-8 d-flex flex-column">
