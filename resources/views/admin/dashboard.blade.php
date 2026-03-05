@@ -277,8 +277,8 @@
                     {{-- 2. SINKRONISASI TERBARU (HIGHLIGHTED) --}}
                     <div class="card border-0 shadow-soft rounded-4 flex-grow-1">
                         <div class="card-header bg-transparent border-bottom p-3 d-flex justify-content-between align-items-center">
-                            <h6 class="card-title mb-0 fw-bold text-dark"><i class="bx bx-time-five text-info me-2"></i>Sinkronisasi Dapodik</h6>
-                            <span class="badge bg-label-info rounded-pill" style="font-size: 0.65rem;">Terbaru</span>
+                            <h6 class="card-title mb-0 fw-bold text-dark"><i class="bx bx-time-five text-info me-2"></i>Data Sinkronisasi Terbaru</h6>
+                            <span class="badge bg-label-info rounded-pill" style="font-size: 0.65rem;">5 Data Terbaru</span>
                         </div>
                         <div class="card-body p-0">
                             <ul class="list-group list-group-flush rounded-bottom-4">
