@@ -132,13 +132,15 @@ class MenuManagementController extends Controller
         DB::transaction(function () use ($request, $menu) {
             // A. Update Data Menu
             $menu->update([
-                'title'     => $request->title,
-                'slug'      => $request->slug,
-                'icon'      => $request->icon,
-                'route'     => $request->route_name,
-                'parent_id' => $request->parent_id,
-                'urutan'    => $request->urutan ?? 0,
-                'is_header' => $request->has('is_header'),
+                'title'       => $request->title,
+                'slug'        => $request->slug,
+                'icon'        => $request->icon,
+                'route'       => $request->route_name,
+                'parent_id'   => $request->parent_id,
+                'urutan'      => $request->urutan ?? 0,
+                'badge_key'   => $request->badge_key,
+                'badge_color' => $request->badge_color,
+                'is_header'   => $request->has('is_header'),
             ]);
 
             // B. Reset & Update Hak Akses Role

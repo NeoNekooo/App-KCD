@@ -34,7 +34,10 @@ class SidebarServiceProvider extends ServiceProvider
                     $kategoriTugas = $tugasActive ? $tugasActive->kategori_layanan : null;
                 }
 
-                $baseQuery = PengajuanSekolah::whereIn('status', $targetStatus);
+                $baseQuery = PengajuanSekolah::whereIn('status', $targetStatus)
+                    ->where(function($q) {
+                        $q->where('tipe_pengaju', '!=', 'PD')->orWhereNull('tipe_pengaju');
+                    });
 
                 // --- FIX: Filter Query based on Task Array ---
                 if ($kategoriTugas && is_array($kategoriTugas)) {
@@ -62,21 +65,24 @@ class SidebarServiceProvider extends ServiceProvider
                 }
                 $totalGtk = (clone $baseQuery)->count();
                 $notifData['total_layanan_gtk'] = $totalGtk > 0 ? $totalGtk : '';
+
+                $pdQuery = PengajuanSekolah::where('tipe_pengaju', 'PD')
+                                           ->whereIn('status', ['Proses', 'Verifikasi Berkas']);
+                
+                $totalPd = $pdQuery->count();
+                $notifData['total_layanan_pd'] = $totalPd > 0 ? $totalPd : '';
             }
 
             $allowedMenuIds = $role ? DB::table('menu_accesses')->where('role_name', $role)->pluck('menu_id') : collect([]);
             
+            // Eager load childrenRecursive untuk meliput sub-submenu kedalaman berapapun
             $menus = Menu::whereIn('id', $allowedMenuIds)->whereNull('parent_id')->where('is_active', true)
-                        ->with(['children' => fn($q) => $q->whereIn('id', $allowedMenuIds)->where('is_active', true)->orderBy('urutan', 'asc')])
+                        ->with('childrenRecursive')
                         ->orderBy('urutan', 'asc')->get();
 
             $isStafVerifikator = $user?->pegawai_kcd_id && !in_array(strtolower($user->role), ['admin', 'administrator', 'kasubag', 'kepala']);
 
             foreach ($menus as $menu) {
-                if ($menu->badge_key && isset($notifData[$menu->badge_key])) {
-                    $menu->badge_value = $notifData[$menu->badge_key];
-                }
-
                 if ($menu->slug === 'layanan-gtk' && $isStafVerifikator) {
                     if ($kategoriTugas && is_array($kategoriTugas)) {
                         $isUmum = collect($kategoriTugas)->contains(fn($k) => in_array(strtolower($k), ['umum', 'all']));
@@ -89,20 +95,52 @@ class SidebarServiceProvider extends ServiceProvider
                             $slugsDiizinkan = collect($kategoriTugas)->map(fn($k) => $mapTugasToSlug[$k] ?? null)->filter()->all();
                             $slugsDiizinkan[] = 'verifikasi-surat'; // Asumsi 'verifikasi-surat' selalu ada
                             
-                            $filteredChildren = $menu->children->filter(fn($child) => in_array($child->slug, $slugsDiizinkan));
-                            $menu->setRelation('children', $filteredChildren);
+                            $filteredChildren = $menu->childrenRecursive->filter(fn($child) => in_array($child->slug, $slugsDiizinkan));
+                            $menu->setRelation('childrenRecursive', $filteredChildren);
                         }
                     } else {
-                        $menu->setRelation('children', collect([]));
-                    }
-                }
-
-                foreach ($menu->children as $child) {
-                    if ($child->badge_key && isset($notifData[$child->badge_key])) {
-                        $child->badge_value = $notifData[$child->badge_key];
+                        $menu->setRelation('childrenRecursive', collect([]));
                     }
                 }
             }
+
+            // Buat fungsi closure rekursif untuk assign badge dari root hingga ke sub-submenu terdalam
+            // sekaligus menjumlahkan/mengakumulasi badge dari anak ke induknya.
+            $assignBadges = function($items) use (&$assignBadges, $notifData) {
+                $totalBadgeContext = 0;
+
+                foreach ($items as $item) {
+                    $myBadge = 0;
+                    
+                    // 1. Ambil badge diri sendiri jika ada
+                    if ($item->badge_key && isset($notifData[$item->badge_key])) {
+                        $myBadge = (int) $notifData[$item->badge_key];
+                    }
+
+                    // 2. Akumulasi dari anak-anaknya (Bottom-Up)
+                    $childrenBadge = 0;
+                    if ($item->relationLoaded('childrenRecursive') && $item->childrenRecursive->isNotEmpty()) {
+                        $childrenBadge = $assignBadges($item->childrenRecursive);
+                    } elseif ($item->relationLoaded('children') && $item->children->isNotEmpty()) {
+                        $childrenBadge = $assignBadges($item->children);
+                    }
+
+                    // 3. Gabungkan badge diri sendiri + badge dari anak
+                    $itemTotal = $myBadge + $childrenBadge;
+                    
+                    // Assign ke menu ini jika > 0
+                    if ($itemTotal > 0) {
+                        $item->badge_value = $itemTotal;
+                    }
+
+                    // 4. Tambahkan ke total context tingkat ini untuk dilempar ke atas (parent)
+                    $totalBadgeContext += $itemTotal;
+                }
+
+                return $totalBadgeContext;
+            };
+            
+            $assignBadges($menus);
             $view->with('menus', $menus);
         });
     }

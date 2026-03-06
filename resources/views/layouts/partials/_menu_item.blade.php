@@ -5,7 +5,7 @@
 
     // LOGIC ACTIVE STATE (INDUK & ANAK)
     $isActive = false; // Untuk menu tanpa anak (Dashboard, Profil)
-    $isOpen   = false; // Untuk menu induk (Layanan GTK)
+    $isOpen = false; // Untuk menu induk (Layanan GTK)
 
     $currentRouteActiveForThisItem = checkRouteActive($menuItem->route, $menuItem->params);
     $status = checkMenuStatusRecursive($menuItem, $currentRouteActiveForThisItem);
@@ -30,8 +30,7 @@
             }
         @endphp
 
-        <a href="{{ $menuUrl }}"
-            class="menu-link {{ $hasChildren ? 'menu-toggle' : '' }}">
+        <a href="{{ $menuUrl }}" class="menu-link {{ $hasChildren ? 'menu-toggle' : '' }}">
 
             @if ($menuItem->icon)
                 <i class="menu-icon tf-icons {{ $menuItem->icon }}"></i>
