@@ -125,8 +125,11 @@ class SidebarServiceProvider extends ServiceProvider
                         $childrenBadge = $assignBadges($item->children);
                     }
 
-                    // 3. Gabungkan badge diri sendiri + badge dari anak
-                    $itemTotal = $myBadge + $childrenBadge;
+                    // 3. Gabungkan badge diri sendiri + badge dari anak secara cerdas (mencegah overlapping)
+                    // Jika Menu Induk memegang agregat manual (seperti 'total_layanan_gtk') yang datanya sebenarnya adalah jumlahan dari anaknya,
+                    // maka jangan dijumlahkan "$myBadge + $childrenBadge" karena akan double. 
+                    // Kita akan mengambil nilai maksimal dari keduanya, SEBAB pada dasarnya $myBadge (total) seharusnya >= $childrenBadge (parsial).
+                    $itemTotal = max($myBadge, $childrenBadge);
                     
                     // Assign ke menu ini jika > 0
                     if ($itemTotal > 0) {
