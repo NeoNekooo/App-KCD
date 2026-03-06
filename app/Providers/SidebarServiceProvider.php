@@ -26,7 +26,7 @@ class SidebarServiceProvider extends ServiceProvider
                 $isKasubag = ($user->pegawaiKcd && strcasecmp($user->pegawaiKcd->jabatan, 'Kasubag') === 0) || $userRole === 'kasubag';
                 $isKepala = $userRole === 'kepala';
 
-                $targetStatus = $isKasubag ? ['Verifikasi Kasubag'] : ($isKepala ? ['Verifikasi Kepala'] : ['Proses', 'Verifikasi Berkas']);
+                $targetStatus = $isKasubag ? ['Verifikasi Kasubag'] : ($isKepala ? ['Verifikasi Kepala'] : ['Proses']);
 
                 $kategoriTugas = null;
                 if (!$isKasubag && !$isKepala && $user->pegawai_kcd_id) {
@@ -67,7 +67,7 @@ class SidebarServiceProvider extends ServiceProvider
                 $notifData['total_layanan_gtk'] = $totalGtk > 0 ? $totalGtk : '';
 
                 $pdQuery = PengajuanSekolah::where('tipe_pengaju', 'PD')
-                                           ->whereIn('status', ['Proses', 'Atur Syarat', 'Lengkapi Berkas', 'Verifikasi Berkas']);
+                                           ->where('status', 'Proses');
                 
                 $totalPd = $pdQuery->count();
                 $notifData['total_layanan_pd'] = $totalPd > 0 ? $totalPd : '';
@@ -126,10 +126,17 @@ class SidebarServiceProvider extends ServiceProvider
                     }
 
                     // 3. Gabungkan badge diri sendiri + badge dari anak secara cerdas (mencegah overlapping)
-                    // Jika Menu Induk memegang agregat manual (seperti 'total_layanan_gtk') yang datanya sebenarnya adalah jumlahan dari anaknya,
-                    // maka jangan dijumlahkan "$myBadge + $childrenBadge" karena akan double. 
-                    // Kita akan mengambil nilai maksimal dari keduanya, SEBAB pada dasarnya $myBadge (total) seharusnya >= $childrenBadge (parsial).
-                    $itemTotal = max($myBadge, $childrenBadge);
+                    // Jika Menu Induk memegang agregat manual tetapi sebenarnya Punya Anak,
+                    // maka jangan tampilkan aggregated count-nya agar tidak bocor dari menu yang disembunyikan.
+                    // Prioritaskan MURNI dari hasil tambah children-nya saja (bottom-up strict).
+                    $hasChildren = ($item->relationLoaded('childrenRecursive') && $item->childrenRecursive->isNotEmpty()) || 
+                                   ($item->relationLoaded('children') && $item->children->isNotEmpty());
+                                   
+                    if ($hasChildren) {
+                        $itemTotal = $childrenBadge;
+                    } else {
+                        $itemTotal = $myBadge;
+                    }
                     
                     // Assign ke menu ini jika > 0
                     if ($itemTotal > 0) {
