@@ -67,7 +67,7 @@ class SidebarServiceProvider extends ServiceProvider
                 $notifData['total_layanan_gtk'] = $totalGtk > 0 ? $totalGtk : '';
 
                 $pdQuery = PengajuanSekolah::where('tipe_pengaju', 'PD')
-                                           ->whereIn('status', ['Proses', 'Verifikasi Berkas']);
+                                           ->whereIn('status', ['Proses', 'Atur Syarat', 'Lengkapi Berkas', 'Verifikasi Berkas']);
                 
                 $totalPd = $pdQuery->count();
                 $notifData['total_layanan_pd'] = $totalPd > 0 ? $totalPd : '';
