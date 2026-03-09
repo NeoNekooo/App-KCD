@@ -144,12 +144,16 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
 
     Route::middleware('check_menu:satuan-pendidikan')->group(function() {
         Route::get('sekolah/export-excel', [SekolahMonitoringController::class, 'exportExcel'])->name('sekolah.export-excel');
+        Route::get('sekolah/rekapitulasi', [SekolahMonitoringController::class, 'rekapitulasi'])->name('sekolah.rekapitulasi'); // Route Baru
+        Route::get('sekolah/rekapitulasi/export-excel', [SekolahMonitoringController::class, 'exportRekapitulasi'])->name('sekolah.rekapitulasi.export-excel'); // Tombol Cetak Rekap
         Route::resource('sekolah', SekolahMonitoringController::class)->only(['index', 'show']);
     });
 
     Route::prefix('gtk')->name('gtk.')
         ->middleware('check_menu:gtk')
         ->controller(GtkController::class)->group(function () {
+            Route::get('rekapitulasi', 'rekapitulasi')->name('rekapitulasi'); // Route Rekap GTK Baru
+            Route::get('rekapitulasi/export-excel', 'exportRekapitulasi')->name('rekapitulasi.export-excel'); // Cetak Excel GTK
             Route::get('guru', 'indexGuru')->name('guru.index');
             Route::get('tenaga-kependidikan', 'indexTendik')->name('tendik.index');
             Route::get('show-multiple', 'showMultiple')->name('show-multiple'); 
@@ -159,6 +163,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
     Route::prefix('kesiswaan')->name('kesiswaan.')
         ->middleware('check_menu:peserta-didik')
         ->group(function() {
+            Route::get('siswa/rekapitulasi', [SiswaController::class, 'rekapitulasi'])->name('siswa.rekapitulasi');
+            Route::get('siswa/rekapitulasi/export-excel', [SiswaController::class, 'exportRekapitulasi'])->name('siswa.rekapitulasi.export-excel');
             Route::get('siswa/export-excel', [SiswaController::class, 'exportExcel'])->name('siswa.export-excel');
             Route::get('siswa/show-multiple', [SiswaController::class, 'showMultiple'])->name('siswa.show-multiple');
             Route::resource('siswa', SiswaController::class)->only(['index', 'show']);

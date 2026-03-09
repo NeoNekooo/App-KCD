@@ -4,10 +4,13 @@ namespace App\Http\Controllers\Admin\Kepegawaian;
 
 use App\Models\Gtk;
 use App\Models\Sekolah;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\RekapitulasiGtkExport;
 
 class GtkController extends Controller
 {
@@ -157,5 +160,84 @@ class GtkController extends Controller
             $gtk->save();
         }
         return back()->with('success', 'Foto berhasil diupdate!');
+    }
+
+    // --- 5. REKAPITULASI GTK ---
+    public function rekapitulasi(Request $request)
+    {
+        $kategoriPtk = $request->input('kategori_ptk', ''); // 'Guru', 'Tendik', atau kosong(Semua)
+        $jenjangTerpilih = $request->input('jenjang', ''); // 'SMA', 'SMK', 'SLB', dll
+
+        // 1. Query Agregasi: Join 'gtks' dengan 'sekolahs' agar kita tahu Wilayah dan Jenjang
+        $query = DB::table('gtks')
+            ->join('sekolahs', 'gtks.sekolah_id', '=', 'sekolahs.sekolah_id')
+            ->select(
+                'sekolahs.kabupaten_kota',
+                DB::raw("SUM(CASE WHEN sekolahs.status_sekolah_str LIKE '%Negeri%' THEN 1 ELSE 0 END) as total_negeri"),
+                DB::raw("SUM(CASE WHEN sekolahs.status_sekolah_str LIKE '%Swasta%' THEN 1 ELSE 0 END) as total_swasta"),
+                DB::raw("COUNT(gtks.id) as total_keseluruhan")
+            )
+            ->whereNotNull('sekolahs.kabupaten_kota');
+
+        // ==== Filter Kondisional ====
+        
+        // A. Filter Jenjang Sekolah
+        if (!empty($jenjangTerpilih)) {
+            $query->where('sekolahs.bentuk_pendidikan_id_str', $jenjangTerpilih);
+        }
+
+        // B. Filter Kategori (Guru / Tendik)
+        if ($kategoriPtk === 'Guru') {
+            $query->where('gtks.jenis_ptk_id_str', 'LIKE', '%Guru%');
+        } elseif ($kategoriPtk === 'Tendik') {
+            $query->where('gtks.jenis_ptk_id_str', 'NOT LIKE', '%Guru%');
+        }
+
+        // ==== Ambil Data Rekap ====
+        $rekapData = $query->groupBy('sekolahs.kabupaten_kota')
+                           ->orderBy('sekolahs.kabupaten_kota', 'asc')
+                           ->get();
+
+        // 2. Kalkulasi Grand Total ke Bawah
+        $grandTotalNegeri = $rekapData->sum('total_negeri');
+        $grandTotalSwasta = $rekapData->sum('total_swasta');
+        $grandTotalAkhir = $rekapData->sum('total_keseluruhan');
+
+        // 3. Ambil List Dropdown Filter
+        $listJenjang = Sekolah::whereNotNull('bentuk_pendidikan_id_str')
+                              ->distinct()
+                              ->pluck('bentuk_pendidikan_id_str')
+                              ->filter(function($value) { return !empty(trim($value)); })
+                              ->sort()
+                              ->values();
+
+        // 4. Return ke View
+        return view('admin.kepegawaian.gtk.rekapitulasi', compact(
+            'rekapData', 
+            'grandTotalNegeri', 
+            'grandTotalSwasta', 
+            'grandTotalAkhir',
+            'listJenjang',
+            'jenjangTerpilih',
+            'kategoriPtk'
+        ));
+    }
+
+    public function exportRekapitulasi(Request $request)
+    {
+        $jenjangTerpilih = $request->input('jenjang', '');
+        $kategoriPtk = $request->input('kategori_ptk', '');
+        
+        // Buat detail penamaan file
+        $namaFile = 'Rekapitulasi_GTK';
+        if (!empty($jenjangTerpilih)) {
+            $namaFile .= '_' . preg_replace('/[^A-Za-z0-9\-]/', '', $jenjangTerpilih); // Hindari spasi/karakter aneh
+        }
+        if (!empty($kategoriPtk)) {
+            $namaFile .= '_' . preg_replace('/[^A-Za-z0-9\-]/', '', $kategoriPtk);
+        }
+        $namaFile .= '.xlsx';
+
+        return Excel::download(new RekapitulasiGtkExport($jenjangTerpilih, $kategoriPtk), $namaFile);
     }
 }

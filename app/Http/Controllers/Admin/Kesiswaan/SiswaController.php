@@ -6,9 +6,11 @@ use App\Http\Controllers\Controller;
 use App\Models\Siswa;
 use App\Models\Sekolah;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Facades\Excel; 
 use App\Exports\SiswaExport; 
+use App\Exports\RekapitulasiSiswaExport;
 
 class SiswaController extends Controller
 {
@@ -125,5 +127,74 @@ class SiswaController extends Controller
     {
         $ids = $request->query('ids') ? explode(',', $request->query('ids')) : null;
         return Excel::download(new SiswaExport($ids), 'Data_Siswa.xlsx');
+    }
+
+    /**
+     * Menampilkan Halaman Rekapitulasi Siswa (Berdasarkan Wilayah dan Jenjang)
+     */
+    public function rekapitulasi(Request $request)
+    {
+        $jenjangTerpilih = $request->input('jenjang', '');
+
+        // 1. Query Agregasi: Join 'siswas' dengan 'sekolahs' (Hanya Siswa Aktif)
+        $query = DB::table('siswas')
+            ->join('sekolahs', 'siswas.sekolah_id', '=', 'sekolahs.sekolah_id')
+            ->where('siswas.status', 'Aktif')
+            ->select(
+                'sekolahs.kabupaten_kota',
+                DB::raw("SUM(CASE WHEN sekolahs.status_sekolah_str LIKE '%Negeri%' THEN 1 ELSE 0 END) as total_negeri"),
+                DB::raw("SUM(CASE WHEN sekolahs.status_sekolah_str LIKE '%Swasta%' THEN 1 ELSE 0 END) as total_swasta"),
+                DB::raw("COUNT(siswas.id) as total_keseluruhan")
+            )
+            ->whereNotNull('sekolahs.kabupaten_kota');
+
+        // B. Filter Jenjang
+        if (!empty($jenjangTerpilih)) {
+            $query->where('sekolahs.bentuk_pendidikan_id_str', $jenjangTerpilih);
+        }
+
+        // Ambil Data
+        $rekapData = $query->groupBy('sekolahs.kabupaten_kota')
+                           ->orderBy('sekolahs.kabupaten_kota', 'asc')
+                           ->get();
+
+        // 2. Kalkulasi Grand Total ke Bawah
+        $grandTotalNegeri = $rekapData->sum('total_negeri');
+        $grandTotalSwasta = $rekapData->sum('total_swasta');
+        $grandTotalAkhir = $rekapData->sum('total_keseluruhan');
+
+        // 3. Ambil List Dropdown Filter Jenjang (Dari Tabel Sekolahs)
+        $listJenjang = Sekolah::whereNotNull('bentuk_pendidikan_id_str')
+                              ->distinct()
+                              ->pluck('bentuk_pendidikan_id_str')
+                              ->filter(function($value) { return !empty(trim($value)); })
+                              ->sort()
+                              ->values();
+
+        // 4. Return ke View
+        return view('admin.kesiswaan.siswa.rekapitulasi', compact(
+            'rekapData', 
+            'grandTotalNegeri', 
+            'grandTotalSwasta', 
+            'grandTotalAkhir',
+            'listJenjang',
+            'jenjangTerpilih'
+        ));
+    }
+
+    /**
+     * Download Excel untuk Hasil Rekapitulasi Siswa
+     */
+    public function exportRekapitulasi(Request $request)
+    {
+        $jenjangTerpilih = $request->input('jenjang', '');
+        
+        $namaFile = 'Rekapitulasi_Siswa_Aktif';
+        if (!empty($jenjangTerpilih)) {
+            $namaFile .= '_' . preg_replace('/[^A-Za-z0-9\-]/', '', $jenjangTerpilih);
+        }
+        $namaFile .= '.xlsx';
+
+        return Excel::download(new RekapitulasiSiswaExport($jenjangTerpilih), $namaFile);
     }
 }
