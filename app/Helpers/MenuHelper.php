@@ -27,7 +27,11 @@ if (!function_exists('checkRouteActive')) {
         if (!$isRouteMatch && str_ends_with($route, '.index')) {
             $baseRoutePrefix = substr($route, 0, -5); // Hapus kata "index"
             if (str_starts_with($currentRoute, $baseRoutePrefix)) {
-                $isRouteMatch = true;
+                $remainder = substr($currentRoute, strlen($baseRoutePrefix));
+                // Pastikan tidak ada sub-objek lain (titik tambahan). Contoh valid: `create`, `edit`. Contoh tak valid: `tugas.index`
+                if (strpos($remainder, '.') === false) {
+                    $isRouteMatch = true;
+                }
             }
         }
 
