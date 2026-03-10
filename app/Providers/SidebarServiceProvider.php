@@ -80,8 +80,8 @@ class SidebarServiceProvider extends ServiceProvider
                         ->with('childrenRecursive')
                         ->orderBy('urutan', 'asc')->get();
 
-            $isStafVerifikator = $user?->pegawai_kcd_id && !in_array(strtolower($user->role), ['admin', 'administrator', 'kasubag', 'kepala']);
-            $isNotAdminOrOperator = !in_array(strtolower($user?->role), ['admin', 'operator kcd']);
+            $isStafVerifikator = $user?->pegawai_kcd_id && !in_array(strtolower($user->role ?? ''), ['admin', 'administrator', 'kasubag', 'kepala']);
+            $isNotAdminOrOperator = !in_array(strtolower($user?->role ?? ''), ['admin', 'administrator', 'operator kcd']);
 
             foreach ($menus as $menu) {
                 // --- BEND ROUTE DASHBOARD KHUSUS PEGAWAI ---

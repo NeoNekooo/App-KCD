@@ -21,7 +21,7 @@ class DashboardController extends Controller
         
         // Cek Role (Sama seperti logic di View)
         // Admin & Operator butuh data statistik lengkap
-        $isAdmin = ($user->role === 'Admin' || $user->role === 'Operator KCD');
+        $isAdmin = in_array(strtolower($user->role ?? ''), ['admin', 'administrator', 'operator kcd']);
 
         // ------------------------------------------------------------------
         // 1. DATA UMUM (Wajib ada untuk SEMUA user: Admin & Pegawai)
@@ -133,7 +133,7 @@ class DashboardController extends Controller
         $user = Auth::user();
         
         // Cek Role
-        $isAdmin = ($user->role === 'Admin' || $user->role === 'Operator KCD');
+        $isAdmin = in_array(strtolower($user->role ?? ''), ['admin', 'administrator', 'operator kcd']);
         if ($isAdmin) {
             return redirect()->route('admin.dashboard');
         }
