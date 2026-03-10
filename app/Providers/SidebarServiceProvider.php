@@ -26,7 +26,7 @@ class SidebarServiceProvider extends ServiceProvider
                 $isKasubag = ($user->pegawaiKcd && strcasecmp($user->pegawaiKcd->jabatan, 'Kasubag') === 0) || $userRole === 'kasubag';
                 $isKepala = $userRole === 'kepala';
 
-                $targetStatus = $isKasubag ? ['Verifikasi Kasubag'] : ($isKepala ? ['Verifikasi Kepala'] : ['Proses']);
+                $targetStatus = $isKasubag ? ['Verifikasi Kasubag'] : ($isKepala ? ['Verifikasi Kepala'] : ['Proses', 'Verifikasi Berkas']);
 
                 $kategoriTugas = null;
                 if (!$isKasubag && !$isKepala && $user->pegawai_kcd_id) {
@@ -115,6 +115,10 @@ class SidebarServiceProvider extends ServiceProvider
                     // 1. Ambil badge diri sendiri jika ada
                     if ($item->badge_key && isset($notifData[$item->badge_key])) {
                         $myBadge = (int) $notifData[$item->badge_key];
+                    } elseif ($item->slug === 'layanan-peserta-didik' && isset($notifData['total_layanan_pd'])) {
+                        $myBadge = (int) $notifData['total_layanan_pd'];
+                    } elseif ($item->slug === 'layanan-gtk' && isset($notifData['total_layanan_gtk'])) {
+                        $myBadge = (int) $notifData['total_layanan_gtk'];
                     }
 
                     // 2. Akumulasi dari anak-anaknya (Bottom-Up)
