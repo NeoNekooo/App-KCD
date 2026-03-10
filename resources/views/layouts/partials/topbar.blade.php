@@ -1,19 +1,11 @@
 @php
-    use App\Models\Gtk;
-    use App\Models\Siswa;
+    use App\Models\PegawaiKcd;
     use Illuminate\Support\Facades\Storage;
 
     $profile = null;
-    $profileType = null; // 'gtk' | 'siswa'
 
     if (auth()->check()) {
-        if (session('ptk_id')) {
-            $profile = Gtk::where('ptk_id', session('ptk_id'))->first();
-            $profileType = 'gtk';
-        } elseif (session('peserta_didik_id')) {
-            $profile = Siswa::where('peserta_didik_id', session('peserta_didik_id'))->first();
-            $profileType = 'siswa';
-        }
+        $profile = PegawaiKcd::where('user_id', auth()->id())->first();
     }
 
     $foto = $profile?->foto;
@@ -86,19 +78,18 @@
                         <div class="dropdown-divider"></div>
                     </li>
                     <li>
-                        <a class="dropdown-item"
-                            href="
-                                 @if (session('ptk_id')) {{ route('admin.personal.gtk.profil') }}
-                                 @elseif (session('peserta_didik_id'))
-                                     {{ route('admin.personal.siswa.profil') }}
-                                 @else
-                                     {{ route('admin.profil-saya.show') }} @endif
-                            ">
+                        <a class="dropdown-item" href="{{ route('admin.profil-saya.show') }}">
                             <i class="bx bx-user me-2"></i>
                             <span class="align-middle">My Profile</span>
                         </a>
                     </li>
-                   <li>
+                    <li>
+                        <a class="dropdown-item" href="{{ route('admin.profil-saya.show') }}">
+                            <i class="bx bx-cog me-2"></i>
+                            <span class="align-middle">Settings</span>
+                        </a>
+                    </li>
+                    <li>
                         <div class="dropdown-divider"></div>
                     </li>
                     <li>
