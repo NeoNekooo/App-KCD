@@ -52,7 +52,13 @@ use App\Http\Controllers\Admin\Settings\RoleAccessController;
 // --- LANDING PAGE (Logic Auth) ---
 Route::get('/', function () {
     if (Auth::check()) {
-        return redirect()->route('admin.dashboard');
+        $user = Auth::user();
+        $isAdmin = ($user->role === 'Admin' || $user->role === 'Operator KCD');
+        if ($isAdmin) {
+            return redirect()->route('admin.dashboard');
+        } else {
+            return redirect()->route('admin.dashboard.pegawai');
+        }
     }
     return view('auth.login-custom');
 })->name('landing');
@@ -70,6 +76,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
 
     // 1. DASHBOARD
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard-pegawai', [DashboardController::class, 'indexPegawai'])->name('dashboard.pegawai');
 
     /*
     |--------------------------------------------------------------------------

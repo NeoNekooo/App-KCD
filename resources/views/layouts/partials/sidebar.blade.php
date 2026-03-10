@@ -2,7 +2,8 @@
 
     {{-- ================= BRAND ================= --}}
     <div class="app-brand demo">
-        <a href="{{ route('admin.dashboard') }}" class="app-brand-link">
+        <a href="{{ Auth::user()->role === 'Admin' || Auth::user()->role === 'Operator KCD' ? route('admin.dashboard') : route('admin.dashboard.pegawai') }}"
+            class="app-brand-link">
             <span class="app-brand-text demo menu-text fw-bolder ms-2 text-uppercase">
                 {{ config('app.name') }}
             </span>

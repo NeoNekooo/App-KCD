@@ -81,8 +81,14 @@ class SidebarServiceProvider extends ServiceProvider
                         ->orderBy('urutan', 'asc')->get();
 
             $isStafVerifikator = $user?->pegawai_kcd_id && !in_array(strtolower($user->role), ['admin', 'administrator', 'kasubag', 'kepala']);
+            $isNotAdminOrOperator = !in_array(strtolower($user?->role), ['admin', 'operator kcd']);
 
             foreach ($menus as $menu) {
+                // --- BEND ROUTE DASHBOARD KHUSUS PEGAWAI ---
+                if ($menu->route === 'admin.dashboard' && $isNotAdminOrOperator) {
+                    $menu->route = 'admin.dashboard.pegawai';
+                }
+
                 if ($menu->slug === 'layanan-gtk' && $isStafVerifikator) {
                     if ($kategoriTugas && is_array($kategoriTugas)) {
                         $isUmum = collect($kategoriTugas)->contains(fn($k) => in_array(strtolower($k), ['umum', 'all']));
