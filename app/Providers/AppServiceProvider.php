@@ -74,7 +74,7 @@ class AppServiceProvider extends ServiceProvider
                     $kategoriTugas = $tugas ? $tugas->kategori_layanan : null;
                 }
 
-                // 3. QUERY DASAR BERDASARKAN MEJA KERJA
+                // 3. QUERY DASAR BERDASARKAN MEJA KERJA SEBELUM DIPISAH TIPE
                 $baseQuery = PengajuanSekolah::whereIn('status', $targetStatus);
 
                 // Jika Staf memiliki spesialisasi tugas, batasi query hanya pada kategori tugasnya
@@ -87,13 +87,20 @@ class AppServiceProvider extends ServiceProvider
                     });
                 }
 
+                // 3.1. SPLIT QUERY UNTUK GTK & PD
+                $baseGtkQuery = (clone $baseQuery)->where(function($q) {
+                    $q->whereNull('tipe_pengaju')->orWhere('tipe_pengaju', '!=', 'PD');
+                });
+                
+                $basePdQuery = (clone $baseQuery)->where('tipe_pengaju', 'PD');
+
                 // 4. HITUNG PER SUB-MENU (DENGAN CLONE QUERY AGAR TIDAK SALING GANGGU)
-                $kp = (clone $baseQuery)->where('kategori', 'LIKE', '%pangkat%')->count();
-                $kgb = (clone $baseQuery)->where('kategori', 'LIKE', '%kgb%')->count();
-                $mutasi = (clone $baseQuery)->where('kategori', 'LIKE', '%mutasi%')->count();
-                $relokasi = (clone $baseQuery)->where('kategori', 'LIKE', '%relokasi%')->count();
-                $satya = (clone $baseQuery)->where('kategori', 'LIKE', '%satya%')->count();
-                $hukdis = (clone $baseQuery)->where('kategori', 'LIKE', '%hukuman%')->count();
+                $kp = (clone $baseGtkQuery)->where('kategori', 'LIKE', '%pangkat%')->count();
+                $kgb = (clone $baseGtkQuery)->where('kategori', 'LIKE', '%kgb%')->count();
+                $mutasi = (clone $baseGtkQuery)->where('kategori', 'LIKE', '%mutasi%')->count();
+                $relokasi = (clone $baseGtkQuery)->where('kategori', 'LIKE', '%relokasi%')->count();
+                $satya = (clone $baseGtkQuery)->where('kategori', 'LIKE', '%satya%')->count();
+                $hukdis = (clone $baseGtkQuery)->where('kategori', 'LIKE', '%hukuman%')->count();
 
                 // Masukkan ke array notif_data (Ubah 0 jadi string kosong agar badge tidak muncul jika kosong)
                 $notif_data['notif_kp'] = $kp > 0 ? $kp : '';
@@ -103,13 +110,15 @@ class AppServiceProvider extends ServiceProvider
                 $notif_data['notif_satya'] = $satya > 0 ? $satya : '';
                 $notif_data['notif_hukdis'] = $hukdis > 0 ? $hukdis : '';
 
-                // 5. HITUNG TOTAL UNTUK MENU INDUK (LAYANAN GTK)
-                // Ini yang akan dipasang di parent menu agar tetap terlihat saat dropdown tertutup
-                $totalGtk = (clone $baseQuery)->count();
+                // 5. HITUNG TOTAL UNTUK MENU INDUK (LAYANAN GTK & PD)
+                $totalGtk = (clone $baseGtkQuery)->count();
+                $totalPd  = (clone $basePdQuery)->count();
+                
                 $notif_data['total_layanan_gtk'] = $totalGtk > 0 ? $totalGtk : '';
+                $notif_data['total_layanan_pd']  = $totalPd > 0 ? $totalPd : '';
                 
                 // Variabel cadangan untuk sidebar utama
-                $sidebarCount = $totalGtk;
+                $sidebarCount = $totalGtk + $totalPd;
 
                 // Kirim variabel ke view
                 $view->with('sidebarCount', $sidebarCount > 0 ? $sidebarCount : '')

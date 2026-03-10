@@ -67,7 +67,7 @@ class SidebarServiceProvider extends ServiceProvider
                 $notifData['total_layanan_gtk'] = $totalGtk > 0 ? $totalGtk : '';
 
                 $pdQuery = PengajuanSekolah::where('tipe_pengaju', 'PD')
-                                           ->where('status', 'Proses');
+                                           ->whereIn('status', $targetStatus);
                 
                 $totalPd = $pdQuery->count();
                 $notifData['total_layanan_pd'] = $totalPd > 0 ? $totalPd : '';
@@ -133,7 +133,9 @@ class SidebarServiceProvider extends ServiceProvider
                                    ($item->relationLoaded('children') && $item->children->isNotEmpty());
                                    
                     if ($hasChildren) {
-                        $itemTotal = $childrenBadge;
+                        // Jika anak tidak merender badge satupun (karena belum dipasang badge_key di DB),
+                        // maka prioritaskan memunculkan badge manual agregat yang ada pada induknya
+                        $itemTotal = $childrenBadge > 0 ? $childrenBadge : $myBadge;
                     } else {
                         $itemTotal = $myBadge;
                     }
