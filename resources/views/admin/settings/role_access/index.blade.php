@@ -107,20 +107,18 @@
 
                                                         <tr class="{{ $rowClass }}">
                                                             <td class="text-center align-middle">
-                                                                @if (!$menu->is_header)
-                                                                    <div
-                                                                        class="d-flex justify-content-center align-items-center">
-                                                                        <input
-                                                                            class="form-check-input check-{{ Str::slug($role) }} d-none"
-                                                                            type="checkbox" name="menu_ids[]"
-                                                                            value="{{ $menu->id }}"
-                                                                            {{ in_array($menu->id, $myMenus) ? 'checked' : '' }}
-                                                                            id="chk_{{ Str::slug($role) }}_{{ $menu->id }}">
-                                                                        <label
-                                                                            for="chk_{{ Str::slug($role) }}_{{ $menu->id }}"
-                                                                            class="custom-checkbox-wrapper mb-0"></label>
-                                                                    </div>
-                                                                @endif
+                                                                <div
+                                                                    class="d-flex justify-content-center align-items-center">
+                                                                    <input
+                                                                        class="form-check-input check-{{ Str::slug($role) }} d-none"
+                                                                        type="checkbox" name="menu_ids[]"
+                                                                        value="{{ $menu->id }}"
+                                                                        {{ in_array($menu->id, $myMenus) ? 'checked' : '' }}
+                                                                        id="chk_{{ Str::slug($role) }}_{{ $menu->id }}">
+                                                                    <label
+                                                                        for="chk_{{ Str::slug($role) }}_{{ $menu->id }}"
+                                                                        class="custom-checkbox-wrapper mb-0"></label>
+                                                                </div>
                                                             </td>
                                                             <td
                                                                 class="align-middle {{ $menu->parent_id ? 'child-connector' : '' }}">
