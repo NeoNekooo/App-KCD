@@ -17,7 +17,7 @@
     }
 
     $foto = $profile?->foto;
-    $nama = $profile?->nama ?? (Auth::user()->nama ?? 'User');
+    $nama = $profile?->nama ?? (Auth::user()->name ?? 'User');
 @endphp
 
 <nav class="container layout-navbar navbar navbar-expand-xl navbar-detached align-items-center bg-navbar-theme"
