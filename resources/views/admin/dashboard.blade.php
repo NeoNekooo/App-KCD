@@ -287,8 +287,12 @@
                                     <i class="bx bx-support fs-4"></i>
                                 </div>
                             </div>
-                            <p class="text-muted small mb-0 fw-medium mt-2"><i class="bx bx-info-circle me-1"></i> Staff
-                                Tata Usaha & Honorer</p>
+                            <div class="d-flex gap-2 mt-2">
+                                <span class="badge bg-label-warning rounded-pill px-3 py-2">ASN:
+                                    {{ $tendikASN ?? 0 }}</span>
+                                <span class="badge bg-label-secondary rounded-pill px-3 py-2">Non-ASN:
+                                    {{ $tendikNonASN ?? 0 }}</span>
+                            </div>
                         </div>
                     </div>
                 </div>

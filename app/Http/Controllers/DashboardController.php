@@ -79,6 +79,18 @@ class DashboardController extends Controller
               ->orWhereNull('jenis_ptk_id_str');
         })->count();
 
+        $data['tendikASN'] = Gtk::where(function($q) {
+                $q->where('jenis_ptk_id_str', 'not like', '%Guru%')
+                  ->orWhereNull('jenis_ptk_id_str');
+            })
+            ->where(function($q) {
+                $q->where('status_kepegawaian_id_str', 'like', '%PNS%')
+                  ->orWhere('status_kepegawaian_id_str', 'like', '%PPPK%')
+                  ->orWhere('status_kepegawaian_id_str', 'like', '%CPNS%');
+            })->count();
+            
+        $data['tendikNonASN'] = $data['totalTendik'] - $data['tendikASN'];
+
         // E. STATISTIK SISWA
         $data['totalSiswa'] = Siswa::where('status', 'Aktif')->count();
         $data['siswaLaki']  = Siswa::where('status', 'Aktif')->whereIn('jenis_kelamin', ['L', 'Laki-laki'])->count();
