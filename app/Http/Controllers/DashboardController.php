@@ -114,13 +114,15 @@ class DashboardController extends Controller
                         ->orderByDesc('updated_at')
                         ->limit(1)
                 ])
-                ->havingNotNull('terakhir_sinkron'); 
+                ->havingRaw('terakhir_sinkron IS NOT NULL'); 
 
             if ($request->filled('filter_kabupaten')) {
                 $sekolahTerbaruQuery->where('kabupaten_kota', $request->filter_kabupaten);
             }
 
             $data['sekolahTerbaru'] = $sekolahTerbaruQuery->orderByDesc('terakhir_sinkron')->limit(5)->get();
+
+            return view('admin.dashboard', $data);
 
         } else { 
             // ------------------------------------------------------------------
@@ -148,8 +150,8 @@ class DashboardController extends Controller
                     }
                 }
             }
-        }
 
-        return view('admin.dashboard', $data);
+            return view('admin.dashboard_pegawai', $data);
+        }
     }
 }

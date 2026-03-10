@@ -88,7 +88,7 @@ class MyProfileController extends Controller
 
                     if (Auth::user()->role === 'Admin') {
                         $jabatan = JabatanKcd::find($request->jabatan_kcd_id);
-                        // Jangan overwrite peran Admin dengan peran bawahan hanya karena update jabatan diri sendiri
+                        $userUpdate['role'] = $jabatan->role;
                         if ($request->nip) {
                             $userUpdate['username'] = $request->nip;
                         }
