@@ -41,13 +41,27 @@ if (!function_exists('checkRouteActive')) {
 
         /*
          * 2. Toleransi Query Params (Search / Filter)
-         * Jika menu memiliki params spesifik di DB (contoh menu jenis="guru" -> `?jenis=guru`), pastikan dicocokkan.
-         * TAPI jika menu TIDAK memiliki params spesifik (seperti menu biasa), biarkan dia tetap Active walau sedang melakukan Pencarian (?search=x)
+         * Terdapat Query Param yang sifatnya sebagai "Identitas Halaman" (seperti 'kategori'). 
+         * Bila URL punya 'kategori', Menu juga harus punya 'kategori' yang identik nilainya, jika tidak, salahkan.
          */
+        $identityParams = ['kategori', 'jenis', 'tipe', 'tab'];
+        foreach ($identityParams as $idKey) {
+            $reqHas = request()->has($idKey);
+            $menuHas = !empty($params) && isset($params[$idKey]);
+            
+            if ($reqHas && $menuHas) {
+                if (request()->query($idKey) != $params[$idKey]) return false;
+            } elseif ($reqHas && !$menuHas) {
+                return false; // URL punya identifier (kategori), sementara Menu ini polosan (untuk semua/lainnya)
+            } elseif (!$reqHas && $menuHas) {
+                return false; // URL polosan, tapi Menu ini punya target spesifik
+            }
+        }
+
+        // Params tambahan lain di DB
         if (!empty($params) && is_array($params)) {
             foreach ($params as $key => $value) {
-                // Jika route punya required param di DB, dan URL saat ini beda nilai query-nya, salahkan
-                if (request()->query($key) != $value) {
+                if (!in_array($key, $identityParams) && request()->query($key) != $value) {
                      return false;
                 }
             }
