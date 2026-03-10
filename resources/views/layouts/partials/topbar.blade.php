@@ -92,7 +92,7 @@
                                  @elseif (session('peserta_didik_id'))
                                      {{ route('admin.personal.siswa.profil') }}
                                  @else
-                                     # @endif
+                                     {{ route('admin.profil-saya.show') }} @endif
                             ">
                             <i class="bx bx-user me-2"></i>
                             <span class="align-middle">My Profile</span>
@@ -100,7 +100,14 @@
                     </li>
 
                     <li>
-                        <a class="dropdown-item" href="#">
+                        <a class="dropdown-item"
+                            href="
+                                 @if (session('ptk_id')) {{ route('admin.personal.gtk.profil') }}
+                                 @elseif (session('peserta_didik_id'))
+                                     {{ route('admin.personal.siswa.profil') }}
+                                 @else
+                                     {{ route('admin.profil-saya.show') }} @endif
+                            ">
                             <i class="bx bx-cog me-2"></i>
                             <span class="align-middle">Settings</span>
                         </a>
