@@ -20,18 +20,16 @@ class SetupMenuPegawai
                                     ->where('is_active', 1)
                                     ->first();
 
-            if ($tugas) {
-                // 1. Cek Mode "DEWA" (Umum/Semua Layanan)
-                // Kalau kategorinya 'umum', 'all', atau 'admin-layanan', dia berhak lihat semua.
+            if ($tugas && is_array($tugas->kategori_layanan)) {
+                // 1. Cek Mode "DEWA"
                 $masterKeys = ['umum', 'all', 'semua-layanan', 'koordinator'];
+                $isUmum = collect($tugas->kategori_layanan)->contains(fn($k) => in_array(strtolower($k), $masterKeys));
                 
-                if (in_array(strtolower($tugas->kategori_layanan), $masterKeys)) {
-                    // JANGAN FILTER APAPUN. Biarkan dia melihat semua menu default dari Config.
-                    // Langsung return next request.
+                if ($isUmum) {
                     return $next($request); 
                 }
 
-                // 2. Mode SPESIFIK (Logic Lama Kita)
+                // 2. Mode SPESIFIK
                 $map = [
                     'mutasi'           => 'layanan-mutasi',
                     'kenaikan-pangkat' => 'layanan-kp',
@@ -40,10 +38,12 @@ class SetupMenuPegawai
                     'satya-lencana'    => 'layanan-satya',
                     'hukuman-disiplin' => 'layanan-hukdis',
                     'verifikasi-surat' => 'verifikasi-surat',
+                    'peserta-didik'    => 'layanan-peserta-didik',
                 ];
 
-                if (isset($map[$tugas->kategori_layanan])) {
-                    $slugTarget = $map[$tugas->kategori_layanan];
+                $slugsTarget = collect($tugas->kategori_layanan)->map(fn($k) => $map[strtolower($k)] ?? null)->filter()->all();
+                
+                if (!empty($slugsTarget)) {
                     $currentMenu = Config::get('menu_access.role_map.Pegawai', []);
                     $blacklistSlugs = array_values($map); // Daftar semua layanan
 
@@ -52,7 +52,9 @@ class SetupMenuPegawai
 
                     // Masukkan Induk & Anak Spesifik
                     if (!in_array('layanan-gtk', $cleanMenu)) $cleanMenu[] = 'layanan-gtk';
-                    if (!in_array($slugTarget, $cleanMenu)) $cleanMenu[] = $slugTarget;
+                    foreach ($slugsTarget as $st) {
+                        if (!in_array($st, $cleanMenu)) $cleanMenu[] = $st;
+                    }
 
                     $finalMenu = array_values($cleanMenu);
                     Config::set('menu_access.role_map.Pegawai', $finalMenu);

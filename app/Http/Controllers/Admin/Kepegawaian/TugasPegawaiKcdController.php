@@ -26,6 +26,7 @@ class TugasPegawaiKcdController extends Controller
             'relokasi'         => 'Relokasi / Penempatan',
             'satya-lencana'    => 'Satya Lencana',
             'hukuman-disiplin' => 'Hukuman Disiplin',
+            'peserta-didik'    => 'Layanan Peserta Didik',
             'verifikasi-surat' => 'Verifikasi Surat Lainnya',
         ];
 

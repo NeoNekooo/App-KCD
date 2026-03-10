@@ -53,7 +53,8 @@ class CheckMenuAccess
                 'relokasi'         => 'layanan-relokasi',
                 'satya-lencana'    => 'layanan-satya',
                 'hukuman-disiplin' => 'layanan-hukdis',
-                'verifikasi-surat' => 'verifikasi-surat', // Ini mungkin direct slug atau juga di VerifikasiController
+                'verifikasi-surat' => 'verifikasi-surat',
+                'peserta-didik'    => 'layanan-peserta-didik',
             ];
 
             // List of slugs that require task-based check, including 'layanan-gtk' parent

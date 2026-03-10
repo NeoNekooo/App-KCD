@@ -89,19 +89,37 @@ class SidebarServiceProvider extends ServiceProvider
                     $menu->route = 'admin.dashboard.pegawai';
                 }
 
-                if ($menu->slug === 'layanan-gtk' && $isStafVerifikator) {
+                if ($menu->slug === 'layanan-kcd' && $isStafVerifikator) {
                     if ($kategoriTugas && is_array($kategoriTugas)) {
                         $isUmum = collect($kategoriTugas)->contains(fn($k) => in_array(strtolower($k), ['umum', 'all']));
                         if (!$isUmum) {
                             $mapTugasToSlug = [
                                 'mutasi' => 'layanan-mutasi', 'kenaikan-pangkat' => 'layanan-kp',
                                 'kgb' => 'layanan-kgb', 'relokasi' => 'layanan-relokasi',
-                                'satya-lencana' => 'layanan-satya', 'hukuman-disiplin' => 'layanan-hukdis'
+                                'satya-lencana' => 'layanan-satya', 'hukuman-disiplin' => 'layanan-hukdis',
+                                'peserta-didik' => 'layanan-peserta-didik'
                             ];
-                            $slugsDiizinkan = collect($kategoriTugas)->map(fn($k) => $mapTugasToSlug[$k] ?? null)->filter()->all();
-                            $slugsDiizinkan[] = 'verifikasi-surat'; // Asumsi 'verifikasi-surat' selalu ada
+                            $slugsDiizinkan = collect($kategoriTugas)->map(fn($k) => $mapTugasToSlug[strtolower($k)] ?? null)->filter()->all();
+                            $slugsDiizinkan[] = 'verifikasi-surat'; // Asumsi selalu ada
                             
-                            $filteredChildren = $menu->childrenRecursive->filter(fn($child) => in_array($child->slug, $slugsDiizinkan));
+                            // Fungsi rekursif untuk menyaring menu
+                            $filterChildren = function ($items) use (&$filterChildren, $slugsDiizinkan) {
+                                return $items->filter(function ($item) use ($filterChildren, $slugsDiizinkan) {
+                                    // 1. Jika menu punya anak, saring anaknya
+                                    if ($item->relationLoaded('childrenRecursive') && $item->childrenRecursive->isNotEmpty()) {
+                                        $filteredSons = $filterChildren($item->childrenRecursive);
+                                        $item->setRelation('childrenRecursive', $filteredSons);
+                                        // Tetap tampilkan parent/folder ini jika masih punya anak yang lolos filter
+                                        if ($filteredSons->isNotEmpty()) return true;
+                                    }
+                                    
+                                    // 2. Jika leaf node (tidak punya anak), cek apakah slug-nya diizinkan
+                                    // (Jika merupakan parent kosong, otomatis tak ter-return berkat kondisi 1)
+                                    return in_array($item->slug, $slugsDiizinkan);
+                                })->values();
+                            };
+
+                            $filteredChildren = $filterChildren($menu->childrenRecursive);
                             $menu->setRelation('childrenRecursive', $filteredChildren);
                         }
                     } else {
