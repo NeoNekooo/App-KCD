@@ -28,9 +28,16 @@ if (!function_exists('checkRouteActive')) {
             $baseRoutePrefix = substr($route, 0, -5); // Hapus kata "index"
             if (str_starts_with($currentRoute, $baseRoutePrefix)) {
                 $remainder = substr($currentRoute, strlen($baseRoutePrefix));
-                // Pastikan tidak ada sub-objek lain (titik tambahan). Contoh valid: `create`, `edit`. Contoh tak valid: `tugas.index`
+                // DAFTAR PUTIH: Hanya rute aksi resource standar yang boleh mengaktifkan menu INDEX
+                // Kita blokir rute seperti 'rekapitulasi' jika rute tersebut memiliki menu sendiri.
+                $standardActions = ['show', 'edit', 'create', 'duplicate', 'store', 'update', 'rekap']; // 'rekap' ditambahkan jika perlu, tapi 'rekapitulasi' biasanya menu sendiri
+                
                 if (strpos($remainder, '.') === false) {
-                    $isRouteMatch = true;
+                    $cleanRemainder = trim($remainder, '.');
+                    // Jika remainder kosong (identik) atau merupakan aksi standar
+                    if ($remainder === '' || in_array($cleanRemainder, $standardActions)) {
+                        $isRouteMatch = true;
+                    }
                 }
             }
         }
