@@ -84,6 +84,14 @@ class PegawaiKcdController extends Controller
                 
                 $jabatan = JabatanKcd::find($request->jabatan_kcd_id);
 
+                // --- VALIDASI HANYA SATU KEPALA ---
+                if (Str::contains(strtolower($jabatan->nama), 'kepala')) {
+                    $exists = PegawaiKcd::where('jabatan_kcd_id', $jabatan->id)->exists();
+                    if ($exists) {
+                        throw new \Exception('Jabatan "' . $jabatan->nama . '" sudah terisi. Silakan ganti jabatan pejabat lama terlebih dahulu.');
+                    }
+                }
+
                 // 1. Handle Upload Foto
                 $fotoPath = null;
                 if ($request->hasFile('foto')) {
@@ -200,6 +208,17 @@ class PegawaiKcdController extends Controller
                 // Update protected fields only if Admin
                 if (Auth::user()->role === 'Admin') {
                     $jabatan = JabatanKcd::find($request->jabatan_kcd_id);
+
+                    // --- VALIDASI HANYA SATU KEPALA ---
+                    if (Str::contains(strtolower($jabatan->nama), 'kepala')) {
+                        $exists = PegawaiKcd::where('jabatan_kcd_id', $jabatan->id)
+                                            ->where('id', '!=', $pegawai->id)
+                                            ->exists();
+                        if ($exists) {
+                            throw new \Exception('Jabatan "' . $jabatan->nama . '" sudah terisi oleh orang lain.');
+                        }
+                    }
+
                     $dataUpdate['jabatan_kcd_id'] = $jabatan->id;
                     $dataUpdate['jabatan'] = $jabatan->nama; 
                     $dataUpdate['nip'] = $request->nip;

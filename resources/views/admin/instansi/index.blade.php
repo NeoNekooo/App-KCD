@@ -338,14 +338,35 @@
                                             </div>
                                             <div class="row g-4">
                                                 <div class="col-md-7">
-                                                    <div class="mb-4">
-                                                        <label class="small text-uppercase fw-bold text-primary mb-1">Nama & Gelar</label>
-                                                        <input type="text" class="form-control input-modern bg-white" name="nama_kepala" value="{{ old('nama_kepala', $instansi->nama_kepala) }}" placeholder="Contoh: Dr. H. Fulan, M.Pd">
-                                                    </div>
-                                                    <div class="mb-0">
-                                                        <label class="small text-uppercase fw-bold text-primary mb-1">NIP Pimpinan</label>
-                                                        <input type="text" class="form-control input-modern bg-white font-monospace" name="nip_kepala" value="{{ old('nip_kepala', $instansi->nip_kepala) }}" placeholder="1980xxxx...">
-                                                    </div>
+                                                    @if($kepala)
+                                                        <div class="mb-4">
+                                                            <label class="small text-uppercase fw-bold text-primary mb-1">Nama & Gelar</label>
+                                                            <input type="text" class="form-control input-modern bg-light" name="nama_kepala" value="{{ $kepala->nama }}" readonly data-bs-toggle="tooltip" title="Data diambil otomatis dari Kepegawaian">
+                                                        </div>
+                                                        <div class="mb-0">
+                                                            <label class="small text-uppercase fw-bold text-primary mb-1">NIP Pimpinan</label>
+                                                            <input type="text" class="form-control input-modern bg-light font-monospace" name="nip_kepala" value="{{ $kepala->nip }}" readonly data-bs-toggle="tooltip" title="Data diambil otomatis dari Kepegawaian">
+                                                        </div>
+                                                        <div class="mt-3">
+                                                            <a href="{{ route('admin.kepegawaian.index') }}" class="btn btn-sm btn-label-primary rounded-pill">
+                                                                <i class='bx bx-edit-alt me-1'></i> Kelola Kepala di Kepegawaian
+                                                            </a>
+                                                        </div>
+                                                    @else
+                                                        <div class="alert alert-warning rounded-4 border-0 mb-0 shadow-xs">
+                                                            <div class="d-flex align-items-center mb-2">
+                                                                <i class='bx bx-error-circle fs-4 me-2'></i>
+                                                                <h6 class="fw-bold m-0 text-dark">Kepala Belum Terdaftar</h6>
+                                                            </div>
+                                                            <p class="small mb-2">Tidak ditemukan pegawai dengan jabatan <b>"Kepala"</b> di data kepegawaian.</p>
+                                                            <a href="{{ route('admin.kepegawaian.index') }}" class="btn btn-sm btn-warning rounded-pill fw-bold">
+                                                                <i class='bx bx-user-plus me-1'></i> Atur Kepala Sekarang
+                                                            </a>
+                                                        </div>
+                                                        {{-- Hidden inputs to prevent empty update errors if any --}}
+                                                        <input type="hidden" name="nama_kepala" value="{{ $instansi->nama_kepala }}">
+                                                        <input type="hidden" name="nip_kepala" value="{{ $instansi->nip_kepala }}">
+                                                    @endif
                                                 </div>
                                                 <div class="col-md-5">
                                                     <label class="small text-uppercase fw-bold text-primary mb-1 d-block">Tanda Tangan Digital</label>

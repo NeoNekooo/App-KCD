@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Instansi;
+use App\Models\PegawaiKcd;
+use App\Models\JabatanKcd;
 use Illuminate\Support\Facades\Storage;
 
 class InstansiController extends Controller
@@ -16,7 +18,23 @@ class InstansiController extends Controller
             $instansi = Instansi::create(['nama_instansi' => 'KCD Wilayah Baru']);
         }
 
-        return view('admin.instansi.index', compact('instansi'));
+        // --- SINKRONISASI KEPALA (AUTOMATIC) ---
+        // Mencari Jabatan yang namanya 'Kepala' atau ID 2
+        $jabatanKepala = JabatanKcd::where('nama', 'like', '%Kepala%')->first();
+        $kepala = null;
+        if ($jabatanKepala) {
+            $kepala = PegawaiKcd::where('jabatan_kcd_id', $jabatanKepala->id)->first();
+            
+            // Opsional: Update record instansi agar tetap sinkron di DB
+            if ($kepala && ($instansi->nama_kepala !== $kepala->nama || $instansi->nip_kepala !== $kepala->nip)) {
+                $instansi->update([
+                    'nama_kepala' => $kepala->nama,
+                    'nip_kepala'  => $kepala->nip
+                ]);
+            }
+        }
+
+        return view('admin.instansi.index', compact('instansi', 'kepala'));
     }
 
     public function update(Request $request)
@@ -27,8 +45,8 @@ class InstansiController extends Controller
         $request->validate([
             'nama_instansi' => 'required|string|max:255',
             'nama_brand'    => 'nullable|string|max:255',
-            'nama_kepala'   => 'nullable|string|max:255',
-            'nip_kepala'    => 'nullable|string|max:50',
+            // 'nama_kepala'   => 'nullable|string|max:255', // Di-handle otomatis dari Kepegawaian
+            // 'nip_kepala'    => 'nullable|string|max:50',  // Di-handle otomatis dari Kepegawaian
             'peta'          => 'nullable|string',
             'social_media'  => 'nullable|array',
             'logo'          => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
@@ -39,7 +57,7 @@ class InstansiController extends Controller
         ]);
 
         // 2. Ambil data input KECUALI logo, ttd, & social_media
-        $data = $request->except(['logo', 'tanda_tangan', 'social_media']);
+        $data = $request->except(['logo', 'tanda_tangan', 'social_media', 'nama_kepala', 'nip_kepala']);
 
         // 3. Rapikan Array Social Media
         if ($request->has('social_media')) {
