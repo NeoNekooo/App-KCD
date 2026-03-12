@@ -333,7 +333,7 @@
                                                 <div class="btn-icon-circle bg-label-primary shadow-xs me-3"><i class='bx bx-user-pin fs-4'></i></div>
                                                 <div>
                                                     <h6 class="fw-bold m-0 text-dark">Pimpinan Instansi & Aset Surat</h6>
-                                                    <small class="text-muted">Data ini akan digunakan otomatis pada cetak SK.</small>
+                                                    <small class="text-muted">Data ini akan digunakan otomatis pada cetak Surat.</small>
                                                 </div>
                                             </div>
                                             <div class="row g-4">
