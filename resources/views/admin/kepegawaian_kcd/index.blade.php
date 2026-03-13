@@ -303,7 +303,9 @@
                     </table>
                 </div>
 
-                {{-- MODALS LOOP OUTSIDE TABLE TO FIX Z-INDEX ISSUE --}}
+
+
+                {{-- MODALS LOOP MUST BE INSIDE AJAX CONTAINER SO IT REFRESHES ALONG WITH TABLE --}}
                 @foreach($pegawais as $item)
                     {{-- MODAL EDIT CEPAT --}}
                     <div class="modal fade text-start" id="modalEdit{{ $item->id }}" tabindex="-1" aria-hidden="true">
@@ -480,9 +482,25 @@
             });
         }
 
+        // Fix Z-Index Modal AJAX Helper
+        function fixAjaxModalZIndex() {
+            // Unbind dulu biar ga double triger kalau di panggil berulang
+            $('#ajaxTableContainer').off('show.bs.modal', '.modal').on('show.bs.modal', '.modal', function () {
+                // Saat ditambahkan ke DOM, CSS kadang bikin backdrop numpuk di dalam container ber z-index rendah
+                $(this).appendTo("body"); 
+            });
+            $('#ajaxTableContainer').off('hidden.bs.modal', '.modal').on('hidden.bs.modal', '.modal', function () {
+                // Return modal back to its original container if needed, but appendTo("body") 
+                // is usually sufficient as long as we destroy it when unmounting component
+                $('.modal-backdrop').remove(); // Pastikan backdrop hilang
+                $('body').removeClass('modal-open').css('padding-right', '');
+            });
+        }
+
         // 🔥 LOGIC AJAX SEARCH & SORT & PAGINATION (SINGLE FILE TRICK) 🔥
         $(document).ready(function() {
             initTooltips(); // Inisialisasi awal
+            fixAjaxModalZIndex(); // Inisialiasi Modal di DOM Awal
 
             let currentSort = '{{ request("sort", "oldest") }}';
             let searchTimer;
@@ -495,6 +513,7 @@
                 $('#ajaxTableContainer').load(url + ' #ajaxTableContainer > *', function(response, status, xhr) {
                     $('#tableLoadingOverlay').removeClass('show'); // Ilangin spinner
                     initTooltips(); // Reset tooltip krn DOM baru
+                    fixAjaxModalZIndex(); // RE-INIT MODAL EVENT SETELAH DOM BARU DARI AJAX
                     
                     // Update state URL di browser bar biar tetep bisa dishare / dicopas
                     window.history.pushState({"html":response,"pageTitle":document.title},"", url);
