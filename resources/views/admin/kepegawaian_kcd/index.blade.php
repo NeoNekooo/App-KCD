@@ -284,45 +284,7 @@
                                             </div>
                                         </div>
 
-                                        {{-- MODAL EDIT CEPAT --}}
-                                        <div class="modal fade text-start" id="modalEdit{{ $item->id }}" tabindex="-1" aria-hidden="true">
-                                            <div class="modal-dialog modal-dialog-centered">
-                                                <div class="modal-content border-0 shadow-lg rounded-4">
-                                                    <div class="modal-header border-bottom py-3 px-4 bg-light-subtle">
-                                                        <h5 class="modal-title fw-bold text-dark m-0"><i class="bx bx-edit text-primary me-2 fs-4" style="vertical-align: middle;"></i>Edit Data Pegawai</h5>
-                                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                                    </div>
-                                                    <form action="{{ route('admin.kepegawaian.update', $item->id) }}" method="POST">
-                                                        @csrf @method('PUT')
-                                                        <div class="modal-body p-4">
-                                                            <div class="mb-4">
-                                                                <label class="form-label small fw-bold text-muted text-uppercase mb-1">Nama Lengkap <span class="text-danger">*</span></label>
-                                                                <input type="text" name="nama" class="form-control form-control-lg fs-6 fw-semibold bg-light border-0 shadow-none" value="{{ $item->nama }}" required>
-                                                            </div>
-                                                            <div class="row g-4">
-                                                                <div class="col-sm-6">
-                                                                    <label class="form-label small fw-bold text-muted text-uppercase mb-1">NIP</label>
-                                                                    <input type="text" name="nip" class="form-control bg-light border-0 shadow-none fw-medium" value="{{ $item->nip }}">
-                                                                </div>
-                                                                <div class="col-sm-6">
-                                                                    <label class="form-label small fw-bold text-muted text-uppercase mb-1">Jabatan <span class="text-danger">*</span></label>
-                                                                    <select name="jabatan_kcd_id" class="form-select bg-light border-0 shadow-none fw-medium" required>
-                                                                        @foreach ($jabatans as $jab)
-                                                                            <option value="{{ $jab->id }}" {{ $item->jabatan_kcd_id == $jab->id ? 'selected' : '' }}>{{ $jab->nama }}</option>
-                                                                        @endforeach
-                                                                    </select>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                        <div class="modal-footer border-top bg-light-subtle py-3 px-4">
-                                                            <button type="button" class="btn btn-label-secondary rounded-pill px-4" data-bs-dismiss="modal">Batal</button>
-                                                            <button type="submit" class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm">Simpan Perubahan</button>
-                                                        </div>
-                                                    </form>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </td>
+
                                 </tr>
                             @empty
                                 <tr>
@@ -340,6 +302,48 @@
                         </tbody>
                     </table>
                 </div>
+
+                {{-- MODALS LOOP OUTSIDE TABLE TO FIX Z-INDEX ISSUE --}}
+                @foreach($pegawais as $item)
+                    {{-- MODAL EDIT CEPAT --}}
+                    <div class="modal fade text-start" id="modalEdit{{ $item->id }}" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content border-0 shadow-lg rounded-4">
+                                <div class="modal-header border-bottom py-3 px-4 bg-light-subtle">
+                                    <h5 class="modal-title fw-bold text-dark m-0"><i class="bx bx-edit text-primary me-2 fs-4" style="vertical-align: middle;"></i>Edit Data Pegawai</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                </div>
+                                <form action="{{ route('admin.kepegawaian.update', $item->id) }}" method="POST">
+                                    @csrf @method('PUT')
+                                    <div class="modal-body p-4">
+                                        <div class="mb-4">
+                                            <label class="form-label small fw-bold text-muted text-uppercase mb-1">Nama Lengkap <span class="text-danger">*</span></label>
+                                            <input type="text" name="nama" class="form-control form-control-lg fs-6 fw-semibold bg-light border-0 shadow-none" value="{{ $item->nama }}" required>
+                                        </div>
+                                        <div class="row g-4">
+                                            <div class="col-sm-6">
+                                                <label class="form-label small fw-bold text-muted text-uppercase mb-1">NIP</label>
+                                                <input type="text" name="nip" class="form-control bg-light border-0 shadow-none fw-medium" value="{{ $item->nip }}">
+                                            </div>
+                                            <div class="col-sm-6">
+                                                <label class="form-label small fw-bold text-muted text-uppercase mb-1">Jabatan <span class="text-danger">*</span></label>
+                                                <select name="jabatan_kcd_id" class="form-select bg-light border-0 shadow-none fw-medium" required>
+                                                    @foreach ($jabatans as $jab)
+                                                        <option value="{{ $jab->id }}" {{ $item->jabatan_kcd_id == $jab->id ? 'selected' : '' }}>{{ $jab->nama }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer border-top bg-light-subtle py-3 px-4">
+                                        <button type="button" class="btn btn-label-secondary rounded-pill px-4" data-bs-dismiss="modal">Batal</button>
+                                        <button type="submit" class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm">Simpan Perubahan</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                @endforeach
 
                 {{-- Footer Pagination --}}
                 <div class="card-footer border-top bg-transparent py-3 px-4">

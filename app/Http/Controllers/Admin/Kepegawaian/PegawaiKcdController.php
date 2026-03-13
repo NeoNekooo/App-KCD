@@ -28,7 +28,10 @@ class PegawaiKcdController extends Controller
             });
         }
 
-        // Logic Sorting
+        // SELALU PRIORITASKAN KEPALA DI ATAS
+        $query->orderByRaw("CASE WHEN jabatan LIKE '%Kepala%' THEN 1 ELSE 2 END ASC");
+
+        // Logic Sorting Lanjutan
         switch ($request->get('sort')) {
             case 'alpha':
                 $query->orderBy('nama', 'asc');
