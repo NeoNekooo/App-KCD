@@ -6,12 +6,10 @@
     <title>Monitor Antrian KCD</title>
     <link rel="icon" type="image/x-icon" href="{{ asset('assets/img/favicon/favicon.ico') }}" />
 
-    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
 
-    <!-- Icons -->
     <link rel="stylesheet" href="{{ asset('assets/vendor/fonts/boxicons.css') }}" />
     <link rel="stylesheet" href="{{ asset('assets/vendor/css/core.css') }}" />
 
@@ -48,7 +46,7 @@
         .tv-header h1 { font-size: 2rem; font-weight: 800; margin: 0; text-transform: uppercase; letter-spacing: 1px; }
         .tv-header .clock { font-size: 2.2rem; font-weight: 700; color: var(--highlight); }
 
-        /* GRID SYSTEM (LANDSCAPE DEFAULT) */
+        /* GRID SYSTEM */
         .layout-container {
             display: grid;
             grid-template-columns: 65% 35%;
@@ -57,7 +55,7 @@
             height: calc(100vh - 100px);
         }
 
-        /* MAIN MONITOR (NOW CALLING) */
+        /* MAIN MONITOR */
         .card-called {
             background-color: var(--card-bg);
             border-radius: 2.5rem;
@@ -121,7 +119,7 @@
         .qr-strip h6 { font-weight: 800; margin: 0; font-size: 1rem; color: var(--bg-color); }
         .qr-strip p { margin: 0; font-size: 0.75rem; color: #666; }
 
-        /* VERTICAL / PORTRAIT MODE */
+        /* PORTRAIT MODE */
         @media (orientation: portrait), (max-width: 900px) {
             .layout-container {
                 grid-template-columns: 100%;
@@ -132,8 +130,6 @@
             .called-no { font-size: 10rem; }
             .called-name { font-size: 3rem; }
             .card-waiting { min-height: 400px; }
-            .waiting-item .no { font-size: 2rem; }
-            .waiting-item .name { font-size: 1.4rem; }
             .tv-header h1 { font-size: 1.4rem; }
         }
 
@@ -181,9 +177,7 @@
 
     <div class="card-waiting">
         <div class="waiting-title">Daftar Tunggu</div>
-        <div id="waitingListContainer" class="waiting-list">
-            <!-- Items populated by JS -->
-        </div>
+        <div id="waitingListContainer" class="waiting-list"></div>
 
         <div class="qr-strip">
             <div id="qrcode"></div>
@@ -208,7 +202,7 @@
     let lastCalledId = null;
     let lastCallCount = 0;
 
-    // QR Code
+    // QR Code Generation
     try {
         new QRCode(document.getElementById("qrcode"), {
             text: window.location.origin + "/buku-tamu",
@@ -216,16 +210,16 @@
         });
     } catch(e) { console.error("QR Error", e); }
 
-    // Init Click
+    // Init Click (Enable Audio & Fullscreen)
     document.getElementById('btnInitManual').addEventListener('click', function() {
         let elem = document.documentElement;
         if (elem.requestFullscreen) { elem.requestFullscreen(); }
         isInitialized = true;
         this.classList.add('hidden-important');
-        speakText("Monitor antrian telah diaktifkan secara otomatis.");
+        speakText("Monitor antrian telah aktif.");
     });
 
-    // Helper Speller Indonesia
+    // Helper Eja Nomor (A-001 -> A kosong kosong satu)
     function ejaIndonesia(text) {
         const kamus = {
             '0': 'kosong', '1': 'satu', '2': 'dua', '3': 'tiga', '4': 'empat',
@@ -235,23 +229,18 @@
         return text.toUpperCase().split('').map(char => kamus[char] || char).join(' ');
     }
 
-    // Voice Engine
+    // Load Voice Engine (Focus on Google Indonesia)
     function loadVoices() {
         let v = synth.getVoices();
         if (v.length > 0) {
-            // Prioritas: Natural Online -> Online -> Google -> Microsoft -> Local ID
-            voiceIndo = v.find(x => x.lang.includes('id') && x.name.includes('Natural')) || 
-                        v.find(x => x.lang.includes('id') && x.name.includes('Online')) || 
-                        v.find(x => x.lang.includes('id') && x.name.includes('Google')) || 
-                        v.find(x => x.lang.includes('id') && x.name.includes('Microsoft')) ||
+            // Prioritas Utama: Google Bahasa Indonesia
+            voiceIndo = v.find(x => x.name === 'Google Bahasa Indonesia') || 
+                        v.find(x => x.lang.includes('id-ID')) || 
                         v.find(x => x.lang.includes('id'));
             
             if (voiceIndo) {
                 document.getElementById('voiceIndicator').innerText = "MODE SUARA: " + voiceIndo.name;
                 document.getElementById('voiceIndicator').style.color = "#00ff00";
-            } else {
-                document.getElementById('voiceIndicator').innerText = "MODE SUARA: Robot Default (Inggris/Lokal)";
-                document.getElementById('voiceIndicator').style.color = "#ffcc00";
             }
         }
     }
@@ -261,37 +250,21 @@
     }
     loadVoices();
 
-    // Clock
+    // Digital Clock
     setInterval(() => {
         document.getElementById('clock').innerText = new Date().toLocaleTimeString('id-ID');
     }, 1000);
 
+    // Speak Function (Native Google Indonesia)
     function speakText(txt) {
         if (!isInitialized) return;
         
-        // Coba Suara Google Translate Dulu (High Quality)
-        try {
-            let googleTtsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(txt)}&tl=id&client=tw-ob`;
-            let audio = new Audio(googleTtsUrl);
-            audio.play().then(() => {
-                console.log("Using Google TTS");
-            }).catch(e => {
-                // Fallback ke Native if blocked
-                speakNative(txt);
-            });
-        } catch(err) {
-            speakNative(txt);
-        }
-    }
-
-    function speakNative(txt) {
-        if (!voiceIndo) loadVoices();
-        synth.cancel();
+        synth.cancel(); // Stop suara sebelumnya
         let utter = new SpeechSynthesisUtterance(txt);
         utter.lang = 'id-ID'; 
         if(voiceIndo) utter.voice = voiceIndo;
         utter.pitch = 1.0; 
-        utter.rate = 0.85; 
+        utter.rate = 0.9; // Kecepatan bicara (0.9 pas buat antrean)
         synth.speak(utter);
     }
 
@@ -300,6 +273,7 @@
             url: "/admin/display-antrian/updates",
             type: "GET",
             success: function(res) {
+                // Handling Panggilan Utama
                 if(res.dipanggil && res.dipanggil.length > 0) {
                     let top = res.dipanggil[0];
                     
@@ -310,9 +284,8 @@
                         if(isInitialized) {
                             document.getElementById('bellSound').play().catch(e => {});
                             setTimeout(() => {
-                                // Eja nomor satu per satu agar lebih jelas (Contoh: A kosong kosong satu)
                                 let ejaanNomor = ejaIndonesia(top.nomor_antrian);
-                                let voiceMsg = `Mohon perhatian. Nomor antrian. ${ejaanNomor}. Atas nama. ${top.nama}. Silakan menuju ke. ${top.tujuan}.`;
+                                let voiceMsg = `Nomor antrian. ${ejaanNomor}. Atas nama. ${top.nama}. Silakan menuju ke. ${top.tujuan}.`;
                                 speakText(voiceMsg);
                             }, 1500);
                         }
@@ -327,7 +300,7 @@
                     $('#lblCallTujuan').text("Menunggu Antrian...");
                 }
 
-                // Waiting List
+                // Handling List Tunggu
                 let html = '';
                 if(res.menunggu && res.menunggu.length > 0) {
                     res.menunggu.slice(0, 5).forEach(w => {
@@ -342,13 +315,10 @@
                 }
                 $('#waitingListContainer').html(html);
             },
-            error: function(err) {
-                console.error("AJAX Error", err);
-            }
+            error: function(err) { console.error("Update Error", err); }
         });
     }
 
-    // Refresh every 3 seconds for speed
     setInterval(fetchUpdates, 3000);
     fetchUpdates();
 </script>
