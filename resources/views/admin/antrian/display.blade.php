@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Display Antrian KCD - Monitor Utama</title>
+    <title>Monitor Antrian KCD</title>
     <link rel="icon" type="image/x-icon" href="{{ asset('assets/img/favicon/favicon.ico') }}" />
 
     <!-- Fonts -->
@@ -30,34 +30,37 @@
             background-color: var(--bg-color);
             color: #ffffff;
             margin: 0;
-            overflow: hidden;
-            height: 100vh;
+            overflow-x: hidden;
+            min-height: 100vh;
         }
 
-        .layout-grid {
-            display: grid;
-            grid-template-columns: 65% 35%;
-            height: calc(100vh - 120px);
-            gap: 20px;
-            padding: 0 40px 40px 40px;
-        }
-
+        /* HEADER */
         .tv-header {
-            height: 120px;
+            height: 100px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 0 50px;
+            padding: 0 40px;
             border-bottom: 2px solid rgba(255,255,255,0.05);
-            margin-bottom: 20px;
+            background: rgba(0,0,0,0.2);
         }
-        .tv-header .brand { display: flex; align-items: center; gap: 20px; }
-        .tv-header h1 { font-size: 2.8rem; font-weight: 800; margin: 0; text-transform: uppercase; letter-spacing: 1px; }
-        .tv-header .clock { font-size: 2.5rem; font-weight: 700; color: var(--highlight); }
+        .tv-header .brand { display: flex; align-items: center; gap: 15px; }
+        .tv-header h1 { font-size: 2rem; font-weight: 800; margin: 0; text-transform: uppercase; letter-spacing: 1px; }
+        .tv-header .clock { font-size: 2.2rem; font-weight: 700; color: var(--highlight); }
 
+        /* GRID SYSTEM (LANDSCAPE DEFAULT) */
+        .layout-container {
+            display: grid;
+            grid-template-columns: 65% 35%;
+            gap: 30px;
+            padding: 30px 40px;
+            height: calc(100vh - 100px);
+        }
+
+        /* MAIN MONITOR (NOW CALLING) */
         .card-called {
             background-color: var(--card-bg);
-            border-radius: 2rem;
+            border-radius: 2.5rem;
             border: 2px solid rgba(255,255,255,0.05);
             display: flex;
             flex-direction: column;
@@ -65,47 +68,84 @@
             align-items: center;
             padding: 40px;
             text-align: center;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            box-shadow: 0 30px 60px rgba(0,0,0,0.4);
             position: relative;
         }
         .tag-status {
             position: absolute;
-            top: 40px;
-            left: 40px;
+            top: 30px;
+            left: 30px;
             background: var(--accent-color);
-            padding: 10px 30px;
+            padding: 8px 25px;
             border-radius: 40px;
-            font-weight: 700;
-            font-size: 1.2rem;
+            font-weight: 800;
+            font-size: 1.1rem;
             text-transform: uppercase;
+            box-shadow: 0 10px 20px rgba(105, 108, 255, 0.3);
         }
 
-        .called-no { font-size: 15rem; font-weight: 900; line-height: 1; margin: 0; color: #ffffff; }
-        .called-name { font-size: 4.5rem; font-weight: 800; margin: 20px 0 10px; color: var(--highlight); text-transform: capitalize; }
-        .called-destination { font-size: 2.5rem; color: var(--text-sub); font-weight: 400; }
+        .called-no { font-size: 14rem; font-weight: 900; line-height: 1; margin: 0; color: #ffffff; text-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .called-name { font-size: 4rem; font-weight: 800; margin: 20px 0 5px; color: var(--highlight); text-transform: uppercase; }
+        .called-destination { font-size: 2rem; color: var(--text-sub); font-weight: 500; }
 
+        /* WAITING LIST */
         .card-waiting {
-            background-color: rgba(255,255,255,0.02);
-            border-left: 2px solid rgba(255,255,255,0.05);
-            padding: 0 20px;
+            background: rgba(0,0,0,0.1);
+            border-radius: 2rem;
+            padding: 25px;
             display: flex;
             flex-direction: column;
+            overflow: hidden;
         }
-        .waiting-title { font-size: 1.8rem; font-weight: 700; color: var(--text-sub); margin-bottom: 30px; border-bottom: 2px solid rgba(255,255,255,0.1); padding-bottom: 15px; text-transform: uppercase; }
-        .waiting-item { background: rgba(255,255,255,0.05); margin-bottom: 15px; padding: 20px 30px; border-radius: 1.5rem; display: flex; align-items: center; justify-content: space-between; }
-        .waiting-item .no { font-size: 2.8rem; font-weight: 900; color: var(--accent-color); }
-        .waiting-item .name { font-size: 1.8rem; font-weight: 700; text-align: right; flex: 1; margin-left: 20px; }
+        .waiting-title { font-size: 1.5rem; font-weight: 800; color: var(--text-sub); margin-bottom: 25px; border-bottom: 2px solid rgba(255,255,255,0.05); padding-bottom: 15px; text-transform: uppercase; }
+        .waiting-list { overflow-y: hidden; }
+        .waiting-item { 
+            background: rgba(255,255,255,0.03); 
+            margin-bottom: 12px; 
+            padding: 15px 25px; 
+            border-radius: 1.5rem; 
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .waiting-item .no { font-size: 2.5rem; font-weight: 900; color: var(--accent-color); }
+        .waiting-item .name { font-size: 1.6rem; font-weight: 700; text-align: right; flex: 1; margin-left: 20px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-        .qr-strip { position: fixed; bottom: 40px; right: 40px; width: 320px; background: #ffffff; color: #333; padding: 20px; border-radius: 1.5rem; display: flex; align-items: center; gap: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
-        .qr-strip h6 { font-weight: 800; margin: 0; font-size: 1.1rem; }
-        .qr-strip p { margin: 0; font-size: 0.8rem; color: #666; }
+        /* QR CODE */
+        .qr-strip { 
+            background: #ffffff; color: #333; padding: 15px 20px; border-radius: 1.5rem; 
+            display: flex; align-items: center; gap: 15px; box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            margin-top: auto;
+        }
+        .qr-strip h6 { font-weight: 800; margin: 0; font-size: 1rem; color: var(--bg-color); }
+        .qr-strip p { margin: 0; font-size: 0.75rem; color: #666; }
+
+        /* VERTICAL / PORTRAIT MODE */
+        @media (orientation: portrait), (max-width: 900px) {
+            .layout-container {
+                grid-template-columns: 100%;
+                grid-template-rows: auto 1fr auto;
+                height: auto;
+                padding: 20px;
+            }
+            .called-no { font-size: 10rem; }
+            .called-name { font-size: 3rem; }
+            .card-waiting { min-height: 400px; }
+            .waiting-item .no { font-size: 2rem; }
+            .waiting-item .name { font-size: 1.4rem; }
+            .tv-header h1 { font-size: 1.4rem; }
+        }
 
         #btnInitManual {
             position: fixed; top: 0; bottom: 0; left:0; right:0;
-            z-index: 10000; background: rgba(13, 33, 55, 0.95);
+            z-index: 10000; background: rgba(13, 33, 55, 0.98);
             display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer;
+            text-align: center; padding: 20px;
         }
         .hidden-important { display: none !important; }
+        .blink { animation: blink 1s infinite; }
+        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
     </style>
 </head>
 <body>
@@ -113,41 +153,42 @@
 <div id="btnInitManual">
     <i class='bx bx-play-circle mb-4 text-primary' style="font-size: 8rem;"></i>
     <h2 class="text-white fw-bold">KLIK UNTUK MENGAKTIFKAN MONITOR</h2>
-    <p class="text-white-50">Mengaktifkan Fitur Suara Otomatis & Layar Penuh</p>
+    <p class="text-white-50">Izin suara & Layar Penuh otomatis</p>
 </div>
 
 <div class="tv-header">
     <div class="brand">
         @if($instansi && $instansi->logo)
-            <img src="{{ Storage::url($instansi->logo) }}" height="70" alt="Logo">
+            <img src="{{ Storage::url($instansi->logo) }}" height="60" alt="Logo">
         @else
-            <img src="{{ asset('logo.png') }}" height="70" alt="Logo">
+            <img src="{{ asset('logo.png') }}" height="60" alt="Logo">
         @endif
-        <h1>MONITOR ANTRIAN TAMU </h1>
+        <h1>MONITOR ANTRIAN TAMU</h1>
     </div>
     <div class="clock" id="clock">00:00:00</div>
 </div>
 
-<div class="layout-grid">
+<div class="layout-container">
     <div class="card-called">
-        <div class="tag-status">SEDANG MELAYANI</div>
-        <div class="called-no-wrapper">
-            <h2 class="called-no" id="lblCallNumber">--</h2>
-        </div>
+        <div class="tag-status blink">SEDANG MELAYANI</div>
+        <h2 class="called-no" id="lblCallNumber">--</h2>
         <div class="called-name" id="lblCallName">SIAP MELAYANI</div>
         <div class="called-destination" id="lblCallTujuan">Menunggu Antrian...</div>
     </div>
-    <div class="card-waiting">
-        <div class="waiting-title">Daftar Antrian Selanjutnya</div>
-        <div id="waitingListContainer"></div>
-    </div>
-</div>
 
-<div class="qr-strip">
-    <div id="qrcode"></div>
-    <div>
-        <h6>DAFTAR MANDIRI</h6>
-        <p>Scan untuk mengambil nomor antrian Anda.</p>
+    <div class="card-waiting">
+        <div class="waiting-title">Daftar Tunggu</div>
+        <div id="waitingListContainer" class="waiting-list">
+            <!-- Items populated by JS -->
+        </div>
+
+        <div class="qr-strip">
+            <div id="qrcode"></div>
+            <div>
+                <h6>DAFTAR MANDIRI</h6>
+                <p>Scan untuk mengambil nomor antrian Anda.</p>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -161,40 +202,47 @@
     let isInitialized = false;
     let synth = window.speechSynthesis;
     let voiceIndo = null;
-    let lastCalledIds = [];
+    let lastCalledId = null;
+    let lastCallCount = 0;
 
-    // QR Logic
+    // QR Code
     try {
         new QRCode(document.getElementById("qrcode"), {
             text: window.location.origin + "/buku-tamu",
-            width: 100,
-            height: 100,
-            colorDark : "#000000", colorLight : "#ffffff"
+            width: 80, height: 80
         });
-    } catch(e) { console.error(e); }
+    } catch(e) { console.error("QR Error", e); }
 
+    // Init Click
     document.getElementById('btnInitManual').addEventListener('click', function() {
         let elem = document.documentElement;
         if (elem.requestFullscreen) { elem.requestFullscreen(); }
         isInitialized = true;
         this.classList.add('hidden-important');
-        speakText("Monitor antrian telah diaktifkan.");
+        speakText("Monitor antrian telah diaktifkan secara otomatis.");
     });
 
+    // Voice Engine
     function loadVoices() {
         let v = synth.getVoices();
         voiceIndo = v.find(x => x.lang.includes('id'));
     }
-    if (speechSynthesis.onvoiceschanged !== undefined) { speechSynthesis.onvoiceschanged = loadVoices; }
+    if (speechSynthesis.onvoiceschanged !== undefined) {
+        speechSynthesis.onvoiceschanged = loadVoices;
+    }
 
-    setInterval(() => { document.getElementById('clock').innerText = new Date().toLocaleTimeString('id-ID'); }, 1000);
+    // Clock
+    setInterval(() => {
+        document.getElementById('clock').innerText = new Date().toLocaleTimeString('id-ID');
+    }, 1000);
 
     function speakText(txt) {
         if (!isInitialized) return;
         synth.cancel();
         let utter = new SpeechSynthesisUtterance(txt);
         if(voiceIndo) utter.voice = voiceIndo;
-        utter.rate = 0.85;
+        else utter.lang = 'id-ID';
+        utter.rate = 0.9;
         synth.speak(utter);
     }
 
@@ -203,19 +251,24 @@
             url: "/admin/display-antrian/updates",
             type: "GET",
             success: function(res) {
+                // Now Calling logic
                 if(res.dipanggil && res.dipanggil.length > 0) {
                     let top = res.dipanggil[0];
-                    let key = top.id + "_" + top.jumlah_panggilan;
-                    if (!lastCalledIds.includes(key)) {
-                        lastCalledIds.push(key);
+                    
+                    // Trigger Voice if ID or CallCount changed
+                    if (lastCalledId !== top.id || lastCallCount !== top.jumlah_panggilan) {
+                        lastCalledId = top.id;
+                        lastCallCount = top.jumlah_panggilan;
+                        
                         if(isInitialized) {
-                            document.getElementById('bellSound').play();
+                            document.getElementById('bellSound').play().catch(e => {});
                             setTimeout(() => {
-                                let msg = `Nomor Antrian. ${top.nomor_antrian.replace('-', ' ')}. ${top.nama}. Silahkan menuju ke ${top.tujuan}.`;
-                                speakText(msg);
-                            }, 1500);
+                                let voiceMsg = `Nomor Antrian ${top.nomor_antrian.replace('-', ' ')}. ${top.nama}. Silahkan menuju ke ${top.tujuan}.`;
+                                speakText(voiceMsg);
+                            }, 1200);
                         }
                     }
+
                     $('#lblCallNumber').text(top.nomor_antrian);
                     $('#lblCallName').text(top.nama);
                     $('#lblCallTujuan').text("Tujuan: " + top.tujuan);
@@ -225,20 +278,29 @@
                     $('#lblCallTujuan').text("Menunggu Antrian...");
                 }
 
+                // Waiting List
                 let html = '';
                 if(res.menunggu && res.menunggu.length > 0) {
-                    res.menunggu.slice(0, 6).forEach(w => {
-                        html += `<div class="waiting-item"><div class="no">${w.nomor_antrian}</div><div class="name">${w.nama}</div></div>`;
+                    res.menunggu.slice(0, 5).forEach(w => {
+                        html += `
+                        <div class="waiting-item">
+                            <div class="no">${w.nomor_antrian}</div>
+                            <div class="name">${w.nama}</div>
+                        </div>`;
                     });
                 } else {
                     html = '<p class="text-center text-white-50 mt-5">Tidak ada antrian selanjutnya.</p>';
                 }
                 $('#waitingListContainer').html(html);
+            },
+            error: function(err) {
+                console.error("AJAX Error", err);
             }
         });
     }
 
-    setInterval(fetchUpdates, 2000);
+    // Refresh every 3 seconds for speed
+    setInterval(fetchUpdates, 3000);
     fetchUpdates();
 </script>
 </body>

@@ -63,32 +63,47 @@
 @endsection
 
 @push('scripts')
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
-    let currentCount = {{ $antrians->count() }};
+    document.addEventListener('DOMContentLoaded', function() {
+        let currentCount = document.querySelectorAll('#antrianTableBody tr').length;
+        const tableBody = document.getElementById('antrianTableBody');
+        const bell = document.getElementById('bellSound');
 
-    function refreshTable() {
-        $.get("/admin/antrian/partial", function(html) {
-            // Count rows in new HTML to see if there's a new guest
-            let newRows = $(html).filter('tr').length;
-            
-            if (newRows > currentCount) {
-                // Play notification sound
-                document.getElementById('bellSound').play().catch(e => console.log('Audio error:', e));
-            }
-            
-            currentCount = newRows;
+        function refreshTable() {
+            fetch("/admin/antrian/partial")
+                .then(response => response.text())
+                .then(html => {
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+                    // Hitung jumlah <tr> yang datanya bukan "Belum ada antrian" (colspan=6)
+                    const rows = doc.querySelectorAll('tr');
+                    let newCount = rows.length;
+                    
+                    // Jika baris pertama punya colspan=6, berarti kosong
+                    if(rows.length === 1 && rows[0].querySelector('td[colspan="6"]')) {
+                        newCount = 0;
+                    }
 
-            // Replace table body
-            $('#antrianTableBody').html(html);
-            
-            // Re-initialize tooltips if you use them
-            $('[data-bs-toggle="tooltip"]').tooltip();
-        });
-    }
+                    if (newCount > currentCount) {
+                        if(bell) bell.play().catch(e => console.log("Audio play blocked"));
+                    }
+                    
+                    currentCount = newCount;
+                    tableBody.innerHTML = html;
 
-    // Refresh every 5 seconds
-    setInterval(refreshTable, 5000);
+                    // Re-init tooltips jika ada
+                    if (typeof bootstrap !== 'undefined' && bootstrap.Tooltip) {
+                        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+                        tooltipTriggerList.map(function (tooltipTriggerEl) {
+                            return new bootstrap.Tooltip(tooltipTriggerEl);
+                        });
+                    }
+                })
+                .catch(err => console.error("Refresh failed:", err));
+        }
+
+        // Jalankan setiap 5 detik
+        setInterval(refreshTable, 5000);
+    });
 </script>
 @endpush
