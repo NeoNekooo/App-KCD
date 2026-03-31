@@ -43,6 +43,11 @@ use App\Http\Controllers\Admin\DokumenLayananController;
 use App\Http\Controllers\Admin\Settings\MenuManagementController;
 use App\Http\Controllers\Admin\Settings\RoleAccessController;
 
+// --- Controller Guest & Antrian ---
+use App\Http\Controllers\GuestBookController;
+use App\Http\Controllers\Admin\AntrianController;
+use App\Http\Controllers\Admin\AntrianDisplayController;
+
 /*
 |--------------------------------------------------------------------------
 | Rute Web Utama
@@ -65,6 +70,10 @@ Route::get('/', function () {
 
 // --- CETAK SK (PUBLIC) ---
 Route::get('/cetak-sk/{uuid}', [CetakSkController::class, 'cetakSk'])->name('cetak.sk');
+
+// --- BUKU TAMU & TIKET ANTRIAN (PUBLIC) ---
+Route::get('/buku-tamu', [GuestBookController::class, 'index'])->name('guest.buku-tamu');
+Route::post('/buku-tamu', [GuestBookController::class, 'store'])->name('guest.buku-tamu.store');
 
 
 /*
@@ -101,6 +110,22 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
         Route::put('/', 'update')->name('update');
         Route::put('/change-password', 'changePassword')->name('change-password');
     });
+
+    // DAFTAR ANTRIAN & TAMU RESEPSIONIS
+    Route::controller(AntrianController::class)
+        ->prefix('antrian')
+        ->name('antrian.')
+        ->middleware('check_menu:antrian')
+        ->group(function() {
+            Route::get('/', 'index')->name('index');
+            Route::put('/{id}/panggil', 'panggil')->name('panggil');
+            Route::put('/{id}/selesai', 'selesai')->name('selesai');
+            Route::delete('/{id}', 'destroy')->name('destroy');
+        });
+
+    // LAYAR TV DISPLAY (Admin Only / Ruang KCD)
+    Route::get('/display-antrian', [AntrianDisplayController::class, 'index'])->name('display.antrian');
+    Route::get('/display-antrian/updates', [AntrianDisplayController::class, 'getUpdates'])->name('display.antrian.updates');
 
     // C. Data Pegawai Internal (Admin-only)
     Route::prefix('kepegawaian')->name('kepegawaian.')->controller(PegawaiKcdController::class)->group(function() {
@@ -292,7 +317,6 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
     Route::get('/underConstructions', function () {
         return view('admin.underConstruction');
     })->name('underConstructions');
-
 });
 
 require __DIR__ . '/auth.php';
