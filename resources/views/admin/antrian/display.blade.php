@@ -32,7 +32,6 @@
             min-height: 100vh;
         }
 
-        /* HEADER */
         .tv-header {
             height: 100px;
             display: flex;
@@ -46,7 +45,6 @@
         .tv-header h1 { font-size: 2rem; font-weight: 800; margin: 0; text-transform: uppercase; letter-spacing: 1px; }
         .tv-header .clock { font-size: 2.2rem; font-weight: 700; color: var(--highlight); }
 
-        /* GRID SYSTEM */
         .layout-container {
             display: grid;
             grid-template-columns: 65% 35%;
@@ -55,7 +53,6 @@
             height: calc(100vh - 100px);
         }
 
-        /* MAIN MONITOR */
         .card-called {
             background-color: var(--card-bg);
             border-radius: 2.5rem;
@@ -79,21 +76,18 @@
             font-weight: 800;
             font-size: 1.1rem;
             text-transform: uppercase;
-            box-shadow: 0 10px 20px rgba(105, 108, 255, 0.3);
         }
 
-        .called-no { font-size: 14rem; font-weight: 900; line-height: 1; margin: 0; color: #ffffff; text-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .called-no { font-size: 14rem; font-weight: 900; line-height: 1; margin: 0; color: #ffffff; }
         .called-name { font-size: 4rem; font-weight: 800; margin: 20px 0 5px; color: var(--highlight); text-transform: uppercase; }
         .called-destination { font-size: 2rem; color: var(--text-sub); font-weight: 500; }
 
-        /* WAITING LIST */
         .card-waiting {
             background: rgba(0,0,0,0.1);
             border-radius: 2rem;
             padding: 25px;
             display: flex;
             flex-direction: column;
-            overflow: hidden;
         }
         .waiting-title { font-size: 1.5rem; font-weight: 800; color: var(--text-sub); margin-bottom: 25px; border-bottom: 2px solid rgba(255,255,255,0.05); padding-bottom: 15px; text-transform: uppercase; }
         .waiting-list { overflow-y: hidden; }
@@ -105,31 +99,20 @@
             display: flex; 
             align-items: center; 
             justify-content: space-between;
-            border: 1px solid rgba(255,255,255,0.05);
         }
         .waiting-item .no { font-size: 2.5rem; font-weight: 900; color: var(--accent-color); }
         .waiting-item .name { font-size: 1.6rem; font-weight: 700; text-align: right; flex: 1; margin-left: 20px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-        /* QR CODE */
         .qr-strip { 
             background: #ffffff; color: #333; padding: 15px 20px; border-radius: 1.5rem; 
-            display: flex; align-items: center; gap: 15px; box-shadow: 0 10px 40px rgba(0,0,0,0.5);
-            margin-top: auto;
+            display: flex; align-items: center; gap: 15px; margin-top: auto;
         }
-        .qr-strip h6 { font-weight: 800; margin: 0; font-size: 1rem; color: var(--bg-color); }
+        .qr-strip h6 { font-weight: 800; margin: 0; font-size: 1rem; color: #333; }
         .qr-strip p { margin: 0; font-size: 0.75rem; color: #666; }
 
-        /* PORTRAIT MODE */
         @media (orientation: portrait), (max-width: 900px) {
-            .layout-container {
-                grid-template-columns: 100%;
-                grid-template-rows: auto 1fr auto;
-                height: auto;
-                padding: 20px;
-            }
+            .layout-container { grid-template-columns: 100%; height: auto; }
             .called-no { font-size: 10rem; }
-            .called-name { font-size: 3rem; }
-            .card-waiting { min-height: 400px; }
             .tv-header h1 { font-size: 1.4rem; }
         }
 
@@ -149,7 +132,10 @@
 <div id="btnInitManual">
     <i class='bx bx-play-circle mb-4 text-primary' style="font-size: 8rem;"></i>
     <h2 class="text-white fw-bold">KLIK UNTUK MENGAKTIFKAN MONITOR</h2>
-    <p class="text-white-50">Izin suara & Layar Penuh otomatis</p>
+    <p class="text-white-50">Mengaktifkan Fitur Suara & Layar Penuh</p>
+    <div class="mt-4 p-3 border border-secondary rounded" style="background: rgba(255,255,255,0.05); max-width: 500px;">
+        <small class="text-info font-monospace">💡 Tips: Gunakan browser <b>Microsoft Edge</b> untuk kualitas suara terbaik (Indonesian Natural Voice).</small>
+    </div>
 </div>
 
 <div class="tv-header">
@@ -182,8 +168,8 @@
         <div class="qr-strip">
             <div id="qrcode"></div>
             <div>
-                <h6>DAFTAR MANDIRI</h6>
-                <p>Scan untuk pendaftaran.</p>
+                <h6>PULAU PENDAFTARAN</h6>
+                <p>Scan untuk mengambil nomor antrian.</p>
             </div>
         </div>
     </div>
@@ -201,6 +187,7 @@
     let voiceIndo = null;
     let lastCalledId = null;
     let lastCallCount = 0;
+    let isSpeaking = false; // Grendel Anti-Gema
 
     // 1. QR Code
     try {
@@ -210,33 +197,24 @@
         });
     } catch(e) { console.error("QR Error", e); }
 
-    // 2. FORCE LOADING VOICE (Crucial for Chrome)
+    // 2. Voice Loader (Mencari suara paling medok)
     function loadVoices() {
-        let voices = synth.getVoices();
-        
-        // Cari suara Google Indonesia dengan filter ketat
-        let target = voices.find(v => v.name === 'Google Bahasa Indonesia') || 
-                     voices.find(v => v.lang === 'id-ID' && v.name.includes('Google')) ||
-                     voices.find(v => v.lang.includes('id-ID')) ||
-                     voices.find(v => v.lang.includes('id'));
-
-        if (target) {
-            voiceIndo = target;
-            const indicator = document.getElementById('voiceIndicator');
-            indicator.innerText = "MODE SUARA: " + voiceIndo.name;
-            indicator.style.color = "#00ff00";
+        let v = synth.getVoices();
+        if (v.length > 0) {
+            voiceIndo = v.find(x => x.lang.includes('id') && x.name.includes('Natural')) || 
+                        v.find(x => x.lang.includes('id') && x.name.includes('Online')) || 
+                        v.find(x => x.lang.includes('id') && x.name.includes('Google')) || 
+                        v.find(x => x.lang.includes('id') && x.name.includes('Microsoft')) ||
+                        v.find(x => x.lang.includes('id'));
+            
+            if (voiceIndo) {
+                document.getElementById('voiceIndicator').innerText = "MODE SUARA: " + voiceIndo.name;
+                document.getElementById('voiceIndicator').style.color = "#00ff00";
+            }
         }
     }
-
-    // Interval khusus buat hajar Chrome biar list suaranya muncul
-    let voiceRetry = setInterval(() => {
-        loadVoices();
-        if (voiceIndo) clearInterval(voiceRetry);
-    }, 500);
-
-    if (speechSynthesis.onvoiceschanged !== undefined) {
-        speechSynthesis.onvoiceschanged = loadVoices;
-    }
+    if (speechSynthesis.onvoiceschanged !== undefined) { speechSynthesis.onvoiceschanged = loadVoices; }
+    loadVoices();
 
     // 3. Init Click
     document.getElementById('btnInitManual').addEventListener('click', function() {
@@ -244,46 +222,42 @@
         if (elem.requestFullscreen) { elem.requestFullscreen(); }
         isInitialized = true;
         this.classList.add('hidden-important');
-        
-        loadVoices(); // Refresh suara pas klik
-        setTimeout(() => {
-            speakText("Monitor antrian telah diaktifkan.");
-        }, 500);
+        loadVoices();
+        setTimeout(() => { speakText("Monitor antrian telah diaktifkan."); }, 500);
     });
 
-    // 4. Helper Speller
+    // 4. Helper Ejaan
     function ejaIndonesia(text) {
         const kamus = {
             '0': 'kosong', '1': 'satu', '2': 'dua', '3': 'tiga', '4': 'empat',
             '5': 'lima', '6': 'enam', '7': 'tujuh', '8': 'delapan', '9': 'sembilan',
-            'A': 'A', 'B': 'B', 'C': 'C', 'D': 'D', '-': ' '
+            'A': 'A', 'B': 'B', '-' : ' '
         };
         return text.toUpperCase().split('').map(char => kamus[char] || char).join(' ');
     }
 
-    // 5. Clock
-    setInterval(() => {
-        document.getElementById('clock').innerText = new Date().toLocaleTimeString('id-ID');
-    }, 1000);
-
-    // 6. Speak Core
+    // 5. Speak Core (Anti-Gema)
     function speakText(txt) {
-        if (!isInitialized) return;
+        if (!isInitialized || isSpeaking) return;
         
-        synth.cancel(); // Buang suara yang sedang jalan
+        isSpeaking = true;
+        synth.cancel();
         
         let utter = new SpeechSynthesisUtterance(txt);
-        
-        // Pastikan suara Indonesia terpasang
-        if (!voiceIndo) loadVoices(); 
-        
-        utter.voice = voiceIndo;
         utter.lang = 'id-ID';
+        if(voiceIndo) utter.voice = voiceIndo;
         utter.pitch = 1.0;
-        utter.rate = 0.9; 
+        utter.rate = 0.88; 
+        
+        // Lepas grendel jika suara selesai
+        utter.onend = function() { isSpeaking = false; };
+        utter.onerror = function() { isSpeaking = false; };
         
         synth.speak(utter);
     }
+
+    // 6. Clock
+    setInterval(() => { document.getElementById('clock').innerText = new Date().toLocaleTimeString('id-ID'); }, 1000);
 
     // 7. Update Fetcher
     function fetchUpdates() {
@@ -307,6 +281,7 @@
                             }, 1500);
                         }
                     }
+
                     $('#lblCallNumber').text(top.nomor_antrian);
                     $('#lblCallName').text(top.nama);
                     $('#lblCallTujuan').text("Tujuan: " + top.tujuan);
@@ -319,22 +294,17 @@
                 let html = '';
                 if(res.menunggu && res.menunggu.length > 0) {
                     res.menunggu.slice(0, 5).forEach(w => {
-                        html += `
-                        <div class="waiting-item">
-                            <div class="no">${w.nomor_antrian}</div>
-                            <div class="name">${w.nama}</div>
-                        </div>`;
+                        html += `<div class="waiting-item"><div class="no">${w.nomor_antrian}</div><div class="name">${w.nama}</div></div>`;
                     });
                 } else {
                     html = '<p class="text-center text-white-50 mt-5">Tidak ada antrian selanjutnya.</p>';
                 }
                 $('#waitingListContainer').html(html);
-            },
-            error: function(err) { console.error("AJAX Error", err); }
+            }
         });
     }
 
-    setInterval(fetchUpdates, 3000);
+    setInterval(fetchUpdates, 4000); // 4 detik agar tidak terlalu rapat
     fetchUpdates();
 </script>
 </body>
