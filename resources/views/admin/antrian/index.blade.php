@@ -63,23 +63,22 @@
 @endsection
 
 @push('scripts')
-<script src="{{ asset('vendor/libs/jquery/jquery.js') }}"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
     let currentCount = {{ $antrians->count() }};
 
     function refreshTable() {
-        $.get("{{ route('admin.antrian.partial') }}", function(html) {
+        $.get("/admin/antrian/partial", function(html) {
             // Count rows in new HTML to see if there's a new guest
             let newRows = $(html).filter('tr').length;
             
             if (newRows > currentCount) {
                 // Play notification sound
-                document.getElementById('newGuestSound').play().catch(e => console.log('Audio error:', e));
-                currentCount = newRows;
-            } else if (newRows < currentCount) {
-                currentCount = newRows;
+                document.getElementById('bellSound').play().catch(e => console.log('Audio error:', e));
             }
+            
+            currentCount = newRows;
 
             // Replace table body
             $('#antrianTableBody').html(html);
@@ -93,4 +92,3 @@
     setInterval(refreshTable, 5000);
 </script>
 @endpush
-
