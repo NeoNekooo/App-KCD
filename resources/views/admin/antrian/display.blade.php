@@ -225,14 +225,24 @@
     // Voice Engine
     function loadVoices() {
         let v = synth.getVoices();
-        // Cari suara Bahasa Indonesia yang bagus (prioritas Google atau Microsoft)
-        voiceIndo = v.find(x => x.lang.includes('id') && x.name.includes('Google')) || 
-                    v.find(x => x.lang.includes('id') && x.name.includes('Microsoft')) ||
-                    v.find(x => x.lang.includes('id'));
+        if (v.length > 0) {
+            // Cari suara Bahasa Indonesia (prioritas Google/Microsoft)
+            voiceIndo = v.find(x => (x.lang.includes('id') || x.lang.includes('ID')) && x.name.includes('Google')) || 
+                        v.find(x => (x.lang.includes('id') || x.lang.includes('ID')) && x.name.includes('Microsoft')) ||
+                        v.find(x => (x.lang.includes('id') || x.lang.includes('ID')));
+            
+            if (voiceIndo) {
+                console.log("Suara Indonesia ditemukan:", voiceIndo.name);
+            }
+        }
     }
+    
+    // Panggil ulang loadVoices saat daftar suara berubah
     if (speechSynthesis.onvoiceschanged !== undefined) {
         speechSynthesis.onvoiceschanged = loadVoices;
     }
+    // Panggil juga sekali di awal
+    loadVoices();
 
     // Clock
     setInterval(() => {
@@ -241,17 +251,25 @@
 
     function speakText(txt) {
         if (!isInitialized) return;
+        
+        // Coba load voices lagi kalau belum ketemu
+        if (!voiceIndo) loadVoices();
+        
         synth.cancel();
         
         let utter = new SpeechSynthesisUtterance(txt);
+        utter.lang = 'id-ID'; // WAJIB KUNCI KE ID
+        
         if(voiceIndo) {
             utter.voice = voiceIndo;
-        } else {
-            utter.lang = 'id-ID';
         }
 
         utter.pitch = 1.0; 
-        utter.rate = 0.9; // Kecepatan sedikit melambat biar lebih natural
+        utter.rate = 0.85; // Sedikit lebih pelan biar jelas
+        
+        // Debug jika masih logat bule (cek di console F12)
+        console.log("Mengucapkan (ID): " + txt);
+        
         synth.speak(utter);
     }
 
