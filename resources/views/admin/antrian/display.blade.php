@@ -202,7 +202,7 @@
     let lastCalledId = null;
     let lastCallCount = 0;
 
-    // QR Code Generation
+    // 1. QR Code
     try {
         new QRCode(document.getElementById("qrcode"), {
             text: window.location.origin + "/buku-tamu",
@@ -210,16 +210,48 @@
         });
     } catch(e) { console.error("QR Error", e); }
 
-    // Init Click (Enable Audio & Fullscreen)
+    // 2. FORCE LOADING VOICE (Crucial for Chrome)
+    function loadVoices() {
+        let voices = synth.getVoices();
+        
+        // Cari suara Google Indonesia dengan filter ketat
+        let target = voices.find(v => v.name === 'Google Bahasa Indonesia') || 
+                     voices.find(v => v.lang === 'id-ID' && v.name.includes('Google')) ||
+                     voices.find(v => v.lang.includes('id-ID')) ||
+                     voices.find(v => v.lang.includes('id'));
+
+        if (target) {
+            voiceIndo = target;
+            const indicator = document.getElementById('voiceIndicator');
+            indicator.innerText = "MODE SUARA: " + voiceIndo.name;
+            indicator.style.color = "#00ff00";
+        }
+    }
+
+    // Interval khusus buat hajar Chrome biar list suaranya muncul
+    let voiceRetry = setInterval(() => {
+        loadVoices();
+        if (voiceIndo) clearInterval(voiceRetry);
+    }, 500);
+
+    if (speechSynthesis.onvoiceschanged !== undefined) {
+        speechSynthesis.onvoiceschanged = loadVoices;
+    }
+
+    // 3. Init Click
     document.getElementById('btnInitManual').addEventListener('click', function() {
         let elem = document.documentElement;
         if (elem.requestFullscreen) { elem.requestFullscreen(); }
         isInitialized = true;
         this.classList.add('hidden-important');
-        speakText("Monitor antrian telah aktif.");
+        
+        loadVoices(); // Refresh suara pas klik
+        setTimeout(() => {
+            speakText("Monitor antrian telah diaktifkan.");
+        }, 500);
     });
 
-    // Helper Eja Nomor (A-001 -> A kosong kosong satu)
+    // 4. Helper Speller
     function ejaIndonesia(text) {
         const kamus = {
             '0': 'kosong', '1': 'satu', '2': 'dua', '3': 'tiga', '4': 'empat',
@@ -229,51 +261,36 @@
         return text.toUpperCase().split('').map(char => kamus[char] || char).join(' ');
     }
 
-    // Load Voice Engine (Focus on Google Indonesia)
-    function loadVoices() {
-        let v = synth.getVoices();
-        if (v.length > 0) {
-            // Prioritas Utama: Google Bahasa Indonesia
-            voiceIndo = v.find(x => x.name === 'Google Bahasa Indonesia') || 
-                        v.find(x => x.lang.includes('id-ID')) || 
-                        v.find(x => x.lang.includes('id'));
-            
-            if (voiceIndo) {
-                document.getElementById('voiceIndicator').innerText = "MODE SUARA: " + voiceIndo.name;
-                document.getElementById('voiceIndicator').style.color = "#00ff00";
-            }
-        }
-    }
-    
-    if (speechSynthesis.onvoiceschanged !== undefined) {
-        speechSynthesis.onvoiceschanged = loadVoices;
-    }
-    loadVoices();
-
-    // Digital Clock
+    // 5. Clock
     setInterval(() => {
         document.getElementById('clock').innerText = new Date().toLocaleTimeString('id-ID');
     }, 1000);
 
-    // Speak Function (Native Google Indonesia)
+    // 6. Speak Core
     function speakText(txt) {
         if (!isInitialized) return;
         
-        synth.cancel(); // Stop suara sebelumnya
+        synth.cancel(); // Buang suara yang sedang jalan
+        
         let utter = new SpeechSynthesisUtterance(txt);
-        utter.lang = 'id-ID'; 
-        if(voiceIndo) utter.voice = voiceIndo;
-        utter.pitch = 1.0; 
-        utter.rate = 0.9; // Kecepatan bicara (0.9 pas buat antrean)
+        
+        // Pastikan suara Indonesia terpasang
+        if (!voiceIndo) loadVoices(); 
+        
+        utter.voice = voiceIndo;
+        utter.lang = 'id-ID';
+        utter.pitch = 1.0;
+        utter.rate = 0.9; 
+        
         synth.speak(utter);
     }
 
+    // 7. Update Fetcher
     function fetchUpdates() {
         $.ajax({
             url: "/admin/display-antrian/updates",
             type: "GET",
             success: function(res) {
-                // Handling Panggilan Utama
                 if(res.dipanggil && res.dipanggil.length > 0) {
                     let top = res.dipanggil[0];
                     
@@ -290,7 +307,6 @@
                             }, 1500);
                         }
                     }
-
                     $('#lblCallNumber').text(top.nomor_antrian);
                     $('#lblCallName').text(top.nama);
                     $('#lblCallTujuan').text("Tujuan: " + top.tujuan);
@@ -300,7 +316,6 @@
                     $('#lblCallTujuan').text("Menunggu Antrian...");
                 }
 
-                // Handling List Tunggu
                 let html = '';
                 if(res.menunggu && res.menunggu.length > 0) {
                     res.menunggu.slice(0, 5).forEach(w => {
@@ -315,7 +330,7 @@
                 }
                 $('#waitingListContainer').html(html);
             },
-            error: function(err) { console.error("Update Error", err); }
+            error: function(err) { console.error("AJAX Error", err); }
         });
     }
 
