@@ -222,26 +222,38 @@
         speakText("Monitor antrian telah diaktifkan secara otomatis.");
     });
 
+    // Helper Speller Indonesia
+    function ejaIndonesia(text) {
+        const kamus = {
+            '0': 'kosong', '1': 'satu', '2': 'dua', '3': 'tiga', '4': 'empat',
+            '5': 'lima', '6': 'enam', '7': 'tujuh', '8': 'delapan', '9': 'sembilan',
+            'A': 'A', 'B': 'B', 'C': 'C', 'D': 'D', '-': ' '
+        };
+        return text.toUpperCase().split('').map(char => kamus[char] || char).join(' ');
+    }
+
     // Voice Engine
     function loadVoices() {
         let v = synth.getVoices();
         if (v.length > 0) {
-            // Cari suara Bahasa Indonesia (prioritas Google/Microsoft)
-            voiceIndo = v.find(x => (x.lang.includes('id') || x.lang.includes('ID')) && x.name.includes('Google')) || 
-                        v.find(x => (x.lang.includes('id') || x.lang.includes('ID')) && x.name.includes('Microsoft')) ||
-                        v.find(x => (x.lang.includes('id') || x.lang.includes('ID')));
+            // Prioritas 1: Suara "Natural" (Sangat Mirip Manusia - Biasanya ada di Edge/Chrome)
+            // Prioritas 2: Suara "Online" (Kualitas Tinggi)
+            // Prioritas 3: Suara Google/Microsoft lokal
+            voiceIndo = v.find(x => x.lang.includes('id') && x.name.includes('Natural')) || 
+                        v.find(x => x.lang.includes('id') && x.name.includes('Online')) || 
+                        v.find(x => x.lang.includes('id') && x.name.includes('Google')) || 
+                        v.find(x => x.lang.includes('id') && x.name.includes('Microsoft')) ||
+                        v.find(x => x.lang.includes('id'));
             
             if (voiceIndo) {
-                console.log("Suara Indonesia ditemukan:", voiceIndo.name);
+                console.log("SUARA MANUSIA AKTIF: " + voiceIndo.name);
             }
         }
     }
     
-    // Panggil ulang loadVoices saat daftar suara berubah
     if (speechSynthesis.onvoiceschanged !== undefined) {
         speechSynthesis.onvoiceschanged = loadVoices;
     }
-    // Panggil juga sekali di awal
     loadVoices();
 
     // Clock
@@ -252,24 +264,33 @@
     function speakText(txt) {
         if (!isInitialized) return;
         
-        // Coba load voices lagi kalau belum ketemu
-        if (!voiceIndo) loadVoices();
-        
-        synth.cancel();
-        
-        let utter = new SpeechSynthesisUtterance(txt);
-        utter.lang = 'id-ID'; // WAJIB KUNCI KE ID
-        
-        if(voiceIndo) {
-            utter.voice = voiceIndo;
+        // JURUS PAMUNGKAS: Pakai Google Translate TTS (Suara Manusia Asli Indonesia)
+        // Ini akan mengabaikan suara robot bawaan komputer yang sering logat bule
+        try {
+            let encodedText = encodeURIComponent(txt);
+            let googleTtsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodedText}&tl=id&total=1&idx=0&textlen=${txt.length}&client=tw-ob`;
+            
+            let audio = new Audio(googleTtsUrl);
+            audio.play().then(() => {
+                console.log("Berhasil menggunakan Suara Google Indonesia");
+            }).catch(e => {
+                console.warn("Google TTS Gagal, Menggunakan Cadangan Robot Bawaan...");
+                // FALLBACK: Balik ke robot bawaan kalau kuota/internet bermasalah
+                speakNative(txt);
+            });
+        } catch(err) {
+            speakNative(txt);
         }
+    }
 
+    function speakNative(txt) {
+        if (!voiceIndo) loadVoices();
+        synth.cancel();
+        let utter = new SpeechSynthesisUtterance(txt);
+        utter.lang = 'id-ID'; 
+        if(voiceIndo) utter.voice = voiceIndo;
         utter.pitch = 1.0; 
-        utter.rate = 0.85; // Sedikit lebih pelan biar jelas
-        
-        // Debug jika masih logat bule (cek di console F12)
-        console.log("Mengucapkan (ID): " + txt);
-        
+        utter.rate = 0.88; 
         synth.speak(utter);
     }
 
@@ -278,11 +299,9 @@
             url: "/admin/display-antrian/updates",
             type: "GET",
             success: function(res) {
-                // Now Calling logic
                 if(res.dipanggil && res.dipanggil.length > 0) {
                     let top = res.dipanggil[0];
                     
-                    // Trigger Voice if ID or CallCount changed
                     if (lastCalledId !== top.id || lastCallCount !== top.jumlah_panggilan) {
                         lastCalledId = top.id;
                         lastCallCount = top.jumlah_panggilan;
@@ -290,9 +309,9 @@
                         if(isInitialized) {
                             document.getElementById('bellSound').play().catch(e => {});
                             setTimeout(() => {
-                                // Kalimat lebih natural dan sopan
-                                let nomorBersuara = top.nomor_antrian.replace('-', ' ').split('').join(' ');
-                                let voiceMsg = `Mohon perhatian. Nomor antrian. ${nomorBersuara}. Atas nama. ${top.nama}. Silakan menuju ke. ${top.tujuan}.`;
+                                // Eja nomor satu per satu agar lebih jelas (Contoh: A kosong kosong satu)
+                                let ejaanNomor = ejaIndonesia(top.nomor_antrian);
+                                let voiceMsg = `Mohon perhatian. Nomor antrian. ${ejaanNomor}. Atas nama. ${top.nama}. Silakan menuju ke. ${top.tujuan}.`;
                                 speakText(voiceMsg);
                             }, 1500);
                         }
