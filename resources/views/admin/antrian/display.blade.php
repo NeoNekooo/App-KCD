@@ -163,7 +163,10 @@
         @else
             <img src="{{ asset('logo.png') }}" height="60" alt="Logo">
         @endif
-        <h1>MONITOR ANTRIAN TAMU</h1>
+        <div>
+            <h1>MONITOR ANTRIAN</h1>
+            <div id="voiceIndicator" style="font-size: 0.7rem; color: var(--accent-color); font-weight: 700; opacity: 0.8;">Mencari Suara...</div>
+        </div>
     </div>
     <div class="clock" id="clock">00:00:00</div>
 </div>
@@ -186,7 +189,7 @@
             <div id="qrcode"></div>
             <div>
                 <h6>DAFTAR MANDIRI</h6>
-                <p>Scan untuk mengambil nomor antrian Anda.</p>
+                <p>Scan untuk pendaftaran.</p>
             </div>
         </div>
     </div>
@@ -236,9 +239,7 @@
     function loadVoices() {
         let v = synth.getVoices();
         if (v.length > 0) {
-            // Prioritas 1: Suara "Natural" (Sangat Mirip Manusia - Biasanya ada di Edge/Chrome)
-            // Prioritas 2: Suara "Online" (Kualitas Tinggi)
-            // Prioritas 3: Suara Google/Microsoft lokal
+            // Prioritas: Natural Online -> Online -> Google -> Microsoft -> Local ID
             voiceIndo = v.find(x => x.lang.includes('id') && x.name.includes('Natural')) || 
                         v.find(x => x.lang.includes('id') && x.name.includes('Online')) || 
                         v.find(x => x.lang.includes('id') && x.name.includes('Google')) || 
@@ -246,7 +247,11 @@
                         v.find(x => x.lang.includes('id'));
             
             if (voiceIndo) {
-                console.log("SUARA MANUSIA AKTIF: " + voiceIndo.name);
+                document.getElementById('voiceIndicator').innerText = "MODE SUARA: " + voiceIndo.name;
+                document.getElementById('voiceIndicator').style.color = "#00ff00";
+            } else {
+                document.getElementById('voiceIndicator').innerText = "MODE SUARA: Robot Default (Inggris/Lokal)";
+                document.getElementById('voiceIndicator').style.color = "#ffcc00";
             }
         }
     }
@@ -264,18 +269,14 @@
     function speakText(txt) {
         if (!isInitialized) return;
         
-        // JURUS PAMUNGKAS: Pakai Google Translate TTS (Suara Manusia Asli Indonesia)
-        // Ini akan mengabaikan suara robot bawaan komputer yang sering logat bule
+        // Coba Suara Google Translate Dulu (High Quality)
         try {
-            let encodedText = encodeURIComponent(txt);
-            let googleTtsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodedText}&tl=id&total=1&idx=0&textlen=${txt.length}&client=tw-ob`;
-            
+            let googleTtsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(txt)}&tl=id&client=tw-ob`;
             let audio = new Audio(googleTtsUrl);
             audio.play().then(() => {
-                console.log("Berhasil menggunakan Suara Google Indonesia");
+                console.log("Using Google TTS");
             }).catch(e => {
-                console.warn("Google TTS Gagal, Menggunakan Cadangan Robot Bawaan...");
-                // FALLBACK: Balik ke robot bawaan kalau kuota/internet bermasalah
+                // Fallback ke Native if blocked
                 speakNative(txt);
             });
         } catch(err) {
@@ -290,7 +291,7 @@
         utter.lang = 'id-ID'; 
         if(voiceIndo) utter.voice = voiceIndo;
         utter.pitch = 1.0; 
-        utter.rate = 0.88; 
+        utter.rate = 0.85; 
         synth.speak(utter);
     }
 
