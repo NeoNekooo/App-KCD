@@ -225,7 +225,10 @@
     // Voice Engine
     function loadVoices() {
         let v = synth.getVoices();
-        voiceIndo = v.find(x => x.lang.includes('id'));
+        // Cari suara Bahasa Indonesia yang bagus (prioritas Google atau Microsoft)
+        voiceIndo = v.find(x => x.lang.includes('id') && x.name.includes('Google')) || 
+                    v.find(x => x.lang.includes('id') && x.name.includes('Microsoft')) ||
+                    v.find(x => x.lang.includes('id'));
     }
     if (speechSynthesis.onvoiceschanged !== undefined) {
         speechSynthesis.onvoiceschanged = loadVoices;
@@ -239,10 +242,16 @@
     function speakText(txt) {
         if (!isInitialized) return;
         synth.cancel();
+        
         let utter = new SpeechSynthesisUtterance(txt);
-        if(voiceIndo) utter.voice = voiceIndo;
-        else utter.lang = 'id-ID';
-        utter.rate = 0.9;
+        if(voiceIndo) {
+            utter.voice = voiceIndo;
+        } else {
+            utter.lang = 'id-ID';
+        }
+
+        utter.pitch = 1.0; 
+        utter.rate = 0.9; // Kecepatan sedikit melambat biar lebih natural
         synth.speak(utter);
     }
 
@@ -263,9 +272,11 @@
                         if(isInitialized) {
                             document.getElementById('bellSound').play().catch(e => {});
                             setTimeout(() => {
-                                let voiceMsg = `Nomor Antrian ${top.nomor_antrian.replace('-', ' ')}. ${top.nama}. Silahkan menuju ke ${top.tujuan}.`;
+                                // Kalimat lebih natural dan sopan
+                                let nomorBersuara = top.nomor_antrian.replace('-', ' ').split('').join(' ');
+                                let voiceMsg = `Mohon perhatian. Nomor antrian. ${nomorBersuara}. Atas nama. ${top.nama}. Silakan menuju ke. ${top.tujuan}.`;
                                 speakText(voiceMsg);
-                            }, 1200);
+                            }, 1500);
                         }
                     }
 
