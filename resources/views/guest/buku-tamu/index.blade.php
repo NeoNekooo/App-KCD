@@ -217,7 +217,7 @@
     @else
         <div class="official-card">
             <div class="official-header">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/1/12/Logo_Provinsi_Jawa_Barat.png" class="logo-box" alt="Logo Jawa Barat">
+                <img src="{{ asset('logo.png') }}" class="logo-box" height="60" alt="Logo Jawa Barat">
                 <h2>BUKU TAMU DIGITAL</h2>
                 <p>Kantor Cabang Dinas Pendidikan Wilayah</p>
             </div>

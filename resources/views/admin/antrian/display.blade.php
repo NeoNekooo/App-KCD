@@ -204,7 +204,7 @@
 
 <div class="tv-header">
     <div class="brand">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/1/12/Logo_Provinsi_Jawa_Barat.png" height="70" alt="Logo">
+        <img src="{{ asset('logo.png') }}" height="70" alt="Logo">
         <h1>MONITOR ANTRIAN TAMU </h1>
     </div>
     <div class="clock" id="clock">00:00:00</div>
@@ -243,7 +243,7 @@
     <source src="https://www.myinstants.com/media/sounds/elevator-ding.mp3" type="audio/mpeg">
 </audio>
 
-<script src="{{ asset('assets/vendor/libs/jquery/jquery.js') }}"></script>
+<script src="{{ asset('vendor/libs/jquery/jquery.js') }}"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
     let isInitialized = false;

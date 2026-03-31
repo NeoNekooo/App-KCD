@@ -55,14 +55,16 @@
     </div>
 </div>
 
-<!-- Sound Effect for New Guest -->
-<audio id="newGuestSound" preload="auto">
-    <source src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" type="audio/mpeg">
+<!-- Audio -->
+<audio id="bellSound" preload="auto">
+    <source src="https://www.myinstants.com/media/sounds/elevator-ding.mp3" type="audio/mpeg">
 </audio>
 
 @endsection
 
-@push('footer-script')
+@push('scripts')
+<script src="{{ asset('vendor/libs/jquery/jquery.js') }}"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
     let currentCount = {{ $antrians->count() }};
 
