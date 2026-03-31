@@ -18,8 +18,9 @@ class GuestBookController extends Controller
     {
         // Ambil data Pejabat/Pegawai KCD untuk Dropdown 'Ingin Bertemu Siapa'
         $pegawais = PegawaiKcd::with('jabatanKcd')->orderBy('nama', 'asc')->get();
+        $instansi = \App\Models\Instansi::first();
 
-        return view('guest.buku-tamu.index', compact('pegawais'));
+        return view('guest.buku-tamu.index', compact('pegawais', 'instansi'));
     }
 
     /**

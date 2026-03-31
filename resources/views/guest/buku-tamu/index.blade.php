@@ -217,7 +217,11 @@
     @else
         <div class="official-card">
             <div class="official-header">
-                <img src="{{ asset('logo.png') }}" class="logo-box" height="60" alt="Logo Jawa Barat">
+                @if($instansi && $instansi->logo)
+                    <img src="{{ Storage::url($instansi->logo) }}" class="logo-box" height="60" alt="Logo Instansi">
+                @else
+                    <img src="{{ asset('logo.png') }}" class="logo-box" height="60" alt="Logo Jawa Barat">
+                @endif
                 <h2>BUKU TAMU DIGITAL</h2>
                 <p>Kantor Cabang Dinas Pendidikan Wilayah</p>
             </div>

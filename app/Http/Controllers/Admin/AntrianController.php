@@ -67,4 +67,19 @@ class AntrianController extends Controller
 
         return redirect()->back()->with('success', 'Antrian tamu dibatalkan.');
     }
+
+    /**
+     * AJAX Get Partial Table Body for Realtime Update
+     */
+    public function getPartial()
+    {
+        $today = Carbon::today();
+        $antrians = AntrianTamu::with('tujuanPegawai.jabatanKcd')
+                    ->whereDate('created_at', $today)
+                    ->orderByRaw("FIELD(status, 'dipanggil', 'menunggu', 'selesai', 'batal') ASC")
+                    ->orderBy('id', 'asc')
+                    ->get();
+
+        return view('admin.antrian._table_body', compact('antrians'))->render();
+    }
 }

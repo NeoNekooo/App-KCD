@@ -204,7 +204,11 @@
 
 <div class="tv-header">
     <div class="brand">
-        <img src="{{ asset('logo.png') }}" height="70" alt="Logo">
+        @if($instansi && $instansi->logo)
+            <img src="{{ Storage::url($instansi->logo) }}" class="logo-box" height="60" alt="Logo Instansi">
+        @else
+            <img src="{{ asset('logo.png') }}" class="logo-box" height="60" alt="Logo Jawa Barat">
+        @endif
         <h1>MONITOR ANTRIAN TAMU </h1>
     </div>
     <div class="clock" id="clock">00:00:00</div>

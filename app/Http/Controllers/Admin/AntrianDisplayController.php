@@ -15,7 +15,8 @@ class AntrianDisplayController extends Controller
      */
     public function index()
     {
-        return view('admin.antrian.display');
+        $instansi = \App\Models\Instansi::first();
+        return view('admin.antrian.display', compact('instansi'));
     }
 
     /**
