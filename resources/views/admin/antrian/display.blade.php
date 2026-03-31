@@ -351,7 +351,7 @@
         });
     }
 
-    setInterval(fetchUpdates, 3000);
+    setInterval(fetchUpdates, 2000);
     fetchUpdates();
 </script>
 </body>
