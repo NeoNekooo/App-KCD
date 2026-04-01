@@ -104,16 +104,20 @@
         .waiting-item .name { font-size: 1.6rem; font-weight: 700; text-align: right; flex: 1; margin-left: 20px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
         .qr-strip { 
-            background: #ffffff; color: #333; padding: 15px 20px; border-radius: 1.5rem; 
-            display: flex; align-items: center; gap: 15px; margin-top: auto;
+            background: #ffffff; color: #333; padding: 25px 35px; border-radius: 2rem; 
+            display: flex; align-items: center; gap: 30px; margin-top: auto;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
-        .qr-strip h6 { font-weight: 800; margin: 0; font-size: 1rem; color: #333; }
-        .qr-strip p { margin: 0; font-size: 0.75rem; color: #666; }
+        .qr-strip h6 { font-weight: 900; margin: 0; font-size: 1.6rem; color: #162c46; line-height: 1.2; }
+        .qr-strip p { margin: 5px 0 0; font-size: 1.1rem; color: #666; font-weight: 600; }
 
         @media (orientation: portrait), (max-width: 900px) {
             .layout-container { grid-template-columns: 100%; height: auto; }
             .called-no { font-size: 10rem; }
             .tv-header h1 { font-size: 1.4rem; }
+            .qr-strip { padding: 20px; gap: 15px; }
+            .qr-strip h6 { font-size: 1.2rem; }
+            .qr-strip p { font-size: 0.9rem; }
         }
 
         #btnInitManual {
@@ -166,10 +170,10 @@
         <div id="waitingListContainer" class="waiting-list"></div>
 
         <div class="qr-strip">
-            <div id="qrcode"></div>
+            <div id="qrcode" style="background: white; border: 8px solid white; border-radius: 10px;"></div>
             <div>
-                <h6>PULAU PENDAFTARAN</h6>
-                <p>Scan untuk mengambil nomor antrian.</p>
+                <h6>DAFTAR MANDIRI</h6>
+                <p>Scan untuk pendaftaran.</p>
             </div>
         </div>
     </div>
@@ -193,7 +197,7 @@
     try {
         new QRCode(document.getElementById("qrcode"), {
             text: window.location.origin + "/buku-tamu",
-            width: 80, height: 80
+            width: 140, height: 140
         });
     } catch(e) { console.error("QR Error", e); }
 
