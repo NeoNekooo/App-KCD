@@ -121,10 +121,27 @@
         .qr-text p { margin: 5px 0 0; font-size: 0.9rem; color: #666; font-weight: 600; }
 
         @media (orientation: portrait), (max-width: 900px) {
-            .layout-container { grid-template-columns: 100%; height: auto; }
-            .called-no { font-size: 10rem; }
-            .tv-header h1 { font-size: 1.4rem; }
-            .qr-section-top { margin-bottom: 20px; }
+            .layout-container { 
+                grid-template-columns: 100%; 
+                height: auto; 
+                padding: 15px; 
+                gap: 20px;
+            }
+            .tv-header { padding: 0 20px; height: 80px; }
+            .tv-header h1 { font-size: 1.2rem; }
+            .tv-header .clock { font-size: 1.5rem; }
+            
+            .card-called { padding: 30px 20px; border-radius: 1.5rem; }
+            .called-no { font-size: 8rem; }
+            .called-name { font-size: 2.5rem; }
+            .called-destination { font-size: 1.4rem; }
+            
+            .qr-section-top { margin-bottom: 15px; padding: 15px; }
+            .qr-section-top #qrcode canvas, .qr-section-top #qrcode img { width: 120px !important; height: 120px !important; }
+            
+            .waiting-item .no { font-size: 1.8rem; }
+            .waiting-item .name { font-size: 1.2rem; }
+            .waiting-title { font-size: 1.2rem; margin-bottom: 15px; }
         }
 
         #btnInitManual {
