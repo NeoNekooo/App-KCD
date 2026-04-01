@@ -103,21 +103,31 @@
         .waiting-item .no { font-size: 2.5rem; font-weight: 900; color: var(--accent-color); }
         .waiting-item .name { font-size: 1.6rem; font-weight: 700; text-align: right; flex: 1; margin-left: 20px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-        .qr-strip { 
-            background: #ffffff; color: #333; padding: 25px 35px; border-radius: 2rem; 
-            display: flex; align-items: center; gap: 30px; margin-top: auto;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        .qr-section-top { 
+            background: #ffffff; 
+            padding: 20px; 
+            border-radius: 1.5rem; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center;
+            text-align: center;
+            margin-bottom: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
         }
-        .qr-strip h6 { font-weight: 900; margin: 0; font-size: 1.6rem; color: #162c46; line-height: 1.2; }
-        .qr-strip p { margin: 5px 0 0; font-size: 1.1rem; color: #666; font-weight: 600; }
+        .qr-section-top #qrcode { 
+            background: white; 
+            padding: 5px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+        .qr-text h6 { font-weight: 900; margin: 0; font-size: 1.4rem; color: #162c46; }
+        .qr-text p { margin: 5px 0 0; font-size: 0.9rem; color: #666; font-weight: 600; }
 
         @media (orientation: portrait), (max-width: 900px) {
             .layout-container { grid-template-columns: 100%; height: auto; }
             .called-no { font-size: 10rem; }
             .tv-header h1 { font-size: 1.4rem; }
-            .qr-strip { padding: 20px; gap: 15px; }
-            .qr-strip h6 { font-size: 1.2rem; }
-            .qr-strip p { font-size: 0.9rem; }
+            .qr-section-top { margin-bottom: 20px; }
         }
 
         #btnInitManual {
@@ -166,16 +176,17 @@
     </div>
 
     <div class="card-waiting">
-        <div class="waiting-title">Daftar Tunggu</div>
-        <div id="waitingListContainer" class="waiting-list"></div>
-
-        <div class="qr-strip">
-            <div id="qrcode" style="background: white; border: 8px solid white; border-radius: 10px;"></div>
-            <div>
+        <!-- QR Code Section at Top -->
+        <div class="qr-section-top">
+            <div id="qrcode"></div>
+            <div class="qr-text">
                 <h6>DAFTAR MANDIRI</h6>
                 <p>Scan untuk pendaftaran.</p>
             </div>
         </div>
+
+        <div class="waiting-title">Daftar Tunggu</div>
+        <div id="waitingListContainer" class="waiting-list"></div>
     </div>
 </div>
 
