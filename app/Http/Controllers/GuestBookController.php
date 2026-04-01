@@ -36,28 +36,14 @@ class GuestBookController extends Controller
             'tujuan_pegawai_id' => 'required|exists:pegawai_kcds,id',
         ]);
 
-        // Logic Auto Generate Nomer Antrian (e.g., A-001) reset per hari
+        // Logic Auto Generate Nomer Antrian (langsung angka, e.g., 001)
         $today = Carbon::today();
         
-        $lastAntrian = AntrianTamu::whereDate('created_at', $today)
-                                  ->orderBy('id', 'desc')
-                                  ->first();
+        $countToday = AntrianTamu::whereDate('created_at', $today)->count();
+        $urutan = $countToday + 1;
 
-        // Hitung urutan hari ini
-        $urutan = 1;
-        if ($lastAntrian && $lastAntrian->nomor_antrian) {
-            // Asumsi format: A-001
-            $parts = explode('-', $lastAntrian->nomor_antrian);
-            if(count($parts) == 2) {
-                $urutan = intval($parts[1]) + 1;
-            } else {
-                // Fallback kalau format aneh
-                $urutan = AntrianTamu::whereDate('created_at', $today)->count() + 1;
-            }
-        }
-
-        // Format nomor: A- (ditambah padding 0 tiga kali)
-        $nomorBaru = 'A-' . str_pad($urutan, 3, '0', STR_PAD_LEFT);
+        // Format nomor: Langsung angka dengan padding 3 digit
+        $nomorBaru = str_pad($urutan, 3, '0', STR_PAD_LEFT);
 
         // Simpan Data
         $antrian = AntrianTamu::create([

@@ -105,20 +105,17 @@
 
         .qr-section-top { 
             background: #ffffff; 
-            padding: 20px; 
-            border-radius: 1.5rem; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center;
-            text-align: center;
-            margin-bottom: 25px;
+            padding: 10px; 
+            border-radius: 1.2rem; 
+            display: inline-block;
+            margin: 0 auto 20px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+            width: fit-content;
         }
         .qr-section-top #qrcode { 
             background: white; 
-            padding: 5px;
-            border-radius: 10px;
-            margin-bottom: 10px;
+            padding: 0;
+            border-radius: 8px;
         }
         .qr-text h6 { font-weight: 900; margin: 0; font-size: 1.4rem; color: #162c46; }
         .qr-text p { margin: 5px 0 0; font-size: 0.9rem; color: #666; font-weight: 600; }
@@ -176,9 +173,11 @@
     </div>
 
     <div class="card-waiting">
-        <!-- QR Code Section at Top (Tanpa Tulisan, QR Gede) -->
-        <div class="qr-section-top">
-            <div id="qrcode"></div>
+        <!-- QR Code Section at Top (Centering) -->
+        <div style="text-align: center; width: 100%;">
+            <div class="qr-section-top">
+                <div id="qrcode"></div>
+            </div>
         </div>
 
         <div class="waiting-title">Daftar Tunggu</div>
