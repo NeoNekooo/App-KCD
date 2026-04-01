@@ -11,6 +11,15 @@
                 <div class="small text-muted"><i class='bx bx-id-card me-1'></i>{{ $item->nik }}</div>
             @endif
         </td>
+        <td>
+            @if($item->nomor_hp)
+                <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $item->nomor_hp) }}" target="_blank" class="badge bg-label-success text-decoration-none">
+                    <i class='bx bxl-whatsapp me-1'></i>{{ $item->nomor_hp }}
+                </a>
+            @else
+                <span class="text-muted small">-</span>
+            @endif
+        </td>
         <td style="white-space: normal; min-width: 250px;">
             <div class="mb-1">
                 <span class="badge bg-label-info small"><i class='bx bx-user-pin me-1'></i> Tjn: {{ $item->tujuanPegawai->nama ?? 'Tidak Diketahui' }}</span>

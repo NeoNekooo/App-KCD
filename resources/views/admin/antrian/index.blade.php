@@ -42,6 +42,7 @@
                         <th class="fw-semibold text-uppercase font-size-13 py-3" style="width: 50px;">No</th>
                         <th class="fw-semibold text-uppercase font-size-13 py-3">No Antrian</th>
                         <th class="fw-semibold text-uppercase font-size-13 py-3">Tamu</th>
+                        <th class="fw-semibold text-uppercase font-size-13 py-3">No HP</th>
                         <th class="fw-semibold text-uppercase font-size-13 py-3">Detail & Keperluan</th>
                         <th class="fw-semibold text-uppercase font-size-13 py-3">Status</th>
                         <th class="fw-semibold text-uppercase font-size-13 py-3 text-center">Aksi Panggilan</th>
@@ -79,8 +80,8 @@
                     const rows = doc.querySelectorAll('tr');
                     let newCount = rows.length;
                     
-                    // Jika baris pertama punya colspan=6, berarti kosong
-                    if(rows.length === 1 && rows[0].querySelector('td[colspan="6"]')) {
+                    // Jika baris pertama punya colspan=7, berarti kosong
+                    if(rows.length === 1 && rows[0].querySelector('td[colspan="7"]')) {
                         newCount = 0;
                     }
 
