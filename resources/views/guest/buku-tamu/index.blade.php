@@ -240,13 +240,21 @@
                 <form action="{{ route('guest.buku-tamu.store') }}" method="POST">
                     @csrf
                     
-                    <label class="section-label">Nama Lengkap Tamu *</label>
-                    <input type="text" name="nama" class="official-input" placeholder="Sesuai kartu identitas" required value="{{ old('nama') }}" autofocus>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="section-label">NIK (Kartu Identitas) *</label>
+                            <input type="text" name="nik" class="official-input" placeholder="16 Digit NIK" required value="{{ old('nik') }}" autofocus>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="section-label">Nama Lengkap Tamu *</label>
+                            <input type="text" name="nama" class="official-input" placeholder="Sesuai KTP" required value="{{ old('nama') }}">
+                        </div>
+                    </div>
 
                     <div class="row g-3">
                         <div class="col-md-6">
-                            <label class="section-label">NIK (Opsional)</label>
-                            <input type="text" name="nik" class="official-input" placeholder="16 Digit NIK" value="{{ old('nik') }}">
+                            <label class="section-label">Nomor WhatsApp / HP *</label>
+                            <input type="text" name="nomor_hp" class="official-input" placeholder="08xxxxxxxxxx" required value="{{ old('nomor_hp') }}">
                         </div>
                         <div class="col-md-6">
                             <label class="section-label">Unit/Instansi/Sekolah *</label>

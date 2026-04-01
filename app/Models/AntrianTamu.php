@@ -12,6 +12,7 @@ class AntrianTamu extends Model
         'nomor_antrian',
         'nama',
         'nik',
+        'nomor_hp',
         'asal_instansi',
         'keperluan',
         'tujuan_pegawai_id',

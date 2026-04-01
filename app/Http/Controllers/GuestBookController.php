@@ -29,8 +29,9 @@ class GuestBookController extends Controller
     public function store(Request $request)
     {
         $request->validate([
+            'nik'               => 'required|string|max:16',
             'nama'              => 'required|string|max:255',
-            'nik'               => 'nullable|string|max:20',
+            'nomor_hp'          => 'required|string|max:20',
             'asal_instansi'     => 'required|string|max:255',
             'keperluan'         => 'required|string|max:500',
             'tujuan_pegawai_id' => 'required|exists:pegawai_kcds,id',
@@ -50,6 +51,7 @@ class GuestBookController extends Controller
             'nomor_antrian'     => $nomorBaru,
             'nama'              => $request->nama,
             'nik'               => $request->nik,
+            'nomor_hp'          => $request->nomor_hp,
             'asal_instansi'     => $request->asal_instansi,
             'keperluan'         => $request->keperluan,
             'tujuan_pegawai_id' => $request->tujuan_pegawai_id,
