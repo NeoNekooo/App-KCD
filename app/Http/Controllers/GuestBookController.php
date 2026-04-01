@@ -30,7 +30,7 @@ class GuestBookController extends Controller
     {
         $request->validate([
             'nama'              => 'required|string|max:255',
-            'nisn'              => 'required|string|max:20',
+            'npsn'              => 'nullable|string|max:20',
             'nomor_hp'          => 'required|string|max:20',
             'asal_instansi'     => 'required|string|max:255',
             'jabatan_pengunjung' => 'required|string|max:100',
@@ -50,7 +50,7 @@ class GuestBookController extends Controller
         $antrian = AntrianTamu::create([
             'nomor_antrian'     => $nomorBaru,
             'nama'              => $request->nama,
-            'nisn'              => $request->nisn,
+            'npsn'              => $request->npsn,
             'nomor_hp'          => $request->nomor_hp,
             'asal_instansi'     => $request->asal_instansi,
             'jabatan_pengunjung' => $request->jabatan_pengunjung,

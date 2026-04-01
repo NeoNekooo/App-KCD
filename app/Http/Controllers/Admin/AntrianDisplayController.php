@@ -43,7 +43,7 @@ class AntrianDisplayController extends Controller
                     'nama'             => $q->nama,
                     'tujuan'           => $q->tujuanPegawai ? $q->tujuanPegawai->nama : 'Petugas',
                     'keperluan'        => $q->keperluan,
-                    'nisn'             => $q->nisn,
+                    'npsn'             => $q->npsn,
                     'jabatan_pengunjung' => $q->jabatan_pengunjung,
                     'jumlah_panggilan' => $q->jumlah_panggilan
                 ];
@@ -62,7 +62,7 @@ class AntrianDisplayController extends Controller
                     'nama'             => $q->nama,
                     'tujuan'           => $q->tujuanPegawai ? $q->tujuanPegawai->nama : 'Petugas',
                     'keperluan'        => $q->keperluan,
-                    'nisn'             => $q->nisn,
+                    'npsn'             => $q->npsn,
                     'jabatan_pengunjung' => $q->jabatan_pengunjung
                 ];
             });

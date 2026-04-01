@@ -11,7 +11,7 @@ class AntrianTamu extends Model
     protected $fillable = [
         'nomor_antrian',
         'nama',
-        'nisn',
+        'npsn',
         'nomor_hp',
         'asal_instansi',
         'jabatan_pengunjung',

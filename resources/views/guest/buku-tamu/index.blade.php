@@ -85,7 +85,8 @@
             font-size: 0.75rem;
             font-weight: 700;
             color: var(--kcd-navy);
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.6rem;
+            margin-top: 1.2rem;
             display: block;
             text-transform: uppercase;
             letter-spacing: 1px;
@@ -99,7 +100,7 @@
             background: #ffffff;
             font-size: 1rem;
             color: #333;
-            margin-bottom: 1.5rem;
+            margin-bottom: 1rem;
             transition: border-color 0.2s;
         }
 
@@ -246,20 +247,20 @@
                     <form action="{{ route('guest.buku-tamu.store') }}" method="POST">
                         @csrf
 
-                        <div class="row g-3">
+                        <div class="row g-4">
                             <div class="col-md-6">
                                 <label class="section-label">Nama Lengkap Tamu *</label>
                                 <input type="text" name="nama" class="official-input" placeholder="Sesuai KTP"
                                     required value="{{ old('nama') }}" autofocus>
                             </div>
                             <div class="col-md-6">
-                                <label class="section-label">NISN *</label>
-                                <input type="text" name="nisn" class="official-input" placeholder="10 Digit NISN"
-                                    required value="{{ old('nisn') }}">
+                                <label class="section-label">NPSN (Opsional)</label>
+                                <input type="text" name="npsn" class="official-input"
+                                    placeholder="Kode NPSN Sekolah" value="{{ old('npsn') }}">
                             </div>
                         </div>
 
-                        <div class="row g-3">
+                        <div class="row g-4">
                             <div class="col-md-6">
                                 <label class="section-label">Nama Induk Sekolah *</label>
                                 <input type="text" name="asal_instansi" class="official-input"
