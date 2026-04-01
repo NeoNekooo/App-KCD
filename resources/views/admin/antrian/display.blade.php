@@ -501,13 +501,7 @@
                     if (res.menunggu && res.menunggu.length > 0) {
                         res.menunggu.slice(0, 5).forEach(w => {
                             html +=
-                                `<div class="waiting-item">
-                                    <div class="no">${w.nomor_antrian}</div>
-                                    <div class="name">
-                                        <div class="fw-bold">${w.nama}</div>
-                                        <div class="small fw-normal opacity-75 mt-1">${w.jabatan_pengunjung}</div>
-                                    </div>
-                                </div>`;
+                                `<div class="waiting-item"><div class="no">${w.nomor_antrian}</div><div class="name">${w.nama}</div></div>`;
                         });
                     } else {
                         html = '<p class="text-center text-white-50 mt-5">Tidak ada antrian selanjutnya.</p>';

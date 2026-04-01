@@ -11,9 +11,6 @@
             </div>
             <div class="small text-muted mb-1"><i class='bx bxs-briefcase me-2'></i>{{ $item->jabatan_pengunjung }}</div>
             <div class="small text-muted mb-1"><i class='bx bxs-institution me-2'></i>{{ $item->asal_instansi }}</div>
-            @if ($item->npsn)
-                <div class="small text-muted"><i class='bx bx-id-card me-2'></i>NPSN: {{ $item->npsn }}</div>
-            @endif
         </td>
         <td>
             @if ($item->nomor_hp)
@@ -26,7 +23,9 @@
             @endif
         </td>
         <td style="white-space: normal; min-width: 250px;">
-            ...
+            @if ($item->npsn)
+                <div class="small fw-bold text-primary mb-1">NPSN: {{ $item->npsn }}</div>
+            @endif
             <div class="small fst-italic">"{{ Str::limit($item->keperluan, 100) }}"</div>
         </td>
         <td>
