@@ -88,14 +88,15 @@
 
         .tag-status {
             position: absolute;
-            top: 30px;
-            left: 30px;
+            top: 20px;
+            left: 20px;
             background: var(--accent-color);
-            padding: 8px 25px;
+            padding: 6px 18px;
             border-radius: 40px;
             font-weight: 800;
-            font-size: 1.1rem;
+            font-size: 0.85rem;
             text-transform: uppercase;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
         }
 
         .called-no {
@@ -435,29 +436,50 @@
             return text.toUpperCase().split('').map(char => kamus[char] || char).join(' ');
         }
 
-        // 5. Speak Core (Anti-Gema)
+        // 5. Speak Core (Anti-Gema & Anti-Tidur)
         function speakText(txt) {
-            if (!isInitialized || isSpeaking) return;
+            if (!isInitialized) return;
+
+            // Jika masih ngomong, stop dulu yang lama
+            if (synth.speaking) {
+                synth.cancel();
+            }
 
             isSpeaking = true;
-            synth.cancel();
+            
+            // Safety timeout (kunci bakal lepas sendiri setelah 15 detik kalau error)
+            let safetyReset = setTimeout(() => {
+                isSpeaking = false;
+            }, 15000);
 
             let utter = new SpeechSynthesisUtterance(txt);
             utter.lang = 'id-ID';
             if (voiceIndo) utter.voice = voiceIndo;
             utter.pitch = 1.0;
-            utter.rate = 0.88;
+            utter.rate = 0.90; // Sedikit lebih cepat agar natural
 
-            // Lepas grendel jika suara selesai
             utter.onend = function() {
-                isSpeaking = false;
-            };
-            utter.onerror = function() {
+                clearTimeout(safetyReset);
                 isSpeaking = false;
             };
 
+            utter.onerror = function(event) {
+                console.error("TTS Error:", event);
+                clearTimeout(safetyReset);
+                isSpeaking = false;
+            };
+
+            // Trik Chrome: Resume sebelum speak & panggil 3x biar bangun
+            synth.resume();
             synth.speak(utter);
         }
+
+        // Trik Tambahan: Jaga biar TTS gak 'tidur' tiap 10 detik
+        setInterval(() => {
+            if (isInitialized && !synth.speaking) {
+                synth.resume();
+            }
+        }, 10000);
 
         // 6. Clock
         setInterval(() => {

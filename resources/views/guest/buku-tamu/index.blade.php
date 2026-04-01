@@ -231,7 +231,7 @@
                         <img src="{{ asset('logo.png') }}" class="logo-box" height="60" alt="Logo Jawa Barat">
                     @endif
                     <h2>BUKU TAMU DIGITAL</h2>
-                    <p>{{ $instansi->nama ?? 'Kantor Cabang Dinas Pendidikan Wilayah' }}</p>
+                    <p>{{ $instansi->nama_instansi ?? 'Kantor Cabang Dinas Pendidikan Wilayah' }}</p>
                 </div>
 
                 <div class="form-body">
