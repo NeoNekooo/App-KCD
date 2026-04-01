@@ -48,6 +48,7 @@
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
             border: 1px solid #e1e8ed;
             overflow: hidden;
+            width: 100%;
         }
 
         .official-header {
@@ -78,7 +79,7 @@
         }
 
         .form-body {
-            padding: 2.5rem 2rem;
+            padding: 2.5rem 2.2rem;
         }
 
         .section-label {
