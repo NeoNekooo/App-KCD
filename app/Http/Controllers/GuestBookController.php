@@ -29,12 +29,12 @@ class GuestBookController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'nik'               => 'required|string|max:16',
             'nama'              => 'required|string|max:255',
+            'nisn'              => 'required|string|max:20',
             'nomor_hp'          => 'required|string|max:20',
             'asal_instansi'     => 'required|string|max:255',
+            'jabatan_pengunjung' => 'required|string|max:100',
             'keperluan'         => 'required|string|max:500',
-            'tujuan_pegawai_id' => 'required|exists:pegawai_kcds,id',
         ]);
 
         // Logic Auto Generate Nomer Antrian (langsung angka, e.g., 001)
@@ -50,11 +50,11 @@ class GuestBookController extends Controller
         $antrian = AntrianTamu::create([
             'nomor_antrian'     => $nomorBaru,
             'nama'              => $request->nama,
-            'nik'               => $request->nik,
+            'nisn'              => $request->nisn,
             'nomor_hp'          => $request->nomor_hp,
             'asal_instansi'     => $request->asal_instansi,
+            'jabatan_pengunjung' => $request->jabatan_pengunjung,
             'keperluan'         => $request->keperluan,
-            'tujuan_pegawai_id' => $request->tujuan_pegawai_id,
             'status'            => 'menunggu', 
             'jumlah_panggilan'  => 0,
         ]);

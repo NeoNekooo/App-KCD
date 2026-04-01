@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,7 +11,8 @@
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet" />
 
     <!-- Icons -->
     <link rel="stylesheet" href="{{ asset('assets/vendor/fonts/boxicons.css') }}" />
@@ -180,115 +182,120 @@
         }
     </style>
 </head>
+
 <body>
 
-<div class="main-wrapper">
+    <div class="main-wrapper">
 
-    @if(session('tiket_success'))
-        <div class="official-card">
-            <div class="official-header" style="background-color: #10b981;">
-                <i class='bx bx-check-circle fs-1'></i>
-                <h2>Pendaftaran Berhasil</h2>
-                <p>Silakan Tunggu Antrian Anda</p>
-            </div>
-            
-            <div class="ticket-result">
-                <div class="ticket-strip">
-                    <div class="ticket-id-label">ANTRIAN ANDA</div>
-                    <div class="ticket-id-number">{{ session('tiket_nomor') }}</div>
-                    
-                    <div class="ticket-footer">
-                        <div class="mb-2">
-                            <small class="text-muted d-block">Nama Lengkap</small>
-                            <span class="fw-bold text-dark">{{ session('tiket_nama') }}</span>
+        @if (session('tiket_success'))
+            <div class="official-card">
+                <div class="official-header" style="background-color: #10b981;">
+                    <i class='bx bx-check-circle fs-1'></i>
+                    <h2>Pendaftaran Berhasil</h2>
+                    <p>Silakan Tunggu Antrian Anda</p>
+                </div>
+
+                <div class="ticket-result">
+                    <div class="ticket-strip">
+                        <div class="ticket-id-label">ANTRIAN ANDA</div>
+                        <div class="ticket-id-number">{{ session('tiket_nomor') }}</div>
+
+                        <div class="ticket-footer">
+                            <div class="mb-2">
+                                <small class="text-muted d-block">Nama Lengkap</small>
+                                <span class="fw-bold text-dark">{{ session('tiket_nama') }}</span>
+                            </div>
+                            <div>
+                                <small class="text-muted d-block">Tujuan Pejabat/Layanan</small>
+                                <span
+                                    class="fw-bold text-primary">{{ session('tiket_tujuan') ?? 'Umum/Resepsionis' }}</span>
+                            </div>
                         </div>
-                        <div>
-                            <small class="text-muted d-block">Tujuan Pejabat/Layanan</small>
-                            <span class="fw-bold text-primary">{{ session('tiket_tujuan') ?? 'Umum/Resepsionis' }}</span>
-                        </div>
+                    </div>
+
+                    <div class="mt-4 text-center">
+                        <a href="{{ route('guest.buku-tamu') }}"
+                            class="btn btn-outline-secondary w-100 rounded-pill">Kembali ke Beranda</a>
                     </div>
                 </div>
-                
-                <div class="mt-4 text-center">
-                    <a href="{{ route('guest.buku-tamu') }}" class="btn btn-outline-secondary w-100 rounded-pill">Kembali ke Beranda</a>
+            </div>
+        @else
+            <div class="official-card">
+                <div class="official-header">
+                    @if ($instansi && $instansi->logo)
+                        <img src="{{ Storage::url($instansi->logo) }}" class="logo-box" height="60"
+                            alt="Logo Instansi">
+                    @else
+                        <img src="{{ asset('logo.png') }}" class="logo-box" height="60" alt="Logo Jawa Barat">
+                    @endif
+                    <h2>BUKU TAMU DIGITAL</h2>
+                    <p>Kantor Cabang Dinas Pendidikan Wilayah</p>
+                </div>
+
+                <div class="form-body">
+                    @if ($errors->any())
+                        <div class="alert alert-danger p-2 mb-4 small rounded-3">
+                            <ul class="mb-0">
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+
+                    <form action="{{ route('guest.buku-tamu.store') }}" method="POST">
+                        @csrf
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="section-label">Nama Lengkap Tamu *</label>
+                                <input type="text" name="nama" class="official-input" placeholder="Sesuai KTP"
+                                    required value="{{ old('nama') }}" autofocus>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="section-label">NISN *</label>
+                                <input type="text" name="nisn" class="official-input" placeholder="10 Digit NISN"
+                                    required value="{{ old('nisn') }}">
+                            </div>
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="section-label">Nama Induk Sekolah *</label>
+                                <input type="text" name="asal_instansi" class="official-input"
+                                    placeholder="Nama Sekolah Asal" required value="{{ old('asal_instansi') }}">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="section-label">Jabatan Pengunjung *</label>
+                                <input type="text" name="jabatan_pengunjung" class="official-input"
+                                    placeholder="Contoh: Siswa, Guru, Orang Tua" required
+                                    value="{{ old('jabatan_pengunjung') }}">
+                            </div>
+                        </div>
+
+                        <label class="section-label">Nomor WhatsApp / HP *</label>
+                        <input type="text" name="nomor_hp" class="official-input" placeholder="08xxxxxxxxxx" required
+                            value="{{ old('nomor_hp') }}">
+
+                        <label class="section-label">Tujuan / Maksud Kunjungan *</label>
+                        <textarea name="keperluan" rows="3" class="official-input" style="resize: none;"
+                            placeholder="Sebutkan maksud kedatangan Anda..." required>{{ old('keperluan') }}</textarea>
+
+                        <button type="submit" class="btn-official shadow-sm mt-3">
+                            SUBMIT & AMBIL ANTRIAN <i class='bx bx-paper-plane'></i>
+                        </button>
+                    </form>
+
+                    <div class="footer-logo-row">
+                        <small class="text-muted">Layanan Terpadu Satu Pintu &copy; {{ date('Y') }}</small>
+                    </div>
                 </div>
             </div>
-        </div>
-    @else
-        <div class="official-card">
-            <div class="official-header">
-                @if($instansi && $instansi->logo)
-                    <img src="{{ Storage::url($instansi->logo) }}" class="logo-box" height="60" alt="Logo Instansi">
-                @else
-                    <img src="{{ asset('logo.png') }}" class="logo-box" height="60" alt="Logo Jawa Barat">
-                @endif
-                <h2>BUKU TAMU DIGITAL</h2>
-                <p>Kantor Cabang Dinas Pendidikan Wilayah</p>
-            </div>
+        @endif
 
-            <div class="form-body">
-                @if ($errors->any())
-                    <div class="alert alert-danger p-2 mb-4 small rounded-3">
-                        <ul class="mb-0">
-                            @foreach ($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
-                    </div>
-                @endif
+    </div>
 
-                <form action="{{ route('guest.buku-tamu.store') }}" method="POST">
-                    @csrf
-                    
-                    <div class="row g-3">
-                        <div class="col-md-6">
-                            <label class="section-label">NIK (Kartu Identitas) *</label>
-                            <input type="text" name="nik" class="official-input" placeholder="16 Digit NIK" required value="{{ old('nik') }}" autofocus>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="section-label">Nama Lengkap Tamu *</label>
-                            <input type="text" name="nama" class="official-input" placeholder="Sesuai KTP" required value="{{ old('nama') }}">
-                        </div>
-                    </div>
-
-                    <div class="row g-3">
-                        <div class="col-md-6">
-                            <label class="section-label">Nomor WhatsApp / HP *</label>
-                            <input type="text" name="nomor_hp" class="official-input" placeholder="08xxxxxxxxxx" required value="{{ old('nomor_hp') }}">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="section-label">Unit/Instansi/Sekolah *</label>
-                            <input type="text" name="asal_instansi" class="official-input" placeholder="Nama Sekolah/Lembaga" required value="{{ old('asal_instansi') }}">
-                        </div>
-                    </div>
-
-                    <label class="section-label">Tujuan Bidang / Pejabat *</label>
-                    <select name="tujuan_pegawai_id" class="official-input official-select" required>
-                        <option value="" selected disabled>-- Pilih Tujuan --</option>
-                        @foreach($pegawais as $pegawai)
-                            <option value="{{ $pegawai->id }}" {{ old('tujuan_pegawai_id') == $pegawai->id ? 'selected' : '' }}>
-                                {{ $pegawai->nama }} ({{ $pegawai->jabatanKcd->nama ?? $pegawai->jabatan }})
-                            </option>
-                        @endforeach
-                    </select>
-
-                    <label class="section-label">Keperluan / Maksud Kunjungan *</label>
-                    <textarea name="keperluan" rows="3" class="official-input" style="resize: none;" placeholder="Contoh: Konsultasi masalah dapodik sekolah" required>{{ old('keperluan') }}</textarea>
-
-                    <button type="submit" class="btn-official shadow-sm mt-3">
-                        SUBMIT & AMBIL ANTRIAN <i class='bx bx-paper-plane'></i>
-                    </button>
-                </form>
-
-                <div class="footer-logo-row">
-                    <small class="text-muted">Layanan Terpadu Satu Pintu &copy; {{ date('Y') }}</small>
-                </div>
-            </div>
-        </div>
-    @endif
-
-</div>
-
-<script src="{{ asset('assets/vendor/libs/jquery/jquery.js') }}"></script>
+    <script src="{{ asset('assets/vendor/libs/jquery/jquery.js') }}"></script>
 </body>
+
 </html>
