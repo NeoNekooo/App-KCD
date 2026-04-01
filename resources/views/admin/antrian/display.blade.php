@@ -176,13 +176,9 @@
     </div>
 
     <div class="card-waiting">
-        <!-- QR Code Section at Top -->
+        <!-- QR Code Section at Top (Tanpa Tulisan, QR Gede) -->
         <div class="qr-section-top">
             <div id="qrcode"></div>
-            <div class="qr-text">
-                <h6>DAFTAR MANDIRI</h6>
-                <p>Scan untuk pendaftaran.</p>
-            </div>
         </div>
 
         <div class="waiting-title">Daftar Tunggu</div>
@@ -204,11 +200,11 @@
     let lastCallCount = 0;
     let isSpeaking = false; // Grendel Anti-Gema
 
-    // 1. QR Code
+    // 1. QR Code (DI-GEDE-IN)
     try {
         new QRCode(document.getElementById("qrcode"), {
             text: window.location.origin + "/buku-tamu",
-            width: 140, height: 140
+            width: 200, height: 200
         });
     } catch(e) { console.error("QR Error", e); }
 
