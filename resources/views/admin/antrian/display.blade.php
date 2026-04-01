@@ -105,10 +105,10 @@
 
         .qr-section-top { 
             background: #ffffff; 
-            padding: 10px; 
+            padding: 15px 15px 30px; 
             border-radius: 1.2rem; 
             display: inline-block;
-            margin: 0 auto 20px;
+            margin: 0 auto 35px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.4);
             width: fit-content;
         }
@@ -136,7 +136,7 @@
             .called-name { font-size: 2.5rem; }
             .called-destination { font-size: 1.4rem; }
             
-            .qr-section-top { margin-bottom: 15px; padding: 15px; }
+            .qr-section-top { margin-bottom: 35px; padding: 20px 20px 35px; }
             .qr-section-top #qrcode canvas, .qr-section-top #qrcode img { width: 120px !important; height: 120px !important; }
             
             .waiting-item .no { font-size: 1.8rem; }
