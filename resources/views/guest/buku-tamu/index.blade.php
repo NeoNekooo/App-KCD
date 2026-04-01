@@ -82,6 +82,16 @@
             padding: 2.5rem 2.2rem;
         }
 
+        .form-body .row {
+            margin-left: 0;
+            margin-right: 0;
+        }
+
+        .form-body .row>[class*="col-"] {
+            padding-left: 0.5rem;
+            padding-right: 0.5rem;
+        }
+
         .section-label {
             font-size: 0.75rem;
             font-weight: 700;
@@ -250,9 +260,23 @@
 
                         <div class="row g-4">
                             <div class="col-md-6">
-                                <label class="section-label">Nama Lengkap Tamu *</label>
+                                <label class="section-label">Nama Lengkap *</label>
                                 <input type="text" name="nama" class="official-input" placeholder="Sesuai KTP"
                                     required value="{{ old('nama') }}" autofocus>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="section-label">Jabatan *</label>
+                                <input type="text" name="jabatan_pengunjung" class="official-input"
+                                    placeholder="Contoh: Siswa, Guru, Orang Tua" required
+                                    value="{{ old('jabatan_pengunjung') }}">
+                            </div>
+                        </div>
+
+                        <div class="row g-4">
+                            <div class="col-md-6">
+                                <label class="section-label">Unit/Instansi/Sekolah *</label>
+                                <input type="text" name="asal_instansi" class="official-input"
+                                    placeholder="Nama Sekolah/Lembaga" required value="{{ old('asal_instansi') }}">
                             </div>
                             <div class="col-md-6">
                                 <label class="section-label">NPSN (Opsional)</label>
@@ -261,25 +285,11 @@
                             </div>
                         </div>
 
-                        <div class="row g-4">
-                            <div class="col-md-6">
-                                <label class="section-label">Nama Induk Sekolah *</label>
-                                <input type="text" name="asal_instansi" class="official-input"
-                                    placeholder="Nama Sekolah Asal" required value="{{ old('asal_instansi') }}">
-                            </div>
-                            <div class="col-md-6">
-                                <label class="section-label">Jabatan Pengunjung *</label>
-                                <input type="text" name="jabatan_pengunjung" class="official-input"
-                                    placeholder="Contoh: Siswa, Guru, Orang Tua" required
-                                    value="{{ old('jabatan_pengunjung') }}">
-                            </div>
-                        </div>
-
-                        <label class="section-label">Nomor WhatsApp / HP *</label>
+                        <label class="section-label">Nomor HP *</label>
                         <input type="text" name="nomor_hp" class="official-input" placeholder="08xxxxxxxxxx" required
                             value="{{ old('nomor_hp') }}">
 
-                        <label class="section-label">Tujuan / Maksud Kunjungan *</label>
+                        <label class="section-label">Keperluan *</label>
                         <textarea name="keperluan" rows="3" class="official-input" style="resize: none;"
                             placeholder="Sebutkan maksud kedatangan Anda..." required>{{ old('keperluan') }}</textarea>
 
