@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 
 use App\Models\AntrianTamu;
 use App\Models\PegawaiKcd;
+use App\Models\KeperluanCategory;
 use Carbon\Carbon;
 use Illuminate\Support\Str;
 
@@ -19,8 +20,9 @@ class GuestBookController extends Controller
         // Ambil data Pejabat/Pegawai KCD untuk Dropdown 'Ingin Bertemu Siapa'
         $pegawais = PegawaiKcd::with('jabatanKcd')->orderBy('nama', 'asc')->get();
         $instansi = \App\Models\Instansi::first();
+        $categories = KeperluanCategory::orderBy('name', 'asc')->get();
 
-        return view('guest.buku-tamu.index', compact('pegawais', 'instansi'));
+        return view('guest.buku-tamu.index', compact('pegawais', 'instansi', 'categories'));
     }
 
     /**

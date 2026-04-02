@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
 use App\Models\AntrianTamu;
+use App\Models\KeperluanCategory;
 use Carbon\Carbon;
 
 class AntrianController extends Controller
@@ -25,7 +26,9 @@ class AntrianController extends Controller
                     ->orderBy('id', 'asc')
                     ->get();
 
-        return view('admin.antrian.index', compact('antrians'));
+        $categories = KeperluanCategory::orderBy('id', 'desc')->get();
+
+        return view('admin.antrian.index', compact('antrians', 'categories'));
     }
 
     /**
@@ -81,5 +84,24 @@ class AntrianController extends Controller
                     ->get();
 
         return view('admin.antrian._table_body', compact('antrians'))->render();
+    }
+
+    public function storeCategory(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:100|unique:keperluan_categories,name'
+        ]);
+
+        KeperluanCategory::create(['name' => $request->name]);
+    
+        return redirect()->back()->with('success', 'Kategori keperluan berhasil ditambahkan.')->with('open_modal_kategori', true);
+    }
+    
+    public function destroyCategory($id)
+    {
+        $category = KeperluanCategory::findOrFail($id);
+        $category->delete();
+    
+        return redirect()->back()->with('success', 'Kategori keperluan berhasil dihapus.')->with('open_modal_kategori', true);
     }
 }

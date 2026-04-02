@@ -122,6 +122,10 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
             Route::put('/{id}/panggil', 'panggil')->name('panggil');
             Route::put('/{id}/selesai', 'selesai')->name('selesai');
             Route::delete('/{id}', 'destroy')->name('destroy');
+            
+            // Kategori Keperluan
+            Route::post('/kategori', 'storeCategory')->name('kategori.store');
+            Route::delete('/kategori/{id}', 'destroyCategory')->name('kategori.destroy');
         });
 
     // LAYAR TV DISPLAY (Admin Only / Ruang KCD)

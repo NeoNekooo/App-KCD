@@ -280,8 +280,16 @@
                             value="{{ old('nomor_hp') }}">
 
                         <label class="section-label">Keperluan *</label>
-                        <textarea name="keperluan" rows="3" class="official-input" style="resize: none;"
-                            placeholder="Sebutkan maksud kedatangan Anda..." required>{{ old('keperluan') }}</textarea>
+                        <select name="keperluan" class="official-input" required>
+                            <option value="" disabled selected>Pilih Keperluan Anda...</option>
+                            @forelse($categories as $cat)
+                                <option value="{{ $cat->name }}" {{ old('keperluan') == $cat->name ? 'selected' : '' }}>
+                                    {{ $cat->name }}
+                                </option>
+                            @empty
+                                <option value="Umum">Umum / Resepsionis</option>
+                            @endforelse
+                        </select>
 
                         <button type="submit" class="btn-official shadow-sm mt-3">
                             SUBMIT & AMBIL ANTRIAN <i class='bx bx-paper-plane'></i>

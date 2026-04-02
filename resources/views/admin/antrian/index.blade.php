@@ -9,6 +9,9 @@
             <div class="text-muted small mt-1">Kelola Tiket Antrian Tamu Harian Kantor Cabang Dinas</div>
         </div>
         <div class="d-flex gap-2">
+            <button type="button" class="btn btn-outline-primary shadow-sm rounded-pill fw-bold" data-bs-toggle="modal" data-bs-target="#modalKategori">
+                <i class='bx bx-category me-2'></i>Kelola Kategori
+            </button>
             <a href="{{ route('admin.display.antrian') }}" target="_blank" class="btn btn-dark shadow-sm rounded-pill fw-bold">
                 <i class='bx bx-tv me-2'></i>Buka Layar TV
             </a>
@@ -31,7 +34,7 @@
         </div>
     @endif
 
-    <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
         <div class="card-header bg-white border-bottom py-3 d-flex align-items-center justify-content-between">
             <h5 class="card-title m-0 fw-bold"><i class="bx bx-list-ul me-2 text-primary"></i>Daftar Tunggu Hari Ini</h5>
         </div>
@@ -56,15 +59,111 @@
     </div>
 </div>
 
+<!-- Modal Kelola Kategori -->
+<div class="modal fade" id="modalKategori" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4">
+            <div class="modal-header border-bottom py-3">
+                <h5 class="modal-title fw-bold"><i class="bx bx-category me-2 text-primary"></i>Kelola Kategori Keperluan</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <form action="{{ route('admin.antrian.kategori.store') }}" method="POST" class="mb-4">
+                    @csrf
+                    <label class="form-label fw-bold small text-uppercase text-muted">Tambah Kategori Baru</label>
+                    <div class="input-group overflow-hidden rounded-3 shadow-sm">
+                        <input type="text" name="name" class="form-control border-primary" placeholder="Tulis nama kategori..." required>
+                        <button class="btn btn-primary" type="submit">SIMPAN</button>
+                    </div>
+                </form>
+
+                <label class="form-label fw-bold small text-uppercase text-muted mb-3">Daftar Kategori Aktif</label>
+                <div class="list-group list-group-flush border rounded-3 overflow-hidden">
+                    @forelse($categories as $cat)
+                        <div class="list-group-item d-flex justify-content-between align-items-center py-3">
+                            <span class="fw-semibold"><i class="bx bx-check-circle text-success me-2"></i>{{ $cat->name }}</span>
+                            <form id="form-delete-{{ $cat->id }}" action="{{ route('admin.antrian.kategori.destroy', $cat->id) }}" method="POST">
+                                @csrf @method('DELETE')
+                                <button type="button" class="btn btn-sm btn-label-danger" onclick="deleteKategori({{ $cat->id }}, event)">
+                                    <i class="bx bx-trash"></i>
+                                </button>
+                            </form>
+                        </div>
+                    @empty
+                        <div class="text-center py-5">
+                            <i class="bx bx-info-circle fs-1 text-muted mb-2"></i>
+                            <p class="text-muted mb-0">Belum ada kategori ditentukan.</p>
+                        </div>
+                    @endforelse
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
 <!-- Audio -->
 <audio id="bellSound" preload="auto">
     <source src="https://www.myinstants.com/media/sounds/elevator-ding.mp3" type="audio/mpeg">
 </audio>
 
+<style>
+    /* Paksa SweetAlert2 tampil paling depan, di atas modal manapun */
+    .swal2-container {
+        z-index: 9999 !important;
+    }
+    .swal2-shown {
+        overflow: hidden !important; 
+    }
+    /* Rapihin tombol SweetAlert2 biar makin premium */
+    .swal2-styled.swal2-confirm {
+        border-radius: 99px !important;
+        padding-left: 25px !important;
+        padding-right: 25px !important;
+        font-weight: 700 !important;
+    }
+    .swal2-styled.swal2-cancel {
+        border-radius: 99px !important;
+        padding-left: 25px !important;
+        padding-right: 25px !important;
+    }
+</style>
+
 @endsection
 
 @push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
+    // Definisikan fungsi di window agar bisa dipanggil dari onclick
+    window.deleteKategori = function(id, e) {
+        e.preventDefault();
+        const form = document.getElementById('form-delete-' + id);
+        
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({
+                title: 'Hapus Kategori?',
+                text: "Kategori ini tidak akan muncul lagi di form tamu.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Ya, Hapus!',
+                cancelButtonText: 'Batal',
+                buttonsStyling: true, // Gunakan styling default tapi kita tindas di CSS
+                confirmButtonColor: '#ff3e1d',
+                cancelButtonColor: '#8592a3',
+                reverseButtons: true, // Tombol hapus di kanan biar standar
+                backdrop: `rgba(0,0,0,0.4)` // Kasih item tipis aja biar nggak numpuk
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit();
+                }
+            });
+        } else {
+            if (confirm('Yakin ingin menghapus kategori ini?')) {
+                form.submit();
+            }
+        }
+    };
+
     document.addEventListener('DOMContentLoaded', function() {
         let currentCount = document.querySelectorAll('#antrianTableBody tr').length;
         const tableBody = document.getElementById('antrianTableBody');
@@ -76,11 +175,9 @@
                 .then(html => {
                     const parser = new DOMParser();
                     const doc = parser.parseFromString(html, 'text/html');
-                    // Hitung jumlah <tr> yang datanya bukan "Belum ada antrian" (colspan=6)
                     const rows = doc.querySelectorAll('tr');
                     let newCount = rows.length;
                     
-                    // Jika baris pertama punya colspan=7, berarti kosong
                     if(rows.length === 1 && rows[0].querySelector('td[colspan="7"]')) {
                         newCount = 0;
                     }
@@ -92,7 +189,6 @@
                     currentCount = newCount;
                     tableBody.innerHTML = html;
 
-                    // Re-init tooltips jika ada
                     if (typeof bootstrap !== 'undefined' && bootstrap.Tooltip) {
                         const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
                         tooltipTriggerList.map(function (tooltipTriggerEl) {
@@ -103,8 +199,22 @@
                 .catch(err => console.error("Refresh failed:", err));
         }
 
-        // Jalankan setiap 5 detik
         setInterval(refreshTable, 5000);
+
+        // Auto Re-open Modal
+        @if(session('open_modal_kategori'))
+            setTimeout(() => {
+                const modalEl = document.getElementById('modalKategori');
+                if (modalEl) {
+                    const modalKategori = new bootstrap.Modal(modalEl);
+                    modalKategori.show();
+                    setTimeout(() => {
+                        const input = modalEl.querySelector('input[name="name"]');
+                        if (input) input.focus();
+                    }, 500);
+                }
+            }, 300);
+        @endif
     });
 </script>
 @endpush
