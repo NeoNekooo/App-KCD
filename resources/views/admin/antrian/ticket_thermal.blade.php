@@ -24,9 +24,9 @@
     <div class="header">
         <center>
             @if($instansi && $instansi->logo)
-                <img src="{{ Storage::url($instansi->logo) }}" height="60" style="margin-bottom: 5px;">
+                <img src="{{ Storage::url($instansi->logo) }}" height="100" style="margin-bottom: 5px;">
             @else
-                <img src="{{ asset('logo.png') }}" height="60" style="margin-bottom: 5px;">
+                <img src="{{ asset('logo.png') }}" height="100" style="margin-bottom: 5px;">
             @endif
         </center>
         <p class="instansi">{{ $instansi->nama_instansi ?? 'KCD WILAYAH' }}</p>
