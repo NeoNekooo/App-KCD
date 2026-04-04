@@ -9,10 +9,20 @@
             <div class="text-muted small mt-1">Kelola Tiket Antrian Tamu Harian Kantor Cabang Dinas</div>
         </div>
         <div class="d-flex gap-2">
+        <div class="d-flex flex-wrap gap-2">
+            <form action="{{ route('admin.antrian.index') }}" method="GET" class="d-flex gap-2">
+                <input type="date" name="search_date" class="form-control shadow-sm rounded-pill fw-bold border-primary" 
+                    value="{{ request('search_date') }}" onchange="this.form.submit()">
+                @if(request('search_date'))
+                    <a href="{{ route('admin.antrian.index') }}" class="btn btn-outline-secondary shadow-sm rounded-pill fw-bold">
+                        <i class='bx bx-reset me-1'></i>Reset
+                    </a>
+                @endif
+            </form>
             <button type="button" class="btn btn-outline-primary shadow-sm rounded-pill fw-bold" data-bs-toggle="modal" data-bs-target="#modalKategori">
                 <i class='bx bx-category me-2'></i>Kelola Kategori
             </button>
-            <a href="{{ route('admin.antrian.export') }}" class="btn btn-success shadow-sm rounded-pill fw-bold">
+            <a href="{{ route('admin.antrian.export', ['search_date' => request('search_date')]) }}" class="btn btn-success shadow-sm rounded-pill fw-bold">
                 <i class='bx bx-spreadsheet me-2'></i>Export Excel
             </a>
             <a href="{{ route('admin.display.antrian') }}" target="_blank" class="btn btn-dark shadow-sm rounded-pill fw-bold">
@@ -59,6 +69,16 @@
                     @include('admin.antrian._table_body')
                 </tbody>
             </table>
+        </div>
+        <div class="card-footer bg-white border-top py-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="small text-muted">
+                    Menampilkan {{ $antrians->firstItem() ?? 0 }} sampai {{ $antrians->lastItem() ?? 0 }} dari {{ $antrians->total() }} data
+                </div>
+                <div>
+                    {{ $antrians->appends(request()->all())->links() }}
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -174,7 +194,11 @@
         const bell = document.getElementById('bellSound');
 
         function refreshTable() {
-            fetch("/admin/antrian/partial")
+            const urlParams = new URLSearchParams(window.location.search);
+            const page = urlParams.get('page') || 1;
+            const searchDate = urlParams.get('search_date') || '';
+
+            fetch(`/admin/antrian/partial?page=${page}&search_date=${searchDate}`)
                 .then(response => response.text())
                 .then(html => {
                     const parser = new DOMParser();

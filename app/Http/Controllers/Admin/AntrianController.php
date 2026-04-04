@@ -13,17 +13,18 @@ use Carbon\Carbon;
 
 class AntrianController extends Controller
 {
-    /**
-     * Dashboard List Antrian Resepsionis
-     */
-    public function index()
+    public function index(Request $request)
     {
-        // Tampilkan semua riwayat antrian
-        // Urutkan berdasarkan status (dipanggil/menunggu dulu) lalu tanggal terbaru
+        $searchDate = $request->input('search_date');
+
+        // Tampilkan semua riwayat antrian dengan filter tanggal opsional
         $antrians = AntrianTamu::with('tujuanPegawai.jabatanKcd')
+                    ->when($searchDate, function($q) use ($searchDate) {
+                        return $q->whereDate('created_at', $searchDate);
+                    })
                     ->orderByRaw("FIELD(status, 'dipanggil', 'menunggu', 'selesai', 'batal') ASC")
                     ->orderBy('created_at', 'desc')
-                    ->get();
+                    ->paginate(10);
 
         $categories = KeperluanCategory::orderBy('id', 'desc')->get();
 
@@ -70,15 +71,17 @@ class AntrianController extends Controller
         return redirect()->back()->with('success', 'Antrian tamu dibatalkan.');
     }
 
-    /**
-     * AJAX Get Partial Table Body for Realtime Update
-     */
-    public function getPartial()
+    public function getPartial(Request $request)
     {
+        $searchDate = $request->input('search_date');
+
         $antrians = AntrianTamu::with('tujuanPegawai.jabatanKcd')
+                    ->when($searchDate, function($q) use ($searchDate) {
+                        return $q->whereDate('created_at', $searchDate);
+                    })
                     ->orderByRaw("FIELD(status, 'dipanggil', 'menunggu', 'selesai', 'batal') ASC")
                     ->orderBy('created_at', 'desc')
-                    ->get();
+                    ->paginate(10);
 
         return view('admin.antrian._table_body', compact('antrians'))->render();
     }
@@ -105,8 +108,11 @@ class AntrianController extends Controller
     /**
      * Export Excel Antrian Tamu
      */
-    public function export()
+    public function export(Request $request)
     {
-        return Excel::download(new AntrianExport, 'Data_Antrian_Tamu_' . date('d-m-Y') . '.xlsx');
+        $date = $request->input('search_date');
+        $fileName = 'Data_Antrian_Tamu_' . ($date ? $date : date('d-m-Y')) . '.xlsx';
+        
+        return Excel::download(new AntrianExport($date), $fileName);
     }
 }

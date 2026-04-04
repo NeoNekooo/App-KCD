@@ -9,12 +9,25 @@ use Maatwebsite\Excel\Concerns\WithMapping;
 
 class AntrianExport implements FromCollection, WithHeadings, WithMapping
 {
+    protected $date;
+
+    public function __construct($date = null)
+    {
+        $this->date = $date;
+    }
+
     /**
     * @return \Illuminate\Support\Collection
     */
     public function collection()
     {
-        return AntrianTamu::with('tujuanPegawai')->orderBy('created_at', 'desc')->get();
+        $query = AntrianTamu::with('tujuanPegawai');
+
+        if ($this->date) {
+            $query->whereDate('created_at', $this->date);
+        }
+
+        return $query->orderBy('created_at', 'desc')->get();
     }
 
     public function headings(): array
@@ -22,6 +35,7 @@ class AntrianExport implements FromCollection, WithHeadings, WithMapping
         return [
             'No Antrian',
             'Tanggal',
+            'Jam Keluar Tiket',
             'Nama Tamu',
             'Asal Instansi',
             'Jabatan',
@@ -36,7 +50,8 @@ class AntrianExport implements FromCollection, WithHeadings, WithMapping
     {
         return [
             $antrian->nomor_antrian,
-            $antrian->created_at->format('d-m-Y H:i'),
+            $antrian->created_at->format('d-m-Y'),
+            $antrian->created_at->format('H:i'),
             $antrian->nama,
             $antrian->asal_instansi,
             $antrian->jabatan_pengunjung,

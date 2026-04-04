@@ -84,7 +84,7 @@
     <tr>
         <td colspan="7" class="text-center py-5">
             <i class='bx bx-inbox fs-1 text-muted opacity-50 mb-3 block'></i>
-            <h6 class="text-muted fw-semibold">Belum ada antrian tamu hari ini.</h6>
+            <h6 class="text-muted fw-semibold">Belum ada data antrian tamu ditemukan.</h6>
         </td>
     </tr>
 @endforelse
