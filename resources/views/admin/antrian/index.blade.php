@@ -8,26 +8,29 @@
             <h4 class="fw-bold m-0"><span class="text-muted fw-light">Dashboard /</span> Layanan Tamu</h4>
             <div class="text-muted small mt-1">Kelola Tiket Antrian Tamu Harian Kantor Cabang Dinas</div>
         </div>
-        <div class="d-flex flex-wrap justify-content-md-end gap-2">
-            <form action="{{ route('admin.antrian.index') }}" method="GET" class="d-flex gap-2">
-                <input type="date" name="search_date" class="form-control shadow-sm rounded-pill fw-bold border-primary" 
-                    value="{{ request('search_date') }}" onchange="this.form.submit()">
+        <div class="d-flex flex-wrap justify-content-md-end align-items-center gap-2">
+            <form action="{{ route('admin.antrian.index') }}" method="GET" class="d-flex align-items-center gap-2">
+                <div class="position-relative">
+                    <input type="date" name="search_date" class="form-control shadow-sm rounded-pill fw-bold border-primary px-3" 
+                        style="height: 38px; width: 160px; font-size: 0.85rem;"
+                        value="{{ request('search_date') }}" onchange="this.form.submit()">
+                </div>
                 @if(request('search_date'))
-                    <a href="{{ route('admin.antrian.index') }}" class="btn btn-outline-secondary shadow-sm rounded-pill fw-bold">
+                    <a href="{{ route('admin.antrian.index') }}" class="btn btn-sm btn-outline-secondary shadow-sm rounded-pill fw-bold d-flex align-items-center py-2" title="Reset Filter">
                         <i class='bx bx-reset me-1'></i>Reset
                     </a>
                 @endif
             </form>
-            <button type="button" class="btn btn-outline-primary shadow-sm rounded-pill fw-bold" data-bs-toggle="modal" data-bs-target="#modalKategori">
+            <button type="button" class="btn btn-sm btn-outline-primary shadow-sm rounded-pill fw-bold py-2" data-bs-toggle="modal" data-bs-target="#modalKategori">
                 <i class='bx bx-category me-2'></i>Kelola Kategori
             </button>
-            <a href="{{ route('admin.antrian.export', ['search_date' => request('search_date')]) }}" class="btn btn-success shadow-sm rounded-pill fw-bold">
+            <a href="{{ route('admin.antrian.export', ['search_date' => request('search_date')]) }}" class="btn btn-sm btn-success shadow-sm rounded-pill fw-bold py-2">
                 <i class='bx bx-spreadsheet me-2'></i>Export Excel
             </a>
-            <a href="{{ route('admin.display.antrian') }}" target="_blank" class="btn btn-dark shadow-sm rounded-pill fw-bold">
+            <a href="{{ route('admin.display.antrian') }}" target="_blank" class="btn btn-sm btn-dark shadow-sm rounded-pill fw-bold py-2">
                 <i class='bx bx-tv me-2'></i>Buka Layar TV
             </a>
-            <a href="{{ route('guest.buku-tamu') }}" target="_blank" class="btn btn-primary shadow-sm rounded-pill fw-bold">
+            <a href="{{ route('guest.buku-tamu') }}" target="_blank" class="btn btn-sm btn-primary shadow-sm rounded-pill fw-bold py-2">
                 <i class='bx bx-qr-scan me-2'></i>Lihat QR Form
             </a>
         </div>
