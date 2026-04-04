@@ -352,16 +352,17 @@
     </div>
 
     <div class="tv-header">
-        <div class="header">
-        <center>
-            @if($instansi && $instansi->logo)
-                <img src="{{ Storage::url($instansi->logo) }}" height="60" style="margin-bottom: 5px;">
+        <div class="brand">
+            @if ($instansi && $instansi->logo)
+                <img src="{{ Storage::url($instansi->logo) }}" height="60" alt="Logo">
             @else
-                <img src="{{ asset('logo.png') }}" height="60" style="margin-bottom: 5px;">
+                <img src="{{ asset('logo.png') }}" height="60" alt="Logo">
             @endif
-        </center>
-        <p class="instansi">{{ $instansi->nama_instansi ?? 'KCD WILAYAH' }}</p>
-        <h1>MONITOR ANTRIAN</h1>
+            <div>
+                <p style="font-size: 0.9rem; margin-bottom: 0px; opacity: 0.8; font-weight: 600;">
+                    {{ $instansi->nama_instansi ?? 'KANTOR CABANG DINAS PENDIDIKAN WILAYAH VI' }}
+                </p>
+                <h1>MONITOR ANTRIAN</h1>
                 <div id="voiceIndicator"
                     style="font-size: 0.7rem; color: var(--accent-color); font-weight: 700; opacity: 0.8;">Mencari
                     Suara...</div>
