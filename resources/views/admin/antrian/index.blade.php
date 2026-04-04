@@ -8,8 +8,7 @@
             <h4 class="fw-bold m-0"><span class="text-muted fw-light">Dashboard /</span> Layanan Tamu</h4>
             <div class="text-muted small mt-1">Kelola Tiket Antrian Tamu Harian Kantor Cabang Dinas</div>
         </div>
-        <div class="d-flex gap-2">
-        <div class="d-flex flex-wrap gap-2">
+        <div class="d-flex flex-wrap justify-content-md-end gap-2">
             <form action="{{ route('admin.antrian.index') }}" method="GET" class="d-flex gap-2">
                 <input type="date" name="search_date" class="form-control shadow-sm rounded-pill fw-bold border-primary" 
                     value="{{ request('search_date') }}" onchange="this.form.submit()">
