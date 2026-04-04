@@ -119,6 +119,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
         ->group(function() {
             Route::get('/', 'index')->name('index');
             Route::get('/partial', 'getPartial')->name('partial');
+            Route::get('/export', 'export')->name('export');
             Route::put('/{id}/panggil', 'panggil')->name('panggil');
             Route::put('/{id}/selesai', 'selesai')->name('selesai');
             Route::delete('/{id}', 'destroy')->name('destroy');

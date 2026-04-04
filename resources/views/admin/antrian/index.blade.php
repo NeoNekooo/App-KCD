@@ -12,6 +12,9 @@
             <button type="button" class="btn btn-outline-primary shadow-sm rounded-pill fw-bold" data-bs-toggle="modal" data-bs-target="#modalKategori">
                 <i class='bx bx-category me-2'></i>Kelola Kategori
             </button>
+            <a href="{{ route('admin.antrian.export') }}" class="btn btn-success shadow-sm rounded-pill fw-bold">
+                <i class='bx bx-spreadsheet me-2'></i>Export Excel
+            </a>
             <a href="{{ route('admin.display.antrian') }}" target="_blank" class="btn btn-dark shadow-sm rounded-pill fw-bold">
                 <i class='bx bx-tv me-2'></i>Buka Layar TV
             </a>
@@ -36,7 +39,7 @@
 
     <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
         <div class="card-header bg-white border-bottom py-3 d-flex align-items-center justify-content-between">
-            <h5 class="card-title m-0 fw-bold"><i class="bx bx-list-ul me-2 text-primary"></i>Daftar Tunggu Hari Ini</h5>
+            <h5 class="card-title m-0 fw-bold"><i class="bx bx-list-ul me-2 text-primary"></i>Daftar Riwayat Antrian Tamu</h5>
         </div>
         <div class="table-responsive text-nowrap">
             <table class="table table-hover align-middle mb-0">
@@ -44,6 +47,7 @@
                     <tr>
                         <th class="fw-semibold text-uppercase font-size-13 py-3" style="width: 50px;">No</th>
                         <th class="fw-semibold text-uppercase font-size-13 py-3">No Antrian</th>
+                        <th class="fw-semibold text-uppercase font-size-13 py-3">Tanggal</th>
                         <th class="fw-semibold text-uppercase font-size-13 py-3">Tamu</th>
                         <th class="fw-semibold text-uppercase font-size-13 py-3">No HP</th>
                         <th class="fw-semibold text-uppercase font-size-13 py-3">Detail & Keperluan</th>

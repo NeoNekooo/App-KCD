@@ -6,6 +6,10 @@
             <span class="badge bg-label-dark fs-6">{{ $item->nomor_antrian }}</span>
         </td>
         <td>
+            <div class="fw-bold">{{ $item->created_at->format('d/m/Y') }}</div>
+            <div class="small text-muted">{{ $item->created_at->format('H:i') }} WIB</div>
+        </td>
+        <td>
             <div class="fw-bold mb-1 {{ $item->status == 'selesai' ? 'text-muted' : 'text-dark' }}">
                 {{ $item->nama }}
             </div>
@@ -78,7 +82,7 @@
     </tr>
 @empty
     <tr>
-        <td colspan="6" class="text-center py-5">
+        <td colspan="7" class="text-center py-5">
             <i class='bx bx-inbox fs-1 text-muted opacity-50 mb-3 block'></i>
             <h6 class="text-muted fw-semibold">Belum ada antrian tamu hari ini.</h6>
         </td>

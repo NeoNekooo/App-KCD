@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 
 use App\Models\AntrianTamu;
 use App\Models\KeperluanCategory;
+use App\Exports\AntrianExport;
+use Maatwebsite\Excel\Facades\Excel;
 use Carbon\Carbon;
 
 class AntrianController extends Controller
@@ -16,14 +18,11 @@ class AntrianController extends Controller
      */
     public function index()
     {
-        // Tampilkan hanya antrian hari ini yang masih aktif (belum selesai/batal)
-        // Atau urutkan berdasarkan status "menunggu" dan "dipanggil"
-        $today = Carbon::today();
-        
+        // Tampilkan semua riwayat antrian
+        // Urutkan berdasarkan status (dipanggil/menunggu dulu) lalu tanggal terbaru
         $antrians = AntrianTamu::with('tujuanPegawai.jabatanKcd')
-                    ->whereDate('created_at', $today)
                     ->orderByRaw("FIELD(status, 'dipanggil', 'menunggu', 'selesai', 'batal') ASC")
-                    ->orderBy('id', 'asc')
+                    ->orderBy('created_at', 'desc')
                     ->get();
 
         $categories = KeperluanCategory::orderBy('id', 'desc')->get();
@@ -76,11 +75,9 @@ class AntrianController extends Controller
      */
     public function getPartial()
     {
-        $today = Carbon::today();
         $antrians = AntrianTamu::with('tujuanPegawai.jabatanKcd')
-                    ->whereDate('created_at', $today)
                     ->orderByRaw("FIELD(status, 'dipanggil', 'menunggu', 'selesai', 'batal') ASC")
-                    ->orderBy('id', 'asc')
+                    ->orderBy('created_at', 'desc')
                     ->get();
 
         return view('admin.antrian._table_body', compact('antrians'))->render();
@@ -103,5 +100,13 @@ class AntrianController extends Controller
         $category->delete();
     
         return redirect()->back()->with('success', 'Kategori keperluan berhasil dihapus.')->with('open_modal_kategori', true);
+    }
+
+    /**
+     * Export Excel Antrian Tamu
+     */
+    public function export()
+    {
+        return Excel::download(new AntrianExport, 'Data_Antrian_Tamu_' . date('d-m-Y') . '.xlsx');
     }
 }
