@@ -352,14 +352,16 @@
     </div>
 
     <div class="tv-header">
-        <div class="brand">
-            @if ($instansi && $instansi->logo)
-                <img src="{{ Storage::url($instansi->logo) }}" height="60" alt="Logo">
+        <div class="header">
+        <center>
+            @if($instansi && $instansi->logo)
+                <img src="{{ Storage::url($instansi->logo) }}" height="60" style="margin-bottom: 5px;">
             @else
-                <img src="{{ asset('logo.png') }}" height="60" alt="Logo">
+                <img src="{{ asset('logo.png') }}" height="60" style="margin-bottom: 5px;">
             @endif
-            <div>
-                <h1>MONITOR ANTRIAN</h1>
+        </center>
+        <p class="instansi">{{ $instansi->nama_instansi ?? 'KCD WILAYAH' }}</p>
+        <h1>MONITOR ANTRIAN</h1>
                 <div id="voiceIndicator"
                     style="font-size: 0.7rem; color: var(--accent-color); font-weight: 700; opacity: 0.8;">Mencari
                     Suara...</div>
@@ -520,6 +522,8 @@
         }, 1000);
 
         // 7. Update Fetcher & Remote Printing
+        let printedIds = []; // Simpan ID yang sudah dicetak biar tombolnya ga balik lagi pas polling
+
         function fetchUpdates() {
             $.ajax({
                 url: "/admin/display-antrian/updates",
@@ -557,14 +561,16 @@
                     let html = '';
                     if (res.menunggu && res.menunggu.length > 0) {
                         res.menunggu.slice(0, 5).forEach(w => {
+                            let btnStyle = printedIds.includes(w.id) ? 'display: none !important;' : 'display: flex !important;';
+
                             html +=
                                 `<div class="waiting-item d-flex align-items-center justify-content-between" style="padding: 15px 25px;">
                                     <div style="display: flex; align-items: center; min-width: 0; flex: 1;">
                                         <div class="no" style="margin-bottom: 0;">${w.nomor_antrian}</div>
                                         <div class="name-text">${w.nama}</div>
                                     </div>
-                                    <div class="btn-print-touch" onclick="printTicketRemotely(${w.id})" title="Cetak Tiket" 
-                                         style="display: flex !important; align-items: center !important; justify-content: center !important; background: rgba(105, 108, 255, 0.3) !important; border: 2px solid #696cff;">
+                                    <div class="btn-print-touch" id="btn_tv_print_${w.id}" onclick="printTicketRemotely(${w.id})" title="Cetak Tiket" 
+                                         style="${btnStyle} align-items: center !important; justify-content: center !important; background: rgba(105, 108, 255, 0.3) !important; border: 2px solid #696cff;">
                                         <span style="font-size: 1.8rem;">🖨️</span>
                                     </div>
                                 </div>`;
@@ -588,6 +594,13 @@
         function printTicketRemotely(id) {
             console.log("Mencetak tiket ID:", id);
             
+            // Sembunyikan tombol di TV segera setelah dicolek (1x Cetak)
+            const btnTV = document.getElementById("btn_tv_print_" + id);
+            if (btnTV) {
+                btnTV.style.display = 'none';
+                if(!printedIds.includes(id)) printedIds.push(id);
+            }
+
             // Hapus dulu kalau iframe lama masih ada
             const oldFrame = document.getElementById("printFrame_" + id);
             if (oldFrame) oldFrame.remove();

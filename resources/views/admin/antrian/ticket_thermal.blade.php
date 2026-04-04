@@ -22,6 +22,13 @@
 </head>
 <body onload="window.print();">
     <div class="header">
+        <center>
+            @if($instansi && $instansi->logo)
+                <img src="{{ Storage::url($instansi->logo) }}" height="60" style="margin-bottom: 5px;">
+            @else
+                <img src="{{ asset('logo.png') }}" height="60" style="margin-bottom: 5px;">
+            @endif
+        </center>
         <p class="instansi">{{ $instansi->nama_instansi ?? 'KCD WILAYAH' }}</p>
         <p style="margin:2px 0; font-size: 10px;">Provinsi Jawa Barat</p>
     </div>
