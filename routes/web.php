@@ -74,6 +74,7 @@ Route::get('/cetak-sk/{uuid}', [CetakSkController::class, 'cetakSk'])->name('cet
 // --- BUKU TAMU & TIKET ANTRIAN (PUBLIC) ---
 Route::get('/buku-tamu', [GuestBookController::class, 'index'])->name('guest.buku-tamu');
 Route::post('/buku-tamu', [GuestBookController::class, 'store'])->name('guest.buku-tamu.store');
+Route::post('/buku-tamu/{id}/print', [GuestBookController::class, 'requestPrint'])->name('guest.buku-tamu.print');
 
 
 /*
@@ -132,6 +133,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
     // LAYAR TV DISPLAY (Admin Only / Ruang KCD)
     Route::get('/display-antrian', [AntrianDisplayController::class, 'index'])->name('display.antrian');
     Route::get('/display-antrian/updates', [AntrianDisplayController::class, 'getUpdates'])->name('display.antrian.updates');
+    Route::get('/display-antrian/ticket/{id}', [AntrianDisplayController::class, 'ticketThermal'])->name('display.antrian.ticket');
+    Route::put('/display-antrian/mark-printed/{id}', [AntrianDisplayController::class, 'markAsPrinted'])->name('display.antrian.mark-printed');
 
     // C. Data Pegawai Internal (Admin-only)
     Route::prefix('kepegawaian')->name('kepegawaian.')->controller(PegawaiKcdController::class)->group(function() {

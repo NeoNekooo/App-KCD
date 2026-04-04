@@ -486,12 +486,13 @@
             document.getElementById('clock').innerText = new Date().toLocaleTimeString('id-ID');
         }, 1000);
 
-        // 7. Update Fetcher
+        // 7. Update Fetcher & Remote Printing
         function fetchUpdates() {
             $.ajax({
                 url: "/admin/display-antrian/updates",
                 type: "GET",
                 success: function(res) {
+                    // --- A. Handling Panggilan Suara & Visual ---
                     if (res.dipanggil && res.dipanggil.length > 0) {
                         let top = res.dipanggil[0];
 
@@ -519,6 +520,7 @@
                         $('#lblCallTujuan').text("Menunggu Antrian...");
                     }
 
+                    // --- B. Daftar Tunggu Kanann ---
                     let html = '';
                     if (res.menunggu && res.menunggu.length > 0) {
                         res.menunggu.slice(0, 5).forEach(w => {
@@ -529,8 +531,42 @@
                         html = '<p class="text-center text-white-50 mt-5">Tidak ada antrian selanjutnya.</p>';
                     }
                     $('#waitingListContainer').html(html);
+
+                    // --- C. REMOTE PRINTING LOGIC ---
+                    if (res.to_print && res.to_print.length > 0) {
+                        res.to_print.forEach(item => {
+                            printTicketRemotely(item.id);
+                        });
+                    }
                 }
             });
+        }
+
+        // Fungsi buat nembak Iframe ke Printer
+        function printTicketRemotely(id) {
+            console.log("Mencetak tiket ID:", id);
+            
+            // 1. Buat Iframe tersembunyi
+            const iframeId = "printFrame_" + id;
+            if(!document.getElementById(iframeId)) {
+                const iframe = document.createElement('iframe');
+                iframe.id = iframeId;
+                iframe.style.display = 'none';
+                iframe.src = "/admin/display-antrian/ticket/" + id;
+                document.body.appendChild(iframe);
+
+                // 2. Beri tau server kalau sudah diproses cetak
+                $.ajax({
+                    url: "/admin/display-antrian/mark-printed/" + id,
+                    type: "PUT",
+                    headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                    success: function() {
+                        console.log("Tiket " + id + " ditandai sudah dicetak.");
+                        // Hapus iframe setelah 30 detik biar gak menuhin DOM
+                        setTimeout(() => { if(iframe) iframe.remove(); }, 30000);
+                    }
+                });
+            }
         }
 
         setInterval(fetchUpdates, 4000); // 4 detik agar tidak terlalu rapat

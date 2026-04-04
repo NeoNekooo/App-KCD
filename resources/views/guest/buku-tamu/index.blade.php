@@ -216,11 +216,53 @@
                     </div>
 
                     <div class="mt-4 text-center">
+                        <button type="button" id="btnPrintTicket" 
+                            class="btn btn-success w-100 rounded-pill mb-2 py-2 fw-bold shadow-sm"
+                            onclick="requestPrint({{ session('tiket_id') }})">
+                            <i class='bx bx-printer me-2'></i>CETAK TIKET FISIK
+                        </button>
                         <a href="{{ route('guest.buku-tamu') }}"
                             class="btn btn-outline-secondary w-100 rounded-pill">Kembali ke Beranda</a>
                     </div>
                 </div>
             </div>
+            
+            <script>
+                function requestPrint(id) {
+                    const btn = document.getElementById('btnPrintTicket');
+                    const originalHtml = btn.innerHTML;
+                    
+                    // Ganti status tombol
+                    btn.disabled = true;
+                    btn.innerHTML = "<i class='bx bx-loader-alt bx-spin me-2'></i>Mencetak...";
+
+                    fetch(`/buku-tamu/${id}/print`, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            'Accept': 'application/json'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if(data.status === 'success') {
+                            alert('Tiket sedang dicetak di mesin printer depan. Silakan ambil tiket fisik Anda.');
+                            btn.innerHTML = "<i class='bx bx-check me-2'></i>Sudah Dicetak";
+                            btn.classList.replace('btn-success', 'btn-light');
+                        } else {
+                            alert('Gagal mengirim perintah cetak. Silakan coba lagi.');
+                            btn.disabled = false;
+                            btn.innerHTML = originalHtml;
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Terjadi kesalahan koneksi.');
+                        btn.disabled = false;
+                        btn.innerHTML = originalHtml;
+                    });
+                }
+            </script>
         @else
             <div class="official-card">
                 <div class="official-header">

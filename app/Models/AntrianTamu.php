@@ -18,11 +18,12 @@ class AntrianTamu extends Model
         'keperluan',
         'tujuan_pegawai_id',
         'status',
+        'print_requested',
         'jumlah_panggilan',
         'waktu_panggilan',
         'waktu_selesai'
     ];
-
+    
     protected $casts = [
         'waktu_panggilan' => 'datetime',
         'waktu_selesai' => 'datetime',

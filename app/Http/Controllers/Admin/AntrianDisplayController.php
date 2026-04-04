@@ -67,9 +67,37 @@ class AntrianDisplayController extends Controller
                 ];
             });
 
+        // Antrian yang minta dicetak oleh tamu dari HP
+        $toPrint = AntrianTamu::whereDate('created_at', $today)
+            ->where('print_requested', true)
+            ->get();
+
         return response()->json([
             'dipanggil' => $sedangDipanggil,
-            'menunggu'  => $daftarMenunggu
+            'menunggu'  => $daftarMenunggu,
+            'to_print'  => $toPrint
         ]);
+    }
+
+    /**
+     * Tampilan Thermal Ticket untuk Iframe Print
+     */
+    public function ticketThermal($id)
+    {
+        $antrian = AntrianTamu::with('tujuanPegawai')->findOrFail($id);
+        $instansi = \App\Models\Instansi::first();
+        return view('admin.antrian.ticket_thermal', compact('antrian', 'instansi'));
+    }
+
+    /**
+     * Tandai tiket sudah berhasil dicetak oleh TV
+     */
+    public function markAsPrinted($id)
+    {
+        $antrian = AntrianTamu::findOrFail($id);
+        $antrian->print_requested = false;
+        $antrian->save();
+
+        return response()->json(['status' => 'success']);
     }
 }

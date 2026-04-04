@@ -61,12 +61,28 @@ class GuestBookController extends Controller
             'jumlah_panggilan'  => 0,
         ]);
 
-        // Simpan ID tiket di session agar tamu bisa melihat tiketnya usai redirect
+        // Simpan data di session agar tamu bisa melihat tiketnya usai redirect
         return redirect()->route('guest.buku-tamu')->with([
             'tiket_success' => true,
+            'tiket_id'      => $antrian->id,
             'tiket_nomor'   => $antrian->nomor_antrian,
             'tiket_nama'    => $antrian->nama,
             'tiket_waktu'   => $antrian->created_at->format('d M Y, H:i')
+        ]);
+    }
+
+    /**
+     * Request Print dari HP Tamu
+     */
+    public function requestPrint($id)
+    {
+        $antrian = AntrianTamu::findOrFail($id);
+        $antrian->print_requested = true;
+        $antrian->save();
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Permintaan cetak dikirim ke resepsionis.'
         ]);
     }
 }
