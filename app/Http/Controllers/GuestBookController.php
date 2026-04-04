@@ -57,16 +57,19 @@ class GuestBookController extends Controller
             'asal_instansi'     => $request->asal_instansi,
             'jabatan_pengunjung' => $request->jabatan_pengunjung,
             'keperluan'         => $request->keperluan,
+            'tujuan_pegawai_id' => $request->tujuan_pegawai_id, // Tambahkan ini biar tersimpan!
             'status'            => 'menunggu', 
             'jumlah_panggilan'  => 0,
         ]);
 
         // Simpan data di session agar tamu bisa melihat tiketnya usai redirect
-        return redirect()->route('guest.buku-tamu')->with([
+        // Pake back() biar lebih stabil di semua jenis device
+        return back()->with([
             'tiket_success' => true,
             'tiket_id'      => $antrian->id,
             'tiket_nomor'   => $antrian->nomor_antrian,
             'tiket_nama'    => $antrian->nama,
+            'tiket_tujuan'  => $antrian->tujuanPegawai ? $antrian->tujuanPegawai->nama : 'Umum/Resepsionis',
             'tiket_waktu'   => $antrian->created_at->format('d M Y, H:i')
         ]);
     }

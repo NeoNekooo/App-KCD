@@ -154,20 +154,53 @@
         }
 
         .waiting-item .no {
-            font-size: 2.5rem;
+            font-size: 2.2rem;
             font-weight: 900;
             color: var(--accent-color);
+            width: 100px;
+            text-align: center;
+            border-right: 2px solid rgba(255, 255, 255, 0.2);
+            line-height: 1;
+            margin-right: 20px;
+            padding-right: 10px;
+            flex-shrink: 0;
         }
 
-        .waiting-item .name {
-            font-size: 1.6rem;
-            font-weight: 700;
-            text-align: right;
-            flex: 1;
-            margin-left: 20px;
+        .waiting-item .name-text {
+            font-size: 1.8rem;
+            color: var(--accent-color);
+            font-weight: 800;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+            max-width: 350px;
+            line-height: 1;
+            text-transform: uppercase;
+            flex: 1;
+        }
+
+        .btn-print-touch {
+            background: rgba(105, 108, 255, 0.2);
+            color: #ffffff;
+            border: 2px solid var(--accent-color);
+            width: 50px;
+            height: 50px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-left: 15px;
+        }
+
+        .btn-print-touch:active {
+            background: var(--accent-color);
+            transform: scale(0.9);
+        }
+
+        .btn-print-touch i {
+            font-size: 1.6rem;
         }
 
         .qr-section-top {
@@ -525,7 +558,16 @@
                     if (res.menunggu && res.menunggu.length > 0) {
                         res.menunggu.slice(0, 5).forEach(w => {
                             html +=
-                                `<div class="waiting-item"><div class="no">${w.nomor_antrian}</div><div class="name">${w.nama}</div></div>`;
+                                `<div class="waiting-item d-flex align-items-center justify-content-between" style="padding: 15px 25px;">
+                                    <div style="display: flex; align-items: center; min-width: 0; flex: 1;">
+                                        <div class="no" style="margin-bottom: 0;">${w.nomor_antrian}</div>
+                                        <div class="name-text">${w.nama}</div>
+                                    </div>
+                                    <div class="btn-print-touch" onclick="printTicketRemotely(${w.id})" title="Cetak Tiket" 
+                                         style="display: flex !important; align-items: center !important; justify-content: center !important; background: rgba(105, 108, 255, 0.3) !important; border: 2px solid #696cff;">
+                                        <span style="font-size: 1.8rem;">🖨️</span>
+                                    </div>
+                                </div>`;
                         });
                     } else {
                         html = '<p class="text-center text-white-50 mt-5">Tidak ada antrian selanjutnya.</p>';
@@ -546,28 +588,57 @@
         function printTicketRemotely(id) {
             console.log("Mencetak tiket ID:", id);
             
-            // 1. Buat Iframe tersembunyi
-            const iframeId = "printFrame_" + id;
-            if(!document.getElementById(iframeId)) {
-                const iframe = document.createElement('iframe');
-                iframe.id = iframeId;
-                iframe.style.display = 'none';
-                iframe.src = "/admin/display-antrian/ticket/" + id;
-                document.body.appendChild(iframe);
+            // Hapus dulu kalau iframe lama masih ada
+            const oldFrame = document.getElementById("printFrame_" + id);
+            if (oldFrame) oldFrame.remove();
 
-                // 2. Beri tau server kalau sudah diproses cetak
-                $.ajax({
-                    url: "/admin/display-antrian/mark-printed/" + id,
-                    type: "PUT",
-                    headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
-                    success: function() {
-                        console.log("Tiket " + id + " ditandai sudah dicetak.");
-                        // Hapus iframe setelah 30 detik biar gak menuhin DOM
-                        setTimeout(() => { if(iframe) iframe.remove(); }, 30000);
-                    }
-                });
-            }
+            // 1. Buat Iframe tersembunyi
+            const iframe = document.createElement('iframe');
+            iframe.id = "printFrame_" + id;
+            // Gunakan gaya yang lebih 'silent' agar tidak mengganggu rendering utama
+            iframe.style.position = 'fixed';
+            iframe.style.right = '0';
+            if (oldFrame) oldFrame.remove();
+            iframe.style.bottom = '0';
+            iframe.style.width = '0';
+            iframe.style.height = '0';
+            iframe.style.border = '0';
+            iframe.src = "/admin/display-antrian/ticket/" + id;
+            document.body.appendChild(iframe);
+
+            // 2. Beri tau server kalau sudah diproses cetak
+            $.ajax({
+                url: "/admin/display-antrian/mark-printed/" + id,
+                type: "PUT",
+                headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                success: function() {
+                    console.log("Tiket " + id + " ditandai sudah dicetak.");
+                    
+                    // Jaga agar tetap Full Screen dengan jeda lebih lama (3 detik)
+                    // karena printer butuh waktu buat 'melepaskan' window focus
+                    setTimeout(() => {
+                        if (isInitialized && !document.fullscreenElement) {
+                            console.log("Mencoba balik ke Full Screen...");
+                            document.documentElement.requestFullscreen().catch(e => {
+                                console.log("Gagal auto-fullscreen, butuh sentuhan user.");
+                            });
+                        }
+                    }, 3000);
+
+                    // Hapus iframe setelah 30 detik biar gak menuhin DOM
+                    setTimeout(() => { if(iframe) iframe.remove(); }, 30000);
+                }
+            });
         }
+
+        // Trik Tambahan: Deteksi kapan print selesai untuk balik ke layar penuh
+        window.onafterprint = function() {
+            if (isInitialized && !document.fullscreenElement) {
+                setTimeout(() => {
+                    document.documentElement.requestFullscreen().catch(e => {});
+                }, 1000);
+            }
+        };
 
         setInterval(fetchUpdates, 4000); // 4 detik agar tidak terlalu rapat
         fetchUpdates();
