@@ -14,7 +14,7 @@
             font-size: 12px;
         }
         .header { border-bottom: 1px dashed #000; margin-bottom: 8px; padding-bottom: 4px; }
-        .instansi { font-size: 14px; font-weight: bold; text-transform: uppercase; margin: 0; }
+        .instansi { font-size: 12px; font-weight: bold; text-transform: uppercase; margin: 0; line-height: 1.2; }
         .nomor { font-size: 50px; font-weight: bold; margin: 5px 0; }
         .info { text-align: left; font-size: 11px; border-top: 1px dashed #000; padding-top: 5px; margin-top: 10px; }
         .footer { margin-top: 10px; font-size: 12px; border-top: 1px dashed #000; padding-top: 5px; font-weight: bold; }
