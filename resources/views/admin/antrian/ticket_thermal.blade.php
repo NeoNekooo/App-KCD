@@ -17,7 +17,7 @@
         .instansi { font-size: 14px; font-weight: bold; text-transform: uppercase; margin: 0; }
         .nomor { font-size: 50px; font-weight: bold; margin: 5px 0; }
         .info { text-align: left; font-size: 11px; border-top: 1px dashed #000; padding-top: 5px; margin-top: 10px; }
-        .footer { margin-top: 10px; font-size: 10px; border-top: 1px dashed #000; padding-top: 5px; }
+        .footer { margin-top: 10px; font-size: 12px; border-top: 1px dashed #000; padding-top: 5px; font-weight: bold; }
     </style>
 </head>
 <body onload="window.print();">
@@ -46,7 +46,7 @@
         Terima Kasih Atas Kunjungan Anda.
     </div>
 
-    <div style="font-size: 9px; margin-top: 5px;">
+    <div style="font-size: 11px; margin-top: 5px;">
         {{ $antrian->created_at->format('d/m/Y H:i:s') }}
     </div>
 </body>
