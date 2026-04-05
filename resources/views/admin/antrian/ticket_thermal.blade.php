@@ -37,8 +37,8 @@
     <div class="nomor">{{ $antrian->nomor_antrian }}</div>
 
     <div class="info">
-        <div>NAMA   : {{ $antrian->nama }}</div>
-        <div>TUJUAN : {{ $antrian->tujuanPegawai ? $antrian->tujuanPegawai->nama : 'UMUM/RESEPSIONIS' }}</div>
+        <div>NAMA      : {{ $antrian->nama }}</div>
+        <div>TUJUAN : {{ $antrian->keperluan }}</div>
     </div>
 
     <div class="footer">
