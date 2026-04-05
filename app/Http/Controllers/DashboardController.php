@@ -51,7 +51,7 @@ class DashboardController extends Controller
         // ------------------------------------------------------------------
         // Blokir akses jika pegawai nyasar ke URL admin
         if (!$isAdmin) {
-            return redirect()->route('aasdmin.dhboard.pegawai');
+            return redirect()->route('admin.dashboard.pegawai');
         }
 
         // A. DATA WILAYAH (Header)
