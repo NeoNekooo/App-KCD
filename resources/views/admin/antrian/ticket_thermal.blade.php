@@ -5,7 +5,7 @@
     <style>
         @page { margin: 0; size: 80mm auto; }
         body {
-            font-family: 'Courier New', Courier, monospace;
+            font-family: Arial, Helvetica, sans-serif;
             width: 72mm;
             margin: 0 auto;
             padding: 5px;
@@ -30,7 +30,7 @@
             @endif
         </center>
         <p class="instansi">{{ $instansi->nama_instansi ?? 'KCD WILAYAH' }}</p>
-        <p style="margin:2px 0; font-size: 10px;">Provinsi Jawa Barat</p>
+        <p style="margin:2px 0; font-size: 13px; font-weight: bold;">Provinsi Jawa Barat</p>
     </div>
 
     <div style="font-size: 12px;">NOMOR ANTRIAN</div>
