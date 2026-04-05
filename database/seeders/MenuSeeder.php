@@ -155,18 +155,16 @@ class MenuSeeder extends Seeder
         $processMenu($sidebarMenu);
 
         // =================================================================
-        // C. BERI AKSES KHUSUS KE "Admin" & "Administrator"
+        // C. BERI AKSES KHUSUS KE ROLE "administrator" (SUPER ADMIN)
         // =================================================================
         $allMenuIds = array_values($slugToIdMap);
-        $adminRoles = ['Admin', 'Administrator', 'admin', 'administrator']; 
+        $superAdminRole = 'administrator'; // Pakai nama role tunggal sesuai jabatan Riri
 
-        foreach ($adminRoles as $roleName) {
-            foreach ($allMenuIds as $mid) {
-                DB::table('menu_accesses')->insertOrIgnore([
-                    'role_name' => $roleName,
-                    'menu_id' => $mid
-                ]);
-            }
+        foreach ($allMenuIds as $mid) {
+            DB::table('menu_accesses')->insertOrIgnore([
+                'role_name' => $superAdminRole,
+                'menu_id' => $mid
+            ]);
         }
         
         $this->command->info('✅ Menu terbaru berhasil disinkronkan! Akses Super Admin aktif.');

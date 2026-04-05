@@ -21,7 +21,7 @@ class AdminUserSeeder extends Seeder
                 'name'     => 'Super Administrator',
                 'email'    => 'admin@kcd.system',
                 'password' => Hash::make('kcd123'), // Password Default
-                'role'     => 'Admin', // Wajib 'Admin' biar menu muncul
+                'role'     => 'administrator', // SESUAI DENGAN MENUSEEDER
             ]
         );
     }
