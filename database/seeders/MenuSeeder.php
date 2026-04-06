@@ -117,8 +117,8 @@ class MenuSeeder extends Seeder
                     ['title' => 'Pengaturan Jabatan', 'slug' => 'pengaturan-jabatan-', 'route' => 'admin.kepegawaian_kcd.jabatan.index'],
                 ],
             ],
-            // Menu khusus buat redirect (tidak tampil di sidebar tapi butuh rute)
-            ['title' => 'dashboard-pegawai', 'slug' => 'dashboard-pegawai', 'icon' => 'bx bx-home-circle', 'route' => 'admin.dashboard.pegawai', 'is_active' => false],
+            // Menu khusus buat redirect (bisa diaktifkan via Pengaturan Akses sesuai role)
+            ['title' => 'dashboard-pegawai', 'slug' => 'dashboard-pegawai', 'icon' => 'bx bx-home-circle', 'route' => 'admin.dashboard.pegawai', 'is_active' => true],
         ];
 
         // =================================================================
