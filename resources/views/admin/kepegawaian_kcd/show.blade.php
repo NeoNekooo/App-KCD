@@ -75,8 +75,15 @@
 
     <div class="container-xxl flex-grow-1 container-p-y">
         {{-- BREADCRUMB --}}
+        @php
+            $isAdmin = in_array(strtolower(trim(Auth::user()->role)), ['admin', 'administrator', 'operator kcd']);
+        @endphp
         <h4 class="fw-bold py-3 mb-4 animate-fade-in-up">
-            <span class="text-muted fw-light">Kepegawaian / <a href="{{ route('admin.kepegawaian.index') }}" class="text-muted text-decoration-none hover-primary">Data Pegawai</a> /</span> Detail Profil
+            @if ($isAdmin && !Request::routeIs('admin.profil-saya.*'))
+                <span class="text-muted fw-light">Kepegawaian / <a href="{{ route('admin.kepegawaian.index') }}" class="text-muted text-decoration-none hover-primary">Data Pegawai</a> /</span> Detail Profil
+            @else
+                <span class="text-muted fw-light"><a href="{{ route('admin.dashboard' . ($isAdmin ? '' : '.pegawai')) }}" class="text-muted text-decoration-none hover-primary">Dashboard</a> /</span> Detail Profil
+            @endif
         </h4>
 
         {{-- Display Validation Errors --}}
@@ -165,9 +172,16 @@
                                         <button type="button" class="btn btn-primary rounded-pill shadow-sm px-4" onclick="enableEditMode()">
                                             <i class="bx bx-edit-alt me-2"></i> Edit Profil
                                         </button>
-                                        @if (Auth::user()->role === 'Admin')
+                                        @php
+                                            $isAdmin = in_array(strtolower(trim(Auth::user()->role)), ['admin', 'administrator', 'operator kcd']);
+                                        @endphp
+                                        @if ($isAdmin && !Request::routeIs('admin.profil-saya.*'))
                                             <a href="{{ route('admin.kepegawaian.index') }}" class="btn btn-outline-secondary rounded-pill px-4">
                                                 <i class="bx bx-arrow-back me-1"></i> Kembali
+                                            </a>
+                                        @else
+                                            <a href="{{ route('admin.dashboard' . ($isAdmin ? '' : '.pegawai')) }}" class="btn btn-outline-secondary rounded-pill px-4">
+                                                <i class="bx bx-home-alt me-1"></i> Dashboard
                                             </a>
                                         @endif
                                     </div>

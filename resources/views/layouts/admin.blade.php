@@ -18,7 +18,7 @@
     />
     <meta name="csrf-token" content="{{ csrf_token() }}">
     
-    <title>Dashboard Admin Sekolah</title>
+    <title>@yield('title', 'KCD System')</title>
     <link rel="stylesheet" href="{{ asset('vendor/fonts/boxicons.css') }}">
 
     {{-- Tailwind + Vite --}}

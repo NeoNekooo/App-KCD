@@ -1,5 +1,7 @@
 @extends('layouts.admin')
 
+@section('title', 'Dashboard Pegawai')
+
 @section('content')
     @php
         $user = Auth::user();

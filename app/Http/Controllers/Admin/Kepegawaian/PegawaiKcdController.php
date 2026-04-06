@@ -153,7 +153,8 @@ class PegawaiKcdController extends Controller
         $jabatans = JabatanKcd::all();
 
         // Validasi Akses: Hanya Admin atau pemilik data yang boleh lihat
-        if (Auth::user()->role !== 'Admin' && $pegawai->user_id !== Auth::id()) {
+        $isAdmin = in_array(strtolower(trim(Auth::user()->role)), ['admin', 'administrator', 'operator kcd']);
+        if (!$isAdmin && $pegawai->user_id !== Auth::id()) {
             abort(403, 'Anda tidak memiliki akses ke profil ini.');
         }
 
@@ -166,7 +167,8 @@ class PegawaiKcdController extends Controller
         $pegawai = PegawaiKcd::findOrFail($id);
 
         // Validasi Akses
-        if (Auth::user()->role !== 'Admin' && $pegawai->user_id !== Auth::id()) {
+        $isAdmin = in_array(strtolower(trim(Auth::user()->role)), ['admin', 'administrator', 'operator kcd']);
+        if (!$isAdmin && $pegawai->user_id !== Auth::id()) {
             abort(403, 'Akses Ditolak.');
         }
 
@@ -209,7 +211,8 @@ class PegawaiKcdController extends Controller
                 }
 
                 // Update protected fields only if Admin
-                if (Auth::user()->role === 'Admin') {
+                $isAdmin = in_array(strtolower(trim(Auth::user()->role)), ['admin', 'administrator', 'operator kcd']);
+                if ($isAdmin) {
                     $jabatan = JabatanKcd::find($request->jabatan_kcd_id);
 
                     // --- VALIDASI HANYA SATU KEPALA ---
@@ -236,7 +239,8 @@ class PegawaiKcdController extends Controller
                         'name' => $request->nama,
                     ];
 
-                    if (Auth::user()->role === 'Admin') {
+                    $isAdmin = in_array(strtolower(trim(Auth::user()->role)), ['admin', 'administrator', 'operator kcd']);
+                    if ($isAdmin) {
                         $jabatan = JabatanKcd::find($request->jabatan_kcd_id);
                         $userUpdate['role'] = $jabatan->role;
                         if ($request->nip) {
@@ -266,7 +270,8 @@ class PegawaiKcdController extends Controller
 
     public function destroy($id)
     {
-        if (Auth::user()->role !== 'Admin') {
+        $isAdmin = in_array(strtolower(trim(Auth::user()->role)), ['admin', 'administrator', 'operator kcd']);
+        if (!$isAdmin) {
             abort(403, 'Hanya Admin yang bisa menghapus pegawai.');
         }
 
@@ -290,7 +295,8 @@ class PegawaiKcdController extends Controller
 
     public function resetPassword($id)
     {
-        if (Auth::user()->role !== 'Admin') abort(403);
+        $isAdmin = in_array(strtolower(trim(Auth::user()->role)), ['admin', 'administrator', 'operator kcd']);
+        if (!$isAdmin) abort(403);
 
         $pegawai = PegawaiKcd::findOrFail($id);
         

@@ -22,7 +22,8 @@ class MyProfileController extends Controller
         $pegawai = PegawaiKcd::with('user')->where('user_id', $userId)->firstOrFail();
         
         // Jabatans are needed for the dropdown if the user happens to be an Admin
-        $jabatans = Auth::user()->role === 'Admin' ? JabatanKcd::all() : [];
+        $isAdmin = in_array(strtolower(trim(Auth::user()->role)), ['admin', 'administrator', 'operator kcd']);
+        $jabatans = $isAdmin ? JabatanKcd::all() : [];
 
         return view('admin.kepegawaian_kcd.show', compact('pegawai', 'jabatans'));
     }
@@ -44,7 +45,8 @@ class MyProfileController extends Controller
         ];
 
         // Admin-specific rules, in case an admin is editing their own profile
-        if (Auth::user()->role === 'Admin') {
+        $isAdmin = in_array(strtolower(trim(Auth::user()->role)), ['admin', 'administrator', 'operator kcd']);
+        if ($isAdmin) {
             $rules['nip'] = 'nullable|string|max:50|unique:pegawai_kcds,nip,' . $id;
             $rules['jabatan_kcd_id'] = 'required|exists:jabatan_kcd,id';
         }
@@ -74,7 +76,8 @@ class MyProfileController extends Controller
                     $dataUpdate['foto'] = $request->file('foto')->store('foto_pegawai', 'public');
                 }
 
-                if (Auth::user()->role === 'Admin') {
+                $isAdmin = in_array(strtolower(trim(Auth::user()->role)), ['admin', 'administrator', 'operator kcd']);
+                if ($isAdmin) {
                     $jabatan = JabatanKcd::find($request->jabatan_kcd_id);
                     $dataUpdate['jabatan_kcd_id'] = $jabatan->id;
                     $dataUpdate['jabatan'] = $jabatan->nama; 
@@ -86,7 +89,8 @@ class MyProfileController extends Controller
                 if ($pegawai->user) {
                     $userUpdate = ['name' => $request->nama];
 
-                    if (Auth::user()->role === 'Admin') {
+                    $isAdmin = in_array(strtolower(trim(Auth::user()->role)), ['admin', 'administrator', 'operator kcd']);
+                    if ($isAdmin) {
                         $jabatan = JabatanKcd::find($request->jabatan_kcd_id);
                         $userUpdate['role'] = $jabatan->role;
                         if ($request->nip) {

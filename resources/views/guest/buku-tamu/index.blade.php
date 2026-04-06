@@ -333,10 +333,68 @@
                             @endforelse
                         </select>
 
-                        <button type="submit" class="btn-official shadow-sm mt-3">
+                        <button type="submit" id="btnSubmitAntrian" class="btn-official shadow-sm mt-3">
                             SUBMIT & AMBIL ANTRIAN <i class='bx bx-paper-plane'></i>
                         </button>
                     </form>
+
+                    <style>
+                        /* Overlay Gaya Mewah */
+                        #loadingOverlay {
+                            position: fixed;
+                            top: 0;
+                            left: 0;
+                            width: 100%;
+                            height: 100%;
+                            background: rgba(13, 33, 55, 0.4);
+                            backdrop-filter: blur(8px);
+                            -webkit-backdrop-filter: blur(8px);
+                            display: none;
+                            align-items: center;
+                            justify-content: center;
+                            z-index: 9999;
+                            opacity: 0;
+                            transition: opacity 0.3s ease;
+                        }
+                        #loadingOverlay.show {
+                            display: flex;
+                            opacity: 1;
+                        }
+                        .loader-content {
+                            text-align: center;
+                            background: white;
+                            padding: 2rem;
+                            border-radius: 1.5rem;
+                            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+                        }
+                    </style>
+
+                    <!-- Overlay Muter Profesional Archer -->
+                    <div id="loadingOverlay">
+                        <div class="loader-content animate-fade-in-up">
+                            <div class="spinner-border text-primary mb-3" role="status" style="width: 3rem; height: 3rem;">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <h4 class="fw-bold mb-1">Sedang Memproses Antrian</h4>
+                            <p class="text-muted mb-0">Mohon tunggu sebentar, sistem sedang melakukan sinkronisasi data Anda.</p>
+                        </div>
+                    </div>
+
+                    <script>
+                        document.querySelector('form').addEventListener('submit', function(e) {
+                            const btn = document.getElementById('btnSubmitAntrian');
+                            const overlay = document.getElementById('loadingOverlay');
+                            
+                            if (btn && overlay) {
+                                // Tampilkan Overlay Mewah
+                                overlay.classList.add('show');
+                                
+                                // Gembok Tombol
+                                btn.disabled = true;
+                                btn.innerHTML = "<i class='bx bx-loader-alt bx-spin me-2'></i>Sedang Menghubungi Server...";
+                            }
+                        });
+                    </script>
 
                     <div class="footer-logo-row">
                         <small class="text-muted">Layanan Terpadu Satu Pintu &copy; {{ date('Y') }}</small>
@@ -348,6 +406,7 @@
     </div>
 
     <script src="{{ asset('assets/vendor/libs/jquery/jquery.js') }}"></script>
+    <script src="{{ asset('assets/vendor/js/bootstrap.js') }}"></script>
 </body>
 
 </html>
