@@ -295,6 +295,18 @@
                 font-size: 1.2rem;
                 margin-bottom: 15px;
             }
+
+            /* --- PORTRAIT VIDEO FIX --- */
+            #videoIsyaratContainer {
+                width: 90vw !important;
+                height: 50vh !important;
+                border-width: 6px !important;
+                border-radius: 2rem !important;
+            }
+            .video-label {
+                font-size: 1.5rem !important;
+                top: 30px !important;
+            }
         }
 
         #btnInitManual {
@@ -323,17 +335,78 @@
         }
 
         @keyframes blink {
-            0% {
-                opacity: 1;
-            }
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
 
-            50% {
-                opacity: 0.5;
-            }
+        /* --- VIDEO ISYARAT STYLING (THEATER MODE) --- */
+        #videoIsyaratContainer {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.8);
+            width: 700px;
+            height: 400px;
+            background: #000;
+            border: 8px solid var(--accent-color);
+            border-radius: 3rem;
+            overflow: hidden;
+            box-shadow: 0 0 150px rgba(0,0,0,0.9), 0 0 50px rgba(105, 108, 255, 0.3);
+            display: none; 
+            z-index: 9999;
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            opacity: 0;
+        }
 
-            100% {
-                opacity: 1;
-            }
+        #videoIsyaratContainer.active {
+            transform: translate(-50%, -50%) scale(1);
+            opacity: 1;
+        }
+
+        #videoIsyaratOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(8px);
+            display: none;
+            z-index: 9998;
+            transition: all 0.5s ease;
+        }
+
+        #videoIsyarat {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .video-label {
+            position: absolute;
+            top: 20px;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            color: white;
+            font-size: 1rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+        }
+
+        .video-decor {
+            position: absolute;
+            bottom: -10px;
+            right: -10px;
+            width: 100px;
+            height: 100px;
+            background: var(--accent-color);
+            opacity: 0.2;
+            filter: blur(30px);
+            border-radius: 50%;
         }
     </style>
 </head>
@@ -374,6 +447,14 @@
     <div class="layout-container">
         <div class="card-called">
             <div class="tag-status blink">SEDANG MELAYANI</div>
+            
+    <div id="videoIsyaratOverlay"></div>
+    <div id="videoIsyaratContainer">
+        <video id="videoIsyarat" muted playsinline></video>
+        <div class="video-label">Bahasa Isyarat</div>
+        <div class="video-decor"></div>
+    </div>
+
             <h2 class="called-no" id="lblCallNumber">--</h2>
             <div class="called-name" id="lblCallName">SIAP MELAYANI</div>
             <div class="called-destination" id="lblCallTujuan">Menunggu Antrian...</div>
@@ -472,42 +553,124 @@
             return text.toUpperCase().split('').map(char => kamus[char] || char).join(' ');
         }
 
-        // 5. Speak Core (Anti-Gema & Anti-Tidur)
-        function speakText(txt) {
-            if (!isInitialized) return;
+        // 5. Speak & Sign Sequencer (The "Brain")
+        function pembilangIndonesia(n) {
+            if (n === 0) return "kosong";
+            let unit = ["", "satu", "dua", "tiga", "empat", "lima", "enam", "tujuh", "delapan", "sembilan", "sepuluh", "sebelas"];
+            let res = "";
+            if (n < 12) res = unit[n];
+            else if (n < 20) res = pembilangIndonesia(n - 10) + " belas";
+            else if (n < 100) res = unit[Math.floor(n / 10)] + " puluh " + unit[n % 10];
+            else if (n < 200) res = "seratus " + pembilangIndonesia(n - 100);
+            else if (n < 1000) res = unit[Math.floor(n / 100)] + " ratus " + pembilangIndonesia(n % 100);
+            return res.trim();
+        }
 
-            // Jika masih ngomong, stop dulu yang lama
-            if (synth.speaking) {
-                synth.cancel();
+        function generateSignSequence(n) {
+            let sequence = [];
+            if (n <= 20) {
+                sequence.push({ text: pembilangIndonesia(n), file: n.toString().padStart(2, '0') + ".webm" });
+            } else if (n < 100) {
+                let puluh = Math.floor(n / 10) * 10;
+                let satuan = n % 10;
+                sequence.push({ text: unitName(Math.floor(n / 10)) + " puluh", file: puluh.toString().padStart(2, '0') + ".webm" });
+                if (satuan > 0) {
+                    sequence.push({ text: unitName(satuan), file: satuan.toString().padStart(2, '0') + ".webm" });
+                }
+            } else if (n === 100) {
+                sequence.push({ text: "seratus", file: "100.webm" });
+            }
+            return sequence;
+        }
+
+        // Helper buat nama satuan murni
+        function unitName(n) {
+            let u = ["", "satu", "dua", "tiga", "empat", "lima", "enam", "tujuh", "delapan", "sembilan"];
+            return u[n];
+        }
+
+        async function playCallSequence(numberStr, name, callback) {
+            if (!isInitialized) return;
+            
+            // 1. Ekstrak Angka (Nomor Antrian murni, misal A-21 -> 21)
+            let rawNumber = parseInt(numberStr.replace(/[^0-9]/g, ''));
+            let prefix = numberStr.replace(/[0-9]/g, '').toUpperCase();
+            
+            // 2. Siapkan Sequence
+            let signSeq = generateSignSequence(rawNumber);
+            let videoContainer = $('#videoIsyaratContainer');
+            let videoElem = document.getElementById('videoIsyarat');
+            
+            // Tampilkan layar video dengan overlay
+            $('#videoIsyaratOverlay').fadeIn();
+            videoContainer.show().addClass('active');
+
+            // 3. Suara Pembuka
+            speakText(`Nomor antrian.`);
+            await new Promise(r => setTimeout(r, 1200));
+
+            // 4. Sebut Huruf (A, B, dll)
+            if (prefix) {
+                speakText(prefix);
+                await new Promise(r => setTimeout(r, 1000));
             }
 
-            isSpeaking = true;
+            // 5. Mainkan Sequence Video & Suara (Sync!)
+            for (let item of signSeq) {
+                // Set Video Source
+                videoElem.src = `/assets/video/isyarat/${item.file}`;
+                videoElem.load();
+                
+                try {
+                    await videoElem.play();
+                } catch(e) { console.error("Video play error", e); }
+                
+                // Speak the text
+                speakText(item.text);
+                
+                // Tunggu video selesai (dengan timeout pengaman)
+                await new Promise(resolve => {
+                    let isEnded = false;
+                    videoElem.onended = () => { isEnded = true; resolve(); };
+                    setTimeout(() => { if(!isEnded) resolve(); }, 3000);
+                });
+            }
+
+            // 6. Suara Penutup (LANGSUNG panggil nama, jangan nunggu delay video hilangnya)
+            speakText(`Atas nama. ${name}. Silakan menuju ke resepsionis.`);
+
+            // Jeda 2 detik (PERIODE TAYANG TAMBAHAN VIDEO - Sambil suara jalan di background)
+            await new Promise(r => setTimeout(r, 2000));
+
+            // Selesai, sembunyikan video
+            videoContainer.removeClass('active');
+            $('#videoIsyaratOverlay').fadeOut(() => {
+                videoContainer.hide();
+            });
             
-            // Safety timeout (kunci bakal lepas sendiri setelah 15 detik kalau error)
-            let safetyReset = setTimeout(() => {
-                isSpeaking = false;
-            }, 15000);
+            if(callback) callback();
+        }
 
-            let utter = new SpeechSynthesisUtterance(txt);
-            utter.lang = 'id-ID';
-            if (voiceIndo) utter.voice = voiceIndo;
-            utter.pitch = 1.0;
-            utter.rate = 0.90; // Sedikit lebih cepat agar natural
+        function speakText(txt) {
+            return new Promise((resolve) => {
+                if (!isInitialized) return resolve();
+                if (synth.speaking) synth.cancel();
 
-            utter.onend = function() {
-                clearTimeout(safetyReset);
-                isSpeaking = false;
-            };
+                let utter = new SpeechSynthesisUtterance(txt);
+                utter.lang = 'id-ID';
+                if (voiceIndo) utter.voice = voiceIndo;
+                utter.pitch = 1.0;
+                utter.rate = 0.90;
 
-            utter.onerror = function(event) {
-                console.error("TTS Error:", event);
-                clearTimeout(safetyReset);
-                isSpeaking = false;
-            };
+                utter.onend = () => resolve();
+                utter.onerror = () => resolve();
 
-            // Trik Chrome: Resume sebelum speak & panggil 3x biar bangun
-            synth.resume();
-            synth.speak(utter);
+                synth.resume();
+                synth.speak(utter);
+                
+                // Safety timeout (biar ga ngehang kalau suara error)
+                setTimeout(resolve, 10000);
+            });
         }
 
         // Trik Tambahan: Jaga biar TTS gak 'tidur' tiap 10 detik
@@ -541,10 +704,8 @@
                             if (isInitialized) {
                                 document.getElementById('bellSound').play().catch(e => {});
                                 setTimeout(() => {
-                                    let ejaanNomor = ejaIndonesia(top.nomor_antrian);
-                                    let voiceMsg =
-                                        `Nomor antrian. ${ejaanNomor}. Atas nama. ${top.nama}. Silakan menuju ke resepsionis.`;
-                                    speakText(voiceMsg);
+                                    // Ganti ke Sequencer Baru (Isyarat + Voice Sinkron)
+                                    playCallSequence(top.nomor_antrian, top.nama);
                                 }, 1500);
                             }
                         }

@@ -62,7 +62,9 @@ use App\Http\Controllers\Admin\SettingController as WebSettingController;
 use App\Http\Controllers\WelcomeController;
 
 // --- LANDING PAGE ---
-Route::get('/', [WelcomeController::class, 'index'])->name('landing');
+// Route::get('/', [WelcomeController::class, 'index'])->name('landing');
+
+Route::redirect('/', '/login');
 
 // --- FRONTEND ROUTES ---
 Route::get('/tentang-kami', function () { 
