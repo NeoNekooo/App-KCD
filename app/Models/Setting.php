@@ -9,18 +9,14 @@ class Setting extends Model
 {
     use HasFactory;
 
-    /**
-     * Nama tabel di database.
-     * (Opsional jika nama tabelnya jamak dari nama model, misal: settings)
-     */
-    protected $table = 'settings';
+    protected $fillable = ['key', 'value'];
 
     /**
-     * Kolom yang boleh diisi secara massal (Mass Assignment).
-     * Sangat penting agar fungsi updateOrCreate() di controller bisa jalan.
+     * Helper to get setting value by key
      */
-    protected $fillable = [
-        'key',
-        'value',
-    ];
+    public static function get($key, $default = null)
+    {
+        $setting = self::where('key', $key)->first();
+        return $setting ? $setting->value : $default;
+    }
 }

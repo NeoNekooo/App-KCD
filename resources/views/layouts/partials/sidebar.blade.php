@@ -20,6 +20,10 @@
     <ul class="menu-inner py-1">
         @if (isset($menus))
             @foreach ($menus as $menu)
+                {{-- Skip menu "Pengaturan Website" --}}
+                @if ($menu->route === 'admin.website.settings.index' || $menu->title === 'Pengaturan Website')
+                    @continue
+                @endif
                 @include('layouts.partials._menu_item', ['menuItem' => $menu, 'level' => 0])
             @endforeach
         @endif

@@ -48,14 +48,36 @@ use App\Http\Controllers\GuestBookController;
 use App\Http\Controllers\Admin\AntrianController;
 use App\Http\Controllers\Admin\AntrianDisplayController;
 
+// --- Controller Manajemen Website (Migrasi) ---
+use App\Http\Controllers\Admin\SliderController;
+use App\Http\Controllers\Admin\WelcomeMessageController;
+use App\Http\Controllers\Admin\SettingController as WebSettingController;
+
 /*
 |--------------------------------------------------------------------------
 | Rute Web Utama
 |--------------------------------------------------------------------------
 */
 
-// --- LANDING PAGE (Logic Auth) ---
-Route::get('/', function () {
+use App\Http\Controllers\WelcomeController;
+
+// --- LANDING PAGE ---
+Route::get('/', [WelcomeController::class, 'index'])->name('landing');
+
+// --- FRONTEND ROUTES ---
+Route::get('/tentang-kami', function () { return view('frontend.about'); });
+Route::get('/struktur-organisasi', function () { return view('frontend.about'); });
+Route::get('/layanan/pengaduan', function () { return view('frontend.services'); });
+Route::get('/layanan/administrasi-ptk', function () { return view('frontend.services'); });
+Route::get('/layanan/tata-kelola', function () { return view('frontend.services'); });
+Route::get('/berita', function () { return view('frontend.gallery'); });
+Route::get('/pengumuman', function () { return view('frontend.gallery'); });
+Route::get('/galeri', function () { return view('frontend.gallery'); });
+Route::get('/unduhan', function () { return view('frontend.gallery'); });
+Route::get('/kontak', function () { return view('frontend.contact'); });
+
+// --- DASHBOARD REDIRECT (Logic Auth) ---
+Route::get('/home', function () {
     if (Auth::check()) {
         $user = Auth::user();
         $isAdmin = in_array(strtolower($user->role ?? ''), ['admin', 'administrator', 'operator kcd']);
@@ -65,8 +87,8 @@ Route::get('/', function () {
             return redirect()->route('admin.dashboard.pegawai');
         }
     }
-    return view('auth.login-custom');
-})->name('landing');
+    return redirect()->route('login');
+})->name('home');
 
 // --- CETAK SK (PUBLIC) ---
 Route::get('/cetak-sk/{uuid}', [CetakSkController::class, 'cetakSk'])->name('cetak.sk');
@@ -322,6 +344,19 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
             Route::get('role-access', [RoleAccessController::class, 'index'])->name('role-access.index');
             Route::post('role-access', [RoleAccessController::class, 'update'])->name('role-access.update');
         });
+
+    /*
+    |--------------------------------------------------------------------------
+    | MANAJEMEN WEBSITE (MIGRASI)
+    |--------------------------------------------------------------------------
+    */
+    Route::prefix('website')->name('website.')->group(function () {
+        Route::resource('sliders', SliderController::class)->middleware('check_menu:web-slider');
+        Route::get('welcome', [WelcomeMessageController::class, 'index'])->name('welcome.index')->middleware('check_menu:web-welcome');
+        Route::post('welcome', [WelcomeMessageController::class, 'update'])->name('welcome.update')->middleware('check_menu:web-welcome');
+        Route::get('settings', [WebSettingController::class, 'index'])->name('settings.index')->middleware('check_menu:web-settings');
+        Route::post('settings', [WebSettingController::class, 'update'])->name('settings.update')->middleware('check_menu:web-settings');
+    });
 
     Route::get('/underConstructions', function () {
         return view('admin.underConstruction');
