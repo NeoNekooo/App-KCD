@@ -27,7 +27,9 @@ class Instansi extends Model
         'logo',
         'tanda_tangan', // <-- Tambahkan Kolom Baru Ini Bre!
         'visi',
-        'misi'
+        'misi',
+        'sejarah_singkat',
+        'foto_profil'
     ];
 
     // INI KUNCINYA: Otomatis convert Array PHP <-> JSON Database

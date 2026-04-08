@@ -5,14 +5,16 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
-class Berita extends Model
+class Pengumuman extends Model
 {
     protected $fillable = [
-        'judul', 'slug', 'ringkasan', 'isi', 'gambar', 'penulis', 'status', 'published_at',
+        'judul', 'slug', 'isi', 'lampiran', 'prioritas',
+        'tanggal_terbit', 'tanggal_berakhir', 'status',
     ];
 
     protected $casts = [
-        'published_at' => 'datetime',
+        'tanggal_terbit' => 'date',
+        'tanggal_berakhir' => 'date',
     ];
 
     protected static function booted()

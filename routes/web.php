@@ -65,15 +65,49 @@ use App\Http\Controllers\WelcomeController;
 Route::get('/', [WelcomeController::class, 'index'])->name('landing');
 
 // --- FRONTEND ROUTES ---
-Route::get('/tentang-kami', function () { return view('frontend.about'); });
-Route::get('/struktur-organisasi', function () { return view('frontend.about'); });
+Route::get('/tentang-kami', function () { 
+    $instansi = \App\Models\Instansi::first();
+    return view('frontend.about', compact('instansi')); 
+});
+Route::get('/struktur-organisasi', function () { 
+    $struktur = \App\Models\StrukturOrganisasi::orderBy('urutan', 'asc')->get();
+    return view('frontend.org-chart', compact('struktur')); 
+});
 Route::get('/layanan/pengaduan', function () { return view('frontend.services'); });
 Route::get('/layanan/administrasi-ptk', function () { return view('frontend.services'); });
 Route::get('/layanan/tata-kelola', function () { return view('frontend.services'); });
-Route::get('/berita', function () { return view('frontend.gallery'); });
-Route::get('/pengumuman', function () { return view('frontend.gallery'); });
-Route::get('/galeri', function () { return view('frontend.gallery'); });
-Route::get('/unduhan', function () { return view('frontend.gallery'); });
+
+// --- Informasi (Dinamis dari DB) ---
+Route::get('/berita', function () { 
+    $berita = \App\Models\Berita::where('status', 'publish')->orderBy('published_at', 'desc')->orderBy('created_at', 'desc')->get();
+    return view('frontend.berita.index', compact('berita')); 
+});
+Route::get('/berita/{slug}', function ($slug) { 
+    $berita = \App\Models\Berita::where('slug', $slug)->firstOrFail();
+    return view('frontend.berita.show', compact('berita')); 
+});
+Route::get('/pengumuman', function () { 
+    $pengumuman = \App\Models\Pengumuman::where('status', 'publish')->orderBy('created_at', 'desc')->get();
+    return view('frontend.pengumuman', compact('pengumuman')); 
+});
+Route::get('/galeri', function () { 
+    $galeri = \App\Models\Galeri::with('items')->orderBy('created_at', 'desc')->get();
+    return view('frontend.gallery', compact('galeri')); 
+});
+Route::get('/unduhan', function () { 
+    $unduhan = \App\Models\Unduhan::orderBy('created_at', 'desc')->get();
+    return view('frontend.unduhan', compact('unduhan')); 
+});
+
+// --- Lembaga (Satuan Pendidikan) ---
+Route::get('/lembaga', function () { 
+    $sekolah = \App\Models\Sekolah::orderBy('nama', 'asc')->get();
+    return view('frontend.lembaga.index', compact('sekolah')); 
+});
+Route::get('/lembaga/{id}', function ($id) { 
+    $sekolah = \App\Models\Sekolah::findOrFail($id);
+    return view('frontend.lembaga.show', compact('sekolah')); 
+});
 Route::get('/kontak', function () { return view('frontend.contact'); });
 
 // --- DASHBOARD REDIRECT (Logic Auth) ---
@@ -351,6 +385,19 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
     |--------------------------------------------------------------------------
     */
     Route::prefix('website')->name('website.')->group(function () {
+        Route::get('profil', [\App\Http\Controllers\Admin\ProfilWebsiteController::class, 'index'])->name('profil.index')->middleware('check_menu:web-profil');
+        Route::put('profil', [\App\Http\Controllers\Admin\ProfilWebsiteController::class, 'update'])->name('profil.update')->middleware('check_menu:web-profil');
+        
+        // --- ROUTE STRUKTUR ORGANISASI ---
+        Route::resource('struktur', \App\Http\Controllers\Admin\StrukturOrganisasiController::class)->except(['create', 'show', 'edit'])->middleware('check_menu:web-struktur');
+        
+        // --- KELOLA KONTEN ---
+        Route::resource('berita', \App\Http\Controllers\Admin\BeritaController::class)->except(['create', 'show', 'edit'])->middleware('check_menu:web-berita');
+        Route::resource('pengumuman', \App\Http\Controllers\Admin\PengumumanController::class)->except(['create', 'show', 'edit'])->middleware('check_menu:web-pengumuman');
+        Route::resource('galeri', \App\Http\Controllers\Admin\GaleriController::class)->except(['create', 'show', 'edit'])->middleware('check_menu:web-galeri');
+        Route::delete('galeri/item/{id}', [\App\Http\Controllers\Admin\GaleriController::class, 'destroyItem'])->name('galeri.item.destroy');
+        Route::resource('unduhan', \App\Http\Controllers\Admin\UnduhanController::class)->except(['create', 'show', 'edit'])->middleware('check_menu:web-unduhan');
+        
         Route::resource('sliders', SliderController::class)->middleware('check_menu:web-slider');
         Route::get('welcome', [WelcomeMessageController::class, 'index'])->name('welcome.index')->middleware('check_menu:web-welcome');
         Route::post('welcome', [WelcomeMessageController::class, 'update'])->name('welcome.update')->middleware('check_menu:web-welcome');

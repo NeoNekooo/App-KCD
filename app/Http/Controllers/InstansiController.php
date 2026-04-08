@@ -54,6 +54,9 @@ class InstansiController extends Controller
             'tanda_tangan'  => 'nullable|image|mimes:png,jpg,jpeg|max:1024',
             'lintang'       => 'nullable|numeric',
             'bujur'         => 'nullable|numeric',
+            'visi'          => 'nullable|string',
+            'misi'          => 'nullable|string',
+            'sejarah_singkat' => 'nullable|string',
         ]);
 
         // 2. Ambil data input KECUALI logo, ttd, & social_media

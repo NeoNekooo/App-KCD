@@ -290,6 +290,11 @@
                                     </button>
                                 </li>
                                 <li class="nav-item">
+                                    <button class="nav-link active d-flex align-items-center gap-2" data-bs-toggle="pill" data-bs-target="#tab-utama" type="button">
+                                        <i class='bx bx-home-smile fs-5'></i> <span class="d-none d-sm-block">Utama</span>
+                                    </button>
+                                </li>
+                                <li class="nav-item">
                                     <button class="nav-link d-flex align-items-center gap-2" data-bs-toggle="pill" data-bs-target="#tab-kontak" type="button">
                                         <i class='bx bx-share-alt fs-5'></i> <span class="d-none d-sm-block">Kontak & Sosmed</span>
                                     </button>

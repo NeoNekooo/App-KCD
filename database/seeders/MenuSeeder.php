@@ -103,7 +103,21 @@ class MenuSeeder extends Seeder
             ],
 
             ['title' => 'Daftar Antrian', 'slug' => 'daftar-antrian', 'icon' => 'bx bx-group', 'route' => 'admin.antrian.index'],
-            ['title' => 'Web Profile', 'slug' => 'web-profile', 'icon' => 'bx bx-globe', 'route' => '#'],
+            [
+                'title' => 'Manajemen Website', 
+                'slug' => 'manajemen-website', 
+                'icon' => 'bx bx-globe',
+                'submenu' => [
+                    ['title' => 'Profil & Tentang', 'slug' => 'web-profil', 'route' => 'admin.website.profil.index'],
+                    ['title' => 'Struktur Organisasi', 'slug' => 'web-struktur', 'route' => 'admin.website.struktur.index'],
+                    ['title' => 'Kelola Berita', 'slug' => 'web-berita', 'route' => 'admin.website.berita.index'],
+                    ['title' => 'Kelola Pengumuman', 'slug' => 'web-pengumuman', 'route' => 'admin.website.pengumuman.index'],
+                    ['title' => 'Kelola Galeri', 'slug' => 'web-galeri', 'route' => 'admin.website.galeri.index'],
+                    ['title' => 'Kelola Unduhan', 'slug' => 'web-unduhan', 'route' => 'admin.website.unduhan.index'],
+                    ['title' => 'Kelola Slider', 'slug' => 'web-slider', 'route' => 'admin.website.sliders.index'],
+                    ['title' => 'Sambutan Pimpinan', 'slug' => 'web-welcome', 'route' => 'admin.website.welcome.index'],
+                ],
+            ],
 
             ['title' => 'SETTINGS', 'slug' => 'header-settings', 'is_header' => true],
             [
