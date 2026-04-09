@@ -61,10 +61,26 @@ use App\Http\Controllers\Admin\SettingController as WebSettingController;
 
 use App\Http\Controllers\WelcomeController;
 
-// --- LANDING PAGE ---
-Route::get('/', [WelcomeController::class, 'index'])->name('landing');
+// --- DOMAIN MANAJEMEN / ADMIN (kcd6.hexanusa.com) ---
+Route::domain('kcd6.hexanusa.com')->group(function () {
+    Route::get('/', function () {
+        return redirect()->route('login');
+    });
+});
 
-// Route::redirect('/', '/login');
+// --- DOMAIN PROFIL / FRONTEND (profilkcd6.hexanusa.com) ---
+Route::domain('profilkcd6.hexanusa.com')->group(function () {
+    Route::get('/', [WelcomeController::class, 'index'])->name('landing');
+});
+
+// --- RUTE FALLBACK (Lokal atau jika domain tidak cocok) ---
+Route::get('/', function () {
+    // Jika di lokal (localhost), tampilkan landing page
+    if (app()->environment('local')) {
+        return app(WelcomeController::class)->index();
+    }
+    return redirect()->route('login');
+});
 
 // --- FRONTEND ROUTES ---
 Route::get('/tentang-kami', function () {

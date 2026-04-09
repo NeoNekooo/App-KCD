@@ -2,12 +2,24 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8 border-b border-blue-800 pb-8 text-center md:text-left">
             <div>
-                <h3 class="text-xl font-bold mb-4 flex items-center md:justify-start justify-center space-x-2">
-                    <span class="bg-white text-blue-900 p-1 rounded font-black">KCD</span>
-                    <span>Kantor Cabang Dinas</span>
+                @php
+                    $instansi = \App\Models\Instansi::first();
+                    $footerLogo = $instansi ? $instansi->logo : null;
+                    $footerName = $instansi ? $instansi->nama_instansi : 'Kantor Cabang Dinas';
+                @endphp
+                <h3 class="text-xl font-bold mb-4 flex items-center md:justify-start justify-center space-x-3">
+                    @if($footerLogo)
+                        <img src="{{ Storage::url($footerLogo) }}" class="h-10 w-auto object-contain" alt="Logo">
+                    @else
+                        <span class="bg-white/10 text-white p-2 rounded-lg font-black">KCD</span>
+                    @endif
+                    <div class="flex flex-col text-left">
+                        <span class="text-base leading-tight">{{ $footerName }}</span>
+                        <span class="text-[10px] text-blue-400 font-bold uppercase tracking-widest">{{ $instansi->wilayah ?? 'Provinsi Jawa Barat' }}</span>
+                    </div>
                 </h3>
                 <p class="text-blue-200 text-sm leading-relaxed">
-                    Menyelenggarakan pelayanan publik yang prima dan profesional demi kemajuan pendidikan dan layanan masyarakat di wilayah kerja kami.
+                    {{ $instansi->alamat ?? 'Menyelenggarakan pelayanan publik yang prima dan profesional demi kemajuan pendidikan dan layanan masyarakat di wilayah kerja kami.' }}
                 </p>
             </div>
             <div>
