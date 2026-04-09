@@ -108,6 +108,50 @@ class WebContentSeeder extends Seeder
             );
         }
 
-        $this->command->info('✅ Konten website (Berita, Pengumuman, Unduhan) berhasil di-seed!');
+        // ================================================
+        // GALERI
+        // ================================================
+        $galeris = [
+            [
+                'judul' => 'Kegiatan Hari Guru Nasional 2025',
+                'tanggal' => '2025-11-25',
+                'deskripsi' => 'Dokumentasi perayaan Hari Guru Nasional di lingkungan KCD Wilayah VI.',
+                'foto' => 'galeri/hgn-2025.jpg',
+            ],
+            [
+                'judul' => 'Peresmian Gedung Layanan Terpadu KCD',
+                'tanggal' => '2026-02-10',
+                'deskripsi' => 'Momen peresmian gedung baru untuk meningkatkan kualitas layanan publik.',
+                'foto' => 'galeri/peresmian-gedung.jpg',
+            ],
+        ];
+
+        foreach ($galeris as $g) {
+            $galeriId = DB::table('galeris')->insertGetId(
+                array_merge($g, ['created_at' => now(), 'updated_at' => now()])
+            );
+
+            // Item Galeri (Foto di dalam album)
+            DB::table('galeri_items')->insert([
+                [
+                    'galeri_id' => $galeriId,
+                    'file' => 'galeri/items/foto1.jpg',
+                    'jenis' => 'foto',
+                    'caption' => 'Suasana kegiatan di pagi hari.',
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ],
+                [
+                    'galeri_id' => $galeriId,
+                    'file' => 'galeri/items/foto2.jpg',
+                    'jenis' => 'foto',
+                    'caption' => 'Penyerahan cinderamata secara simbolis.',
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ],
+            ]);
+        }
+
+        $this->command->info('✅ Konten website (Berita, Pengumuman, Unduhan, Galeri) berhasil di-seed!');
     }
 }
