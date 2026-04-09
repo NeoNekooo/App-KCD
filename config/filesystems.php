@@ -37,14 +37,12 @@ return [
             'throw' => false,
             'report' => false,
         ],
-'public' => [
-    'driver' => 'local',
-    'root' => storage_path('app/public'),
-    'url' => env('ADMIN_URL') . '/storage',
-    'visibility' => 'public',
-    'throw' => false,
-],
-            'report' => false,
+        'public' => [
+            'driver' => 'local',
+            'root' => storage_path('app/public'),
+            'url' => env('ADMIN_URL') . '/storage',
+            'visibility' => 'public',
+            'throw' => false,
         ],
 
         's3' => [
