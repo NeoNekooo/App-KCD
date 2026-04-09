@@ -158,9 +158,7 @@
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
             <!-- Service Card 1 -->
             <div class="group relative bg-white p-8 rounded-[2.5rem] shadow-sm border border-gray-100 hover:shadow-2xl hover:shadow-blue-200/40 transition-all duration-500 hover:-translate-y-1.5 overflow-hidden">
-                <!-- Hover Accent -->
                 <div class="absolute top-0 right-0 w-24 h-24 bg-blue-600/5 rounded-bl-full translate-x-8 -translate-y-8 group-hover:translate-x-0 group-hover:translate-y-0 transition-transform duration-700"></div>
-                
                 <div class="relative z-10">
                     <div class="h-16 w-16 bg-blue-100 rounded-2xl flex items-center justify-center text-blue-600 mb-8 group-hover:scale-110 group-hover:bg-blue-600 group-hover:text-white transition-all duration-500 shadow-inner">
                         <svg class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -181,9 +179,8 @@
             </div>
 
             <!-- Service Card 2 -->
-            <div class="group relative bg-white p-8 rounded-[2.5rem] shadow-sm border border-gray-100 hover:shadow-2xl hover:shadow-blue-200/40 transition-all duration-500 hover:-translate-y-1.5 overflow-hidden border-b-4 border-b-blue-600/20">
+            <div class="group relative bg-white p-8 rounded-[2.5rem] shadow-sm border border-gray-100 hover:shadow-2xl hover:shadow-blue-200/40 transition-all duration-500 hover:-translate-y-1.5 overflow-hidden">
                 <div class="absolute top-0 right-0 w-24 h-24 bg-blue-600/5 rounded-bl-full translate-x-8 -translate-y-8 group-hover:translate-x-0 group-hover:translate-y-0 transition-transform duration-700"></div>
-                
                 <div class="relative z-10">
                     <div class="h-16 w-16 bg-blue-100 rounded-2xl flex items-center justify-center text-blue-600 mb-8 group-hover:scale-110 group-hover:bg-blue-600 group-hover:text-white transition-all duration-500 shadow-inner">
                         <svg class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -206,7 +203,6 @@
             <!-- Service Card 3 -->
             <div class="group relative bg-white p-8 rounded-[2.5rem] shadow-sm border border-gray-100 hover:shadow-2xl hover:shadow-blue-200/40 transition-all duration-500 hover:-translate-y-1.5 overflow-hidden">
                 <div class="absolute top-0 right-0 w-24 h-24 bg-blue-600/5 rounded-bl-full translate-x-8 -translate-y-8 group-hover:translate-x-0 group-hover:translate-y-0 transition-transform duration-700"></div>
-                
                 <div class="relative z-10">
                     <div class="h-16 w-16 bg-blue-100 rounded-2xl flex items-center justify-center text-blue-600 mb-8 group-hover:scale-110 group-hover:bg-blue-600 group-hover:text-white transition-all duration-500 shadow-inner">
                         <svg class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -228,6 +224,4 @@
         </div>
     </div>
 </div>
-
-<!-- Rest of the sections remain the same... -->
 @endsection
