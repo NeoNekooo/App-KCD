@@ -72,7 +72,7 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         
         <!-- Bento Grid 1: Sejarah & Foto -->
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-20">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-20 items-start">
             <!-- Left: Sejarah Singkat -->
             <div class="lg:col-span-7 glass-card rounded-[2rem] p-8 md:p-12 transition-all animate-in delay-100">
                 <div class="inline-flex items-center justify-center p-3 bg-blue-50 text-blue-600 rounded-2xl mb-6 shadow-sm">
@@ -80,8 +80,8 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                     </svg>
                 </div>
-                <h2 class="text-3xl lg:text-4xl font-extrabold text-slate-800 mb-6 font-sans">Sejarah Singkat</h2>
-                <div class="cms-content">
+                <h2 class="text-3xl lg:text-4xl font-extrabold text-slate-800 mb-6 font-sans text-left">Sejarah Singkat</h2>
+                <div class="cms-content text-left">
                     @if($instansi && $instansi->sejarah_singkat)
                         {!! $instansi->sejarah_singkat !!}
                     @else
@@ -91,24 +91,26 @@
             </div>
 
             <!-- Right: Foto Premium Profil -->
-            <div class="lg:col-span-5 rounded-[2rem] overflow-hidden shadow-2xl relative group animate-in delay-200 min-h-[400px]">
-                <!-- Layer Overlay untuk estetika -->
-                <div class="absolute inset-0 bg-gradient-to-t from-slate-900/60 via-transparent to-transparent z-10"></div>
-                
-                @if($instansi && $instansi->foto_profil)
-                    <img src="{{ Storage::url($instansi->foto_profil) }}" alt="Foto Instansi" class="w-full h-full object-cover relative z-0 transition-transform duration-700 group-hover:scale-110">
-                @else
-                    <img src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?ixlib=rb-1.2.1&auto=format&fit=crop&w=1000&q=80" alt="Placeholder Gedung Edukasi" class="w-full h-full object-cover relative z-0 transition-transform duration-700 group-hover:scale-110">
-                @endif
-                
-                <!-- Badge di pojok gambar -->
-                <div class="absolute bottom-6 left-6 right-6 z-20">
-                    <div class="glass-card rounded-xl p-4">
-                        <p class="text-slate-800 font-semibold">{{ $instansi->nama_instansi ?? 'Gedung KCD Wilayah' }}</p>
-                        <p class="text-slate-500 text-sm flex items-center mt-1">
-                            <svg class="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                            Pusat Administratif & Pelayanan
-                        </p>
+            <div class="lg:col-span-5 sticky top-28">
+                <div class="rounded-[2rem] overflow-hidden shadow-2xl relative group animate-in delay-200 aspect-[4/5] lg:aspect-auto lg:h-[600px]">
+                    <!-- Layer Overlay untuk estetika -->
+                    <div class="absolute inset-0 bg-gradient-to-t from-slate-900/60 via-transparent to-transparent z-10"></div>
+                    
+                    @if($instansi && $instansi->foto_profil)
+                        <img src="{{ Storage::url($instansi->foto_profil) }}" alt="Foto Instansi" class="w-full h-full object-cover relative z-0 transition-transform duration-700 group-hover:scale-110">
+                    @else
+                        <img src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?ixlib=rb-1.2.1&auto=format&fit=crop&w=1000&q=80" alt="Placeholder Gedung Edukasi" class="w-full h-full object-cover relative z-0 transition-transform duration-700 group-hover:scale-110">
+                    @endif
+                    
+                    <!-- Badge di pojok gambar -->
+                    <div class="absolute bottom-6 left-6 right-6 z-20">
+                        <div class="glass-card rounded-xl p-4">
+                            <p class="text-slate-800 font-semibold">{{ $instansi->nama_instansi ?? 'Gedung KCD Wilayah' }}</p>
+                            <p class="text-slate-500 text-sm flex items-center mt-1 text-left">
+                                <svg class="w-4 h-4 mr-1 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                                Pusat Administratif & Pelayanan
+                            </p>
+                        </div>
                     </div>
                 </div>
             </div>
