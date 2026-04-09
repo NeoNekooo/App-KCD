@@ -29,7 +29,7 @@ use App\Http\Controllers\Admin\DataSpasialController;
 use App\Http\Controllers\Admin\Administrasi\TipeSuratController;
 use App\Http\Controllers\Admin\Administrasi\SuratKeluarSiswaController;
 use App\Http\Controllers\Admin\Administrasi\SuratKeluarGuruController;
-use App\Http\Controllers\Admin\Administrasi\SuratKeluarInternalController; 
+use App\Http\Controllers\Admin\Administrasi\SuratKeluarInternalController;
 use App\Http\Controllers\Admin\Administrasi\SuratMasukController;
 use App\Http\Controllers\Admin\Administrasi\NomorSuratSettingController;
 use App\Http\Controllers\Admin\Administrasi\ArsipSuratController;
@@ -62,53 +62,53 @@ use App\Http\Controllers\Admin\SettingController as WebSettingController;
 use App\Http\Controllers\WelcomeController;
 
 // --- LANDING PAGE ---
-// Route::get('/', [WelcomeController::class, 'index'])->name('landing');
+Route::get('/', [WelcomeController::class, 'index'])->name('landing');
 
-Route::redirect('/', '/login');
+// Route::redirect('/', '/login');
 
 // --- FRONTEND ROUTES ---
-Route::get('/tentang-kami', function () { 
+Route::get('/tentang-kami', function () {
     $instansi = \App\Models\Instansi::first();
-    return view('frontend.about', compact('instansi')); 
+    return view('frontend.about', compact('instansi'));
 });
-Route::get('/struktur-organisasi', function () { 
+Route::get('/struktur-organisasi', function () {
     $struktur = \App\Models\StrukturOrganisasi::orderBy('urutan', 'asc')->get();
-    return view('frontend.org-chart', compact('struktur')); 
+    return view('frontend.org-chart', compact('struktur'));
 });
 Route::get('/layanan/pengaduan', function () { return view('frontend.services'); });
 Route::get('/layanan/administrasi-ptk', function () { return view('frontend.services'); });
 Route::get('/layanan/tata-kelola', function () { return view('frontend.services'); });
 
 // --- Informasi (Dinamis dari DB) ---
-Route::get('/berita', function () { 
+Route::get('/berita', function () {
     $berita = \App\Models\Berita::where('status', 'publish')->orderBy('published_at', 'desc')->orderBy('created_at', 'desc')->get();
-    return view('frontend.berita.index', compact('berita')); 
+    return view('frontend.berita.index', compact('berita'));
 });
-Route::get('/berita/{slug}', function ($slug) { 
+Route::get('/berita/{slug}', function ($slug) {
     $berita = \App\Models\Berita::where('slug', $slug)->firstOrFail();
-    return view('frontend.berita.show', compact('berita')); 
+    return view('frontend.berita.show', compact('berita'));
 });
-Route::get('/pengumuman', function () { 
+Route::get('/pengumuman', function () {
     $pengumuman = \App\Models\Pengumuman::where('status', 'publish')->orderBy('created_at', 'desc')->get();
-    return view('frontend.pengumuman', compact('pengumuman')); 
+    return view('frontend.pengumuman', compact('pengumuman'));
 });
-Route::get('/galeri', function () { 
+Route::get('/galeri', function () {
     $galeri = \App\Models\Galeri::with('items')->orderBy('created_at', 'desc')->get();
-    return view('frontend.gallery', compact('galeri')); 
+    return view('frontend.gallery', compact('galeri'));
 });
-Route::get('/unduhan', function () { 
+Route::get('/unduhan', function () {
     $unduhan = \App\Models\Unduhan::orderBy('created_at', 'desc')->get();
-    return view('frontend.unduhan', compact('unduhan')); 
+    return view('frontend.unduhan', compact('unduhan'));
 });
 
 // --- Lembaga (Satuan Pendidikan) ---
-Route::get('/lembaga', function () { 
+Route::get('/lembaga', function () {
     $sekolah = \App\Models\Sekolah::orderBy('nama', 'asc')->get();
-    return view('frontend.lembaga.index', compact('sekolah')); 
+    return view('frontend.lembaga.index', compact('sekolah'));
 });
-Route::get('/lembaga/{id}', function ($id) { 
+Route::get('/lembaga/{id}', function ($id) {
     $sekolah = \App\Models\Sekolah::findOrFail($id);
-    return view('frontend.lembaga.show', compact('sekolah')); 
+    return view('frontend.lembaga.show', compact('sekolah'));
 });
 Route::get('/kontak', function () { return view('frontend.contact'); });
 
@@ -151,12 +151,12 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
     | KEPEGAWAIAN
     |--------------------------------------------------------------------------
     */
-    
+
     // A. Tugas Pegawai
     Route::controller(TugasPegawaiKcdController::class)
         ->prefix('kepegawaian/tugas-internal')
         ->name('kepegawaian.tugas-kcd.')
-        ->middleware('check_menu:kepegawaian-tugas') 
+        ->middleware('check_menu:kepegawaian-tugas')
         ->group(function() {
             Route::get('/', 'index')->name('index');
             Route::post('/', 'store')->name('store');
@@ -182,7 +182,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
             Route::put('/{id}/panggil', 'panggil')->name('panggil');
             Route::put('/{id}/selesai', 'selesai')->name('selesai');
             Route::delete('/{id}', 'destroy')->name('destroy');
-            
+
             // Kategori Keperluan
             Route::post('/kategori', 'storeCategory')->name('kategori.store');
             Route::delete('/kategori/{id}', 'destroyCategory')->name('kategori.destroy');
@@ -200,7 +200,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
             Route::get('/', 'index')->name('index');
             Route::post('/', 'store')->name('store');
             Route::get('/{id}', 'show')->name('show');
-            Route::put('/{id}', 'update')->name('update'); 
+            Route::put('/{id}', 'update')->name('update');
             Route::delete('/{id}', 'destroy')->name('destroy');
             Route::put('/{id}/reset', 'resetPassword')->name('reset');
         });
@@ -221,8 +221,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
         ->name('instansi.')
         ->middleware('check_menu:profil-instansi')
         ->group(function () {
-            Route::get('/', 'index')->name('index'); 
-            Route::put('/', 'update')->name('update'); 
+            Route::get('/', 'index')->name('index');
+            Route::put('/', 'update')->name('update');
         });
 
     /*
@@ -230,7 +230,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
     | MONITORING
     |--------------------------------------------------------------------------
     */
-    
+
     // 🔥 Route Monitoring Sync Log 🔥
     Route::get('monitoring-sync', [SyncLogController::class, 'index'])->name('monitoring-sync.index');
 
@@ -255,7 +255,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
             Route::get('rekapitulasi/export-excel', 'exportRekapitulasi')->name('rekapitulasi.export-excel'); // Cetak Excel GTK
             Route::get('guru', 'indexGuru')->name('guru.index');
             Route::get('tenaga-kependidikan', 'indexTendik')->name('tendik.index');
-            Route::get('show-multiple', 'showMultiple')->name('show-multiple'); 
+            Route::get('show-multiple', 'showMultiple')->name('show-multiple');
             Route::get('{id}', 'show')->name('show');
         });
 
@@ -286,11 +286,11 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
     Route::prefix('administrasi')->name('administrasi.')
         ->middleware('check_menu:administrasi-surat')
         ->group(function () {
-            
+
             // Route Copy Template
             Route::post('tipe-surat/{id}/duplicate', [TipeSuratController::class, 'duplicate'])->name('tipe-surat.duplicate');
             Route::resource('tipe-surat', TipeSuratController::class);
-            
+
             // Surat Keluar Siswa & Guru
             Route::get('surat-keluar-siswa/get-siswa/{nama_rombel}', [SuratKeluarSiswaController::class, 'getSiswaByKelas'])->name('surat-keluar-siswa.get-siswa');
             Route::resource('surat-keluar-siswa', SuratKeluarSiswaController::class)->only(['index', 'store']);
@@ -306,12 +306,12 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
                     Route::post('/cetak', 'cetak')->name('cetak');
                     Route::post('/pdf', 'downloadPdf')->name('pdf');
                 });
-            
+
             // Surat Masuk & Pengaturan Nomor
             Route::resource('surat-masuk', SuratMasukController::class);
             Route::post('pengaturan-nomor/reset/{id}', [NomorSuratSettingController::class, 'resetCounter'])->name('pengaturan-nomor.reset');
             Route::resource('pengaturan-nomor', NomorSuratSettingController::class)->except(['create', 'edit', 'show']);
-            
+
             // Arsip
             Route::resource('arsip-surat', ArsipSuratController::class)->only(['index', 'destroy']);
             Route::get('arsip-surat/{id}/cetak', [ArsipSuratController::class, 'cetak'])->name('arsip-surat.cetak');
@@ -322,7 +322,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
     | LAYANAN & VERIFIKASI GTK
     |--------------------------------------------------------------------------
     */
-    
+
     Route::middleware('check_menu:layanan-gtk')->prefix('verifikasi')->name('verifikasi.')->group(function () {
         Route::get('/', [VerifikasiController::class, 'index'])->name('index');
         Route::post('/{id}/approve-initial', [VerifikasiController::class, 'approveInitial'])->name('approve_initial');
@@ -352,7 +352,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
 
         // Proses Verifikasi Akhir (ACC / Revisi Berkas)
         Route::put('/{id}/process', [VerifikasiPdController::class, 'verifyProcess'])->name('process');
-        
+
         // Opsional: Jika butuh route reject mandiri di tahap awal
         Route::post('/{id}/reject', [VerifikasiPdController::class, 'reject'])->name('reject');
     });
@@ -389,17 +389,17 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
     Route::prefix('website')->name('website.')->group(function () {
         Route::get('profil', [\App\Http\Controllers\Admin\ProfilWebsiteController::class, 'index'])->name('profil.index')->middleware('check_menu:web-profil');
         Route::put('profil', [\App\Http\Controllers\Admin\ProfilWebsiteController::class, 'update'])->name('profil.update')->middleware('check_menu:web-profil');
-        
+
         // --- ROUTE STRUKTUR ORGANISASI ---
         Route::resource('struktur', \App\Http\Controllers\Admin\StrukturOrganisasiController::class)->except(['create', 'show', 'edit'])->middleware('check_menu:web-struktur');
-        
+
         // --- KELOLA KONTEN ---
         Route::resource('berita', \App\Http\Controllers\Admin\BeritaController::class)->except(['create', 'show', 'edit'])->middleware('check_menu:web-berita');
         Route::resource('pengumuman', \App\Http\Controllers\Admin\PengumumanController::class)->except(['create', 'show', 'edit'])->middleware('check_menu:web-pengumuman');
         Route::resource('galeri', \App\Http\Controllers\Admin\GaleriController::class)->except(['create', 'show', 'edit'])->middleware('check_menu:web-galeri');
         Route::delete('galeri/item/{id}', [\App\Http\Controllers\Admin\GaleriController::class, 'destroyItem'])->name('galeri.item.destroy');
         Route::resource('unduhan', \App\Http\Controllers\Admin\UnduhanController::class)->except(['create', 'show', 'edit'])->middleware('check_menu:web-unduhan');
-        
+
         Route::resource('sliders', SliderController::class)->middleware('check_menu:web-slider');
         Route::get('welcome', [WelcomeMessageController::class, 'index'])->name('welcome.index')->middleware('check_menu:web-welcome');
         Route::post('welcome', [WelcomeMessageController::class, 'update'])->name('welcome.update')->middleware('check_menu:web-welcome');
