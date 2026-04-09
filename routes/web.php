@@ -121,15 +121,48 @@ Route::get('/unduhan', function () {
 Route::get('/lembaga', function () {
     $query = \App\Models\Sekolah::query();
     
-    // Filter berdasarkan kabupaten jika ada di URL (?kabupaten=...)
-    if (request()->has('kabupaten')) {
+    // Filter Pencarian (Nama / NPSN)
+    if (request('search')) {
+        $query->where(function($q) {
+            $q->where('nama', 'like', '%' . request('search') . '%')
+              ->orWhere('npsn', 'like', '%' . request('search') . '%');
+        });
+    }
+
+    // Filter Kabupaten/Kota
+    if (request('kabupaten')) {
         $query->where('kabupaten_kota', request('kabupaten'));
     }
+
+    // Filter Kecamatan
+    if (request('kecamatan')) {
+        $query->where('kecamatan', request('kecamatan'));
+    }
+
+    // Filter Jenjang
+    if (request('jenjang')) {
+        $query->where('bentuk_pendidikan_id_str', request('jenjang'));
+    }
+
+    // Filter Status
+    if (request('status')) {
+        $query->where('status_sekolah_str', request('status'));
+    }
     
-    $sekolah = $query->orderBy('nama', 'asc')->get();
-    $kabupatenAktif = request('kabupaten');
+    $sekolah = $query->orderBy('nama', 'asc')->paginate(20)->withQueryString();
     
-    return view('frontend.lembaga.index', compact('sekolah', 'kabupatenAktif'));
+    // Data untuk dropdown filter
+    $listKabupaten = \App\Models\Sekolah::select('kabupaten_kota')->distinct()->whereNotNull('kabupaten_kota')->orderBy('kabupaten_kota')->get();
+    $listJenjang = \App\Models\Sekolah::select('bentuk_pendidikan_id_str')->distinct()->whereNotNull('bentuk_pendidikan_id_str')->orderBy('bentuk_pendidikan_id_str')->get();
+    $listStatus = \App\Models\Sekolah::select('status_sekolah_str')->distinct()->whereNotNull('status_sekolah_str')->orderBy('status_sekolah_str')->get();
+
+    return view('frontend.lembaga.index', [
+        'sekolah' => $sekolah,
+        'listKabupaten' => $listKabupaten,
+        'listJenjang' => $listJenjang,
+        'listStatus' => $listStatus,
+        'filters' => request()->all()
+    ]);
 });
 Route::get('/lembaga/{id}', function ($id) {
     $sekolah = \App\Models\Sekolah::findOrFail($id);

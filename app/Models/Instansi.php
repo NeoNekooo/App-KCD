@@ -29,11 +29,13 @@ class Instansi extends Model
         'visi',
         'misi',
         'sejarah_singkat',
-        'foto_profil'
+        'foto_profil',
+        'foto_sejarah'
     ];
 
     // INI KUNCINYA: Otomatis convert Array PHP <-> JSON Database
     protected $casts = [
         'social_media' => 'array',
+        'foto_sejarah' => 'array',
     ];
 }

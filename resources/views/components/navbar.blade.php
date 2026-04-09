@@ -8,7 +8,7 @@
             <!-- Logo Section -->
             <div class="flex items-center min-w-0 flex-1 lg:flex-initial">
                 <a href="/" class="flex items-center space-x-3 group min-w-0">
-                    <div class="transition-transform duration-500 group-hover:scale-110 flex-shrink-0 flex items-center justify-center overflow-hidden w-12 h-12 md:w-14 md:h-14">
+                    <div class="transition-transform duration-500 group-hover:scale-110 flex-shrink-0 flex items-center justify-center overflow-hidden w-14 h-14 md:w-16 md:h-16">
                         @php
                             $instansi = \App\Models\Instansi::first();
                             $siteLogo = $instansi ? $instansi->logo : null;
@@ -84,8 +84,8 @@
                         </div>
                     </div>
 
-                    <!-- Satuan Pendidikan Dropdown (NEW) -->
-                    <div class="relative" @mouseenter="openDropdown = 'satdik'" @mouseleave="openDropdown = null" x-data="{ openSub: false }">
+                    <!-- Satuan Pendidikan Dropdown -->
+                    <div class="relative" @mouseenter="openDropdown = 'satdik'" @mouseleave="openDropdown = null">
                         <button class="flex items-center px-4 py-2 text-sm font-bold tracking-wide transition-all rounded-xl outline-none"
                                 :class="{ 'text-blue-900 hover:bg-blue-50': scrolled, 'text-white hover:bg-white/10': !scrolled }">
                             <span>Satuan Pendidikan</span>
@@ -94,31 +94,7 @@
                             </svg>
                         </button>
                         <div x-show="openDropdown === 'satdik'" x-transition class="absolute left-0 mt-1 w-56 bg-white rounded-2xl shadow-2xl border border-gray-100 py-3 z-50">
-                            
-                            <!-- Submenu: Lembaga -->
-                            <div class="relative group/sub" @mouseenter="openSub = true" @mouseleave="openSub = false">
-                                <div class="flex items-center justify-between px-6 py-2.5 text-sm font-bold text-gray-600 hover:bg-blue-50 hover:text-blue-600 transition cursor-pointer">
-                                    <span>Lembaga</span>
-                                    <svg class="w-4 h-4 -rotate-90" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                                    </svg>
-                                </div>
-                                
-                                <!-- Nested Dropdown (Kabupaten/Kota) -->
-                                <div x-show="openSub" x-transition class="absolute left-full top-0 ml-0.5 w-64 bg-white rounded-2xl shadow-2xl border border-gray-100 py-3 z-50">
-                                    @php
-                                        $kabupatens = \App\Models\Sekolah::select('kabupaten_kota')->distinct()->whereNotNull('kabupaten_kota')->orderBy('kabupaten_kota', 'asc')->get();
-                                    @endphp
-                                    @forelse($kabupatens as $kab)
-                                        <a href="{{ url('/lembaga?kabupaten=' . urlencode($kab->kabupaten_kota)) }}" class="block px-6 py-2.5 text-sm font-bold text-gray-600 hover:bg-blue-50 hover:text-blue-600 transition">
-                                            {{ $kab->kabupaten_kota }}
-                                        </a>
-                                    @empty
-                                        <span class="block px-6 py-2.5 text-sm text-gray-400 italic">Data belum tersedia</span>
-                                    @endforelse
-                                </div>
-                            </div>
-
+                            <a href="/lembaga" class="block px-6 py-2.5 text-sm font-bold text-gray-600 hover:bg-blue-50 hover:text-blue-600 transition">Lembaga Pendidikan</a>
                         </div>
                     </div>
 
@@ -191,8 +167,8 @@
                 </div>
             </div>
 
-            <!-- Satuan Pendidikan Mobile (NEW) -->
-            <div x-data="{ open: false, openLembaga: false }">
+            <!-- Satuan Pendidikan Mobile -->
+            <div x-data="{ open: false }">
                 <button @click="open = !open" class="w-full flex items-center justify-between px-6 py-4 rounded-2xl text-base font-bold text-gray-600 hover:bg-blue-50 hover:text-blue-600 transition outline-none">
                     <span>Satuan Pendidikan</span>
                     <svg class="w-4 h-4 transition-transform" :class="{'rotate-180': open}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -200,24 +176,7 @@
                     </svg>
                 </button>
                 <div x-show="open" class="pl-6 space-y-1 bg-gray-50 rounded-2xl mb-2">
-                    <button @click="openLembaga = !openLembaga" class="w-full flex items-center justify-between px-6 py-3 text-sm font-bold text-gray-500 outline-none">
-                        <span>Lembaga</span>
-                        <svg class="w-3 h-3 transition-transform" :class="{'rotate-180': openLembaga}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                        </svg>
-                    </button>
-                    <div x-show="openLembaga" class="pl-4 pb-2 space-y-1">
-                        @php
-                            $kabupatens = \App\Models\Sekolah::select('kabupaten_kota')->distinct()->whereNotNull('kabupaten_kota')->orderBy('kabupaten_kota', 'asc')->get();
-                        @endphp
-                        @forelse($kabupatens as $kab)
-                            <a href="{{ url('/lembaga?kabupaten=' . urlencode($kab->kabupaten_kota)) }}" class="block px-6 py-2 text-xs font-bold text-gray-400 hover:text-blue-600">
-                                {{ $kab->kabupaten_kota }}
-                            </a>
-                        @empty
-                            <span class="block px-6 py-2 text-xs text-gray-400 italic">Data belum tersedia</span>
-                        @endforelse
-                    </div>
+                    <a href="/lembaga" class="block px-6 py-3 text-sm font-bold text-gray-500">Lembaga Pendidikan</a>
                 </div>
             </div>
 

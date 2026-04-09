@@ -1,83 +1,218 @@
 @extends('layouts.frontend')
-@section('title', 'Lembaga - Satuan Pendidikan')
+
+@section('title', 'Satuan Pendidikan - Kantor Cabang Dinas')
+
+@push('styles')
+<style>
+    .table-responsive::-webkit-scrollbar {
+        height: 8px;
+    }
+    .table-responsive::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 10px;
+    }
+    .table-responsive::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 10px;
+    }
+    .table-responsive::-webkit-scrollbar-thumb:hover {
+        background: #94a3b8;
+    }
+    .filter-card {
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(226, 232, 240, 0.8);
+    }
+    .status-badge-negeri { background-color: #dcfce7; color: #166534; }
+    .status-badge-swasta { background-color: #fef9c3; color: #854d0e; }
+    .jenjang-badge { background-color: #e0f2fe; color: #075985; }
+    
+    .animate-in {
+        opacity: 0;
+        transform: translateY(20px);
+        animation: fadeInUp 0.6s ease-out forwards;
+    }
+    @keyframes fadeInUp {
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
+@endpush
+
 @section('content')
-<div class="bg-slate-900 py-16">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <div class="inline-flex items-center gap-2 bg-blue-500/20 backdrop-blur-sm border border-blue-400/30 text-blue-200 text-sm font-medium px-4 py-1.5 rounded-full mb-6">
-            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
-            Satuan Pendidikan Binaan
-        </div>
-        <h1 class="text-4xl md:text-5xl font-extrabold text-white mb-4 tracking-tight">
-            {{ $kabupatenAktif ? 'Lembaga - ' . $kabupatenAktif : 'Lembaga Pendidikan' }}
-        </h1>
-        <p class="text-lg text-blue-200/80 max-w-2xl mx-auto">
-            {{ $kabupatenAktif ? 'Daftar satuan pendidikan binaan di wilayah ' . $kabupatenAktif : 'Daftar satuan pendidikan yang berada di bawah naungan Kantor Cabang Dinas Pendidikan.' }}
+<!-- Header Section -->
+<div class="bg-blue-900 py-16 relative overflow-hidden">
+    <div class="absolute inset-0 opacity-10">
+        <svg class="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+            <path d="M0 100 C 20 0 50 0 100 100 Z" fill="white"></path>
+        </svg>
+    </div>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
+        <h1 class="text-4xl md:text-5xl font-black text-white mb-4 tracking-tight uppercase animate-in">Satuan Pendidikan</h1>
+        <p class="text-lg text-blue-100/80 max-w-2xl mx-auto font-light animate-in" style="animation-delay: 100ms;">
+            Data resmi lembaga pendidikan yang berada di bawah naungan Cabang Dinas Pendidikan.
         </p>
     </div>
 </div>
 
-<div class="py-16 bg-gray-50">
+<!-- Main Section -->
+<div class="bg-slate-50 min-h-screen py-12">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
-        <!-- Active Filter Badge -->
-        @if($kabupatenAktif)
-        <div class="mb-8 flex justify-center">
-            <div class="inline-flex items-center gap-3 bg-white px-5 py-2.5 rounded-2xl shadow-sm border border-blue-100">
-                <span class="text-sm font-bold text-gray-400 uppercase tracking-widest">Filter:</span>
-                <span class="text-sm font-black text-blue-600 uppercase tracking-widest">{{ $kabupatenAktif }}</span>
-                <a href="{{ url('/lembaga') }}" class="ml-2 text-gray-300 hover:text-red-500 transition">
-                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                </a>
-            </div>
-        </div>
-        @endif
-
-        <!-- Search & Filter -->
-        <div class="mb-10 max-w-xl mx-auto">
-            <div class="relative">
-                <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                <input type="text" id="searchSekolah" placeholder="Cari nama sekolah..." class="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition text-sm">
-            </div>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="sekolahGrid">
-            @forelse($sekolah as $item)
-            <a href="{{ url('/lembaga/'.$item->id) }}" class="sekolah-card group bg-white rounded-2xl shadow-sm border border-gray-100 p-6 hover:shadow-xl hover:-translate-y-1 transition-all duration-300" data-nama="{{ strtolower($item->nama) }}">
-                <div class="flex items-start gap-4">
-                    <div class="w-14 h-14 rounded-xl bg-blue-50 flex items-center justify-center flex-shrink-0 group-hover:bg-blue-600 group-hover:text-white transition-all duration-300">
-                        @if($item->logo)
-                        <img src="{{ Storage::url($item->logo) }}" class="w-10 h-10 object-contain">
-                        @else
-                        <svg class="w-7 h-7 text-blue-600 group-hover:text-white transition" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
-                        @endif
-                    </div>
-                    <div class="min-w-0">
-                        <h3 class="font-bold text-gray-900 text-sm leading-tight group-hover:text-blue-600 transition line-clamp-2">{{ $item->nama }}</h3>
-                        <p class="text-xs text-gray-400 mt-1">NPSN: {{ $item->npsn ?? '-' }}</p>
-                        <div class="flex flex-wrap items-center gap-2 mt-2">
-                            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full {{ $item->status_sekolah_str == 'Negeri' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700' }}">{{ $item->status_sekolah_str ?? '-' }}</span>
-                            <span class="text-[10px] font-medium text-gray-400">{{ $item->kecamatan ?? '' }}</span>
-                        </div>
+        <!-- Filter Panel -->
+        <div class="filter-card rounded-[2rem] p-6 mb-8 shadow-sm animate-in" style="animation-delay: 200ms;">
+            <form action="{{ url('/lembaga') }}" method="GET" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                
+                <!-- Search -->
+                <div class="lg:col-span-2">
+                    <label class="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Cari Sekolah / NPSN</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-slate-400">
+                            <i class='bx bx-search fs-5'></i>
+                        </span>
+                        <input type="text" name="search" value="{{ $filters['search'] ?? '' }}" 
+                               class="w-full pl-11 pr-4 py-3 rounded-2xl border border-slate-200 focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition outline-none text-sm font-medium" 
+                               placeholder="Nama sekolah atau NPSN...">
                     </div>
                 </div>
-            </a>
-            @empty
-            <div class="col-span-full text-center py-20">
-                <h3 class="text-xl font-bold text-gray-900">Belum ada data satuan pendidikan</h3>
-            </div>
-            @endforelse
+
+                <!-- Kabupaten -->
+                <div>
+                    <label class="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Kabupaten/Kota</label>
+                    <select name="kabupaten" class="w-full px-4 py-3 rounded-2xl border border-slate-200 focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition outline-none text-sm font-bold text-slate-600 bg-white">
+                        <option value="">Semua Wilayah</option>
+                        @foreach($listKabupaten as $kab)
+                            <option value="{{ $kab->kabupaten_kota }}" {{ ($filters['kabupaten'] ?? '') == $kab->kabupaten_kota ? 'selected' : '' }}>
+                                {{ $kab->kabupaten_kota }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <!-- Jenjang -->
+                <div>
+                    <label class="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Jenjang</label>
+                    <select name="jenjang" class="w-full px-4 py-3 rounded-2xl border border-slate-200 focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition outline-none text-sm font-bold text-slate-600 bg-white">
+                        <option value="">Semua Jenjang</option>
+                        @foreach($listJenjang as $j)
+                            <option value="{{ $j->bentuk_pendidikan_id_str }}" {{ ($filters['jenjang'] ?? '') == $j->bentuk_pendidikan_id_str ? 'selected' : '' }}>
+                                {{ $j->bentuk_pendidikan_id_str }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex items-end gap-2">
+                    <button type="submit" class="flex-grow bg-blue-600 text-white font-black uppercase tracking-widest py-3 px-4 rounded-2xl hover:bg-blue-700 shadow-lg hover:shadow-blue-200 transition duration-300">
+                        Filter
+                    </button>
+                    <a href="{{ url('/lembaga') }}" class="bg-slate-100 text-slate-500 p-3 rounded-2xl hover:bg-slate-200 transition" title="Reset Filter">
+                        <i class='bx bx-refresh fs-4'></i>
+                    </a>
+                </div>
+            </form>
         </div>
+
+        <!-- Data Info & Results -->
+        <div class="flex flex-col md:flex-row justify-between items-center mb-6 px-4 animate-in" style="animation-delay: 300ms;">
+            <div class="mb-4 md:mb-0">
+                <span class="text-sm text-slate-500 font-medium">Menampilkan <span class="text-blue-600 font-bold">{{ $sekolah->firstItem() ?? 0 }}-{{ $sekolah->lastItem() ?? 0 }}</span> dari <span class="text-slate-800 font-black">{{ $sekolah->total() }}</span> sekolah</span>
+            </div>
+            
+            <div class="flex gap-2">
+                @if($filters)
+                    <div class="flex flex-wrap gap-2">
+                        @foreach($filters as $key => $val)
+                            @if($val && !in_array($key, ['page', 'status']))
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-blue-50 text-blue-600 text-[10px] font-black uppercase tracking-wider border border-blue-100">
+                                    {{ $key }}: {{ $val }}
+                                </span>
+                            @endif
+                        @endforeach
+                    </div>
+                @endif
+            </div>
+        </div>
+
+        <!-- Modern Data Table -->
+        <div class="bg-white rounded-[2.5rem] shadow-xl overflow-hidden border border-slate-100 mb-8 animate-in" style="animation-delay: 400ms;">
+            <div class="table-responsive">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-slate-50/50 border-b border-slate-100">
+                            <th class="px-8 py-6 text-[11px] font-black text-slate-400 uppercase tracking-[0.2em]">Info Lembaga</th>
+                            <th class="px-6 py-6 text-[11px] font-black text-slate-400 uppercase tracking-[0.2em]">NPSN</th>
+                            <th class="px-6 py-6 text-[11px] font-black text-slate-400 uppercase tracking-[0.2em]">Status & Jenjang</th>
+                            <th class="px-6 py-6 text-[11px] font-black text-slate-400 uppercase tracking-[0.2em]">Wilayah</th>
+                            <th class="px-8 py-6 text-[11px] font-black text-slate-400 uppercase tracking-[0.2em] text-center">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-50">
+                        @forelse($sekolah as $item)
+                        <tr class="hover:bg-blue-50/30 transition-colors duration-200 group">
+                            <td class="px-8 py-5">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300 shadow-sm border border-white">
+                                        @if($item->logo)
+                                            <img src="{{ Storage::url($item->logo) }}" class="w-8 h-8 object-contain">
+                                        @else
+                                            <i class='bx bxs-school text-slate-400 fs-4'></i>
+                                        @endif
+                                    </div>
+                                    <div class="min-w-0">
+                                        <div class="text-sm font-black text-slate-800 truncate">{{ $item->nama }}</div>
+                                        <div class="text-[11px] text-slate-400 font-bold uppercase tracking-wider mt-0.5 truncate">{{ $item->alamat_jalan ?? 'Alamat belum tersedia' }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-5">
+                                <span class="px-3 py-1.5 rounded-xl bg-slate-100 text-slate-600 text-xs font-mono font-bold tracking-wider border border-slate-200/50">
+                                    {{ $item->npsn }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-5">
+                                <div class="flex flex-col gap-1.5">
+                                    <span class="inline-flex w-fit px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest {{ strtolower($item->status_sekolah_str) == 'negeri' ? 'status-badge-negeri' : 'status-badge-swasta' }}">
+                                        {{ $item->status_sekolah_str }}
+                                    </span>
+                                    <span class="inline-flex w-fit px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest jenjang-badge">
+                                        {{ $item->bentuk_pendidikan_id_str }}
+                                    </span>
+                                </div>
+                            </td>
+                            <td class="px-6 py-5">
+                                <div class="text-xs font-bold text-slate-700">{{ $item->kecamatan }}</div>
+                                <div class="text-[10px] text-slate-400 font-black uppercase tracking-widest mt-1">{{ $item->kabupaten_kota }}</div>
+                            </td>
+                            <td class="px-8 py-5 text-center">
+                                <a href="{{ url('/lembaga/'.$item->id) }}" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-blue-600 text-white font-black uppercase tracking-widest text-[10px] hover:bg-blue-700 shadow-lg hover:shadow-blue-200 transition-all duration-300 group-hover:scale-105 border-0">
+                                    <span>Lihat Detail</span>
+                                    <i class='bx bx-right-arrow-alt fs-5'></i>
+                                </a>
+                            </td>
+                        </tr>
+                        @empty
+                        <tr>
+                            <td colspan="5" class="px-8 py-20 text-center">
+                                <div class="flex flex-col items-center">
+                                    <i class='bx bx-search-alt text-slate-200' style="font-size: 5rem;"></i>
+                                    <h3 class="text-xl font-bold text-slate-800 mt-4">Data tidak ditemukan</h3>
+                                    <p class="text-slate-400 text-sm mt-2">Coba ganti kata kunci pencarian atau bersihkan filter.</p>
+                                    <a href="{{ url('/lembaga') }}" class="mt-6 text-blue-600 font-black uppercase tracking-widest text-xs hover:underline">Lihat Semua Sekolah</a>
+                                </div>
+                            </td>
+                        </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Custom Styled Pagination -->
+        <div class="px-4">
+            {{ $sekolah->links() }}
+        </div>
+
     </div>
 </div>
-
-@push('scripts')
-<script>
-document.getElementById('searchSekolah')?.addEventListener('input', function() {
-    const q = this.value.toLowerCase();
-    document.querySelectorAll('.sekolah-card').forEach(card => {
-        card.style.display = card.dataset.nama.includes(q) ? '' : 'none';
-    });
-});
-</script>
-@endpush
 @endsection

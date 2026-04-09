@@ -50,23 +50,49 @@
                             </div>
                             
                             <div class="col-lg-4">
-                                <label class="form-label small fw-bold text-primary text-uppercase mb-2"><i class='bx bx-image me-1'></i> Foto Profil / Sejarah</label>
-                                <div class="border rounded-4 p-3 text-center bg-light">
-                                    @if ($instansi->foto_profil)
-                                        <img src="{{ Storage::url($instansi->foto_profil) }}" id="previewFoto" class="img-fluid rounded mb-3 shadow-sm" style="max-height: 200px; object-fit: cover;">
-                                    @else
-                                        <img src="" id="previewFoto" class="img-fluid rounded mb-3 shadow-sm d-none" style="max-height: 200px; object-fit: cover;">
-                                        <div id="fotoPlaceholder" class="text-muted mb-3 py-4">
-                                            <i class='bx bx-image-add fs-1 opacity-50'></i>
-                                            <div class="small fw-medium mt-2">Belum ada foto</div>
+                                <!-- Foto Profil Utama -->
+                                <div class="mb-4">
+                                    <label class="form-label small fw-bold text-primary text-uppercase mb-2"><i class='bx bx-image me-1'></i> Foto Profil Utama</label>
+                                    <div class="border rounded-4 p-3 text-center bg-light">
+                                        @if ($instansi->foto_profil)
+                                            <img src="{{ Storage::url($instansi->foto_profil) }}" id="previewFoto" class="img-fluid rounded mb-3 shadow-sm" style="max-height: 150px; width: 100%; object-fit: cover;">
+                                        @else
+                                            <img src="" id="previewFoto" class="img-fluid rounded mb-3 shadow-sm d-none" style="max-height: 150px; width: 100%; object-fit: cover;">
+                                            <div id="fotoPlaceholder" class="text-muted mb-3 py-3">
+                                                <i class='bx bx-image-add fs-1 opacity-50'></i>
+                                                <div class="small fw-medium mt-2">Belum ada foto</div>
+                                            </div>
+                                        @endif
+                                        
+                                        <label for="uploadFoto" class="btn btn-sm btn-outline-primary w-100 fw-bold rounded-pill">
+                                            <i class="bx bx-upload me-1"></i> Pilih Foto Utama
+                                        </label>
+                                        <input type="file" id="uploadFoto" name="foto_profil" class="d-none" accept="image/png, image/jpeg, image/jpg, image/webp" onchange="previewImage(this, 'previewFoto', 'fotoPlaceholder')">
+                                    </div>
+                                </div>
+
+                                <!-- Foto Galeri Sejarah (Multiple) -->
+                                <div>
+                                    <label class="form-label small fw-bold text-primary text-uppercase mb-2"><i class='bx bx-images me-1'></i> Foto Galeri Sejarah (Banyak)</label>
+                                    <div class="border rounded-4 p-3 bg-light">
+                                        <div id="multiplePreview" class="row g-2 mb-3">
+                                            @if($instansi->foto_sejarah && is_array($instansi->foto_sejarah))
+                                                @foreach($instansi->foto_sejarah as $fs)
+                                                    <div class="col-4">
+                                                        <img src="{{ Storage::url($fs) }}" class="img-fluid rounded shadow-xs border border-white" style="aspect-ratio: 1/1; object-fit: cover;">
+                                                    </div>
+                                                @endforeach
+                                            @else
+                                                <div class="col-12 text-center text-muted py-3 small italic">Belum ada foto tambahan</div>
+                                            @endif
                                         </div>
-                                    @endif
-                                    
-                                    <label for="uploadFoto" class="btn btn-sm btn-outline-primary w-100 fw-bold rounded-pill">
-                                        <i class="bx bx-upload me-1"></i> Pilih Foto Baru
-                                    </label>
-                                    <input type="file" id="uploadFoto" name="foto_profil" class="d-none" accept="image/png, image/jpeg, image/jpg, image/webp" onchange="previewImage(this, 'previewFoto', 'fotoPlaceholder')">
-                                    <div class="small text-muted mt-2" style="font-size: 0.75rem;">Format JPG/PNG/WEBP (Max 2MB)</div>
+                                        
+                                        <label for="uploadMultiple" class="btn btn-sm btn-primary w-100 fw-bold rounded-pill">
+                                            <i class="bx bx-plus-circle me-1"></i> Upload Banyak Foto
+                                        </label>
+                                        <input type="file" id="uploadMultiple" name="foto_sejarah[]" class="d-none" multiple accept="image/png, image/jpeg, image/jpg, image/webp" onchange="previewMultiple(this, 'multiplePreview')">
+                                        <div class="small text-muted mt-2 text-center" style="font-size: 0.7rem;">Pilih beberapa foto sekaligus. (Max 2MB/foto)</div>
+                                    </div>
                                 </div>
                             </div>
                             
@@ -127,6 +153,24 @@
                         if (placeholder) placeholder.classList.add('d-none');
                     }
                     reader.readAsDataURL(input.files[0]);
+                }
+            }
+
+            function previewMultiple(input, containerId) {
+                const container = document.getElementById(containerId);
+                container.innerHTML = ''; // Kosongkan preview lama
+                
+                if (input.files) {
+                    Array.from(input.files).forEach(file => {
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                            const div = document.createElement('div');
+                            div.className = 'col-4';
+                            div.innerHTML = `<img src="${e.target.result}" class="img-fluid rounded shadow-xs border border-white" style="aspect-ratio: 1/1; object-fit: cover;">`;
+                            container.appendChild(div);
+                        }
+                        reader.readAsDataURL(file);
+                    });
                 }
             }
         </script>
