@@ -12,7 +12,7 @@
     activeSlide: 1, 
     slides: [
         @foreach($sliders as $slider)
-        { id: {{ $loop->iteration }}, image: '{{ asset('storage/' . $slider->image) }}', title: '{{ addslashes($slider->title) }}', subtitle: '{{ addslashes($slider->subtitle) }}' },
+        { id: {{ $loop->iteration }}, image: '{{ Storage::url($slider->image) }}', title: '{{ addslashes($slider->title) }}', subtitle: '{{ addslashes($slider->subtitle) }}' },
         @endforeach
     ],
     @if($sliders->isEmpty())

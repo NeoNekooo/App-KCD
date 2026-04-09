@@ -403,10 +403,9 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
         Route::resource('sliders', SliderController::class)->middleware('check_menu:web-slider');
         Route::get('welcome', [WelcomeMessageController::class, 'index'])->name('welcome.index')->middleware('check_menu:web-welcome');
         Route::post('welcome', [WelcomeMessageController::class, 'update'])->name('welcome.update')->middleware('check_menu:web-welcome');
-        Route::get('settings', [WebSettingController::class, 'index'])->name('settings.index')->middleware('check_menu:web-settings');
-        Route::post('settings', [WebSettingController::class, 'update'])->name('settings.update')->middleware('check_menu:web-settings');
-    });
-
+        // Route::get('settings', [WebSettingController::class, 'index'])->name('settings.index')->middleware('check_menu:web-settings');
+        // Route::post('settings', [WebSettingController::class, 'update'])->name('settings.update')->middleware('check_menu:web-settings');
+        });
     Route::get('/underConstructions', function () {
         return view('admin.underConstruction');
     })->name('underConstructions');

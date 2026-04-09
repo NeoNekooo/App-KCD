@@ -11,9 +11,9 @@
                     <div class="transition-transform duration-500 group-hover:scale-110 flex-shrink-0 flex items-center justify-center overflow-hidden w-12 h-12 md:w-14 md:h-14">
                         @php
                             $instansi = \App\Models\Instansi::first();
-                            $siteLogo = \App\Models\Setting::get('site_logo') ?? ($instansi && $instansi->logo ? $instansi->logo : null);
-                            $siteName = \App\Models\Setting::get('site_name') ?? ($instansi ? $instansi->nama_instansi : 'Kantor Cabang Dinas');
-                            $siteSlogan = \App\Models\Setting::get('site_slogan') ?? ($instansi ? $instansi->wilayah : 'Provinsi Jawa Barat');
+                            $siteLogo = $instansi ? $instansi->logo : null;
+                            $siteName = $instansi ? ($instansi->nama_brand ?? $instansi->nama_instansi) : 'Kantor Cabang Dinas';
+                            $siteSlogan = $instansi ? $instansi->wilayah : 'Provinsi Jawa Barat';
                         @endphp
                         @if($siteLogo)
                             <img src="{{ Storage::url($siteLogo) }}" 
