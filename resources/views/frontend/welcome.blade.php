@@ -101,7 +101,7 @@
                 <div class="absolute -inset-4 bg-blue-600/5 rounded-[3rem] -rotate-3 group-hover:rotate-0 transition duration-700"></div>
                 <div class="relative rounded-[2.5rem] overflow-hidden shadow-2xl border-8 border-white aspect-[4/5] max-w-[320px] mx-auto lg:mx-0">
                     @if($welcome->image)
-                        <img src="{{ asset('storage/' . $welcome->image) }}" class="w-full h-full object-cover transition duration-700 group-hover:scale-110">
+                        <img src="{{ Storage::url($welcome->image) }}" class="w-full h-full object-cover transition duration-700 group-hover:scale-110">
                     @else
                         <div class="w-full h-full bg-gray-100 flex items-center justify-center">
                             <svg class="w-20 h-20 text-gray-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
