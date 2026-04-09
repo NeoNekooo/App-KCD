@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class GaleriItem extends Model
 {
+    protected $table = 'galeri_items';
+
     protected $fillable = [
         'galeri_id',
         'file',

@@ -7,6 +7,8 @@ use Illuminate\Support\Str;
 
 class Pengumuman extends Model
 {
+    protected $table = 'pengumumans';
+
     protected $fillable = [
         'judul', 'slug', 'isi', 'lampiran', 'prioritas',
         'tanggal_terbit', 'tanggal_berakhir', 'status',

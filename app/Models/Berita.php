@@ -7,6 +7,8 @@ use Illuminate\Support\Str;
 
 class Berita extends Model
 {
+    protected $table = 'beritas';
+
     protected $fillable = [
         'judul', 'slug', 'ringkasan', 'isi', 'gambar', 'penulis', 'status', 'published_at',
     ];
