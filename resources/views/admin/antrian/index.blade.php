@@ -11,11 +11,29 @@
         <div class="d-flex flex-wrap justify-content-md-end align-items-center gap-2">
             <form action="{{ route('admin.antrian.index') }}" method="GET" class="d-flex align-items-center gap-2">
                 <div class="position-relative">
-                    <input type="date" name="search_date" class="form-control shadow-sm rounded-pill fw-bold border-primary px-3" 
-                        style="height: 38px; width: 160px; font-size: 0.85rem;"
-                        value="{{ request('search_date') }}" onchange="this.form.submit()">
+                    <select name="search_month" class="form-select shadow-sm rounded-pill fw-bold border-primary px-3" 
+                        style="height: 38px; width: 140px; font-size: 0.85rem;"
+                        onchange="this.form.submit()">
+                        <option value="">-- Pilih Bulan --</option>
+                        @foreach(range(1, 12) as $m)
+                            <option value="{{ $m }}" {{ request('search_month') == $m ? 'selected' : '' }}>
+                                {{ Carbon\Carbon::create()->month($m)->translatedFormat('F') }}
+                            </option>
+                        @endforeach
+                    </select>
                 </div>
-                @if(request('search_date'))
+                <div class="position-relative">
+                    <select name="search_year" class="form-select shadow-sm rounded-pill fw-bold border-primary px-3" 
+                        style="height: 38px; width: 100px; font-size: 0.85rem;"
+                        onchange="this.form.submit()">
+                        @foreach(range(date('Y') - 1, date('Y')) as $y)
+                            <option value="{{ $y }}" {{ (request('search_year') ?? date('Y')) == $y ? 'selected' : '' }}>
+                                {{ $y }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+                @if(request('search_month'))
                     <a href="{{ route('admin.antrian.index') }}" class="btn btn-sm btn-outline-secondary shadow-sm rounded-pill fw-bold d-flex align-items-center py-2" title="Reset Filter">
                         <i class='bx bx-reset me-1'></i>Reset
                     </a>
@@ -24,7 +42,11 @@
             <button type="button" class="btn btn-sm btn-outline-primary shadow-sm rounded-pill fw-bold py-2" data-bs-toggle="modal" data-bs-target="#modalKategori">
                 <i class='bx bx-category me-2'></i>Kelola Kategori
             </button>
-            <a href="{{ route('admin.antrian.export', ['search_date' => request('search_date')]) }}" class="btn btn-sm btn-success shadow-sm rounded-pill fw-bold py-2">
+            <a href="{{ route('admin.antrian.export', [
+                'search_date' => request('search_date'),
+                'search_month' => request('search_month'),
+                'search_year' => request('search_year') ?? date('Y')
+            ]) }}" class="btn btn-sm btn-success shadow-sm rounded-pill fw-bold py-2">
                 <i class='bx bx-spreadsheet me-2'></i>Export Excel
             </a>
             <a href="{{ route('admin.display.antrian') }}" target="_blank" class="btn btn-sm btn-dark shadow-sm rounded-pill fw-bold py-2">
@@ -199,8 +221,10 @@
             const urlParams = new URLSearchParams(window.location.search);
             const page = urlParams.get('page') || 1;
             const searchDate = urlParams.get('search_date') || '';
+            const searchMonth = urlParams.get('search_month') || '';
+            const searchYear = urlParams.get('search_year') || '';
 
-            fetch(`/admin/antrian/partial?page=${page}&search_date=${searchDate}`)
+            fetch(`/admin/antrian/partial?page=${page}&search_date=${searchDate}&search_month=${searchMonth}&search_year=${searchYear}`)
                 .then(response => response.text())
                 .then(html => {
                     const parser = new DOMParser();
