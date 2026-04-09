@@ -164,14 +164,14 @@
                         <div
                             class="d-flex flex-column flex-xl-row justify-content-between align-items-xl-center position-relative z-1 gap-4">
                             <div class="d-flex align-items-center gap-4">
-                                <div class="bg-white p-1 rounded-circle d-flex align-items-center justify-content-center shadow-lg"
-                                    style="width: 100px; height: 100px; flex-shrink: 0;">
+                                <div class="bg-white p-2 rounded-4 d-flex align-items-center justify-content-center shadow-lg"
+                                    style="width: 130px; height: 130px; flex-shrink: 0;">
                                     @if (!empty($instansi->logo) && \Storage::disk('public')->exists($instansi->logo))
                                         <img src="{{ \Storage::url($instansi->logo) }}"
-                                            class="img-fluid rounded-circle w-100 h-100 object-fit-cover" alt="Logo">
+                                            class="img-fluid rounded-3 w-100 h-100 object-fit-contain" alt="Logo">
                                     @else
                                         <img src="https://ui-avatars.com/api/?name={{ urlencode($instansi->nama_instansi ?? 'KCD') }}&background=696cff&color=fff&size=128&font-size=0.33"
-                                            class="img-fluid rounded-circle" alt="Logo">
+                                            class="img-fluid rounded-3" alt="Logo">
                                     @endif
                                 </div>
                                 <div>

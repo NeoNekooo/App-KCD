@@ -10,10 +10,14 @@ use Maatwebsite\Excel\Concerns\WithMapping;
 class AntrianExport implements FromCollection, WithHeadings, WithMapping
 {
     protected $date;
+    protected $month;
+    protected $year;
 
-    public function __construct($date = null)
+    public function __construct($date = null, $month = null, $year = null)
     {
         $this->date = $date;
+        $this->month = $month;
+        $this->year = $year;
     }
 
     /**
@@ -25,6 +29,9 @@ class AntrianExport implements FromCollection, WithHeadings, WithMapping
 
         if ($this->date) {
             $query->whereDate('created_at', $this->date);
+        } elseif ($this->month && $this->year) {
+            $query->whereMonth('created_at', $this->month)
+                  ->whereYear('created_at', $this->year);
         }
 
         return $query->orderBy('created_at', 'desc')->get();

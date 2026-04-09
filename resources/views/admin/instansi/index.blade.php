@@ -39,15 +39,15 @@
 
         /* --- AVATAR --- */
         .avatar-wrapper {
-            margin-top: -70px;
+            margin-top: -85px; /* Sesuaikan karena box makin gede */
             position: relative;
             display: inline-block;
             z-index: 5;
         }
         .avatar-box {
-            width: 140px;
-            height: 140px;
-            border-radius: 50%;
+            width: 170px; /* Gedein dari 140px */
+            height: 170px; /* Gedein dari 140px */
+            border-radius: 1.5rem; /* Sudut lebih manis */
             border: 5px solid #fff;
             background: #fff;
             overflow: hidden;

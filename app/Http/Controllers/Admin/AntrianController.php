@@ -16,11 +16,17 @@ class AntrianController extends Controller
     public function index(Request $request)
     {
         $searchDate = $request->input('search_date');
+        $searchMonth = $request->input('search_month');
+        $searchYear = $request->input('search_year');
 
-        // Tampilkan semua riwayat antrian dengan filter tanggal opsional
+        // Tampilkan semua riwayat antrian dengan filter fleksibel (Tanggal ATAU Bulan)
         $antrians = AntrianTamu::with('tujuanPegawai.jabatanKcd')
                     ->when($searchDate, function($q) use ($searchDate) {
                         return $q->whereDate('created_at', $searchDate);
+                    })
+                    ->when(!$searchDate && $searchMonth && $searchYear, function($q) use ($searchMonth, $searchYear) {
+                        return $q->whereMonth('created_at', $searchMonth)
+                                 ->whereYear('created_at', $searchYear);
                     })
                     ->orderByRaw("FIELD(status, 'dipanggil', 'menunggu', 'selesai', 'batal') ASC")
                     ->orderBy('created_at', 'desc')
@@ -74,10 +80,16 @@ class AntrianController extends Controller
     public function getPartial(Request $request)
     {
         $searchDate = $request->input('search_date');
+        $searchMonth = $request->input('search_month');
+        $searchYear = $request->input('search_year');
 
         $antrians = AntrianTamu::with('tujuanPegawai.jabatanKcd')
                     ->when($searchDate, function($q) use ($searchDate) {
                         return $q->whereDate('created_at', $searchDate);
+                    })
+                    ->when(!$searchDate && $searchMonth && $searchYear, function($q) use ($searchMonth, $searchYear) {
+                        return $q->whereMonth('created_at', $searchMonth)
+                                 ->whereYear('created_at', $searchYear);
                     })
                     ->orderByRaw("FIELD(status, 'dipanggil', 'menunggu', 'selesai', 'batal') ASC")
                     ->orderBy('created_at', 'desc')
@@ -111,8 +123,21 @@ class AntrianController extends Controller
     public function export(Request $request)
     {
         $date = $request->input('search_date');
-        $fileName = 'Data_Antrian_Tamu_' . ($date ? $date : date('d-m-Y')) . '.xlsx';
+        $month = $request->input('search_month');
+        $year = $request->input('search_year');
+
+        $fileName = 'Data_Antrian_Tamu_';
         
-        return Excel::download(new AntrianExport($date), $fileName);
+        if ($date) {
+            $fileName .= $date;
+        } elseif ($month && $year) {
+            $fileName .= "Bulan_{$month}_Tahun_{$year}";
+        } else {
+            $fileName .= date('d-m-Y');
+        }
+
+        $fileName .= '.xlsx';
+        
+        return Excel::download(new AntrianExport($date, $month, $year), $fileName);
     }
 }
