@@ -119,8 +119,17 @@ Route::get('/unduhan', function () {
 
 // --- Lembaga (Satuan Pendidikan) ---
 Route::get('/lembaga', function () {
-    $sekolah = \App\Models\Sekolah::orderBy('nama', 'asc')->get();
-    return view('frontend.lembaga.index', compact('sekolah'));
+    $query = \App\Models\Sekolah::query();
+    
+    // Filter berdasarkan kabupaten jika ada di URL (?kabupaten=...)
+    if (request()->has('kabupaten')) {
+        $query->where('kabupaten_kota', request('kabupaten'));
+    }
+    
+    $sekolah = $query->orderBy('nama', 'asc')->get();
+    $kabupatenAktif = request('kabupaten');
+    
+    return view('frontend.lembaga.index', compact('sekolah', 'kabupatenAktif'));
 });
 Route::get('/lembaga/{id}', function ($id) {
     $sekolah = \App\Models\Sekolah::findOrFail($id);
