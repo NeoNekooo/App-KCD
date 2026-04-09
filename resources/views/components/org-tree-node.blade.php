@@ -41,7 +41,7 @@
             <div class="org-card-accent"></div>
             <div class="org-card-body">
                 <div class="org-avatar-ring">
-                    <img src="{{ $node->foto_pejabat ? asset('storage/'.$node->foto_pejabat) : 'https://ui-avatars.com/api/?name='.urlencode($node->nama_pejabat ?? $node->jabatan).'&background=3b82f6&color=fff&size=128' }}" 
+                    <img src="{{ $node->foto_pejabat ? Storage::url($node->foto_pejabat) : 'https://ui-avatars.com/api/?name='.urlencode($node->nama_pejabat ?? $node->jabatan).'&background=3b82f6&color=fff&size=128' }}" 
                          alt="{{ $node->jabatan }}">
                 </div>
                 <h3 class="org-title">{{ $node->jabatan }}</h3>

@@ -16,7 +16,7 @@
                             $siteSlogan = \App\Models\Setting::get('site_slogan') ?? ($instansi ? $instansi->wilayah : 'Provinsi Jawa Barat');
                         @endphp
                         @if($siteLogo)
-                            <img src="{{ asset('storage/' . $siteLogo) }}" 
+                            <img src="{{ Storage::url($siteLogo) }}" 
                                  class="max-w-full max-h-full object-contain filter drop-shadow-md" 
                                  alt="Logo"
                                  onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
