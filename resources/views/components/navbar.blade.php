@@ -12,8 +12,8 @@
                         @php
                             $instansi = \App\Models\Instansi::first();
                             $siteLogo = $instansi ? $instansi->logo : null;
-                            $siteName = $instansi ? ($instansi->nama_brand ?? $instansi->nama_instansi) : 'Kantor Cabang Dinas';
-                            $siteSlogan = $instansi ? $instansi->wilayah : 'Provinsi Jawa Barat';
+                            $siteName = $instansi ? $instansi->nama_instansi : 'Kantor Cabang Dinas';
+                            $siteSlogan = $instansi ? ($instansi->wilayah ?? 'Provinsi Jawa Barat') : 'Provinsi Jawa Barat';
                         @endphp
                         @if($siteLogo)
                             <img src="{{ Storage::url($siteLogo) }}" 
