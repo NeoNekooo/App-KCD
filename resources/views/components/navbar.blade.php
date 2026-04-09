@@ -81,6 +81,8 @@
                             <a href="/layanan/pengaduan" class="block px-6 py-2.5 text-sm font-bold text-gray-600 hover:bg-blue-50 hover:text-blue-600 transition">Layanan Pengaduan</a>
                             <a href="/layanan/administrasi-ptk" class="block px-6 py-2.5 text-sm font-bold text-gray-600 hover:bg-blue-50 hover:text-blue-600 transition">Administrasi PTK</a>
                             <a href="/layanan/tata-kelola" class="block px-6 py-2.5 text-sm font-bold text-gray-600 hover:bg-blue-50 hover:text-blue-600 transition">Tata Kelola Sekolah</a>
+                            <div class="border-t border-gray-100 my-2"></div>
+                            <a href="/lembaga" class="block px-6 py-2.5 text-sm font-bold text-gray-600 hover:bg-blue-50 hover:text-blue-600 transition">Lembaga Pendidikan</a>
                         </div>
                     </div>
 
@@ -154,6 +156,7 @@
                     <a href="/layanan/pengaduan" class="block px-6 py-3 text-sm font-bold text-gray-500">Layanan Pengaduan</a>
                     <a href="/layanan/administrasi-ptk" class="block px-6 py-3 text-sm font-bold text-gray-500">Administrasi PTK</a>
                     <a href="/layanan/tata-kelola" class="block px-6 py-3 text-sm font-bold text-gray-500">Tata Kelola Sekolah</a>
+                    <a href="/lembaga" class="block px-6 py-3 text-sm font-bold text-gray-500">Lembaga Pendidikan</a>
                 </div>
             </div>
 

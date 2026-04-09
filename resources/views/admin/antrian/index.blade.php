@@ -11,15 +11,10 @@
         <div class="d-flex flex-wrap justify-content-md-end align-items-center gap-2">
             <form action="{{ route('admin.antrian.index') }}" method="GET" class="d-flex align-items-center gap-2">
                 <div class="position-relative">
-                    <input type="date" name="search_date" class="form-control shadow-sm rounded-pill fw-bold border-primary px-3" 
-                        style="height: 38px; width: 160px; font-size: 0.85rem;"
-                        value="{{ request('search_date') }}" onchange="this.form.submit()" title="Filter Tanggal Spesifik">
-                </div>
-                <div class="position-relative">
                     <select name="search_month" class="form-select shadow-sm rounded-pill fw-bold border-primary px-3" 
                         style="height: 38px; width: 140px; font-size: 0.85rem;"
                         onchange="this.form.submit()">
-                        <option value="">-- Bulan --</option>
+                        <option value="">-- Pilih Bulan --</option>
                         @foreach(range(1, 12) as $m)
                             <option value="{{ $m }}" {{ request('search_month') == $m ? 'selected' : '' }}>
                                 {{ Carbon\Carbon::create()->month($m)->translatedFormat('F') }}
@@ -38,9 +33,9 @@
                         @endforeach
                     </select>
                 </div>
-                @if(request('search_date') || request('search_month'))
+                @if(request('search_month'))
                     <a href="{{ route('admin.antrian.index') }}" class="btn btn-sm btn-outline-secondary shadow-sm rounded-pill fw-bold d-flex align-items-center py-2" title="Reset Filter">
-                        <i class='bx bx-reset'></i>
+                        <i class='bx bx-reset me-1'></i>Reset
                     </a>
                 @endif
             </form>
