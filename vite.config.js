@@ -31,7 +31,8 @@ export default defineConfig({
         // public/build/assets/
         assetsDir: 'assets',
         
-        // Optional tapi recommended untuk server shared hosting
-        manifest: true,
+        // Memastikan manifest diletakkan langsung di public/build/manifest.json
+        // bukan di dalam folder .vite/
+        manifest: 'manifest.json',
     },
 });
