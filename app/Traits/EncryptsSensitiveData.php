@@ -5,10 +5,10 @@ namespace App\Traits;
 use Illuminate\Support\Facades\Crypt;
 
 /**
- * Trait EncryptsSensitiveData v6-ULTIMATE
+ * Trait EncryptsSensitiveData v6.1-THE-JANITOR
  * 
- * Sistem intersepsi triple-layer untuk menjamin data PII terdekripsi 
- * sebelum menyentuh sistem casting Laravel (terutama Date/Carbon).
+ * Versi pembersihan total. Menjamin tidak ada kode enkripsi mentah
+ * yang bocor ke tampilan UI jika dekripsi gagal.
  */
 trait EncryptsSensitiveData
 {
@@ -46,7 +46,8 @@ trait EncryptsSensitiveData
     }
 
     /**
-     * Mendekripsi sebuah nilai (v6-ULTIMATE).
+     * Mendekripsi sebuah nilai (v6.1).
+     * Selalu mengembalikan NULL jika deteksi enkripsi ditemukan tapi dekripsi gagal.
      */
     public static function decryptValue($value): ?string
     {
@@ -54,7 +55,7 @@ trait EncryptsSensitiveData
             return $value;
         }
 
-        // Cek pola Base64 Laravel Encryption secara longgar
+        // Deteksi pola enkripsi Laravel
         if (!str_contains($value, 'eyJpdi')) {
             return $value;
         }
@@ -62,8 +63,7 @@ trait EncryptsSensitiveData
         try {
             return Crypt::decryptString(trim($value));
         } catch (\Throwable $e) {
-            // Jika gagal didekripsi (korup/key beda), WAJIB kembalikan NULL
-            // agar tidak merusak sistem casting Date Laravel.
+            // Jika gagal (korup/key beda), WAJIB NULL. Jangan biarkan kode ghaib lolos!
             return null;
         }
     }
@@ -90,21 +90,21 @@ trait EncryptsSensitiveData
     }
 
     /**
-     * LAYER 1: Intersepsi pada pengambilan nilai atribut.
+     * MASTER INTERCEPTION: Menjamin dekripsi pada level akses paling dasar.
      */
-    public function getAttributeValue($key)
+    public function getAttribute($key)
     {
-        $value = $this->getAttributeFromArray($key);
+        $value = parent::getAttribute($key);
 
         if (is_string($value) && str_contains($value, 'eyJpdi')) {
-            $value = static::decryptValue($value);
+            return static::decryptValue($value);
         }
 
-        return $this->transformModelValue($key, $value);
+        return $value;
     }
 
     /**
-     * LAYER 2: Intersepsi tepat sebelum casting atribut dijalankan.
+     * INTERNAL CASTING INTERCEPTION: Mencegah crash pada tipe Date.
      */
     protected function castAttribute($key, $value)
     {
@@ -116,7 +116,7 @@ trait EncryptsSensitiveData
     }
 
     /**
-     * LAYER 3: Intersepsi pada fungsi asDate (Benteng terakhir sebelum Carbon).
+     * BENTENG TERAKHIR: Untuk sistem internal Laravel yang memanggil asDate langsung.
      */
     protected function asDate($value)
     {
