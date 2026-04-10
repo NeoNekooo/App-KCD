@@ -12,10 +12,11 @@ use Illuminate\Support\Facades\Storage;
 use App\Models\AlumniTestimoni;
 use App\Models\TracerStudy;
 use App\Models\Pengguna; // [Opsional: Import model Pengguna]
+use App\Traits\EncryptsSensitiveData;
 
 class Siswa extends Model
 {
-    use HasFactory;
+    use HasFactory, EncryptsSensitiveData;
 
     protected $table = 'siswas';
     protected $primaryKey = 'id';

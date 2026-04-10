@@ -8,8 +8,12 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 
+use App\Traits\EncryptsSensitiveData;
+
 class SchoolSyncController extends Controller
 {
+    use EncryptsSensitiveData;
+
     public function handle(Request $request, $table)
     {
         // 🔥 DOPING SERVER: Biar kuat nampung ribuan data Siswa tanpa Time-Out! 🔥
@@ -43,11 +47,17 @@ class SchoolSyncController extends Controller
             $columns = array_keys($firstRow);
 
             if (!Schema::hasTable($tableName)) {
-                Schema::create($tableName, function ($blueprint) use ($columns) {
+                Schema::create($tableName, function ($blueprint) use ($columns, $tableName) {
                     $blueprint->id(); 
                     foreach ($columns as $col) {
                         if ($col === 'id') continue;
-                        $this->defineColumn($blueprint, $col);
+                        
+                        // 🔥 TIPE DATA KHUSUS ENKRIPSI 🔥
+                        if (static::shouldEncrypt($tableName, $col)) {
+                            $blueprint->text($col)->nullable();
+                        } else {
+                            $this->defineColumn($blueprint, $col);
+                        }
                     }
                     $blueprint->timestamps();
                 });
@@ -55,9 +65,13 @@ class SchoolSyncController extends Controller
                 $existingCols = Schema::getColumnListing($tableName);
                 $newCols = array_diff($columns, $existingCols);
                 if (!empty($newCols)) {
-                    Schema::table($tableName, function ($blueprint) use ($newCols) {
+                    Schema::table($tableName, function ($blueprint) use ($newCols, $tableName) {
                         foreach ($newCols as $col) {
-                            $this->defineColumn($blueprint, $col);
+                            if (static::shouldEncrypt($tableName, $col)) {
+                                $blueprint->text($col)->nullable();
+                            } else {
+                                $this->defineColumn($blueprint, $col);
+                            }
                         }
                     });
                 }
@@ -81,9 +95,13 @@ class SchoolSyncController extends Controller
                 try {
                     $row = (array) $row;
                     
-                    // Encode array/json
+                    // --- 🔥 ENKRIPSI DATA SENSITIF 🔥 ---
                     foreach ($row as $k => $v) {
-                        if (is_array($v)) $row[$k] = json_encode($v);
+                        if (static::shouldEncrypt($tableName, $k)) {
+                            $row[$k] = static::encryptValue($v);
+                        } elseif (is_array($v)) {
+                            $row[$k] = json_encode($v);
+                        }
                     }
 
                     if (!isset($row['updated_at'])) {

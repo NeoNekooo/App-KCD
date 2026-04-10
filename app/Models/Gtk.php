@@ -4,10 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\EncryptsSensitiveData;
 
 class Gtk extends Model
 {
-    use HasFactory;
+    use HasFactory, EncryptsSensitiveData;
 
     protected $guarded = [];
 

@@ -8,8 +8,12 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 
+use App\Traits\EncryptsSensitiveData;
+
 class GenericSyncController extends Controller
 {
+    use EncryptsSensitiveData;
+
     public function handleSync(Request $request, $entity)
     {
         // 1. Ambil data
@@ -31,14 +35,18 @@ class GenericSyncController extends Controller
 
         // 3. Cek/Buat Tabel (Skema)
         if (!Schema::hasTable($tableName)) {
-            Schema::create($tableName, function ($table) use ($dapodikColumns, $entity) {
+            Schema::create($tableName, function ($table) use ($dapodikColumns, $entity, $tableName) {
                 $table->id();
                 // Tambahkan qr_token khusus untuk siswa/gtk
                 if (in_array($entity, ['siswa', 'siswas', 'gtk', 'gtks'])) {
                     $table->string('qr_token')->nullable()->unique();
                 }
                 foreach ($dapodikColumns as $column) {
-                    $this->defineColumnType($table, $column);
+                    if (static::shouldEncrypt($tableName, $column)) {
+                        $table->text($column)->nullable();
+                    } else {
+                        $this->defineColumnType($table, $column);
+                    }
                 }
                 $table->timestamps();
             });
@@ -54,9 +62,13 @@ class GenericSyncController extends Controller
 
             $newColumns = array_diff($dapodikColumns, $existingColumns);
             if (!empty($newColumns)) {
-                Schema::table($tableName, function ($table) use ($newColumns) {
+                Schema::table($tableName, function ($table) use ($newColumns, $tableName) {
                     foreach ($newColumns as $column) {
-                        $this->defineColumnType($table, $column);
+                        if (static::shouldEncrypt($tableName, $column)) {
+                            $table->text($column)->nullable();
+                        } else {
+                            $this->defineColumnType($table, $column);
+                        }
                     }
                 });
             }
@@ -120,9 +132,11 @@ class GenericSyncController extends Controller
             }
             // --------------------------------
 
-            // Bersihkan Array -> JSON
+            // Bersihkan Array -> JSON & Enkripsi data sensitif
             foreach ($row as $key => $value) {
-                if (is_array($value)) {
+                if (static::shouldEncrypt($tableName, $key)) {
+                    $row[$key] = static::encryptValue($value);
+                } elseif (is_array($value)) {
                     $row[$key] = json_encode($value, JSON_UNESCAPED_UNICODE);
                 }
             }
