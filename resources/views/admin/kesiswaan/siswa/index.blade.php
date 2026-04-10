@@ -141,8 +141,8 @@
                             </td>
                             <td>
                                 <div class="d-flex flex-column">
-                                    <span class="fw-bold small text-primary">NISN: {{ \App\Services\EncryptionService::decrypt($siswa->nisn) ?? '-' }}</span>
-                                    <small class="text-muted">NIK: {{ \App\Services\EncryptionService::decrypt($siswa->nik) ?? '-' }}</small>
+                                    <span class="fw-bold small text-primary">NISN: {{ $siswa->nisn ?? '-' }}</span>
+                                    <small class="text-muted">NIK: {{ $siswa->nik ?? '-' }}</small>
                                 </div>
                             </td>
                             <td>

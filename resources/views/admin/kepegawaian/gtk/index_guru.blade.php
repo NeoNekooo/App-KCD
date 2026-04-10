@@ -219,8 +219,11 @@
                                             {{ $gtk->status_kepegawaian_id_str ?? '-' }}
                                         </span>
                                     </td>
-                                    <td><span
-                                            class="text-dark small fw-medium">{{ $gtk->jabatan_ptk_id_str ?? '-' }}</span>
+                                    <td>
+                                        <div class="d-flex flex-column">
+                                            <span class="fw-bold small text-primary">NIK: {{ $gtk->nik ?? '-' }}</span>
+                                            <small class="text-muted">NUPTK: {{ $gtk->nuptk ?? '-' }}</small>
+                                        </div>
                                     </td>
                                     <td class="text-end pe-4">
                                         <a href="{{ route('admin.gtk.show', $gtk->id) }}"

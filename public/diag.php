@@ -1,8 +1,7 @@
 <?php
 
 /**
- * Radar Diagnostik Enkripsi v2.0
- * Buka via: https://kcd6.hexanusa.com/diag.php
+ * RADAR DIAGNOSTIK DATABASE v2.0
  */
 
 require __DIR__.'/../vendor/autoload.php';
@@ -12,41 +11,36 @@ $response = $kernel->handle($request = Illuminate\Http\Request::capture());
 
 header('Content-Type: text/plain');
 
-echo "=== RADAR DIAGNOSTIK APPKCD ===\n\n";
+echo "=== RADAR DIAGNOSTIK DATABASE KCD ===\n\n";
 
-// 1. Cek Linkage
-echo "EncryptionService: " . (class_exists(\App\Services\EncryptionService::class) ? "LINKED ✅" : "MISSING ❌") . "\n";
-echo "APP_KEY: " . (env('APP_KEY') ? "LOADED ✅" : "MISSING ❌") . "\n\n";
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
-// 2. Cek Sampel Data
-$siswa = \App\Models\Siswa::whereNotNull('nisn')->first();
+$tables = ['siswas', 'gtks'];
 
-if ($siswa) {
-    $rawNisn = $siswa->getRawOriginal('nisn');
-    echo "SAMPEL SISWA: " . $siswa->nama . "\n";
-    echo "RAW NISN (Database): " . $rawNisn . "\n";
-    
-    // Cek Panjang
-    echo "Panjang Data: " . strlen($rawNisn) . " karakter\n";
-    if (strlen($rawNisn) == 191) {
-        echo "[PERINGATAN] Data kemungkinan TERPOTONG (191 char). Data ini korup dan tidak bisa didekripsi selamanya.\n";
+foreach ($tables as $table) {
+    if (Schema::hasTable($table)) {
+        echo "TABEL: $table\n";
+        echo "---------------------------------\n";
+        
+        $columns = DB::select("SHOW COLUMNS FROM `$table` WHERE Field IN ('nik', 'nisn', 'tanggal_lahir', 'no_wa')");
+        
+        foreach ($columns as $col) {
+            echo "Kolom: {$col->Field} | Tipe: {$col->Type} | Null: {$col->Null}\n";
+        }
+        
+        // Cek contoh data mentah (Raw)
+        $sample = DB::table($table)->whereNotNull('nik')->first();
+        if ($sample) {
+            $val = $sample->nik;
+            echo "Contoh Raw NIK: " . substr($val, 0, 50) . "...\n";
+            echo "Panjang Raw NIK: " . strlen($val) . " karakter\n";
+        } else {
+            echo "Tabel kosong atau NIK null.\n";
+        }
+        echo "\n";
     }
-
-    // Tes Dekripsi Manual
-    try {
-        $decrypted = \Illuminate\Support\Facades\Crypt::decryptString(trim($rawNisn));
-        echo "TES DEKRIPSI: " . $decrypted . " ✅ SUCCESS!\n";
-    } catch (\Throwable $e) {
-        echo "TES DEKRIPSI: FAILED ❌ (Penyebab: Kunci APP_KEY salah atau data korup)\n";
-        echo "Error: " . $e->getMessage() . "\n";
-    }
-
-} else {
-    echo "Peringatan: Tidak ada data siswa di database.\n";
 }
 
-echo "\nSOLUSI TERBAIK:\n";
-echo "1. Jika Tes Dekripsi FAILED, hapus data siswa ini dan suruh sekolah sinkron ulang.\n";
-echo "2. Pastikan APP_KEY sekolah dan KCD sama (Opsional, tapi disarankan).\n";
-
-echo "\n--- DIAGNOSTIK SELESAI ---";
+echo "INFO: Enkripsi Laravel butuh minimal tipe TEXT atau VARCHAR(255+).\n";
+echo "Jika tipe masih VARCHAR(20) atau sejenisnya, DATA PASTI TERPOTONG!\n";

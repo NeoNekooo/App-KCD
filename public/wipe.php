@@ -17,7 +17,10 @@ echo "=== OPERASI PEMBERSIHAN DATA KORUP (WIPE) ===\n\n";
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
-$tables = ['siswas', 'gtks']; // Tabel utama yang bermasalah enkripsinya
+// 🔥 JURUS JEBOL: Matikan pengecekan Foreign Key sebentar 🔥
+DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+
+$tables = ['siswas', 'gtks']; 
 
 foreach ($tables as $table) {
     if (Schema::hasTable($table)) {
@@ -26,6 +29,9 @@ foreach ($tables as $table) {
         echo "BERSIH ✅\n";
     }
 }
+
+// 🔥 Kembalikan pengecekan Foreign Key 🔥
+DB::statement('SET FOREIGN_KEY_CHECKS=1;');
 
 echo "\n--- PEMBERSIHAN SELESAI ---\n";
 echo "Langkah selanjutnya:\n";
