@@ -38,9 +38,12 @@ class GtkController extends Controller
 
         // 🔥 FORCED DECRYPTION DI LEVEL CONTROLLER (GURU) 🔥
         $gurus->through(function ($gtk) {
-            $gtk->nik = \App\Services\EncryptionService::decrypt($gtk->nik);
-            $gtk->no_hp = \App\Services\EncryptionService::decrypt($gtk->no_hp);
-            $gtk->no_wa = \App\Services\EncryptionService::decrypt($gtk->no_wa);
+            $cols = \App\Services\EncryptionService::getEncryptedColumns()['gtks'] ?? [];
+            foreach ($cols as $col) {
+                if (isset($gtk->$col)) {
+                    $gtk->$col = \App\Services\EncryptionService::decrypt($gtk->$col);
+                }
+            }
             return $gtk;
         });
 
@@ -89,9 +92,12 @@ class GtkController extends Controller
 
         // 🔥 FORCED DECRYPTION DI LEVEL CONTROLLER (TENDIK) 🔥
         $tendiks->through(function ($gtk) {
-            $gtk->nik = \App\Services\EncryptionService::decrypt($gtk->nik);
-            $gtk->no_hp = \App\Services\EncryptionService::decrypt($gtk->no_hp);
-            $gtk->no_wa = \App\Services\EncryptionService::decrypt($gtk->no_wa);
+            $cols = \App\Services\EncryptionService::getEncryptedColumns()['gtks'] ?? [];
+            foreach ($cols as $col) {
+                if (isset($gtk->$col)) {
+                    $gtk->$col = \App\Services\EncryptionService::decrypt($gtk->$col);
+                }
+            }
             return $gtk;
         });
         
@@ -147,11 +153,12 @@ class GtkController extends Controller
         $gtk = Gtk::with(['sekolah'])->findOrFail($id);
 
         // 🔥 FORCED DECRYPTION SHOW DETAIL 🔥
-        $gtk->nik = \App\Services\EncryptionService::decrypt($gtk->nik);
-        $gtk->no_hp = \App\Services\EncryptionService::decrypt($gtk->no_hp);
-        $gtk->no_wa = \App\Services\EncryptionService::decrypt($gtk->no_wa);
-        $gtk->nik_ibu_kandung = \App\Services\EncryptionService::decrypt($gtk->nik_ibu_kandung);
-        $gtk->no_telepon_rumah = \App\Services\EncryptionService::decrypt($gtk->no_telepon_rumah);
+        $cols = \App\Services\EncryptionService::getEncryptedColumns()['gtks'] ?? [];
+        foreach ($cols as $col) {
+            if (isset($gtk->$col)) {
+                $gtk->$col = \App\Services\EncryptionService::decrypt($gtk->$col);
+            }
+        }
 
         return view('admin.kepegawaian.gtk.show', compact('gtk'));
     }

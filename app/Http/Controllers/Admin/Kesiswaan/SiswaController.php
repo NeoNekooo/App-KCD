@@ -65,9 +65,12 @@ class SiswaController extends Controller
 
         // 🔥 FORCED DECRYPTION DI LEVEL CONTROLLER 🔥
         $siswas->through(function ($siswa) {
-            $siswa->nisn = \App\Services\EncryptionService::decrypt($siswa->nisn);
-            $siswa->nik = \App\Services\EncryptionService::decrypt($siswa->nik);
-            // Tambahkan kolom lain jika perlu
+            $cols = \App\Services\EncryptionService::getEncryptedColumns()['siswas'] ?? [];
+            foreach ($cols as $col) {
+                if (isset($siswa->$col)) {
+                    $siswa->$col = \App\Services\EncryptionService::decrypt($siswa->$col);
+                }
+            }
             return $siswa;
         });
 
