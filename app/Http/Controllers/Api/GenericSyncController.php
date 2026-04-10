@@ -12,7 +12,7 @@ use App\Traits\EncryptsSensitiveData;
 
 class GenericSyncController extends Controller
 {
-    use EncryptsSensitiveData;
+    // Trait dicabut dari sini karena ini Controller, bukan Model
 
     public function handleSync(Request $request, $entity)
     {
@@ -42,7 +42,7 @@ class GenericSyncController extends Controller
                     $table->string('qr_token')->nullable()->unique();
                 }
                 foreach ($dapodikColumns as $column) {
-                    if (static::shouldEncrypt($tableName, $column)) {
+                    if (EncryptsSensitiveData::shouldEncrypt($tableName, $column)) {
                         $table->text($column)->nullable();
                     } else {
                         $this->defineColumnType($table, $column);
@@ -64,7 +64,7 @@ class GenericSyncController extends Controller
             if (!empty($newColumns)) {
                 Schema::table($tableName, function ($table) use ($newColumns, $tableName) {
                     foreach ($newColumns as $column) {
-                        if (static::shouldEncrypt($tableName, $column)) {
+                        if (EncryptsSensitiveData::shouldEncrypt($tableName, $column)) {
                             $table->text($column)->nullable();
                         } else {
                             $this->defineColumnType($table, $column);
@@ -134,8 +134,8 @@ class GenericSyncController extends Controller
 
             // Bersihkan Array -> JSON & Enkripsi data sensitif
             foreach ($row as $key => $value) {
-                if (static::shouldEncrypt($tableName, $key)) {
-                    $row[$key] = static::encryptValue($value);
+                if (EncryptsSensitiveData::shouldEncrypt($tableName, $key)) {
+                    $row[$key] = EncryptsSensitiveData::encryptValue($value);
                 } elseif (is_array($value)) {
                     $row[$key] = json_encode($value, JSON_UNESCAPED_UNICODE);
                 }

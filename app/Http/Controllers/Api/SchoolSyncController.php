@@ -12,7 +12,7 @@ use App\Traits\EncryptsSensitiveData;
 
 class SchoolSyncController extends Controller
 {
-    use EncryptsSensitiveData;
+    // Trait dicabut dari sini karena ini Controller, bukan Model
 
     public function handle(Request $request, $table)
     {
@@ -53,7 +53,7 @@ class SchoolSyncController extends Controller
                         if ($col === 'id') continue;
                         
                         // 🔥 TIPE DATA KHUSUS ENKRIPSI 🔥
-                        if (static::shouldEncrypt($tableName, $col)) {
+                        if (EncryptsSensitiveData::shouldEncrypt($tableName, $col)) {
                             $blueprint->text($col)->nullable();
                         } else {
                             $this->defineColumn($blueprint, $col);
@@ -67,7 +67,7 @@ class SchoolSyncController extends Controller
                 if (!empty($newCols)) {
                     Schema::table($tableName, function ($blueprint) use ($newCols, $tableName) {
                         foreach ($newCols as $col) {
-                            if (static::shouldEncrypt($tableName, $col)) {
+                            if (EncryptsSensitiveData::shouldEncrypt($tableName, $col)) {
                                 $blueprint->text($col)->nullable();
                             } else {
                                 $this->defineColumn($blueprint, $col);
@@ -97,8 +97,8 @@ class SchoolSyncController extends Controller
                     
                     // --- 🔥 ENKRIPSI DATA SENSITIF 🔥 ---
                     foreach ($row as $k => $v) {
-                        if (static::shouldEncrypt($tableName, $k)) {
-                            $row[$k] = static::encryptValue($v);
+                        if (EncryptsSensitiveData::shouldEncrypt($tableName, $k)) {
+                            $row[$k] = EncryptsSensitiveData::encryptValue($v);
                         } elseif (is_array($v)) {
                             $row[$k] = json_encode($v);
                         }
