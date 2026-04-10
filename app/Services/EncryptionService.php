@@ -59,6 +59,12 @@ class EncryptionService
             return $value;
         }
 
+        // 🔥 CEGAH ENKRIPSI GANDA 🔥
+        // Jika data sudah diawali eyJpdi, artinya sudah terenkripsi. JANGAN dihajar lagi!
+        if (strpos($value, 'eyJpdi') !== false) {
+            return $value;
+        }
+
         try {
             return Crypt::encryptString((string) $value);
         } catch (\Throwable $e) {
