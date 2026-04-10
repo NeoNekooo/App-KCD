@@ -3,64 +3,53 @@
 namespace App\Traits;
 
 use Illuminate\Support\Facades\Crypt;
-use Illuminate\Contracts\Encryption\DecryptException;
+use Illuminate\Support\Facades\Log;
 
 /**
- * Trait EncryptsSensitiveData
+ * Trait EncryptsSensitiveData v5-Ultra-Nuclear
  * 
- * Menyediakan mapping kolom sensitif per tabel dan helper method
- * untuk enkripsi/dekripsi data PII (Personal Identifiable Information).
+ * Menyediakan mapping kolom sensitif dan penanganan otomatis enkripsi/dekripsi.
+ * Versi ini dipersenjatai dengan pengamanan ekstra agar tidak menyebabkan 
+ * Error 500 pada casting tipe data Date di Laravel.
  */
 trait EncryptsSensitiveData
 {
     /**
      * Mapping tabel => kolom-kolom yang harus dienkripsi.
-     * Kolom 'nama' TIDAK dienkripsi demi mempertahankan fitur search & sorting.
      */
     public static function getEncryptedColumns(): array
     {
         return [
             'siswas' => [
-                'nisn',
-                'nik',
-                'no_kk',
-                'nik_ayah',
-                'nik_ibu',
-                'nik_wali',
-                'tanggal_lahir',
-                'nomor_telepon_rumah',
-                'nomor_telepon_seluler',
-                'no_wa',
-                'no_wa_ayah',
-                'no_wa_ibu',
-                'no_wa_wali',
+                'nisn', 'nik', 'no_kk', 'nik_ayah', 'nik_ibu', 'nik_wali',
+                'tanggal_lahir', 'nomor_telepon_rumah', 'nomor_telepon_seluler',
+                'no_wa', 'no_wa_ayah', 'no_wa_ibu', 'no_wa_wali',
             ],
             'gtks' => [
-                'nik',
-                'nik_ibu_kandung',
-                'no_hp',
-                'no_wa',
-                'no_telepon_rumah',
+                'nik', 'nik_ibu_kandung', 'no_hp', 'no_wa', 'no_telepon_rumah',
             ],
         ];
     }
 
     /**
-     * Mengenkripsi sebuah nilai. Mengembalikan null jika nilai kosong.
+     * Mengenkripsi sebuah nilai secara aman.
      */
     public static function encryptValue($value): ?string
     {
-        if ($value === null || $value === '') {
+        if ($value === null || $value === '' || is_array($value) || is_object($value)) {
             return $value;
         }
 
-        return Crypt::encryptString((string) $value);
+        try {
+            return Crypt::encryptString((string) $value);
+        } catch (\Throwable $e) {
+            return (string) $value;
+        }
     }
 
     /**
-     * Mendekripsi sebuah nilai dengan error handling (v4-Ultra).
-     * Jika data SUDAH berupa plain text (belum terenkripsi), kembalikan aslinya.
-     * Jika data terenkripsi tapi RUSAK, kembalikan null agar tidak crash.
+     * Mendekripsi sebuah nilai (v5-Ultra-Nuclear).
+     * Jika gagal atau data korup, mengembalikan NULL untuk mencegah crash pada Eloquent Casting.
      */
     public static function decryptValue($value): ?string
     {
@@ -68,7 +57,8 @@ trait EncryptsSensitiveData
             return $value;
         }
 
-        // Cek format Laravel Encryption (eyJpdi...)
+        // Deteksi pola enkripsi Laravel (Base64 dari JSON yang dimulai dengan {"iv":)
+        // Pola umum: eyJpdiI...
         if (!str_contains($value, 'eyJpdiI')) {
             return $value;
         }
@@ -76,15 +66,14 @@ trait EncryptsSensitiveData
         try {
             return Crypt::decryptString(trim($value));
         } catch (\Throwable $e) {
-            // Log jika dibutuhkan untuk debugging (opsional)
-            // \Log::error("Decryption failed: " . $e->getMessage());
+            // Jika gagal (misal data terpotong/APP_KEY beda), balikan NULL.
+            // PENTING: Jangan balikan string asli terenkripsi karena akan merusak Carbon::parse()
             return null;
         }
     }
 
     /**
-     * Cek apakah kolom tertentu pada tabel tertentu harus dienkripsi.
-     * Dibuat robust untuk menangani table prefix dan perbedaan pluralisasi.
+     * Cek apakah kolom tertentu harus dienkripsi.
      */
     public static function shouldEncrypt(string $tableName, string $columnName): bool
     {
@@ -94,11 +83,6 @@ trait EncryptsSensitiveData
 
         foreach ($mapping as $mappedTable => $columns) {
             $mappedTable = strtolower($mappedTable);
-            
-            // Cek apakah nama tabel cocok:
-            // 1. Cocok persis (siswas === siswas)
-            // 2. Berakhiran (prefix_siswas berakhiran siswas)
-            // 3. Singular (siswas berakhiran siswa)
             if ($tableName === $mappedTable || 
                 str_ends_with($tableName, $mappedTable) ||
                 str_ends_with($tableName, rtrim($mappedTable, 's'))
@@ -106,36 +90,34 @@ trait EncryptsSensitiveData
                 return in_array($columnName, $columns);
             }
         }
-
         return false;
     }
 
     /**
-     * Overriding getAttributeValue to automatically decrypt values 
-     * BEFORE Laravel tries to cast them (e.g. to Date)
+     * Overriding getAttributeValue (Jantung dari Trait v5).
+     * Mencegah data terenkripsi lolos ke Eloquent Casting (seperti Date).
      */
     public function getAttributeValue($key)
     {
-        // Ambil nilai mentah dari internal attributes array (sebelum casting)
+        // 1. Ambil nilai mentah dari model attributes
         $value = $this->getAttributeFromArray($key);
 
-        // OPSI NUKLIR: Jika string terlihat seperti data terenkripsi (dimulai dengan eyJpdi...)
-        // maka otomatis coba dekripsi, biarpun kolomnya nggak terdaftar di mapping.
-        // Ini untuk mencegah Error 500 pada sistem Casting Laravel (seperti Date).
-        if (is_string($value) && str_starts_with($value, 'eyJpdiI')) {
+        // 2. Deteksi data terenkripsi secara agresif
+        if (is_string($value) && str_contains($value, 'eyJpdiI')) {
+            // Debug Marker V5-NUCLEAR
             $value = static::decryptValue($value);
         }
 
-        // Lanjutkan ke logika standar Laravel (Casting & Accessors)
+        // 3. Teruskan ke transformModelValue (Casting, Accessors, dll)
+        // Jika $value sekarang null (karena gagal dekripsi), Carbon akan aman.
         return $this->transformModelValue($key, $value);
     }
 
     /**
-     * Check if an attribute is encryptable
+     * Cek apakah atribut bisa dienkripsi.
      */
     protected function isEncryptable($key): bool
     {
-        $tableName = $this->getTable();
-        return static::shouldEncrypt($tableName, $key);
+        return static::shouldEncrypt($this->getTable(), $key);
     }
 }
