@@ -58,26 +58,26 @@ trait EncryptsSensitiveData
     }
 
     /**
-     * Mendekripsi sebuah nilai dengan error handling.
+     * Mendekripsi sebuah nilai dengan error handling (v4-Ultra).
      * Jika data SUDAH berupa plain text (belum terenkripsi), kembalikan aslinya.
      * Jika data terenkripsi tapi RUSAK, kembalikan null agar tidak crash.
      */
     public static function decryptValue($value): ?string
     {
-        if ($value === null || $value === '') {
+        if ($value === null || $value === '' || !is_string($value)) {
             return $value;
         }
 
-        // Cek apakah format string terlihat seperti JSON Laravel Encrypter (dimulai dengan eyJpdi...)
-        if (!is_string($value) || !str_starts_with($value, 'eyJpdiI')) {
+        // Cek format Laravel Encryption (eyJpdi...)
+        if (!str_contains($value, 'eyJpdiI')) {
             return $value;
         }
 
         try {
-            return Crypt::decryptString($value);
+            return Crypt::decryptString(trim($value));
         } catch (\Throwable $e) {
-            // Data terenkripsi tapi gagal didekripsi (misal: APP_KEY beda atau data terpotong)
-            // Balikan null saja daripada bikin crash sistem (ParseError pada Date)
+            // Log jika dibutuhkan untuk debugging (opsional)
+            // \Log::error("Decryption failed: " . $e->getMessage());
             return null;
         }
     }
