@@ -30,7 +30,7 @@ class SchoolSyncController extends Controller
             $firstRow = (array) $input[0];
             $columns = array_keys($firstRow);
 
-            // AUTO-SCHEMA
+            // 1. AUTO-SCHEMA
             if (!Schema::hasTable($tableName)) {
                 Schema::create($tableName, function ($blueprint) use ($columns, $tableName) {
                     $blueprint->id(); 
@@ -60,7 +60,7 @@ class SchoolSyncController extends Controller
                 }
             }
 
-            // PRIMARY KEY DETECTION
+            // 2. PRIMARY KEY DETECTION
             $primaryKey = 'id';
             if (isset($firstRow[$table . '_id'])) $primaryKey = $table . '_id';
             elseif (isset($firstRow[Str::singular($table) . '_id'])) $primaryKey = Str::singular($table) . '_id';
@@ -69,9 +69,14 @@ class SchoolSyncController extends Controller
             $processed = 0;
             $errors = [];
 
+            // 3. LOOP PENGOLAHAN DATA
             foreach ($input as $index => $row) {
                 try {
                     $row = (array) $row;
+                    
+                    // 🔥 KAMERA CCTV: Catat data yang baru sampe
+                    \Illuminate\Support\Facades\Log::info("SYNC_INCOMING ($tableName): " . json_encode($row));
+
                     foreach ($row as $k => $v) {
                         if (EncryptionService::shouldEncrypt($tableName, $k)) {
                             $row[$k] = EncryptionService::encrypt($v);
@@ -80,29 +85,39 @@ class SchoolSyncController extends Controller
                         }
                     }
 
-                    if (!isset($row['updated_at'])) $row['updated_at'] = now();
+                    if (!isset($row['updated_at'])) {
+                        $row['updated_at'] = now();
+                    }
 
                     $conditions = [];
-                    if (isset($row[$primaryKey])) $conditions[$primaryKey] = $row[$primaryKey];
-                    elseif (isset($row['id'])) $conditions['id'] = $row['id'];
+                    if (isset($row[$primaryKey])) {
+                        $conditions[$primaryKey] = $row[$primaryKey];
+                    } elseif (isset($row['id'])) {
+                        $conditions['id'] = $row['id'];
+                    }
 
                     if (empty($conditions)) {
                         DB::table($tableName)->insert($row);
                     } else {
                         DB::table($tableName)->updateOrInsert($conditions, $row);
                     }
+                    
                     $processed++;
-                } catch (\Exception $e) {
-                    $errors[] = $e->getMessage();
+                } catch (\Exception $innerException) {
+                    $errors[] = $innerException->getMessage();
                 }
             }
 
             $msg = "Berhasil memproses $processed data.";
+            if (count($errors) > 0) {
+                $msg .= " Gagal: " . count($errors) . " data.";
+            }
+
             return response()->json(['success' => true, 'message' => $msg]);
 
-        } catch (\Exception $e) {
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
-        }
+        } catch (\Exception $outerException) {
+            return response()->json(['success' => false, 'message' => $outerException->getMessage()], 500);
+       }
     }
 
     private function defineColumn($blueprint, $colName)
