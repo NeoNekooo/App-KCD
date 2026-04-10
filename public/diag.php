@@ -1,7 +1,7 @@
 <?php
 
 /**
- * RADAR DIAGNOSTIK DATABASE v2.0
+ * RADAR DIAGNOSTIK KUNCI v3.1
  */
 
 require __DIR__.'/../vendor/autoload.php';
@@ -11,36 +11,53 @@ $response = $kernel->handle($request = Illuminate\Http\Request::capture());
 
 header('Content-Type: text/plain');
 
-echo "=== RADAR DIAGNOSTIK DATABASE KCD ===\n\n";
+echo "=== RADAR DIAGNOSTIK KUNCI KCD v3.1 ===\n\n";
 
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
+use App\Services\EncryptionService;
 
+// 1. CEK KUNCI DARI CONFIG (PASTI STABIL)
+$currentKey = config('app.key');
+$cipher = config('app.cipher');
+
+echo "APP_KEY AKTIF (Config): " . substr($currentKey, 0, 15) . "...\n";
+echo "CIPHER: $cipher\n";
+echo "HASH KUNCI: " . md5($currentKey) . "\n\n";
+
+// 2. TES SIKLUS ENKRIPSI
+$testPlain = "TEST_RIRI_123";
+$testEnc = EncryptionService::encrypt($testPlain);
+$testDec = EncryptionService::decrypt($testEnc);
+
+echo "TES SIKLUS INTERNAL:\n";
+echo "Plain: $testPlain\n";
+echo "Hasil Buka Gembok: " . ($testDec === $testPlain ? "✅ SUKSES (Kunci Sinkron)" : "❌ GAGAL (Sistem Enkripsi Error)") . "\n\n";
+
+// 3. TES BUKA DATA DATABASE
 $tables = ['siswas', 'gtks'];
 
 foreach ($tables as $table) {
-    if (Schema::hasTable($table)) {
-        echo "TABEL: $table\n";
-        echo "---------------------------------\n";
+    echo "MEMERIKSA DATA TABEL: $table\n";
+    $sample = DB::table($table)->whereNotNull('nik')->first();
+    
+    if ($sample) {
+        $rawNik = $sample->nik;
+        echo "Raw NIK di DB: " . substr($rawNik, 0, 40) . "...\n";
         
-        $columns = DB::select("SHOW COLUMNS FROM `$table` WHERE Field IN ('nik', 'nisn', 'tanggal_lahir', 'no_wa')");
+        $decrypted = EncryptionService::decrypt($rawNik);
         
-        foreach ($columns as $col) {
-            echo "Kolom: {$col->Field} | Tipe: {$col->Type} | Null: {$col->Null}\n";
-        }
-        
-        // Cek contoh data mentah (Raw)
-        $sample = DB::table($table)->whereNotNull('nik')->first();
-        if ($sample) {
-            $val = $sample->nik;
-            echo "Contoh Raw NIK: " . substr($val, 0, 50) . "...\n";
-            echo "Panjang Raw NIK: " . strlen($val) . " karakter\n";
+        if ($decrypted) {
+            echo "HASIL DEKRIPSI: $decrypted ✅ BERHASIL!\n";
         } else {
-            echo "Tabel kosong atau NIK null.\n";
+            echo "HASIL DEKRIPSI: ❌ GAGAL (MAC Invalid/Kunci Beda)\n";
+            echo "KESIMPULAN: Data di DB ini dikunci pake APP_KEY lama Riri.\n";
+            echo "Wajib jalankan wipe.php terus SINKRON ULANG!\n";
         }
-        echo "\n";
+    } else {
+        echo "Tidak ada data untuk dites.\n";
     }
+    echo "---------------------------------\n";
 }
 
-echo "INFO: Enkripsi Laravel butuh minimal tipe TEXT atau VARCHAR(255+).\n";
-echo "Jika tipe masih VARCHAR(20) atau sejenisnya, DATA PASTI TERPOTONG!\n";
+echo "\nSARAN ARCHER:\n";
+echo "Jangan lupa jalankan: php artisan config:clear di server Riri!\n";

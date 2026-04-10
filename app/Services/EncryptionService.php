@@ -75,7 +75,8 @@ class EncryptionService
         try {
             return Crypt::decryptString(trim($value));
         } catch (\Throwable $e) {
-            // Log hanya jika benar-benar butuh debug, tapi kita bungkam untuk kestabilan UI
+            // 🔥 CATAT ERROR KE LOG LARAVEL 🔥
+            \Illuminate\Support\Facades\Log::critical("DECRYPT_FAIL: " . $e->getMessage() . " | APP_KEY_CONFIG: " . substr(config('app.key'), 0, 15) . "...");
             return null;
         }
     }
