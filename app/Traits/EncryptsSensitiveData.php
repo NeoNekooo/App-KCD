@@ -99,13 +99,16 @@ trait EncryptsSensitiveData
      */
     public function getAttributeValue($key)
     {
-        $value = parent::getAttributeValue($key);
+        // Ambil nilai mentah dari internal attributes array (sebelum casting)
+        $value = $this->getAttributeFromArray($key);
 
+        // Jika kolom ini harus dienkripsi, dekripsi sekarang (sebelum Casting/Accessor)
         if (is_string($value) && $this->isEncryptable($key)) {
-            return static::decryptValue($value);
+            $value = static::decryptValue($value);
         }
 
-        return $value;
+        // Lanjutkan ke logika standar Laravel (Casting & Accessors)
+        return $this->transformModelValue($key, $value);
     }
 
     /**
