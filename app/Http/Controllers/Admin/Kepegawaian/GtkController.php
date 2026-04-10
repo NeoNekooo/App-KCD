@@ -34,6 +34,10 @@ class GtkController extends Controller
             });
         }
 
+        // --- PAGINATION ---
+        $perPage = $request->input('per_page', 15);
+        if ($perPage === 'all') $perPage = $query->count() > 0 ? $query->count() : 15;
+
         $gurus = $query->latest('updated_at')->paginate($perPage)->withQueryString();
 
         // 🔥 FORCED DECRYPTION DI LEVEL CONTROLLER (GURU) 🔥
@@ -87,6 +91,10 @@ class GtkController extends Controller
                   ->orWhere('nuptk', 'like', "%{$search}%");
             });
         }
+
+        // --- PAGINATION ---
+        $perPage = $request->input('per_page', 15);
+        if ($perPage === 'all') $perPage = $query->count() > 0 ? $query->count() : 15;
 
         $tendiks = $query->latest('updated_at')->paginate($perPage)->withQueryString();
 
