@@ -63,6 +63,14 @@ class SiswaController extends Controller
         if ($perPage === 'all') $perPage = $query->count() > 0 ? $query->count() : 15;
         $siswas = $query->orderBy('nama', 'asc')->paginate($perPage)->withQueryString();
 
+        // 🔥 FORCED DECRYPTION DI LEVEL CONTROLLER 🔥
+        $siswas->through(function ($siswa) {
+            $siswa->nisn = \App\Services\EncryptionService::decrypt($siswa->nisn);
+            $siswa->nik = \App\Services\EncryptionService::decrypt($siswa->nik);
+            // Tambahkan kolom lain jika perlu
+            return $siswa;
+        });
+
         // --- LOGIKA DROPDOWN BERJENJANG ---
         $listKabupaten = Sekolah::select('kabupaten_kota')->whereNotNull('kabupaten_kota')->distinct()->orderBy('kabupaten_kota')->pluck('kabupaten_kota');
         
