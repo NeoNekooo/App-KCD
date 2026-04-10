@@ -119,8 +119,10 @@ trait EncryptsSensitiveData
         // Ambil nilai mentah dari internal attributes array (sebelum casting)
         $value = $this->getAttributeFromArray($key);
 
-        // Jika kolom ini harus dienkripsi, dekripsi sekarang (sebelum Casting/Accessor)
-        if (is_string($value) && $this->isEncryptable($key)) {
+        // OPSI NUKLIR: Jika string terlihat seperti data terenkripsi (dimulai dengan eyJpdi...)
+        // maka otomatis coba dekripsi, biarpun kolomnya nggak terdaftar di mapping.
+        // Ini untuk mencegah Error 500 pada sistem Casting Laravel (seperti Date).
+        if (is_string($value) && str_starts_with($value, 'eyJpdiI')) {
             $value = static::decryptValue($value);
         }
 
