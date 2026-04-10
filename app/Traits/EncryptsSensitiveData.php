@@ -60,7 +60,7 @@ trait EncryptsSensitiveData
     /**
      * Mendekripsi sebuah nilai dengan error handling.
      * Jika data SUDAH berupa plain text (belum terenkripsi), kembalikan aslinya.
-     * Jika data terenkripsi tapi RUSAK (terpotong di DB), kembalikan null agar tidak crash.
+     * Jika data terenkripsi tapi RUSAK, kembalikan null agar tidak crash.
      */
     public static function decryptValue($value): ?string
     {
@@ -69,14 +69,13 @@ trait EncryptsSensitiveData
         }
 
         // Cek apakah format string terlihat seperti JSON Laravel Encrypter (dimulai dengan eyJpdi...)
-        // Jika tidak, kemungkinan besar ini plain text lama.
-        if (!str_starts_with($value, 'eyJpdiI')) {
+        if (!is_string($value) || !str_starts_with($value, 'eyJpdiI')) {
             return $value;
         }
 
         try {
             return Crypt::decryptString($value);
-        } catch (DecryptException $e) {
+        } catch (\Throwable $e) {
             // Data terenkripsi tapi gagal didekripsi (misal: APP_KEY beda atau data terpotong)
             // Balikan null saja daripada bikin crash sistem (ParseError pada Date)
             return null;
@@ -85,19 +84,30 @@ trait EncryptsSensitiveData
 
     /**
      * Cek apakah kolom tertentu pada tabel tertentu harus dienkripsi.
+     * Dibuat robust untuk menangani table prefix dan perbedaan pluralisasi.
      */
     public static function shouldEncrypt(string $tableName, string $columnName): bool
     {
         $mapping = static::getEncryptedColumns();
+        $tableName = strtolower($tableName);
+        $columnName = strtolower($columnName);
 
-        // Support singular/plural names as we often use both in sync controllers
-        $normalizedTable = (str_ends_with($tableName, 's')) ? $tableName : $tableName . 's';
-        
-        if (!isset($mapping[$normalizedTable])) {
-            return false;
+        foreach ($mapping as $mappedTable => $columns) {
+            $mappedTable = strtolower($mappedTable);
+            
+            // Cek apakah nama tabel cocok:
+            // 1. Cocok persis (siswas === siswas)
+            // 2. Berakhiran (prefix_siswas berakhiran siswas)
+            // 3. Singular (siswas berakhiran siswa)
+            if ($tableName === $mappedTable || 
+                str_ends_with($tableName, $mappedTable) ||
+                str_ends_with($tableName, rtrim($mappedTable, 's'))
+            ) {
+                return in_array($columnName, $columns);
+            }
         }
 
-        return in_array(strtolower($columnName), $mapping[$normalizedTable]);
+        return false;
     }
 
     /**
