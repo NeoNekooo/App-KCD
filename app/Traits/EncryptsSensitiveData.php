@@ -59,8 +59,8 @@ trait EncryptsSensitiveData
 
     /**
      * Mendekripsi sebuah nilai dengan error handling.
-     * Jika data SUDAH berupa plain text (belum terenkripsi / migrasi lama),
-     * maka kembalikan nilai aslinya tanpa error.
+     * Jika data SUDAH berupa plain text (belum terenkripsi), kembalikan aslinya.
+     * Jika data terenkripsi tapi RUSAK (terpotong di DB), kembalikan null agar tidak crash.
      */
     public static function decryptValue($value): ?string
     {
@@ -68,11 +68,18 @@ trait EncryptsSensitiveData
             return $value;
         }
 
+        // Cek apakah format string terlihat seperti JSON Laravel Encrypter (dimulai dengan eyJpdi...)
+        // Jika tidak, kemungkinan besar ini plain text lama.
+        if (!str_starts_with($value, 'eyJpdiI')) {
+            return $value;
+        }
+
         try {
             return Crypt::decryptString($value);
         } catch (DecryptException $e) {
-            // Data belum terenkripsi (legacy/plain text), kembalikan apa adanya
-            return $value;
+            // Data terenkripsi tapi gagal didekripsi (misal: APP_KEY beda atau data terpotong)
+            // Balikan null saja daripada bikin crash sistem (ParseError pada Date)
+            return null;
         }
     }
 
