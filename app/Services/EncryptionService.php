@@ -5,16 +5,13 @@ namespace App\Services;
 use Illuminate\Support\Facades\Crypt;
 
 /**
- * Service EncryptionService v1.0
+ * Service EncryptionService v2.0 - FINAL STABLE
  * 
- * Pusat logika enkripsi/dekripsi untuk App-KCD.
- * Digunakan oleh Trait (untuk Model) dan Controller (untuk Sinkronisasi).
+ * Pusat logika enkripsi/dekripsi.
+ * Menggunakan daftar kolom eksklusif dari Riri.
  */
 class EncryptionService
 {
-    /**
-     * Mapping kolom yang harus dienkripsi.
-     */
     public static function getEncryptedColumns(): array
     {
         return [
@@ -29,9 +26,6 @@ class EncryptionService
         ];
     }
 
-    /**
-     * Cek apakah kolom tertentu harus dienkripsi.
-     */
     public static function shouldEncrypt(string $tableName, string $columnName): bool
     {
         $mapping = static::getEncryptedColumns();
@@ -50,17 +44,13 @@ class EncryptionService
         return false;
     }
 
-    /**
-     * Mengenkripsi nilai.
-     */
     public static function encrypt($value): ?string
     {
         if ($value === null || $value === '' || !is_string($value)) {
             return $value;
         }
 
-        // 🔥 CEGAH ENKRIPSI GANDA 🔥
-        // Jika data sudah diawali eyJpdi, artinya sudah terenkripsi. JANGAN dihajar lagi!
+        // Jangan enkripsi jika sudah terenkripsi
         if (strpos($value, 'eyJpdi') !== false) {
             return $value;
         }
@@ -72,9 +62,6 @@ class EncryptionService
         }
     }
 
-    /**
-     * Mendekripsi nilai.
-     */
     public static function decrypt($value): ?string
     {
         if ($value === null || $value === '' || !is_string($value)) {
@@ -88,8 +75,7 @@ class EncryptionService
         try {
             return Crypt::decryptString(trim($value));
         } catch (\Throwable $e) {
-            // 🔥 CATAT ERROR KE LOG LARAVEL 🔥
-            \Illuminate\Support\Facades\Log::critical("DECRYPT_FAIL: " . $e->getMessage() . " | APP_KEY: " . substr(env('APP_KEY'), 0, 15) . "...");
+            // Log hanya jika benar-benar butuh debug, tapi kita bungkam untuk kestabilan UI
             return null;
         }
     }

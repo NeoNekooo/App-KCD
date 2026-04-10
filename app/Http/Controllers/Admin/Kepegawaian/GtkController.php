@@ -34,10 +34,15 @@ class GtkController extends Controller
             });
         }
 
-        $perPage = $request->input('per_page', 15);
-        if ($perPage === 'all') $perPage = $query->count() > 0 ? $query->count() : 15;
-        
         $gurus = $query->latest('updated_at')->paginate($perPage)->withQueryString();
+
+        // 🔥 FORCED DECRYPTION DI LEVEL CONTROLLER (GURU) 🔥
+        $gurus->through(function ($gtk) {
+            $gtk->nik = \App\Services\EncryptionService::decrypt($gtk->nik);
+            $gtk->no_hp = \App\Services\EncryptionService::decrypt($gtk->no_hp);
+            $gtk->no_wa = \App\Services\EncryptionService::decrypt($gtk->no_wa);
+            return $gtk;
+        });
 
         // --- LOGIKA DROPDOWN BERJENJANG ---
         $listKabupaten = Sekolah::select('kabupaten_kota')->whereNotNull('kabupaten_kota')->distinct()->orderBy('kabupaten_kota')->pluck('kabupaten_kota');
@@ -80,10 +85,15 @@ class GtkController extends Controller
             });
         }
 
-        $perPage = $request->input('per_page', 15);
-        if ($perPage === 'all') $perPage = $query->count() > 0 ? $query->count() : 15;
-        
         $tendiks = $query->latest('updated_at')->paginate($perPage)->withQueryString();
+
+        // 🔥 FORCED DECRYPTION DI LEVEL CONTROLLER (TENDIK) 🔥
+        $tendiks->through(function ($gtk) {
+            $gtk->nik = \App\Services\EncryptionService::decrypt($gtk->nik);
+            $gtk->no_hp = \App\Services\EncryptionService::decrypt($gtk->no_hp);
+            $gtk->no_wa = \App\Services\EncryptionService::decrypt($gtk->no_wa);
+            return $gtk;
+        });
         
         // --- LOGIKA DROPDOWN BERJENJANG ---
         $listKabupaten = Sekolah::select('kabupaten_kota')->whereNotNull('kabupaten_kota')->distinct()->orderBy('kabupaten_kota')->pluck('kabupaten_kota');
@@ -135,6 +145,14 @@ class GtkController extends Controller
     public function show($id)
     {
         $gtk = Gtk::with(['sekolah'])->findOrFail($id);
+
+        // 🔥 FORCED DECRYPTION SHOW DETAIL 🔥
+        $gtk->nik = \App\Services\EncryptionService::decrypt($gtk->nik);
+        $gtk->no_hp = \App\Services\EncryptionService::decrypt($gtk->no_hp);
+        $gtk->no_wa = \App\Services\EncryptionService::decrypt($gtk->no_wa);
+        $gtk->nik_ibu_kandung = \App\Services\EncryptionService::decrypt($gtk->nik_ibu_kandung);
+        $gtk->no_telepon_rumah = \App\Services\EncryptionService::decrypt($gtk->no_telepon_rumah);
+
         return view('admin.kepegawaian.gtk.show', compact('gtk'));
     }
 
