@@ -88,6 +88,8 @@ class EncryptionService
         try {
             return Crypt::decryptString(trim($value));
         } catch (\Throwable $e) {
+            // 🔥 CATAT ERROR KE LOG LARAVEL 🔥
+            \Illuminate\Support\Facades\Log::critical("DECRYPT_FAIL: " . $e->getMessage() . " | APP_KEY: " . substr(env('APP_KEY'), 0, 15) . "...");
             return null;
         }
     }
