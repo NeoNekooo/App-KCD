@@ -124,7 +124,7 @@
                                     <div class="d-flex flex-column text-truncate" style="max-width: 250px;">
                                         <span class="fw-bold text-dark text-truncate">{{ $siswa->nama }}</span>
                                         <small class="text-muted font-monospace" style="font-size: 0.75rem;">
-                                            TTL: {{ $siswa->tempat_lahir ?? '-' }}, {{ $siswa->tanggal_lahir ? date('d-m-Y', strtotime($siswa->tanggal_lahir)) : '-' }}
+                                            TTL: {{ $siswa->tempat_lahir ?? '-' }}, {{ $siswa->tanggal_lahir ? (\Carbon\Carbon::parse($siswa->tanggal_lahir)->format('d-m-Y')) : '-' }}
                                         </small>
                                     </div>
                                 </div>

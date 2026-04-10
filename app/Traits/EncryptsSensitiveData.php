@@ -3,14 +3,12 @@
 namespace App\Traits;
 
 use Illuminate\Support\Facades\Crypt;
-use Illuminate\Support\Facades\Log;
 
 /**
- * Trait EncryptsSensitiveData v5-Ultra-Nuclear
+ * Trait EncryptsSensitiveData v6-ULTIMATE
  * 
- * Menyediakan mapping kolom sensitif dan penanganan otomatis enkripsi/dekripsi.
- * Versi ini dipersenjatai dengan pengamanan ekstra agar tidak menyebabkan 
- * Error 500 pada casting tipe data Date di Laravel.
+ * Sistem intersepsi triple-layer untuk menjamin data PII terdekripsi 
+ * sebelum menyentuh sistem casting Laravel (terutama Date/Carbon).
  */
 trait EncryptsSensitiveData
 {
@@ -36,7 +34,7 @@ trait EncryptsSensitiveData
      */
     public static function encryptValue($value): ?string
     {
-        if ($value === null || $value === '' || is_array($value) || is_object($value)) {
+        if ($value === null || $value === '' || !is_string($value)) {
             return $value;
         }
 
@@ -48,8 +46,7 @@ trait EncryptsSensitiveData
     }
 
     /**
-     * Mendekripsi sebuah nilai (v5-Ultra-Nuclear).
-     * Jika gagal atau data korup, mengembalikan NULL untuk mencegah crash pada Eloquent Casting.
+     * Mendekripsi sebuah nilai (v6-ULTIMATE).
      */
     public static function decryptValue($value): ?string
     {
@@ -57,17 +54,16 @@ trait EncryptsSensitiveData
             return $value;
         }
 
-        // Deteksi pola enkripsi Laravel (Base64 dari JSON yang dimulai dengan {"iv":)
-        // Pola umum: eyJpdiI...
-        if (!str_contains($value, 'eyJpdiI')) {
+        // Cek pola Base64 Laravel Encryption secara longgar
+        if (!str_contains($value, 'eyJpdi')) {
             return $value;
         }
 
         try {
             return Crypt::decryptString(trim($value));
         } catch (\Throwable $e) {
-            // Jika gagal (misal data terpotong/APP_KEY beda), balikan NULL.
-            // PENTING: Jangan balikan string asli terenkripsi karena akan merusak Carbon::parse()
+            // Jika gagal didekripsi (korup/key beda), WAJIB kembalikan NULL
+            // agar tidak merusak sistem casting Date Laravel.
             return null;
         }
     }
@@ -94,27 +90,45 @@ trait EncryptsSensitiveData
     }
 
     /**
-     * Overriding getAttributeValue (Jantung dari Trait v5).
-     * Mencegah data terenkripsi lolos ke Eloquent Casting (seperti Date).
+     * LAYER 1: Intersepsi pada pengambilan nilai atribut.
      */
     public function getAttributeValue($key)
     {
-        // 1. Ambil nilai mentah dari model attributes
         $value = $this->getAttributeFromArray($key);
 
-        // 2. Deteksi data terenkripsi secara agresif
-        if (is_string($value) && str_contains($value, 'eyJpdiI')) {
-            // Debug Marker V5-NUCLEAR
+        if (is_string($value) && str_contains($value, 'eyJpdi')) {
             $value = static::decryptValue($value);
         }
 
-        // 3. Teruskan ke transformModelValue (Casting, Accessors, dll)
-        // Jika $value sekarang null (karena gagal dekripsi), Carbon akan aman.
         return $this->transformModelValue($key, $value);
     }
 
     /**
-     * Cek apakah atribut bisa dienkripsi.
+     * LAYER 2: Intersepsi tepat sebelum casting atribut dijalankan.
+     */
+    protected function castAttribute($key, $value)
+    {
+        if (is_string($value) && str_contains($value, 'eyJpdi')) {
+            $value = static::decryptValue($value);
+        }
+
+        return parent::castAttribute($key, $value);
+    }
+
+    /**
+     * LAYER 3: Intersepsi pada fungsi asDate (Benteng terakhir sebelum Carbon).
+     */
+    protected function asDate($value)
+    {
+        if (is_string($value) && str_contains($value, 'eyJpdi')) {
+            $value = static::decryptValue($value);
+        }
+
+        return parent::asDate($value);
+    }
+
+    /**
+     * Cek apakah atribut bisa dienkripsi (Mutators).
      */
     protected function isEncryptable($key): bool
     {
