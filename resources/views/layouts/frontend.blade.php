@@ -18,7 +18,7 @@
     {{-- Force Refresh for Hosting --}}
     @if(app()->environment('production'))
         <link rel="stylesheet" href="{{ asset('build/assets/frontend-RPixff0h.css?v=' . time()) }}">
-        <script src="{{ asset('build/assets/frontend-Y67pf_WM.js?v=' . time()) }}" defer></script>
+        <script src="{{ asset('build/assets/frontend-Y67pf_WM.js?v=' . time()) }}" type="module" defer></script>
     @endif
     @stack('styles')
     <style>
