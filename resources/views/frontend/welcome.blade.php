@@ -112,7 +112,7 @@
                 </div>
                 <!-- Identity Badge -->
                 <div class="absolute -bottom-6 -right-2 bg-blue-900 p-6 rounded-2xl shadow-2xl text-white hidden md:block z-10">
-                    <h4 class="font-black text-base leading-tight uppercase tracking-widest">{{ $welcome->pimpinan_name ?? 'Pimpinan KCD' }}</h4>
+                    <h4 class="font-black text-base leading-tight tracking-widest">{{ $welcome->pimpinan_name ?? 'Pimpinan KCD' }}</h4>
                     <p class="text-blue-300 text-[10px] font-bold uppercase mt-1.5 tracking-[0.2em]">{{ $welcome->pimpinan_role ?? 'Kepala Kantor' }}</p>
                 </div>
             </div>
@@ -132,7 +132,7 @@
 
                 <div class="pt-4 flex items-center space-x-4 md:hidden">
                     <div class="flex flex-col">
-                        <span class="font-black text-blue-950 uppercase tracking-widest">{{ $welcome->pimpinan_name }}</span>
+                        <span class="font-black text-blue-950 tracking-widest">{{ $welcome->pimpinan_name }}</span>
                         <span class="text-xs text-blue-600 font-bold uppercase tracking-widest">{{ $welcome->pimpinan_role }}</span>
                     </div>
                 </div>
