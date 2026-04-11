@@ -95,7 +95,7 @@
 <!-- Welcome Message Section -->
 <div class="py-24 bg-white overflow-hidden">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-16 items-start">
             <!-- Foto Pimpinan -->
             <div class="lg:col-span-4 relative group">
                 <div class="absolute -inset-4 bg-blue-600/5 rounded-[3rem] -rotate-3 group-hover:rotate-0 transition duration-700"></div>
