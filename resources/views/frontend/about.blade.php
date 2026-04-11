@@ -3,6 +3,8 @@
 @section('title', 'Tentang Kami - ' . ($instansi->nama_instansi ?? 'Kantor Cabang Dinas'))
 
 @push('styles')
+<!-- Swiper CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
 <style>
     .cms-content {
         font-size: 1.1rem;
@@ -11,7 +13,7 @@
     }
     .cms-content p { margin-bottom: 1.5rem; }
     
-    /* Layout kartu visi misi yang kontras */
+    /* Layout kartu visi misi */
     .card-visi {
         background-color: #f0f9ff;
         border-left: 6px solid #0284c7;
@@ -21,16 +23,43 @@
         border-left: 6px solid #16a34a;
     }
     
-    /* Grid foto terpisah */
-    .photo-grid-item {
-        transition: all 0.3s ease;
-        border-radius: 1.5rem;
+    /* Slider Container */
+    .about-slider-frame {
+        position: relative;
+        border-radius: 2rem;
         overflow: hidden;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        box-shadow: 0 20px 50px rgba(0,0,0,0.1);
+        background: #f1f5f9;
     }
-    .photo-grid-item:hover {
-        transform: scale(1.02);
-        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    
+    .about-swiper {
+        width: 100%;
+        height: 100%;
+    }
+
+    .swiper-slide img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    /* Custom Swiper Buttons */
+    .swiper-button-next, .swiper-button-prev {
+        background: rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(10px);
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+        color: #fff;
+    }
+    .swiper-button-next:after, .swiper-button-prev:after {
+        font-size: 18px;
+        font-weight: bold;
+    }
+    .swiper-pagination-bullet-active {
+        background: #fff !important;
+        width: 24px !important;
+        border-radius: 5px !important;
     }
 
     .animate-up {
@@ -56,7 +85,7 @@
 <div class="py-16 bg-white">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
-        <!-- Bagian Sejarah & Galeri Terpisah -->
+        <!-- Bagian Sejarah & Slider Foto -->
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start mb-20">
             
             <!-- Teks Sejarah (Kiri) -->
@@ -74,26 +103,41 @@
                 </div>
             </div>
 
-            <!-- Galeri Foto Terpisah (Kanan) -->
-            <div class="lg:col-span-5 space-y-6 animate-up" style="animation-delay: 200ms;">
-                @php
-                    $fotos = [];
-                    if($instansi->foto_profil) $fotos[] = $instansi->foto_profil;
-                    if($instansi->foto_sejarah && is_array($instansi->foto_sejarah)) {
-                        $fotos = array_merge($fotos, $instansi->foto_sejarah);
-                    }
-                @endphp
+            <!-- Frame Slider Foto (Kanan) -->
+            <div class="lg:col-span-5 animate-up sticky top-28" style="animation-delay: 200ms;">
+                <div class="about-slider-frame h-[400px] md:h-[500px]">
+                    @php
+                        $fotos = [];
+                        if($instansi->foto_profil) $fotos[] = $instansi->foto_profil;
+                        if($instansi->foto_sejarah && is_array($instansi->foto_sejarah)) {
+                            $fotos = array_merge($fotos, $instansi->foto_sejarah);
+                        }
+                    @endphp
 
-                @forelse($fotos as $foto)
-                    <div class="photo-grid-item">
-                        <img src="{{ Storage::url($foto) }}" class="w-full h-auto object-cover" alt="Dokumentasi Instansi">
-                    </div>
-                @empty
-                    <div class="p-12 border-2 border-dashed border-slate-200 rounded-[2rem] text-center text-slate-400">
-                        <i class='bx bx-image-alt fs-1 mb-2'></i>
-                        <p class="text-xs font-bold uppercase tracking-widest">Belum ada foto</p>
-                    </div>
-                @endforelse
+                    @if(count($fotos) > 0)
+                        <div class="swiper about-swiper">
+                            <div class="swiper-wrapper">
+                                @foreach($fotos as $foto)
+                                    <div class="swiper-slide">
+                                        <div class="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent z-10"></div>
+                                        <img src="{{ Storage::url($foto) }}" alt="Dokumentasi Instansi">
+                                    </div>
+                                @endforeach
+                            </div>
+                            <!-- Navigasi jika foto lebih dari 1 -->
+                            @if(count($fotos) > 1)
+                                <div class="swiper-button-next"></div>
+                                <div class="swiper-button-prev"></div>
+                                <div class="swiper-pagination"></div>
+                            @endif
+                        </div>
+                    @else
+                        <div class="w-full h-full flex flex-col items-center justify-center text-slate-400 bg-slate-50">
+                            <i class='bx bx-image-alt fs-1 mb-2'></i>
+                            <p class="text-xs font-bold uppercase tracking-widest">Belum ada foto</p>
+                        </div>
+                    @endif
+                </div>
             </div>
         </div>
 
@@ -141,4 +185,32 @@
 
     </div>
 </div>
+
+@push('scripts')
+<!-- Swiper JS -->
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const swiper = new Swiper('.about-swiper', {
+            loop: true,
+            autoplay: {
+                delay: 5000,
+                disableOnInteraction: false,
+            },
+            pagination: {
+                el: '.swiper-pagination',
+                clickable: true,
+            },
+            navigation: {
+                nextEl: '.swiper-button-next',
+                prevEl: '.swiper-button-prev',
+            },
+            effect: 'fade',
+            fadeEffect: {
+                crossFade: true
+            },
+        });
+    });
+</script>
+@endpush
 @endsection
