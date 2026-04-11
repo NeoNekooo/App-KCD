@@ -14,11 +14,12 @@
     next() { this.activeSlide = this.activeSlide === this.totalSlides ? 1 : this.activeSlide + 1 },
     prev() { this.activeSlide = this.activeSlide === 1 ? this.totalSlides : this.activeSlide - 1 },
     init() { if(this.totalSlides > 1) setInterval(() => this.next(), 6000) }
-}" class="relative h-[85dvh] min-h-[450px] max-h-[750px] overflow-hidden bg-slate-900 -mt-24 md:-mt-28">
+}" x-cloak class="relative h-[85dvh] min-h-[450px] max-h-[750px] overflow-hidden bg-slate-900 -mt-24 md:-mt-28">
     
     <!-- Slides -->
     @forelse($sliders as $slider)
         <div x-show="activeSlide === {{ $loop->iteration }}" 
+             style="display: {{ $loop->first ? 'block' : 'none' }}"
              x-transition:enter="transition ease-out duration-1000"
              x-transition:enter-start="opacity-0 scale-105"
              x-transition:enter-end="opacity-100 scale-100"
