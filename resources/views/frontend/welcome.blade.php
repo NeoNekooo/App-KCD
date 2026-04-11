@@ -10,24 +10,15 @@
 
 <div x-data="{ 
     activeSlide: 1, 
-    slides: [
-        @foreach($sliders as $slider)
-        { id: {{ $loop->iteration }}, image: '{{ Storage::url($slider->image) }}', title: '{{ addslashes($slider->title) }}', subtitle: '{{ addslashes($slider->subtitle) }}' },
-        @endforeach
-    ],
-    @if($sliders->isEmpty())
-    slides: [
-        { id: 1, image: 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1920&q=80', title: 'Melayani dengan Prima', subtitle: 'Membangun Masa Depan Pendidikan Indonesia' }
-    ],
-    @endif
-    next() { this.activeSlide = this.activeSlide === this.slides.length ? 1 : this.activeSlide + 1 },
-    prev() { this.activeSlide = this.activeSlide === 1 ? this.slides.length : this.activeSlide - 1 },
-    init() { if(this.slides.length > 1) setInterval(() => this.next(), 6000) }
+    totalSlides: {{ $sliders->count() > 0 ? $sliders->count() : 1 }},
+    next() { this.activeSlide = this.activeSlide === this.totalSlides ? 1 : this.activeSlide + 1 },
+    prev() { this.activeSlide = this.activeSlide === 1 ? this.totalSlides : this.activeSlide - 1 },
+    init() { if(this.totalSlides > 1) setInterval(() => this.next(), 6000) }
 }" class="relative h-[85dvh] min-h-[450px] max-h-[750px] overflow-hidden bg-slate-900 -mt-24 md:-mt-28">
     
     <!-- Slides -->
-    <template x-for="slide in slides" :key="slide.id">
-        <div x-show="activeSlide === slide.id" 
+    @forelse($sliders as $slider)
+        <div x-show="activeSlide === {{ $loop->iteration }}" 
              x-transition:enter="transition ease-out duration-1000"
              x-transition:enter-start="opacity-0 scale-105"
              x-transition:enter-end="opacity-100 scale-100"
@@ -37,12 +28,16 @@
              class="absolute inset-0">
             
             <div class="absolute inset-0 bg-slate-900/40 z-10"></div>
-            <img :src="slide.image" class="w-full h-full object-cover" :alt="slide.title">
+            <img src="{{ Storage::url($slider->image) }}" class="w-full h-full object-cover" alt="{{ $slider->title }}">
 
             <div class="absolute inset-0 z-20 flex items-center justify-center px-4">
                 <div class="text-center max-w-4xl">
-                    <h1 x-text="slide.title" class="text-3xl md:text-5xl lg:text-6xl font-black text-white mb-6 tracking-tight drop-shadow-2xl"></h1>
-                    <p x-text="slide.subtitle" class="text-sm md:text-lg text-blue-50 font-medium mb-10 drop-shadow-lg uppercase tracking-[0.2em] opacity-90"></p>
+                    <h1 class="text-3xl md:text-5xl lg:text-6xl font-black text-white mb-6 tracking-tight drop-shadow-2xl">
+                        {{ $slider->title }}
+                    </h1>
+                    <p class="text-sm md:text-lg text-blue-50 font-medium mb-10 drop-shadow-lg uppercase tracking-[0.2em] opacity-90">
+                        {{ $slider->subtitle }}
+                    </p>
                     <div class="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-4">
                         <a href="/lembaga" class="w-full sm:w-auto px-8 py-3.5 bg-blue-600 text-white font-black uppercase tracking-widest text-[10px] rounded-xl shadow-xl hover:bg-blue-700 transition duration-300 transform hover:-translate-y-1">
                             Satuan Pendidikan
@@ -54,16 +49,29 @@
                 </div>
             </div>
         </div>
-    </template>
+    @empty
+        <div class="absolute inset-0">
+            <div class="absolute inset-0 bg-slate-900/40 z-10"></div>
+            <img src="https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1920&q=80" class="w-full h-full object-cover">
+            <div class="absolute inset-0 z-20 flex items-center justify-center px-4">
+                <div class="text-center">
+                    <h1 class="text-3xl md:text-5xl lg:text-6xl font-black text-white mb-6 tracking-tight drop-shadow-2xl uppercase">Melayani dengan Prima</h1>
+                    <p class="text-sm md:text-lg text-blue-50 font-medium mb-10 drop-shadow-lg uppercase tracking-[0.2em]">Membangun Masa Depan Pendidikan Indonesia</p>
+                </div>
+            </div>
+        </div>
+    @endforelse
 
+    @if($sliders->count() > 1)
     <div class="absolute bottom-8 left-1/2 -translate-x-1/2 z-30 flex space-x-3">
-        <template x-for="slide in slides" :key="slide.id">
-            <button @click="activeSlide = slide.id" 
-                    :class="activeSlide === slide.id ? 'bg-white w-10' : 'bg-white/40 w-3'"
+        @foreach($sliders as $slider)
+            <button @click="activeSlide = {{ $loop->iteration }}" 
+                    :class="activeSlide === {{ $loop->iteration }} ? 'bg-white w-10' : 'bg-white/40 w-3'"
                     class="h-1.5 rounded-full transition-all duration-500">
             </button>
-        </template>
+        @endforeach
     </div>
+    @endif
 </div>
 
 @php
@@ -93,7 +101,7 @@
             <div class="lg:col-span-8 space-y-8">
                 <div>
                     <span class="text-[10px] font-black text-blue-600 uppercase tracking-[0.3em] mb-4 block">Kata Sambutan</span>
-                    <h2 class="text-2xl md:text-4xl font-black text-slate-900 leading-tight tracking-tight">
+                    <h2 class="text-2xl md:text-4xl font-black text-slate-900 leading-tight tracking-tight uppercase italic">
                         {{ $welcome->title }}
                     </h2>
                 </div>
@@ -106,7 +114,7 @@
 </div>
 @endif
 
-<!-- Features -->
+<!-- Features Highlight -->
 <div class="py-20 bg-slate-50">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -134,7 +142,7 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-16">
             
-            <!-- Berita (8 columns) -->
+            <!-- Berita -->
             <div class="lg:col-span-8">
                 <div class="flex items-center justify-between mb-12">
                     <div class="flex items-center gap-4">
@@ -159,7 +167,7 @@
                             <div class="text-[9px] text-slate-400 font-bold uppercase tracking-widest mb-3 flex items-center gap-2">
                                 <i class='bx bx-calendar-alt text-blue-500'></i> {{ $berita->created_at->translatedFormat('d M Y') }}
                             </div>
-                            <h3 class="text-base font-bold text-slate-800 leading-tight group-hover:text-blue-600 transition-colors line-clamp-2">{{ $berita->judul }}</h3>
+                            <h3 class="text-base font-bold text-slate-800 leading-tight group-hover:text-blue-600 transition-colors line-clamp-2 uppercase">{{ $berita->judul }}</h3>
                         </div>
                     </a>
                     @empty
@@ -168,12 +176,10 @@
                 </div>
             </div>
 
-            <!-- Pengumuman (4 columns) -->
+            <!-- Pengumuman -->
             <div class="lg:col-span-4">
                 <div class="flex items-center gap-4 mb-12">
-                    <div class="w-12 h-12 rounded-2xl bg-amber-500 text-white flex items-center justify-center shadow-xl shadow-amber-200">
-                        <i class='bx bxs-megaphone text-2xl'></i>
-                    </div>
+                    <div class="w-12 h-12 rounded-2xl bg-amber-500 text-white flex items-center justify-center shadow-xl shadow-amber-100"><i class='bx bxs-megaphone text-2xl'></i></div>
                     <h2 class="text-2xl font-black text-slate-900 uppercase tracking-tight">Pengumuman</h2>
                 </div>
 
@@ -183,12 +189,12 @@
                         <div class="text-[8px] text-amber-600 font-black uppercase tracking-widest mb-2 flex items-center gap-1">
                             <i class='bx bx-time'></i> {{ $pengumuman->created_at->diffForHumans() }}
                         </div>
-                        <h3 class="text-sm font-bold text-slate-800 group-hover:text-blue-600 transition-colors line-clamp-2">{{ $pengumuman->judul }}</h3>
+                        <h3 class="text-sm font-bold text-slate-800 group-hover:text-blue-600 transition-colors line-clamp-2 uppercase">{{ $pengumuman->judul }}</h3>
                     </a>
                     @empty
                     <div class="p-12 text-center text-slate-400 border-2 border-dashed rounded-[3rem]">Tidak ada pengumuman</div>
                     @endforelse
-                    <a href="/pengumuman" class="block w-full py-4 text-center rounded-2xl bg-slate-900 text-white text-[9px] font-black uppercase tracking-widest hover:bg-blue-600 transition-all shadow-lg mt-6">Lihat Semua Pengumuman</a>
+                    <a href="/pengumuman" class="block w-full py-4 text-center rounded-2xl bg-slate-900 text-white text-[9px] font-black uppercase tracking-widest hover:bg-blue-600 transition-all shadow-lg mt-6">Lihat Semua</a>
                 </div>
             </div>
         </div>
