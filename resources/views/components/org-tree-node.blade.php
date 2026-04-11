@@ -22,7 +22,7 @@
                     <span class="assistant-badge">Staf Khusus</span>
                     <div class="assistant-inner">
                         <img class="assistant-avatar" 
-                             src="{{ $asisten->foto_pejabat ? asset('storage/'.$asisten->foto_pejabat) : 'https://ui-avatars.com/api/?name='.urlencode($asisten->nama_pejabat ?? $asisten->jabatan).'&background=f59e0b&color=fff&size=64' }}" 
+                             src="{{ $asisten->foto_pejabat ? Storage::url($asisten->foto_pejabat) : 'https://ui-avatars.com/api/?name='.urlencode($asisten->nama_pejabat ?? $asisten->jabatan).'&background=f59e0b&color=fff&size=64' }}" 
                              alt="{{ $asisten->jabatan }}">
                         <div class="assistant-info">
                             <h4>{{ $asisten->jabatan }}</h4>
@@ -59,7 +59,7 @@
                     <span class="assistant-badge">Staf Khusus</span>
                     <div class="assistant-inner">
                         <img class="assistant-avatar" 
-                             src="{{ $asisten->foto_pejabat ? asset('storage/'.$asisten->foto_pejabat) : 'https://ui-avatars.com/api/?name='.urlencode($asisten->nama_pejabat ?? $asisten->jabatan).'&background=f59e0b&color=fff&size=64' }}" 
+                             src="{{ $asisten->foto_pejabat ? Storage::url($asisten->foto_pejabat) : 'https://ui-avatars.com/api/?name='.urlencode($asisten->nama_pejabat ?? $asisten->jabatan).'&background=f59e0b&color=fff&size=64' }}" 
                              alt="{{ $asisten->jabatan }}">
                         <div class="assistant-info">
                             <h4>{{ $asisten->jabatan }}</h4>
