@@ -4,24 +4,13 @@
 
 @push('styles')
 <style>
-    .glass-profile {
-        background: rgba(255, 255, 255, 0.9);
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-    }
-    .stat-card {
-        transition: all 0.3s ease;
-    }
-    .stat-card:hover {
-        transform: translateY(-5px);
-    }
     .info-label {
         font-size: 0.7rem;
         text-transform: uppercase;
         letter-spacing: 0.1em;
         font-weight: 900;
         color: #94a3b8;
-        margin-bottom: 0.25rem;
+        margin-bottom: 0.35rem;
     }
     .info-value {
         font-weight: 700;
@@ -36,155 +25,170 @@
     @keyframes fadeInUp {
         to { opacity: 1; transform: translateY(0); }
     }
+    .hero-gradient {
+        background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+    }
+    .icon-box {
+        width: 3rem;
+        height: 3rem;
+        border-radius: 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
 </style>
 @endpush
 
 @section('content')
-<!-- Hero Header -->
-<div class="bg-blue-950 pt-16 pb-32 relative overflow-hidden">
-    <div class="absolute inset-0 opacity-20">
-        <div class="absolute top-0 -right-20 w-96 h-96 bg-blue-500 rounded-full blur-[100px]"></div>
-        <div class="absolute bottom-0 -left-20 w-96 h-96 bg-indigo-500 rounded-full blur-[100px]"></div>
-    </div>
+<!-- Simplified Premium Header -->
+<div class="hero-gradient pt-20 pb-48 relative overflow-hidden">
+    <!-- Abstract Decorations -->
+    <div class="absolute top-0 right-0 w-64 h-64 bg-blue-400/10 rounded-full -mr-32 -mt-32"></div>
+    <div class="absolute bottom-0 left-0 w-48 h-48 bg-indigo-400/10 rounded-full -ml-24 -mb-24"></div>
     
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <a href="{{ url('/lembaga') }}" class="inline-flex items-center gap-2 text-blue-300 hover:text-white text-xs font-black uppercase tracking-widest mb-8 transition-all group">
+        <a href="{{ url('/lembaga') }}" class="inline-flex items-center gap-2 text-blue-200 hover:text-white text-[10px] font-black uppercase tracking-[0.2em] mb-10 transition-all group">
             <i class='bx bx-left-arrow-alt fs-4 group-hover:-translate-x-1 transition-transform'></i>
             Kembali ke Daftar
         </a>
 
-        <div class="flex flex-col md:flex-row items-center md:items-end gap-8">
-            <!-- Logo Sekolah -->
-            <div class="w-32 h-32 md:w-40 md:h-40 rounded-[2.5rem] bg-white p-6 shadow-2xl flex items-center justify-center flex-shrink-0 animate-in">
-                @if($sekolah->logo)
-                    <img src="{{ Storage::url($sekolah->logo) }}" class="w-full h-full object-contain" alt="Logo {{ $sekolah->nama }}">
-                @else
-                    <i class='bx bxs-school text-blue-100' style="font-size: 5rem;"></i>
-                @endif
+        <div class="flex flex-col md:flex-row items-center gap-8">
+            <!-- Icon Identitas (Header) -->
+            <div class="w-20 h-20 md:w-24 md:h-24 rounded-[2rem] bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-white shadow-2xl animate-in">
+                <i class='bx bxs-institution text-4xl'></i>
             </div>
 
-            <!-- Judul & Info Utama -->
-            <div class="text-center md:text-left flex-grow animate-in" style="animation-delay: 100ms;">
+            <div class="text-center md:text-left animate-in" style="animation-delay: 100ms;">
                 <div class="flex flex-wrap justify-center md:justify-start gap-2 mb-4">
-                    <span class="px-3 py-1 rounded-lg bg-blue-500/20 text-blue-300 text-[10px] font-black uppercase tracking-widest border border-blue-400/30">
+                    <span class="px-3 py-1 rounded-lg bg-blue-500/20 text-blue-200 text-[10px] font-black uppercase tracking-widest border border-blue-400/30">
                         {{ $sekolah->bentuk_pendidikan_id_str }}
                     </span>
-                    <span class="px-3 py-1 rounded-lg {{ strtolower($sekolah->status_sekolah_str) == 'negeri' ? 'bg-emerald-500/20 text-emerald-300 border-emerald-400/30' : 'bg-amber-500/20 text-amber-300 border-amber-400/30' }} text-[10px] font-black uppercase tracking-widest border">
+                    <span class="px-3 py-1 rounded-lg {{ strtolower($sekolah->status_sekolah_str) == 'negeri' ? 'bg-emerald-500/20 text-emerald-200 border-emerald-400/30' : 'bg-amber-500/20 text-amber-200 border-amber-400/30' }} text-[10px] font-black uppercase tracking-widest border">
                         {{ $sekolah->status_sekolah_str }}
                     </span>
                 </div>
-                <h1 class="text-3xl md:text-5xl font-black text-white leading-tight mb-2 uppercase tracking-tight">
+                <h1 class="text-3xl md:text-5xl font-black text-white leading-tight mb-2 uppercase tracking-tighter">
                     {{ $sekolah->nama }}
                 </h1>
-                <p class="text-blue-200/70 font-medium flex items-center justify-center md:justify-start gap-2">
-                    <i class='bx bx-fingerprint'></i> NPSN: {{ $sekolah->npsn ?? '-' }}
+                <p class="text-blue-100/60 font-bold text-xs uppercase tracking-widest flex items-center justify-center md:justify-start gap-2">
+                    <i class='bx bx-fingerprint'></i> NPSN : {{ $sekolah->npsn ?? '-' }}
                 </p>
-            </div>
-
-            <!-- Quick Action -->
-            <div class="animate-in" style="animation-delay: 200ms;">
-                @if($sekolah->website)
-                <a href="{{ str_starts_with($sekolah->website, 'http') ? $sekolah->website : 'https://'.$sekolah->website }}" target="_blank" 
-                   class="inline-flex items-center gap-2 px-6 py-3 bg-white text-blue-900 font-black uppercase tracking-widest text-xs rounded-2xl hover:bg-blue-50 transition-all shadow-xl">
-                    Kunjungi Website <i class='bx bx-link-external'></i>
-                </a>
-                @endif
             </div>
         </div>
     </div>
 </div>
 
-<!-- Content Grid -->
-<div class="bg-slate-50 min-h-screen -mt-12 pb-24 relative z-20">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+<!-- Main Content Grid -->
+<div class="bg-slate-50 min-h-screen -mt-24 pb-24 relative z-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-10">
             
-            <!-- Left Column: Details -->
-            <div class="lg:col-span-8 space-y-8">
-                <!-- Data Identitas -->
-                <div class="bg-white rounded-[2.5rem] shadow-sm border border-slate-100 p-8 md:p-10 animate-in" style="animation-delay: 300ms;">
-                    <div class="flex items-center gap-3 mb-8">
-                        <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
-                            <i class='bx bx-info-circle fs-4'></i>
+            <!-- Left Side -->
+            <div class="lg:col-span-8 space-y-10">
+                <!-- Detail Identitas -->
+                <div class="bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 p-8 md:p-12 animate-in" style="animation-delay: 200ms;">
+                    <div class="flex items-center gap-4 mb-12">
+                        <div class="icon-box bg-blue-50 text-blue-600">
+                            <i class='bx bx-id-card text-2xl'></i>
                         </div>
-                        <h2 class="text-xl font-black text-slate-800 uppercase tracking-tight">Identitas Lembaga</h2>
+                        <h2 class="text-xl font-black text-slate-800 uppercase tracking-tight">Informasi Identitas</h2>
                     </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        <div class="space-y-6">
-                            <div>
-                                <div class="info-label">Nama Satuan Pendidikan</div>
-                                <div class="info-value">{{ $sekolah->nama }}</div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
+                        <div class="space-y-8">
+                            <div class="flex items-start gap-4">
+                                <div class="mt-1 text-blue-400"><i class='bx bx-buildings'></i></div>
+                                <div>
+                                    <div class="info-label">Nama Resmi</div>
+                                    <div class="info-value">{{ $sekolah->nama }}</div>
+                                </div>
                             </div>
-                            <div>
-                                <div class="info-label">NPSN / NSS</div>
-                                <div class="info-value">{{ $sekolah->npsn ?? '-' }} / {{ $sekolah->nss ?? '-' }}</div>
+                            <div class="flex items-start gap-4">
+                                <div class="mt-1 text-blue-400"><i class='bx bx-barcode'></i></div>
+                                <div>
+                                    <div class="info-label">NPSN / NSS</div>
+                                    <div class="info-value">{{ $sekolah->npsn ?? '-' }} / {{ $sekolah->nss ?? '-' }}</div>
+                                </div>
                             </div>
-                            <div>
-                                <div class="info-label">Status Sekolah</div>
-                                <div class="info-value">{{ $sekolah->status_sekolah_str ?? '-' }}</div>
+                            <div class="flex items-start gap-4">
+                                <div class="mt-1 text-blue-400"><i class='bx bx-time'></i></div>
+                                <div>
+                                    <div class="info-label">Waktu Belajar</div>
+                                    <div class="info-value">Pagi / 5 Hari</div>
+                                </div>
                             </div>
                         </div>
-                        <div class="space-y-6">
-                            <div>
-                                <div class="info-label">Bentuk Pendidikan</div>
-                                <div class="info-value">{{ $sekolah->bentuk_pendidikan_id_str ?? '-' }}</div>
+                        <div class="space-y-8">
+                            <div class="flex items-start gap-4">
+                                <div class="mt-1 text-blue-400"><i class='bx bx-category'></i></div>
+                                <div>
+                                    <div class="info-label">Jenjang / Status</div>
+                                    <div class="info-value">{{ $sekolah->bentuk_pendidikan_id_str }} / {{ $sekolah->status_sekolah_str }}</div>
+                                </div>
                             </div>
-                            <div>
-                                <div class="info-label">Penyelenggaraan SKS</div>
-                                <div class="info-value">{{ $sekolah->is_sks == 1 ? 'Ya' : 'Tidak' }}</div>
+                            <div class="flex items-start gap-4">
+                                <div class="mt-1 text-blue-400"><i class='bx bx-map-alt'></i></div>
+                                <div>
+                                    <div class="info-label">Wilayah Pembinaan</div>
+                                    <div class="info-value">{{ $sekolah->kabupaten_kota }}</div>
+                                </div>
                             </div>
-                            <div>
-                                <div class="info-label">Kode Wilayah</div>
-                                <div class="info-value">{{ $sekolah->kode_wilayah ?? '-' }}</div>
+                            <div class="flex items-start gap-4">
+                                <div class="mt-1 text-blue-400"><i class='bx bx-certification'></i></div>
+                                <div>
+                                    <div class="info-label">Program SKS</div>
+                                    <div class="info-value">{{ $sekolah->is_sks == 1 ? 'Tersedia' : 'Tidak Ada' }}</div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Kontak & Alamat -->
-                <div class="bg-white rounded-[2.5rem] shadow-sm border border-slate-100 p-8 md:p-10 animate-in" style="animation-delay: 400ms;">
-                    <div class="flex items-center gap-3 mb-8">
-                        <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
-                            <i class='bx bx-map-pin fs-4'></i>
+                <!-- Lokasi Lembaga -->
+                <div class="bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 p-8 md:p-12 animate-in" style="animation-delay: 300ms;">
+                    <div class="flex items-center gap-4 mb-12">
+                        <div class="icon-box bg-emerald-50 text-emerald-600">
+                            <i class='bx bx-map-pin text-2xl'></i>
                         </div>
-                        <h2 class="text-xl font-black text-slate-800 uppercase tracking-tight">Lokasi & Kontak</h2>
+                        <h2 class="text-xl font-black text-slate-800 uppercase tracking-tight">Lokasi Lembaga</h2>
                     </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
-                        <div class="space-y-6">
-                            <div>
-                                <div class="info-label">Alamat Lengkap</div>
-                                <div class="info-value leading-relaxed">
-                                    {{ $sekolah->alamat_jalan ?? 'Alamat belum diatur' }}<br>
-                                    @if($sekolah->desa_kelurahan) Desa/Kel. {{ $sekolah->desa_kelurahan }}, @endif
-                                    @if($sekolah->kecamatan) Kec. {{ $sekolah->kecamatan }} @endif<br>
-                                    {{ $sekolah->kabupaten_kota }}, {{ $sekolah->provinsi }} {{ $sekolah->kode_pos }}
-                                </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+                        <div>
+                            <div class="info-label">Alamat Lengkap</div>
+                            <div class="info-value leading-relaxed text-slate-600 mb-8">
+                                {{ $sekolah->alamat_jalan ?? 'Alamat belum diatur' }}<br>
+                                {{ $sekolah->desa_kelurahan ? 'Desa '.$sekolah->desa_kelurahan.',' : '' }} 
+                                {{ $sekolah->kecamatan ? 'Kec. '.$sekolah->kecamatan : '' }}<br>
+                                {{ $sekolah->kabupaten_kota }}, {{ $sekolah->provinsi }}
                             </div>
-                            <div class="flex flex-wrap gap-4 pt-4">
-                                @if($sekolah->email)
-                                <a href="mailto:{{ $sekolah->email }}" class="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-50 text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-colors text-xs font-bold">
-                                    <i class='bx bx-envelope'></i> Email
-                                </a>
-                                @endif
-                                @if($sekolah->nomor_telepon)
-                                <a href="tel:{{ $sekolah->nomor_telepon }}" class="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-50 text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-colors text-xs font-bold">
-                                    <i class='bx bx-phone'></i> Telepon
-                                </a>
-                                @endif
+                            <div class="flex gap-4">
+                                <div class="flex-1 p-4 bg-slate-50 rounded-2xl border border-slate-100 flex items-center gap-3">
+                                    <div class="text-blue-400"><i class='bx bx-envelope-open'></i></div>
+                                    <div>
+                                        <div class="text-[9px] font-black text-slate-400 uppercase mb-1">Kodepos</div>
+                                        <div class="text-sm font-bold text-slate-700">{{ $sekolah->kode_pos ?? '-' }}</div>
+                                    </div>
+                                </div>
+                                <div class="flex-1 p-4 bg-slate-50 rounded-2xl border border-slate-100 flex items-center gap-3">
+                                    <div class="text-blue-400"><i class='bx bx-map-alt'></i></div>
+                                    <div>
+                                        <div class="text-[9px] font-black text-slate-400 uppercase mb-1">ID Wilayah</div>
+                                        <div class="text-sm font-bold text-slate-700">{{ $sekolah->kode_wilayah ?? '-' }}</div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         
-                        <!-- Mini Map -->
-                        <div class="rounded-3xl overflow-hidden border border-slate-100 h-48 bg-slate-50">
+                        <div class="rounded-[2rem] overflow-hidden border border-slate-100 shadow-inner h-64 bg-slate-100 relative">
                             @if($sekolah->lintang && $sekolah->bujur)
                                 <iframe width="100%" height="100%" frameborder="0" style="border:0" 
                                     src="https://maps.google.com/maps?q={{ $sekolah->lintang }},{{ $sekolah->bujur }}&z=15&output=embed" allowfullscreen></iframe>
                             @else
                                 <div class="w-full h-full flex flex-col items-center justify-center text-slate-300">
-                                    <i class='bx bx-map-alt fs-1'></i>
-                                    <span class="text-[10px] font-black uppercase mt-2">Koordinat belum tersedia</span>
+                                    <i class='bx bx-map-alt text-5xl mb-2'></i>
+                                    <p class="text-[10px] font-black uppercase">Peta Belum Tersedia</p>
                                 </div>
                             @endif
                         </div>
@@ -192,46 +196,62 @@
                 </div>
             </div>
 
-            <!-- Right Column: Sidebar -->
-            <div class="lg:col-span-4 space-y-6">
-                <!-- Statistik/Sekilas (Simulasi) -->
-                <div class="bg-blue-600 rounded-[2.5rem] p-8 text-white animate-in" style="animation-delay: 500ms;">
-                    <h3 class="text-lg font-black uppercase tracking-widest mb-6">Sekilas Data</h3>
-                    <div class="space-y-6">
-                        <div class="flex items-center gap-4">
-                            <div class="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center text-2xl">
-                                <i class='bx bx-user-voice'></i>
-                            </div>
-                            <div>
-                                <div class="text-blue-100 text-[10px] font-black uppercase tracking-widest">Akreditasi</div>
-                                <div class="text-xl font-black">A (Unggul)</div>
-                            </div>
-                        </div>
-                        <div class="flex items-center gap-4">
-                            <div class="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center text-2xl">
-                                <i class='bx bx-group'></i>
-                            </div>
-                            <div>
-                                <div class="text-blue-100 text-[10px] font-black uppercase tracking-widest">Kurikulum</div>
-                                <div class="text-xl font-black">Merdeka</div>
-                            </div>
-                        </div>
-                    </div>
+            <!-- Right Side -->
+            <div class="lg:col-span-4 space-y-8 mt-4 md:mt-0 animate-in" style="animation-delay: 400ms;">
+                <!-- Card Hubungi -->
+                <div class="bg-slate-900 rounded-[3rem] p-10 text-white shadow-2xl relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full -mr-16 -mt-16"></div>
+                    <h3 class="text-lg font-black uppercase tracking-widest mb-10 flex items-center gap-3 text-blue-400">
+                        <i class='bx bx-headphone text-2xl'></i> Hubungi Kami
+                    </h3>
                     
-                    <div class="mt-8 pt-8 border-t border-white/10">
-                        <p class="text-blue-100 text-xs leading-relaxed opacity-80">
-                            Data ini disinkronisasi secara berkala dari sistem database Dapodik pusat untuk menjamin akurasi informasi pendidikan.
-                        </p>
+                    <div class="space-y-8">
+                        @if($sekolah->website)
+                        <a href="{{ str_starts_with($sekolah->website, 'http') ? $sekolah->website : 'https://'.$sekolah->website }}" target="_blank" class="flex items-center gap-5 group">
+                            <div class="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center group-hover:bg-blue-600 transition-colors shadow-inner">
+                                <i class='bx bx-globe text-xl'></i>
+                            </div>
+                            <div>
+                                <div class="text-[9px] font-black text-slate-500 uppercase tracking-widest">Situs Resmi</div>
+                                <div class="text-sm font-bold truncate max-w-[180px]">{{ str_replace(['https://', 'http://'], '', $sekolah->website) }}</div>
+                            </div>
+                        </a>
+                        @endif
+
+                        <a href="mailto:{{ $sekolah->email ?? 'info@sekolah.sch.id' }}" class="flex items-center gap-5 group">
+                            <div class="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center group-hover:bg-blue-600 transition-colors shadow-inner">
+                                <i class='bx bx-envelope text-xl'></i>
+                            </div>
+                            <div>
+                                <div class="text-[9px] font-black text-slate-500 uppercase tracking-widest">Email Sekolah</div>
+                                <div class="text-sm font-bold truncate max-w-[180px]">{{ $sekolah->email ?? 'Belum tersedia' }}</div>
+                            </div>
+                        </a>
+
+                        <a href="tel:{{ $sekolah->nomor_telepon }}" class="flex items-center gap-5 group">
+                            <div class="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center group-hover:bg-blue-600 transition-colors shadow-inner">
+                                <i class='bx bx-phone-call text-xl'></i>
+                            </div>
+                            <div>
+                                <div class="text-[9px] font-black text-slate-500 uppercase tracking-widest">Telepon</div>
+                                <div class="text-sm font-bold">{{ $sekolah->nomor_telepon ?? 'Belum tersedia' }}</div>
+                            </div>
+                        </a>
                     </div>
                 </div>
 
-                <!-- Banner/Info -->
-                <div class="bg-white rounded-[2.5rem] shadow-sm border border-slate-100 p-8 animate-in" style="animation-delay: 600ms;">
-                    <h3 class="text-sm font-black text-slate-800 uppercase tracking-widest mb-4">Butuh Bantuan?</h3>
-                    <p class="text-slate-500 text-xs leading-relaxed mb-6">Jika terdapat kesalahan data atau ingin menanyakan informasi lebih lanjut mengenai sekolah ini, silakan hubungi layanan pengaduan kami.</p>
-                    <a href="/kontak" class="block w-full py-3 bg-slate-50 text-slate-600 text-center rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-100 transition">
-                        Hubungi KCD Wilayah
-                    </a>
+                <!-- Verified Box -->
+                <div class="p-8 bg-blue-600 rounded-[3rem] text-white shadow-xl relative overflow-hidden group">
+                    <i class='bx bxs-badge-check absolute -right-4 -bottom-4 text-8xl text-white/10 group-hover:scale-110 transition-transform'></i>
+                    <div class="relative z-10 text-center">
+                        <div class="w-16 h-16 rounded-2xl bg-white/20 flex items-center justify-center mx-auto mb-6 text-3xl">
+                            <i class='bx bx-shield-quarter'></i>
+                        </div>
+                        <h4 class="text-base font-black uppercase tracking-widest mb-2">Terverifikasi</h4>
+                        <p class="text-[10px] text-blue-100 font-medium leading-relaxed opacity-80">
+                            Informasi ini merupakan data resmi yang telah disinkronisasi melalui sistem Satu Data Pendidikan.
+                        </p>
+                    </div>
                 </div>
             </div>
 

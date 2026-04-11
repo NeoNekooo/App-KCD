@@ -113,24 +113,10 @@
             </form>
         </div>
 
-        <!-- Data Info & Results -->
+        <!-- Data Info -->
         <div class="flex flex-col md:flex-row justify-between items-center mb-6 px-4 animate-in" style="animation-delay: 300ms;">
             <div class="mb-4 md:mb-0">
                 <span class="text-sm text-slate-500 font-medium">Menampilkan <span class="text-blue-600 font-bold">{{ $sekolah->firstItem() ?? 0 }}-{{ $sekolah->lastItem() ?? 0 }}</span> dari <span class="text-slate-800 font-black">{{ $sekolah->total() }}</span> sekolah</span>
-            </div>
-            
-            <div class="flex gap-2">
-                @if($filters)
-                    <div class="flex flex-wrap gap-2">
-                        @foreach($filters as $key => $val)
-                            @if($val && !in_array($key, ['page', 'status']))
-                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-blue-50 text-blue-600 text-[10px] font-black uppercase tracking-wider border border-blue-100">
-                                    {{ $key }}: {{ $val }}
-                                </span>
-                            @endif
-                        @endforeach
-                    </div>
-                @endif
             </div>
         </div>
 
@@ -140,9 +126,10 @@
                 <table class="w-full text-left border-collapse">
                     <thead>
                         <tr class="bg-slate-50/50 border-b border-slate-100">
-                            <th class="px-8 py-6 text-[11px] font-black text-slate-400 uppercase tracking-[0.2em]">Info Lembaga</th>
+                            <th class="px-8 py-6 text-[11px] font-black text-slate-400 uppercase tracking-[0.2em]">Nama Lembaga</th>
                             <th class="px-6 py-6 text-[11px] font-black text-slate-400 uppercase tracking-[0.2em]">NPSN</th>
-                            <th class="px-6 py-6 text-[11px] font-black text-slate-400 uppercase tracking-[0.2em]">Status & Jenjang</th>
+                            <th class="px-6 py-6 text-[11px] font-black text-slate-400 uppercase tracking-[0.2em]">Jenjang</th>
+                            <th class="px-6 py-6 text-[11px] font-black text-slate-400 uppercase tracking-[0.2em]">Status</th>
                             <th class="px-6 py-6 text-[11px] font-black text-slate-400 uppercase tracking-[0.2em]">Wilayah</th>
                             <th class="px-8 py-6 text-[11px] font-black text-slate-400 uppercase tracking-[0.2em] text-center">Aksi</th>
                         </tr>
@@ -151,19 +138,7 @@
                         @forelse($sekolah as $item)
                         <tr class="hover:bg-blue-50/30 transition-colors duration-200 group">
                             <td class="px-8 py-5">
-                                <div class="flex items-center gap-4">
-                                    <div class="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300 shadow-sm border border-white">
-                                        @if($item->logo)
-                                            <img src="{{ Storage::url($item->logo) }}" class="w-8 h-8 object-contain">
-                                        @else
-                                            <i class='bx bxs-school text-slate-400 fs-4'></i>
-                                        @endif
-                                    </div>
-                                    <div class="min-w-0">
-                                        <div class="text-sm font-black text-slate-800 truncate">{{ $item->nama }}</div>
-                                        <div class="text-[11px] text-slate-400 font-bold uppercase tracking-wider mt-0.5 truncate">{{ $item->alamat_jalan ?? 'Alamat belum tersedia' }}</div>
-                                    </div>
-                                </div>
+                                <div class="text-sm font-black text-slate-800">{{ $item->nama }}</div>
                             </td>
                             <td class="px-6 py-5">
                                 <span class="px-3 py-1.5 rounded-xl bg-slate-100 text-slate-600 text-xs font-mono font-bold tracking-wider border border-slate-200/50">
@@ -171,14 +146,14 @@
                                 </span>
                             </td>
                             <td class="px-6 py-5">
-                                <div class="flex flex-col gap-1.5">
-                                    <span class="inline-flex w-fit px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest {{ strtolower($item->status_sekolah_str) == 'negeri' ? 'status-badge-negeri' : 'status-badge-swasta' }}">
-                                        {{ $item->status_sekolah_str }}
-                                    </span>
-                                    <span class="inline-flex w-fit px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest jenjang-badge">
-                                        {{ $item->bentuk_pendidikan_id_str }}
-                                    </span>
-                                </div>
+                                <span class="inline-flex px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest jenjang-badge">
+                                    {{ $item->bentuk_pendidikan_id_str }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-5">
+                                <span class="inline-flex px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest {{ strtolower($item->status_sekolah_str) == 'negeri' ? 'status-badge-negeri' : 'status-badge-swasta' }}">
+                                    {{ $item->status_sekolah_str }}
+                                </span>
                             </td>
                             <td class="px-6 py-5">
                                 <div class="text-xs font-bold text-slate-700">{{ $item->kecamatan }}</div>
@@ -193,12 +168,11 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="5" class="px-8 py-20 text-center">
+                            <td colspan="6" class="px-8 py-20 text-center">
                                 <div class="flex flex-col items-center">
                                     <i class='bx bx-search-alt text-slate-200' style="font-size: 5rem;"></i>
                                     <h3 class="text-xl font-bold text-slate-800 mt-4">Data tidak ditemukan</h3>
                                     <p class="text-slate-400 text-sm mt-2">Coba ganti kata kunci pencarian atau bersihkan filter.</p>
-                                    <a href="{{ url('/lembaga') }}" class="mt-6 text-blue-600 font-black uppercase tracking-widest text-xs hover:underline">Lihat Semua Sekolah</a>
                                 </div>
                             </td>
                         </tr>
@@ -208,7 +182,7 @@
             </div>
         </div>
 
-        <!-- Custom Styled Pagination -->
+        <!-- Pagination -->
         <div class="px-4">
             {{ $sekolah->links() }}
         </div>
