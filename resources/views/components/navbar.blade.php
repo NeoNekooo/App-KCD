@@ -168,17 +168,7 @@
             </div>
 
             <!-- Satuan Pendidikan Mobile -->
-            <div x-data="{ open: false }">
-                <button @click="open = !open" class="w-full flex items-center justify-between px-6 py-4 rounded-2xl text-base font-bold text-gray-600 hover:bg-blue-50 hover:text-blue-600 transition outline-none">
-                    <span>Satuan Pendidikan</span>
-                    <svg class="w-4 h-4 transition-transform" :class="{'rotate-180': open}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                    </svg>
-                </button>
-                <div x-show="open" class="pl-6 space-y-1 bg-gray-50 rounded-2xl mb-2">
-                    <a href="/lembaga" class="block px-6 py-3 text-sm font-bold text-gray-500">Lembaga Pendidikan</a>
-                </div>
-            </div>
+            <a href="/lembaga" class="block px-6 py-4 rounded-2xl text-base font-bold text-gray-600 hover:bg-blue-50 hover:text-blue-600 transition">Satuan Pendidikan</a>
 
             <!-- Informasi Mobile -->
             <div x-data="{ open: false }">
