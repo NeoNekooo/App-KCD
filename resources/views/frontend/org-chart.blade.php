@@ -180,8 +180,16 @@
     .assistant-branch {
         display: flex;
         align-items: center;
-        position: relative;
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
         z-index: 5;
+    }
+    .assistant-left {
+        right: 100%;
+    }
+    .assistant-right {
+        left: 100%;
     }
     .assistant-line {
         width: 32px;
