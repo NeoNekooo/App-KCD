@@ -11,18 +11,20 @@
     .premium-org-tree * { box-sizing: border-box; }
     .premium-org-tree {
         display: flex;
-        justify-content: center;
+        flex-direction: column;
+        align-items: center;
         padding: 3rem 1rem 4rem;
         font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        width: 100%;
     }
 
     /* ---- CONNECTOR LINES (Gradient Style) ---- */
     .premium-org-tree ul {
         padding-top: 50px;
         position: relative;
-        display: flex;
+        display: inline-flex; /* Ganti flex jadi inline-flex agar lebar mengikuti isi */
         justify-content: center;
-        margin: 0;
+        margin: 0 auto;
         padding-inline-start: 0;
     }
     .premium-org-tree ul ul::before {
