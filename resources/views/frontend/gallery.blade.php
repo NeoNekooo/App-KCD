@@ -1,49 +1,73 @@
 @extends('layouts.frontend')
+
 @section('title', 'Galeri Kegiatan - Kantor Cabang Dinas')
+
 @section('content')
-<div class="bg-slate-900 py-16">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <h1 class="text-4xl md:text-5xl font-extrabold text-white mb-4 tracking-tight">Galeri Kegiatan</h1>
-        <p class="text-lg text-blue-200/80 max-w-2xl mx-auto">Dokumentasi foto kegiatan dan acara Kantor Cabang Dinas Pendidikan.</p>
+<div class="bg-slate-900 py-20 relative overflow-hidden">
+    <div class="absolute inset-0 opacity-20">
+        <div class="absolute top-0 left-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
+    </div>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
+        <h1 class="text-3xl md:text-5xl font-black text-white uppercase tracking-tight mb-4 italic">Galeri Kegiatan</h1>
+        <p class="text-blue-100 text-lg max-w-2xl mx-auto font-light opacity-80">Dokumentasi visual berbagai momentum penting dan kegiatan inspiratif kami.</p>
     </div>
 </div>
-<div class="py-16 bg-gray-50">
+
+<div class="py-20 bg-slate-50 min-h-screen">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            @forelse($galeri as $album)
-            <div class="group bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
-                <div class="relative h-56 overflow-hidden">
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+            @php
+                $galeris = \App\Models\Galeri::with('items')->latest()->paginate(9);
+            @endphp
+
+            @forelse($galeris as $album)
+            <div class="group bg-white rounded-[3rem] overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-700 hover:-translate-y-2 border border-slate-100">
+                <div class="relative aspect-square overflow-hidden">
                     @if($album->foto)
-                    <img src="{{ Storage::url($album->foto) }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                        <img src="{{ Storage::url($album->foto) }}" class="w-full h-full object-cover transition-transform duration-[2s] group-hover:scale-110">
                     @else
-                    <div class="w-full h-full bg-gradient-to-br from-indigo-50 to-blue-100 flex items-center justify-center">
-                        <svg class="w-16 h-16 text-blue-200" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                    </div>
+                        <div class="w-full h-full bg-slate-100 flex items-center justify-center text-slate-300">
+                            <i class='bx bx-image text-6xl'></i>
+                        </div>
                     @endif
-                    <div class="absolute bottom-3 right-3 bg-black/60 backdrop-blur-sm text-white text-xs font-bold px-3 py-1 rounded-full">
-                        <i class="bx bx-images mr-1"></i>{{ $album->items->count() }} Foto
+                    
+                    <!-- Overlay Info -->
+                    <div class="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-transparent opacity-60 group-hover:opacity-100 transition-opacity duration-500 flex flex-col justify-end p-10 text-white">
+                        <div class="flex items-center gap-2 mb-3">
+                            <span class="px-3 py-1 rounded-full bg-blue-600 text-[8px] font-black uppercase tracking-widest">
+                                <i class='bx bx-images mr-1'></i> {{ $album->items->count() }} Foto
+                            </span>
+                            @if($album->tanggal)
+                            <span class="text-[9px] font-bold uppercase tracking-widest opacity-80">
+                                {{ \Carbon\Carbon::parse($album->tanggal)->translatedFormat('M Y') }}
+                            </span>
+                            @endif
+                        </div>
+                        <h3 class="text-lg font-black leading-tight uppercase tracking-tight group-hover:text-blue-400 transition-colors line-clamp-2">
+                            {{ $album->judul }}
+                        </h3>
                     </div>
                 </div>
-                <div class="p-5">
-                    <h3 class="text-lg font-bold text-gray-900 mb-1">{{ $album->judul }}</h3>
-                    @if($album->tanggal)<p class="text-xs text-gray-400 mb-2">{{ $album->tanggal->format('d F Y') }}</p>@endif
-                    @if($album->deskripsi)<p class="text-sm text-gray-500 line-clamp-2">{{ $album->deskripsi }}</p>@endif
-                </div>
-                @if($album->items->count() > 0)
-                <div class="px-5 pb-5">
-                    <div class="grid grid-cols-4 gap-1.5 rounded-lg overflow-hidden">
-                        @foreach($album->items->take(4) as $foto)
-                        <img src="{{ Storage::url($foto->file) }}" class="w-full h-16 object-cover {{ $loop->first ? 'rounded-tl-lg' : '' }} {{ $loop->index == 3 ? 'rounded-br-lg' : '' }}">
-                        @endforeach
-                    </div>
+                
+                @if($album->deskripsi)
+                <div class="p-8">
+                    <p class="text-xs text-slate-500 line-clamp-2 leading-relaxed italic">
+                        "{{ $album->deskripsi }}"
+                    </p>
                 </div>
                 @endif
             </div>
             @empty
-            <div class="col-span-full text-center py-20">
-                <h3 class="text-xl font-bold text-gray-900">Belum ada galeri kegiatan</h3>
+            <div class="col-span-full py-20 text-center bg-white rounded-[3rem] shadow-inner border-2 border-dashed border-slate-100">
+                <i class='bx bx-images text-6xl text-slate-200 mb-4'></i>
+                <p class="text-slate-400 font-bold uppercase tracking-widest">Belum ada album galeri</p>
             </div>
             @endforelse
+        </div>
+
+        <div class="mt-16">
+            {{ $galeris->links() }}
         </div>
     </div>
 </div>

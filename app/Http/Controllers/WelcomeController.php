@@ -16,7 +16,18 @@ class WelcomeController extends Controller
             ->get();
 
         $welcome = WelcomeMessage::first();
+        
+        // Ambil 3 data terbaru
+        $latestBerita = \App\Models\Berita::where('status', 'publish')->latest()->take(3)->get();
+        $latestPengumuman = \App\Models\Pengumuman::where('status', 'publish')->latest()->take(3)->get();
+        $latestGaleri = \App\Models\Galeri::latest()->take(3)->get();
 
-        return view('frontend.welcome', compact('sliders', 'welcome'));
+        return view('frontend.welcome', compact(
+            'sliders', 
+            'welcome', 
+            'latestBerita', 
+            'latestPengumuman', 
+            'latestGaleri'
+        ));
     }
 }
