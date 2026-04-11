@@ -17,7 +17,7 @@
     
     {{-- Force CSS Refresh for Hosting --}}
     @if(app()->environment('production'))
-        <link rel="stylesheet" href="{{ asset('build/assets/frontend-CLpIIIhr.css?v=' . time()) }}">
+        <link rel="stylesheet" href="{{ asset('build/assets/frontend-RPixff0h.css?v=' . time()) }}">
     @endif
     @stack('styles')
     <style>
