@@ -62,11 +62,11 @@
 
 <!-- Main Content Area -->
 <div class="bg-slate-50 min-h-screen pb-24 relative z-20">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-16">
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-10">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-8 pt-12">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-12">
             
             <!-- Left Side -->
-            <div class="lg:col-span-8 space-y-10">
+            <div class="lg:col-span-8 space-y-12">
                 <!-- Identitas Card -->
                 <div class="bg-white rounded-[2.5rem] shadow-xl border border-slate-100 p-8 md:p-12">
                     <div class="flex items-center gap-4 mb-12">
