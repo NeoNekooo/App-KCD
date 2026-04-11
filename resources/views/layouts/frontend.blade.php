@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>@yield('title', 'KCD - Kantor Cabang Dinas')</title>
+    
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -12,13 +13,30 @@
     <!-- Icons -->
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
 
-    <!-- Frontend Styles & Scripts -->
+    <!-- Global Assets -->
     @if(app()->environment('local'))
         @vite(['resources/css/frontend.css', 'resources/js/frontend.js'])
     @else
-        {{-- Pemanggilan Manual untuk Server Produksi (Hosting) --}}
-        <link rel="stylesheet" href="{{ asset('build/assets/frontend-RPixff0h.css') }}">
-        <script src="{{ asset('build/assets/frontend-Y67pf_WM.js') }}" type="module" defer></script>
+        @php
+            // Logika otomatis mencari file build terbaru di folder assets
+            $manifestPath = public_path('build/manifest.json');
+            $cssFile = '';
+            $jsFile = '';
+            
+            if (file_exists($manifestPath)) {
+                $manifest = json_decode(file_get_contents($manifestPath), true);
+                $cssFile = asset('build/' . ($manifest['resources/css/frontend.css']['file'] ?? ''));
+                $jsFile = asset('build/' . ($manifest['resources/js/frontend.js']['file'] ?? ''));
+            }
+        @endphp
+        
+        @if($cssFile && $jsFile)
+            <link rel="stylesheet" href="{{ $cssFile }}">
+            <script src="{{ $jsFile }}" type="module" defer></script>
+        @else
+            {{-- Fallback jika manifest belum terupdate sempurna --}}
+            @vite(['resources/css/frontend.css', 'resources/js/frontend.js'])
+        @endif
     @endif
 
     @stack('styles')
