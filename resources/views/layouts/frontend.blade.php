@@ -15,9 +15,10 @@
     <!-- Frontend-only Styles & Scripts -->
     @vite(['resources/css/frontend.css', 'resources/js/frontend.js'])
     
-    {{-- Force CSS Refresh for Hosting --}}
+    {{-- Force Refresh for Hosting --}}
     @if(app()->environment('production'))
         <link rel="stylesheet" href="{{ asset('build/assets/frontend-RPixff0h.css?v=' . time()) }}">
+        <script src="{{ asset('build/assets/frontend-Y67pf_WM.js?v=' . time()) }}" defer></script>
     @endif
     @stack('styles')
     <style>
