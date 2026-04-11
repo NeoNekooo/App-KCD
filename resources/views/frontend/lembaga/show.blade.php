@@ -17,43 +17,32 @@
         color: #1e293b;
         font-size: 0.95rem;
     }
-    .animate-in {
-        opacity: 0;
-        transform: translateY(20px);
-        animation: fadeInUp 0.6s ease-out forwards;
-    }
-    @keyframes fadeInUp {
-        to { opacity: 1; transform: translateY(0); }
-    }
 </style>
 @endpush
 
 @section('content')
-<!-- Header Section -->
-<div class="relative bg-slate-900 pt-20 pb-44 overflow-hidden">
-    <!-- Background Decor -->
-    <div class="absolute inset-0 opacity-20 pointer-events-none">
-        <div class="absolute top-0 right-0 w-96 h-96 bg-blue-600 rounded-full blur-[100px] -mr-48 -mt-48"></div>
-        <div class="absolute bottom-0 left-0 w-64 h-64 bg-indigo-600 rounded-full blur-[80px] -ml-32 -mb-32"></div>
-    </div>
+<!-- Header Section - Version Hosting Stable -->
+<div style="background-color: #0f172a; background-image: linear-gradient(to bottom right, #1e3a8a, #0f172a);" class="pt-20 pb-32 relative overflow-hidden">
+    <!-- Manual Decorations -->
+    <div class="absolute top-0 right-0 w-96 h-96 bg-blue-500 rounded-full blur-[100px] opacity-20 -mr-48 -mt-48"></div>
     
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <!-- Back Link -->
-        <a href="{{ url('/lembaga') }}" class="inline-flex items-center gap-2 text-blue-300 hover:text-white text-[10px] font-black uppercase tracking-[0.2em] mb-10 transition-all group">
-            <i class='bx bx-left-arrow-alt text-lg group-hover:-translate-x-1 transition-transform'></i>
+        <a href="{{ url('/lembaga') }}" class="inline-flex items-center gap-2 text-blue-300 hover:text-white text-[10px] font-black uppercase tracking-[0.2em] mb-10 transition-all">
+            <i class='bx bx-left-arrow-alt text-lg'></i>
             Kembali ke Daftar
         </a>
 
         <div class="flex flex-col md:flex-row items-center md:items-start gap-8">
             <!-- Icon Box -->
-            <div class="w-20 h-20 md:w-24 md:h-24 rounded-[2rem] bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-white shadow-2xl animate-in">
+            <div class="w-20 h-20 md:w-24 md:h-24 rounded-[2rem] bg-white/10 border border-white/20 flex items-center justify-center text-white shadow-2xl">
                 <i class='bx bxs-institution text-4xl'></i>
             </div>
 
             <!-- Title & Badges -->
-            <div class="text-center md:text-left flex-1 animate-in" style="animation-delay: 100ms;">
+            <div class="text-center md:text-left flex-1">
                 <div class="flex flex-wrap justify-center md:justify-start gap-2 mb-4">
-                    <span class="px-3 py-1 rounded-lg bg-blue-500/20 text-blue-300 text-[10px] font-black uppercase tracking-widest border border-blue-400/20">
+                    <span class="px-3 py-1 rounded-lg bg-blue-500/20 text-blue-200 text-[10px] font-black uppercase tracking-widest border border-blue-400/20">
                         {{ $sekolah->bentuk_pendidikan_id_str }}
                     </span>
                     <span class="px-3 py-1 rounded-lg {{ strtolower($sekolah->status_sekolah_str) == 'negeri' ? 'bg-emerald-500/20 text-emerald-300 border-emerald-400/20' : 'bg-amber-500/20 text-amber-300 border-amber-400/20' }} text-[10px] font-black uppercase tracking-widest border">
@@ -72,14 +61,14 @@
 </div>
 
 <!-- Main Content Area -->
-<div class="bg-slate-50 min-h-screen -mt-20 pb-24 relative z-20">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
+<div class="bg-slate-50 min-h-screen pb-24 relative z-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-16">
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-10">
             
-            <!-- Left Side: Identity & Location -->
+            <!-- Left Side -->
             <div class="lg:col-span-8 space-y-10">
                 <!-- Identitas Card -->
-                <div class="bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 p-8 md:p-12 animate-in" style="animation-delay: 200ms;">
+                <div class="bg-white rounded-[2.5rem] shadow-xl border border-slate-100 p-8 md:p-12">
                     <div class="flex items-center gap-4 mb-12">
                         <div class="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center shadow-inner">
                             <i class='bx bx-id-card text-2xl'></i>
@@ -107,7 +96,7 @@
                                 <div class="mt-1 text-blue-400"><i class='bx bx-time-five'></i></div>
                                 <div>
                                     <div class="info-label">Waktu Belajar</div>
-                                    <div class="info-value">Pagi / 5 Hari</div>
+                                    <div class="info-value text-slate-700">Pagi / 5 Hari</div>
                                 </div>
                             </div>
                         </div>
@@ -130,7 +119,7 @@
                                 <div class="mt-1 text-blue-400"><i class='bx bx-certification'></i></div>
                                 <div>
                                     <div class="info-label">Program SKS</div>
-                                    <div class="info-value">{{ $sekolah->is_sks == 1 ? 'Tersedia' : 'Tidak Ada' }}</div>
+                                    <div class="info-value text-slate-700">{{ $sekolah->is_sks == 1 ? 'Tersedia' : 'Tidak Ada' }}</div>
                                 </div>
                             </div>
                         </div>
@@ -138,7 +127,7 @@
                 </div>
 
                 <!-- Location Card -->
-                <div class="bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 p-8 md:p-12 animate-in" style="animation-delay: 300ms;">
+                <div class="bg-white rounded-[2.5rem] shadow-xl border border-slate-100 p-8 md:p-12">
                     <div class="flex items-center gap-4 mb-12">
                         <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center shadow-inner">
                             <i class='bx bx-map-pin text-2xl'></i>
@@ -189,7 +178,7 @@
             </div>
 
             <!-- Right Side -->
-            <div class="lg:col-span-4 space-y-8 animate-in" style="animation-delay: 400ms;">
+            <div class="lg:col-span-4 space-y-8">
                 <!-- Contact Card -->
                 <div class="bg-slate-900 rounded-[3rem] p-10 text-white shadow-2xl relative overflow-hidden">
                     <div class="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full -mr-16 -mt-16"></div>
@@ -225,7 +214,7 @@
                                 <i class='bx bx-phone-call text-xl'></i>
                             </div>
                             <div>
-                                <div class="text-[9px] font-black text-slate-500 uppercase tracking-widest">Layanan Telepon</div>
+                                <div class="text-[9px] font-black text-slate-500 uppercase tracking-widest">Telepon</div>
                                 <div class="text-sm font-bold">{{ $sekolah->nomor_telepon ?? 'Belum tersedia' }}</div>
                             </div>
                         </a>
