@@ -12,17 +12,19 @@
     <!-- Icons -->
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
 
-    <!-- Frontend-only Styles & Scripts -->
-    @vite(['resources/css/frontend.css', 'resources/js/frontend.js'])
-    
-    {{-- Force Refresh for Hosting --}}
-    @if(app()->environment('production'))
-        <link rel="stylesheet" href="{{ asset('build/assets/frontend-RPixff0h.css?v=' . time()) }}">
-        <script src="{{ asset('build/assets/frontend-Y67pf_WM.js?v=' . time()) }}" type="module" defer></script>
+    <!-- Frontend Styles & Scripts -->
+    @if(app()->environment('local'))
+        @vite(['resources/css/frontend.css', 'resources/js/frontend.js'])
+    @else
+        {{-- Pemanggilan Manual untuk Server Produksi (Hosting) --}}
+        <link rel="stylesheet" href="{{ asset('build/assets/frontend-RPixff0h.css') }}">
+        <script src="{{ asset('build/assets/frontend-Y67pf_WM.js') }}" type="module" defer></script>
     @endif
+
     @stack('styles')
     <style>
         body { font-family: 'Inter', sans-serif; }
+        [x-cloak] { display: none !important; }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-900 flex flex-col min-h-screen">
@@ -36,4 +38,3 @@
     @stack('scripts')
 </body>
 </html>
-
