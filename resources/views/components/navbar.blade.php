@@ -84,19 +84,11 @@
                         </div>
                     </div>
 
-                    <!-- Satuan Pendidikan Dropdown -->
-                    <div class="relative" @mouseenter="openDropdown = 'satdik'" @mouseleave="openDropdown = null">
-                        <button class="flex items-center px-4 py-2 text-sm font-bold tracking-wide transition-all rounded-xl outline-none"
-                                :class="{ 'text-blue-900 hover:bg-blue-50': scrolled, 'text-white hover:bg-white/10': !scrolled }">
-                            <span>Satuan Pendidikan</span>
-                            <svg class="w-4 h-4 ml-1 transition-transform duration-200" :class="{'rotate-180': openDropdown === 'satdik'}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                            </svg>
-                        </button>
-                        <div x-show="openDropdown === 'satdik'" x-transition class="absolute left-0 mt-1 w-56 bg-white rounded-2xl shadow-2xl border border-gray-100 py-3 z-50">
-                            <a href="/lembaga" class="block px-6 py-2.5 text-sm font-bold text-gray-600 hover:bg-blue-50 hover:text-blue-600 transition">Lembaga Pendidikan</a>
-                        </div>
-                    </div>
+                    <!-- Satuan Pendidikan -->
+                    <a href="/lembaga" class="px-4 py-2 text-sm font-bold tracking-wide transition-all rounded-xl"
+                       :class="{ 'text-blue-900 hover:bg-blue-50': scrolled, 'text-white hover:bg-white/10': !scrolled }">
+                        Satuan Pendidikan
+                    </a>
 
                     <!-- Informasi Dropdown -->
                     <div class="relative" @mouseenter="openDropdown = 'informasi'" @mouseleave="openDropdown = null">
