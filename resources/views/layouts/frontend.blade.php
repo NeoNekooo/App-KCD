@@ -12,9 +12,13 @@
     <!-- Icons -->
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
 
-    <!-- Frontend-only Styles & Scripts (NO Sneat) -->
-    @vite('resources/css/frontend.css')
-    @vite('resources/js/frontend.js')
+    <!-- Frontend-only Styles & Scripts -->
+    @vite(['resources/css/frontend.css', 'resources/js/frontend.js'])
+    
+    {{-- Force CSS Refresh for Hosting --}}
+    @if(app()->environment('production'))
+        <link rel="stylesheet" href="{{ asset('build/assets/frontend-CLpIIIhr.css?v=' . time()) }}">
+    @endif
     @stack('styles')
     <style>
         body { font-family: 'Inter', sans-serif; }
