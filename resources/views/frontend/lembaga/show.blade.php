@@ -25,71 +25,63 @@
     @keyframes fadeInUp {
         to { opacity: 1; transform: translateY(0); }
     }
-    .hero-gradient {
-        background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
-    }
-    .icon-box {
-        width: 3rem;
-        height: 3rem;
-        border-radius: 1rem;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-shrink: 0;
-    }
 </style>
 @endpush
 
 @section('content')
-<!-- Simplified Premium Header -->
-<div class="hero-gradient pt-20 pb-48 relative overflow-hidden">
-    <!-- Abstract Decorations -->
-    <div class="absolute top-0 right-0 w-64 h-64 bg-blue-400/10 rounded-full -mr-32 -mt-32"></div>
-    <div class="absolute bottom-0 left-0 w-48 h-48 bg-indigo-400/10 rounded-full -ml-24 -mb-24"></div>
+<!-- Header Section -->
+<div class="relative bg-slate-900 pt-20 pb-44 overflow-hidden">
+    <!-- Background Decor -->
+    <div class="absolute inset-0 opacity-20 pointer-events-none">
+        <div class="absolute top-0 right-0 w-96 h-96 bg-blue-600 rounded-full blur-[100px] -mr-48 -mt-48"></div>
+        <div class="absolute bottom-0 left-0 w-64 h-64 bg-indigo-600 rounded-full blur-[80px] -ml-32 -mb-32"></div>
+    </div>
     
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <a href="{{ url('/lembaga') }}" class="inline-flex items-center gap-2 text-blue-200 hover:text-white text-[10px] font-black uppercase tracking-[0.2em] mb-10 transition-all group">
-            <i class='bx bx-left-arrow-alt fs-4 group-hover:-translate-x-1 transition-transform'></i>
+        <!-- Back Link -->
+        <a href="{{ url('/lembaga') }}" class="inline-flex items-center gap-2 text-blue-300 hover:text-white text-[10px] font-black uppercase tracking-[0.2em] mb-10 transition-all group">
+            <i class='bx bx-left-arrow-alt text-lg group-hover:-translate-x-1 transition-transform'></i>
             Kembali ke Daftar
         </a>
 
-        <div class="flex flex-col md:flex-row items-center gap-8">
-            <!-- Icon Identitas (Header) -->
+        <div class="flex flex-col md:flex-row items-center md:items-start gap-8">
+            <!-- Icon Box -->
             <div class="w-20 h-20 md:w-24 md:h-24 rounded-[2rem] bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-white shadow-2xl animate-in">
                 <i class='bx bxs-institution text-4xl'></i>
             </div>
 
-            <div class="text-center md:text-left animate-in" style="animation-delay: 100ms;">
+            <!-- Title & Badges -->
+            <div class="text-center md:text-left flex-1 animate-in" style="animation-delay: 100ms;">
                 <div class="flex flex-wrap justify-center md:justify-start gap-2 mb-4">
-                    <span class="px-3 py-1 rounded-lg bg-blue-500/20 text-blue-200 text-[10px] font-black uppercase tracking-widest border border-blue-400/30">
+                    <span class="px-3 py-1 rounded-lg bg-blue-500/20 text-blue-300 text-[10px] font-black uppercase tracking-widest border border-blue-400/20">
                         {{ $sekolah->bentuk_pendidikan_id_str }}
                     </span>
-                    <span class="px-3 py-1 rounded-lg {{ strtolower($sekolah->status_sekolah_str) == 'negeri' ? 'bg-emerald-500/20 text-emerald-200 border-emerald-400/30' : 'bg-amber-500/20 text-amber-200 border-amber-400/30' }} text-[10px] font-black uppercase tracking-widest border">
+                    <span class="px-3 py-1 rounded-lg {{ strtolower($sekolah->status_sekolah_str) == 'negeri' ? 'bg-emerald-500/20 text-emerald-300 border-emerald-400/20' : 'bg-amber-500/20 text-amber-300 border-amber-400/20' }} text-[10px] font-black uppercase tracking-widest border">
                         {{ $sekolah->status_sekolah_str }}
                     </span>
                 </div>
-                <h1 class="text-3xl md:text-5xl font-black text-white leading-tight mb-2 uppercase tracking-tighter">
+                <h1 class="text-3xl md:text-5xl font-black text-white leading-tight mb-2 uppercase tracking-tighter italic">
                     {{ $sekolah->nama }}
                 </h1>
-                <p class="text-blue-100/60 font-bold text-xs uppercase tracking-widest flex items-center justify-center md:justify-start gap-2">
-                    <i class='bx bx-fingerprint'></i> NPSN : {{ $sekolah->npsn ?? '-' }}
+                <p class="text-blue-200/60 font-bold text-xs uppercase tracking-widest flex items-center justify-center md:justify-start gap-2">
+                    <i class='bx bx-fingerprint text-blue-400'></i> NPSN : {{ $sekolah->npsn ?? '-' }}
                 </p>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Main Content Grid -->
-<div class="bg-slate-50 min-h-screen -mt-24 pb-24 relative z-20">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12">
+<!-- Main Content Area -->
+<div class="bg-slate-50 min-h-screen -mt-20 pb-24 relative z-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-10">
             
-            <!-- Left Side -->
+            <!-- Left Side: Identity & Location -->
             <div class="lg:col-span-8 space-y-10">
-                <!-- Detail Identitas -->
+                <!-- Identitas Card -->
                 <div class="bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 p-8 md:p-12 animate-in" style="animation-delay: 200ms;">
                     <div class="flex items-center gap-4 mb-12">
-                        <div class="icon-box bg-blue-50 text-blue-600">
+                        <div class="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center shadow-inner">
                             <i class='bx bx-id-card text-2xl'></i>
                         </div>
                         <h2 class="text-xl font-black text-slate-800 uppercase tracking-tight">Informasi Identitas</h2>
@@ -101,18 +93,18 @@
                                 <div class="mt-1 text-blue-400"><i class='bx bx-buildings'></i></div>
                                 <div>
                                     <div class="info-label">Nama Resmi</div>
-                                    <div class="info-value">{{ $sekolah->nama }}</div>
+                                    <div class="info-value text-slate-800">{{ $sekolah->nama }}</div>
                                 </div>
                             </div>
                             <div class="flex items-start gap-4">
-                                <div class="mt-1 text-blue-400"><i class='bx bx-barcode'></i></div>
+                                <div class="mt-1 text-blue-400"><i class='bx bx-barcode-reader'></i></div>
                                 <div>
                                     <div class="info-label">NPSN / NSS</div>
-                                    <div class="info-value">{{ $sekolah->npsn ?? '-' }} / {{ $sekolah->nss ?? '-' }}</div>
+                                    <div class="info-value text-blue-600 font-mono">{{ $sekolah->npsn ?? '-' }} / {{ $sekolah->nss ?? '-' }}</div>
                                 </div>
                             </div>
                             <div class="flex items-start gap-4">
-                                <div class="mt-1 text-blue-400"><i class='bx bx-time'></i></div>
+                                <div class="mt-1 text-blue-400"><i class='bx bx-time-five'></i></div>
                                 <div>
                                     <div class="info-label">Waktu Belajar</div>
                                     <div class="info-value">Pagi / 5 Hari</div>
@@ -131,7 +123,7 @@
                                 <div class="mt-1 text-blue-400"><i class='bx bx-map-alt'></i></div>
                                 <div>
                                     <div class="info-label">Wilayah Pembinaan</div>
-                                    <div class="info-value">{{ $sekolah->kabupaten_kota }}</div>
+                                    <div class="info-value text-slate-600">{{ $sekolah->kabupaten_kota }}</div>
                                 </div>
                             </div>
                             <div class="flex items-start gap-4">
@@ -145,10 +137,10 @@
                     </div>
                 </div>
 
-                <!-- Lokasi Lembaga -->
+                <!-- Location Card -->
                 <div class="bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 p-8 md:p-12 animate-in" style="animation-delay: 300ms;">
                     <div class="flex items-center gap-4 mb-12">
-                        <div class="icon-box bg-emerald-50 text-emerald-600">
+                        <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center shadow-inner">
                             <i class='bx bx-map-pin text-2xl'></i>
                         </div>
                         <h2 class="text-xl font-black text-slate-800 uppercase tracking-tight">Lokasi Lembaga</h2>
@@ -165,16 +157,16 @@
                             </div>
                             <div class="flex gap-4">
                                 <div class="flex-1 p-4 bg-slate-50 rounded-2xl border border-slate-100 flex items-center gap-3">
-                                    <div class="text-blue-400"><i class='bx bx-envelope-open'></i></div>
+                                    <div class="text-blue-400"><i class='bx bx-mail-send text-xl'></i></div>
                                     <div>
                                         <div class="text-[9px] font-black text-slate-400 uppercase mb-1">Kodepos</div>
                                         <div class="text-sm font-bold text-slate-700">{{ $sekolah->kode_pos ?? '-' }}</div>
                                     </div>
                                 </div>
                                 <div class="flex-1 p-4 bg-slate-50 rounded-2xl border border-slate-100 flex items-center gap-3">
-                                    <div class="text-blue-400"><i class='bx bx-map-alt'></i></div>
+                                    <div class="text-blue-400"><i class='bx bx-globe'></i></div>
                                     <div>
-                                        <div class="text-[9px] font-black text-slate-400 uppercase mb-1">ID Wilayah</div>
+                                        <div class="text-[9px] font-black text-slate-400 uppercase mb-1">Wilayah</div>
                                         <div class="text-sm font-bold text-slate-700">{{ $sekolah->kode_wilayah ?? '-' }}</div>
                                     </div>
                                 </div>
@@ -187,7 +179,7 @@
                                     src="https://maps.google.com/maps?q={{ $sekolah->lintang }},{{ $sekolah->bujur }}&z=15&output=embed" allowfullscreen></iframe>
                             @else
                                 <div class="w-full h-full flex flex-col items-center justify-center text-slate-300">
-                                    <i class='bx bx-map-alt text-5xl mb-2'></i>
+                                    <i class='bx bx-map-alt text-5xl mb-2 opacity-20'></i>
                                     <p class="text-[10px] font-black uppercase">Peta Belum Tersedia</p>
                                 </div>
                             @endif
@@ -197,8 +189,8 @@
             </div>
 
             <!-- Right Side -->
-            <div class="lg:col-span-4 space-y-8 mt-4 md:mt-0 animate-in" style="animation-delay: 400ms;">
-                <!-- Card Hubungi -->
+            <div class="lg:col-span-4 space-y-8 animate-in" style="animation-delay: 400ms;">
+                <!-- Contact Card -->
                 <div class="bg-slate-900 rounded-[3rem] p-10 text-white shadow-2xl relative overflow-hidden">
                     <div class="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full -mr-16 -mt-16"></div>
                     <h3 class="text-lg font-black uppercase tracking-widest mb-10 flex items-center gap-3 text-blue-400">
@@ -233,18 +225,18 @@
                                 <i class='bx bx-phone-call text-xl'></i>
                             </div>
                             <div>
-                                <div class="text-[9px] font-black text-slate-500 uppercase tracking-widest">Telepon</div>
+                                <div class="text-[9px] font-black text-slate-500 uppercase tracking-widest">Layanan Telepon</div>
                                 <div class="text-sm font-bold">{{ $sekolah->nomor_telepon ?? 'Belum tersedia' }}</div>
                             </div>
                         </a>
                     </div>
                 </div>
 
-                <!-- Verified Box -->
+                <!-- Verified Card -->
                 <div class="p-8 bg-blue-600 rounded-[3rem] text-white shadow-xl relative overflow-hidden group">
                     <i class='bx bxs-badge-check absolute -right-4 -bottom-4 text-8xl text-white/10 group-hover:scale-110 transition-transform'></i>
                     <div class="relative z-10 text-center">
-                        <div class="w-16 h-16 rounded-2xl bg-white/20 flex items-center justify-center mx-auto mb-6 text-3xl">
+                        <div class="w-16 h-16 rounded-2xl bg-white/20 flex items-center justify-center mx-auto mb-6 text-3xl shadow-inner">
                             <i class='bx bx-shield-quarter'></i>
                         </div>
                         <h4 class="text-base font-black uppercase tracking-widest mb-2">Terverifikasi</h4>
