@@ -6,14 +6,12 @@
     $assistantsLeft = collect($allNodes)->where('parent_id', $node->id)->where('jenis_hubungan', 'asisten_kiri')->sortBy('urutan');
     $assistantsRight = collect($allNodes)->where('parent_id', $node->id)->whereIn('jenis_hubungan', ['asisten_kanan', 'asisten'])->sortBy('urutan');
     
-    // Logika penyeimbang agar kartu tetap di tengah
-    $hasAssistant = $assistantsLeft->count() > 0 || $assistantsRight->count() > 0;
-    $balanceMargin = $hasAssistant ? 'margin-left: 230px; margin-right: 230px;' : '';
-    
+    $marginLeft = $assistantsLeft->count() > 0 ? 'margin-left: 210px;' : '';
+    $marginRight = $assistantsRight->count() > 0 ? 'margin-right: 210px;' : '';
     $isRoot = $node->parent_id == null;
 @endphp
 
-<li style="{{ $balanceMargin }}">
+<li style="{{ $marginLeft }} {{ $marginRight }}">
     <div class="org-node-wrapper">
         {{-- ===== LEFT ASSISTANTS ===== --}}
         @if($assistantsLeft->count() > 0)
