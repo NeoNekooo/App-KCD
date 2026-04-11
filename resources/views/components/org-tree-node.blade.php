@@ -2,20 +2,16 @@
 
 @php
     $children = collect($allNodes)->where('parent_id', $node->id)->whereIn('jenis_hubungan', ['struktural'])->sortBy('urutan');
+    // Backward compat: 'asisten' (lama) dianggap kanan
     $assistantsLeft = collect($allNodes)->where('parent_id', $node->id)->where('jenis_hubungan', 'asisten_kiri')->sortBy('urutan');
     $assistantsRight = collect($allNodes)->where('parent_id', $node->id)->whereIn('jenis_hubungan', ['asisten_kanan', 'asisten'])->sortBy('urutan');
     
-    // Tentukan lebar asisten (190px card + 32px line = ~222px)
-    $assistantWidth = 230; 
-    
-    // Jika ada asisten di salah satu sisi, berikan margin yang sama di kedua sisi agar kartu tetap di tengah
-    $hasAssistant = $assistantsLeft->count() > 0 || $assistantsRight->count() > 0;
-    $marginStyle = $hasAssistant ? "margin-left: {$assistantWidth}px; margin-right: {$assistantWidth}px;" : "";
-    
+    $marginLeft = $assistantsLeft->count() > 0 ? 'margin-left: 210px;' : '';
+    $marginRight = $assistantsRight->count() > 0 ? 'margin-right: 210px;' : '';
     $isRoot = $node->parent_id == null;
 @endphp
 
-<li style="{{ $marginStyle }}">
+<li style="{{ $marginLeft }} {{ $marginRight }}">
     <div class="org-node-wrapper">
         {{-- ===== LEFT ASSISTANTS ===== --}}
         @if($assistantsLeft->count() > 0)

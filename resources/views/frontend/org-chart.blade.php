@@ -11,20 +11,18 @@
     .premium-org-tree * { box-sizing: border-box; }
     .premium-org-tree {
         display: flex;
-        flex-direction: column;
-        align-items: center;
+        justify-content: center;
         padding: 3rem 1rem 4rem;
         font-family: 'Inter', system-ui, -apple-system, sans-serif;
-        width: 100%;
     }
 
     /* ---- CONNECTOR LINES (Gradient Style) ---- */
     .premium-org-tree ul {
         padding-top: 50px;
         position: relative;
-        display: inline-flex; /* Ganti flex jadi inline-flex agar lebar mengikuti isi */
+        display: flex;
         justify-content: center;
-        margin: 0 auto;
+        margin: 0;
         padding-inline-start: 0;
     }
     .premium-org-tree ul ul::before {
@@ -58,7 +56,7 @@
         right: auto;
         left: 50%;
         border-left: 2px solid #94a3b8;
-        height: 24px; /* Versi 24px sebelum diperpendek */
+        height: 24px;
     }
     .premium-org-tree li:only-child::after,
     .premium-org-tree li:only-child::before { display: none; }
@@ -155,6 +153,11 @@
         text-align: center;
         letter-spacing: -0.01em;
     }
+    .org-card-root .org-title {
+        font-size: 15px;
+        font-weight: 800;
+        color: #0f172a;
+    }
     .org-name {
         font-size: 11px;
         font-weight: 500;
@@ -162,6 +165,9 @@
         margin: 0;
         text-align: center;
         line-height: 1.4;
+    }
+    .org-card-root .org-name {
+        font-size: 12px;
     }
 
     /* ---- ASSISTANT BRANCH ---- */
