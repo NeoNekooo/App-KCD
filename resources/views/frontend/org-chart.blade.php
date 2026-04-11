@@ -32,7 +32,7 @@
         left: 50%;
         border-left: 2px solid #94a3b8;
         width: 0;
-        height: 50px;
+        height: 20px; /* Dipendekkan agar tidak menusuk kartu di bawah */
         transform: translateX(-50%);
     }
     .premium-org-tree li {
@@ -40,7 +40,7 @@
         text-align: center;
         list-style-type: none;
         position: relative;
-        padding: 50px 12px 0 12px;
+        padding: 40px 12px 0 12px; /* Dikurangi sedikit agar lebih rapat dan rapi */
     }
     .premium-org-tree li::before,
     .premium-org-tree li::after {
@@ -50,14 +50,14 @@
         right: 50%;
         border-top: 2px solid #94a3b8;
         width: 50%;
-        height: 50px;
+        height: 20px; /* Konsisten dengan tinggi garis atas */
     }
     .premium-org-tree li::after {
         right: auto;
         left: 50%;
         border-left: 2px solid #94a3b8;
+        height: 20px; /* Berhenti tepat sebelum mengenai ring foto */
     }
-    .premium-org-tree li:only-child::after,
     .premium-org-tree li:only-child::before { display: none; }
     .premium-org-tree li:only-child { padding-top: 0; }
     .premium-org-tree li:first-child::before,
