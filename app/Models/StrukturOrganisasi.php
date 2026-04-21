@@ -3,10 +3,13 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\FilterRegional;
 
 class StrukturOrganisasi extends Model
 {
-    protected $fillable = ['parent_id', 'jenis_hubungan', 'jabatan', 'nama_pejabat', 'foto_pejabat', 'urutan'];
+    use FilterRegional;
+
+    protected $fillable = ['instansi_id', 'parent_id', 'jenis_hubungan', 'jabatan', 'nama_pejabat', 'foto_pejabat', 'urutan'];
 
     public function parent()
     {

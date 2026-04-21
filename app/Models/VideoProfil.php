@@ -4,11 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\FilterRegional;
 
 class VideoProfil extends Model
 {
-    use HasFactory;
+    use FilterRegional;
 
     protected $table = 'video_profils';
-    protected $fillable = ['judul', 'url_youtube', 'deskripsi'];
+    protected $fillable = ['instansi_id', 'judul', 'url_youtube', 'deskripsi'];
 }

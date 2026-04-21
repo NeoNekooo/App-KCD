@@ -3,8 +3,11 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\FilterRegional;
 
 class KeperluanCategory extends Model
 {
-    protected $fillable = ['name'];
+    use FilterRegional;
+
+    protected $fillable = ['instansi_id', 'name'];
 }

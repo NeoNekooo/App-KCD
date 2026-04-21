@@ -5,10 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory; // <-- TAMBAHAN
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Traits\FilterRegional;
 
 class Rombel extends Model
 {
-    use HasFactory; // <-- TAMBAHAN
+    use HasFactory, FilterRegional; // <-- TAMBAHAN
 
     /**
      * Atribut yang boleh diisi secara massal (mass assignable).
@@ -18,6 +19,7 @@ class Rombel extends Model
      */
     protected $table = 'rombels';
     protected $fillable = [
+        'sekolah_id',
         'nama_rombel',
         'jenis_rombel',
         'kurikulum_id',
@@ -153,6 +155,14 @@ class Rombel extends Model
     public function waliKelas()
     {
         return $this->belongsTo(Gtk::class, 'ptk_id_str', 'nama');
+    }
+
+    /**
+     * Relasi ke Sekolah (Induk)
+     */
+    public function sekolah()
+    {
+        return $this->belongsTo(Sekolah::class, 'sekolah_id', 'sekolah_id');
     }
 }
 // Other code in the file

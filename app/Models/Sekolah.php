@@ -4,16 +4,19 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\FilterRegional;
 
 class Sekolah extends Model
 {
-    use HasFactory;
+    use HasFactory, FilterRegional;
 
     // Nama tabel sesuai di database 'miaw' kamu
     protected $table = 'sekolahs';
 
     // Semua kolom yang bisa diisi (sesuai struktur SQL sekolahs.sql)
     protected $fillable = [
+        'instansi_id',
+        'cadisdik_id',
         'sekolah_id',
         'nama',
         'nss',

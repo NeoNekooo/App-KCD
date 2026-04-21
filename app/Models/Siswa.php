@@ -13,10 +13,11 @@ use App\Models\AlumniTestimoni;
 use App\Models\TracerStudy;
 use App\Models\Pengguna; // [Opsional: Import model Pengguna]
 use App\Traits\EncryptsSensitiveData;
+use App\Traits\FilterRegional;
 
 class Siswa extends Model
 {
-    use HasFactory, EncryptsSensitiveData;
+    use HasFactory, EncryptsSensitiveData, FilterRegional;
 
     protected $table = 'siswas';
     protected $primaryKey = 'id';

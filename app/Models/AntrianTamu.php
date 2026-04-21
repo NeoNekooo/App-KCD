@@ -2,13 +2,16 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
+use App\Traits\FilterRegional;
 
 class AntrianTamu extends Model
 {
+    use FilterRegional;
+
     protected $table = 'antrian_tamus';
 
     protected $fillable = [
+        'instansi_id',
         'nomor_antrian',
         'nama',
         'npsn',

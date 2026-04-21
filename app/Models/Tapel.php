@@ -5,15 +5,18 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
+use App\Traits\FilterRegional;
+
 class Tapel extends Model
 {
-    use HasFactory;
+    use HasFactory, FilterRegional;
 
     // Nama tabel eksplisit (karena tidak menggunakan plural 'tapels')
     protected $table = 'tapel';
 
     // Kolom yang diizinkan untuk mass assignment
     protected $fillable = [
+        'instansi_id',
         'kode_tapel',
         'tahun_ajaran',
         'semester',

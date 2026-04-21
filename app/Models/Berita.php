@@ -3,12 +3,15 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\FilterRegional;
 use Illuminate\Support\Str;
 
 class Berita extends Model
 {
+    use FilterRegional;
+
     protected $fillable = [
-        'judul', 'slug', 'ringkasan', 'isi', 'gambar', 'penulis', 'status', 'published_at',
+        'instansi_id', 'judul', 'slug', 'ringkasan', 'isi', 'gambar', 'penulis', 'status', 'published_at',
     ];
 
     protected $casts = [

@@ -2,8 +2,10 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use App\Models\Instansi;
+use App\Models\Cadisdik;
+use Illuminate\Support\Facades\Schema;
 
 class InstansiSeeder extends Seeder
 {
@@ -12,15 +14,21 @@ class InstansiSeeder extends Seeder
      */
     public function run(): void
     {
-        $instansi = \App\Models\Instansi::first();
-        if (!$instansi) {
-            $instansi = \App\Models\Instansi::create(['nama_instansi' => 'Kantor Cabang Dinas X']);
-        }
+        Schema::disableForeignKeyConstraints();
+        Instansi::truncate();
+        Schema::enableForeignKeyConstraints();
 
-        $instansi->update([
-            'visi' => '<p><strong>Mewujudkan Pendidikan Menengah yang Berkualitas, Inklusif, dan Berdaya Saing di Tingkat Nasional dan Global.</strong></p>',
-            'misi' => '<ul><li>Meningkatkan akses dan pemerataan pendidikan bermutu.</li><li>Meningkatkan profesionalisme guru dan tenaga kependidikan.</li><li>Mengembangkan inovasi pembelajaran berwawasan global.</li><li>Membangun generasi cerdas berkarakter kuat.</li></ul>',
-            'sejarah_singkat' => '<h3>Sejarah Berdirinya Instansi</h3><p>Kantor Cabang Dinas (KCD) Wilayah ini dibentuk sebagai perpanjangan tangan dinas provinsi untuk mempermudah koordinasi, pembinaan, dan pengawasan pendidikan menengah. Perjalanan KCD dimulai pada tahun ...</p><p><em>Visi besar kami diwujudkan melalui kerja sama antar sekolah, masyarakat, dan seluruh elemen pendidik.</em></p>'
-        ]);
+        $cadisdiks = Cadisdik::all();
+
+        foreach ($cadisdiks as $cadisdik) {
+            Instansi::create([
+                'cadisdik_id'   => $cadisdik->id,
+                'nama_instansi' => "Kantor Cabang Dinas " . str_replace("Wilayah ", "", $cadisdik->nama),
+                'nama_brand'    => "KCD " . str_replace("Wilayah ", "", $cadisdik->nama),
+                'visi' => '<p><strong>Mewujudkan Pendidikan Menengah yang Berkualitas, Inklusif, dan Berdaya Saing.</strong></p>',
+                'misi' => '<ul><li>Meningkatkan akses pendidikan bermutu.</li><li>Meningkatkan profesionalisme tenaga kependidikan.</li></ul>',
+                'sejarah_singkat' => '<p>Kantor Cabang Dinas ini dibentuk untuk mempermudah koordinasi pendidikan menengah di wilayahnya.</p>'
+            ]);
+        }
     }
 }

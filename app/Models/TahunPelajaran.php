@@ -5,11 +5,14 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+use App\Traits\FilterRegional;
+
 class TahunPelajaran extends Model
 {
-    use HasFactory;
+    use HasFactory, FilterRegional;
 
     protected $fillable = [
+        'instansi_id',
         'tahun_pelajaran',
         'keterangan',
         'is_active',

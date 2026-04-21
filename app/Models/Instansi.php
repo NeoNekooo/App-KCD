@@ -4,14 +4,16 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\FilterRegional;
 
 class Instansi extends Model
 {
-    use HasFactory;
+    use HasFactory, FilterRegional;
 
     protected $table = 'instansis';
     
     protected $fillable = [
+        'cadisdik_id',
         'nama_instansi',
         'nama_brand',
         'nama_kepala',

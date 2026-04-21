@@ -4,14 +4,16 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\FilterRegional;
 
 class TugasPegawaiKcd extends Model
 {
-    use HasFactory;
+    use HasFactory, FilterRegional;
 
     protected $table = 'tugas_pegawai_kcds';
     
     protected $fillable = [
+        'instansi_id',
         'pegawai_kcd_id',
         'nama_tugas',
         'kategori_layanan', // <-- Ini kuncinya buat hak akses

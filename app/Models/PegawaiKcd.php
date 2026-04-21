@@ -4,15 +4,17 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\FilterRegional;
 
 class PegawaiKcd extends Model
 {
-    use HasFactory;
+    use HasFactory, FilterRegional;
 
     protected $table = 'pegawai_kcds';
 
     // Kita definisikan $fillable biar aman dan jelas kolom apa aja yang boleh diisi
     protected $fillable = [
+        'instansi_id',
         'user_id', 
         'nama', 
         'nik', 

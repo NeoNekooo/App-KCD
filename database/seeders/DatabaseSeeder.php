@@ -14,10 +14,12 @@ class DatabaseSeeder extends Seeder
 
         $this->call([
             AdminUserSeeder::class,
-            PengaturanAbsensiSeeder::class,
-            TingkatSeeder::class,
-            // DatabaseSeeder.php
-            AdminSeeder::class,
+            // PengaturanAbsensiSeeder::class,
+            // TingkatSeeder::class,
+            CadisdikSeeder::class, // <-- Tambahan: Daftar UUID Wilayah
+            InstansiSeeder::class, // <-- Tambahan: Jembatan UUID ke ID Integer
+            RegionalAdminSeeder::class, // <-- Tambahan: Akun Contoh Wilayah VI
+            // AdminSeeder::class,
             KasubagUserSeeder::class
 
 

@@ -4,12 +4,13 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\FilterRegional;
 
 class Setting extends Model
 {
-    use HasFactory;
+    use FilterRegional;
 
-    protected $fillable = ['key', 'value'];
+    protected $fillable = ['instansi_id', 'key', 'value'];
 
     /**
      * Helper to get setting value by key
