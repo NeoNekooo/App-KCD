@@ -36,7 +36,7 @@ class SchoolSyncController extends Controller
                 Schema::create($tableName, function ($blueprint) use ($columns, $tableName) {
                     $blueprint->id(); 
                     foreach ($columns as $col) {
-                        if ($col === 'id') continue;
+                        if (in_array($col, ['id', 'created_at', 'updated_at'])) continue;
                         $this->defineColumn($blueprint, $col);
                     }
                     $blueprint->timestamps();
@@ -47,6 +47,7 @@ class SchoolSyncController extends Controller
                 if (!empty($newCols)) {
                     Schema::table($tableName, function ($blueprint) use ($newCols, $tableName) {
                         foreach ($newCols as $col) {
+                            if (in_array($col, ['id', 'created_at', 'updated_at'])) continue;
                             $this->defineColumn($blueprint, $col);
                         }
                     });
