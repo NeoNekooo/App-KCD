@@ -26,7 +26,8 @@ class SchoolSyncController extends Controller
                 return response()->json(['success' => false, 'message' => 'Invalid data.'], 400);
             }
 
-            $tableName = Str::plural($table); 
+            // Gunakan nama tabel apa adanya dari pengirim (Sekolah)
+            $tableName = $table; 
             $firstRow = (array) $input[0];
             $columns = array_keys($firstRow);
 
@@ -36,11 +37,7 @@ class SchoolSyncController extends Controller
                     $blueprint->id(); 
                     foreach ($columns as $col) {
                         if ($col === 'id') continue;
-                        if (EncryptionService::shouldEncrypt($tableName, $col)) {
-                            $blueprint->text($col)->nullable();
-                        } else {
-                            $this->defineColumn($blueprint, $col);
-                        }
+                        $this->defineColumn($blueprint, $col);
                     }
                     $blueprint->timestamps();
                 });
@@ -50,21 +47,18 @@ class SchoolSyncController extends Controller
                 if (!empty($newCols)) {
                     Schema::table($tableName, function ($blueprint) use ($newCols, $tableName) {
                         foreach ($newCols as $col) {
-                            if (EncryptionService::shouldEncrypt($tableName, $col)) {
-                                $blueprint->text($col)->nullable();
-                            } else {
-                                $this->defineColumn($blueprint, $col);
-                            }
+                            $this->defineColumn($blueprint, $col);
                         }
                     });
                 }
             }
 
-            // 2. PRIMARY KEY DETECTION
+            // 2. PRIMARY KEY DETECTION - Cari ID Unik (Dapodik) agar data antar sekolah tidak tabrakan
             $primaryKey = 'id';
-            if (isset($firstRow[$table . '_id'])) $primaryKey = $table . '_id';
-            elseif (isset($firstRow[Str::singular($table) . '_id'])) $primaryKey = Str::singular($table) . '_id';
-            elseif (isset($firstRow['peserta_didik_id']) && $tableName === 'siswas') $primaryKey = 'peserta_didik_id'; 
+            if (isset($firstRow['ptk_id'])) $primaryKey = 'ptk_id';
+            elseif (isset($firstRow['peserta_didik_id'])) $primaryKey = 'peserta_didik_id';
+            elseif (isset($firstRow['sekolah_id']) && $tableName === 'sekolahs') $primaryKey = 'sekolah_id';
+            elseif (isset($firstRow[$table . '_id'])) $primaryKey = $table . '_id';
 
             $processed = 0;
             $errors = [];
@@ -74,13 +68,8 @@ class SchoolSyncController extends Controller
                 try {
                     $row = (array) $row;
                     
-                    // 🔥 KAMERA CCTV: Catat data yang baru sampe
-                    \Illuminate\Support\Facades\Log::info("SYNC_INCOMING ($tableName): " . json_encode($row));
-
                     foreach ($row as $k => $v) {
-                        if (EncryptionService::shouldEncrypt($tableName, $k)) {
-                            $row[$k] = EncryptionService::encrypt($v);
-                        } elseif (is_array($v)) {
+                        if (is_array($v)) {
                             $row[$k] = json_encode($v);
                         }
                     }
@@ -90,10 +79,22 @@ class SchoolSyncController extends Controller
                     }
 
                     $conditions = [];
-                    if (isset($row[$primaryKey])) {
-                        $conditions[$primaryKey] = $row[$primaryKey];
-                    } elseif (isset($row['id'])) {
-                        $conditions['id'] = $row['id'];
+                    // Gunakan Kombinasi Primary Key + sekolah_id untuk keamanan data
+                    if ($primaryKey !== 'id' && isset($row[$primaryKey])) {
+                         $conditions[$primaryKey] = $row[$primaryKey];
+                    } else {
+                         // Jika tidak ada ID unik Dapodik, gunakan ID lokal + sekolah_id
+                         if (isset($row['id'])) $conditions['id_lokal_sekolah'] = $row['id']; // Simpan ID asli sekolah
+                         if (isset($row['sekolah_id'])) $conditions['sekolah_id'] = $row['sekolah_id'];
+                         
+                         // Pastikan kolom id_lokal_sekolah ada di tabel
+                         if (!Schema::hasColumn($tableName, 'id_lokal_sekolah') && isset($row['id'])) {
+                             Schema::table($tableName, function($table) {
+                                 $table->string('id_lokal_sekolah')->nullable()->index();
+                             });
+                         }
+                         // Jangan mencoba mengupdate kolom 'id' auto-increment KCD dengan ID dari sekolah
+                         unset($row['id']); 
                     }
 
                     if (empty($conditions)) {
