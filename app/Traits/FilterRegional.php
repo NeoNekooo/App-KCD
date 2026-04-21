@@ -26,12 +26,27 @@ trait FilterRegional
                 $instansiId = $user->instansi_id ?? ($user->pegawaiKcd->instansi_id ?? null);
 
                 if ($instansiId) {
-                    // 1. Jika tabel memiliki kolom instansi_id, saring secara langsung
-                    if (Schema::hasColumn($builder->getModel()->getTable(), 'instansi_id')) {
-                        $builder->where($builder->getQuery()->from . '.instansi_id', $instansiId);
+                    $model = $builder->getModel();
+                    $tableName = $model->getTable();
+                    
+                    // Tentukan kolom filter
+                    $column = 'instansi_id';
+                    
+                    // Case khusus untuk model Instansi: filter berdasarkan 'id'
+                    if ($model instanceof \App\Models\Instansi) {
+                        $column = 'id';
+                    } 
+                    // Atau jika model mendefinisikan kolom regional secara custom
+                    elseif (property_exists($model, 'regionalColumn')) {
+                        $column = $model->regionalColumn;
+                    }
+
+                    // 1. Jika tabel memiliki kolom yang ditentukan (id / instansi_id)
+                    if (Schema::hasColumn($tableName, $column)) {
+                        $builder->where($tableName . '.' . $column, $instansiId);
                     } 
                     // 2. Jika tidak ada kolom instansi_id namun memiliki relasi sekolah, saring via relasi
-                    elseif (method_exists($builder->getModel(), 'sekolah')) {
+                    elseif (method_exists($model, 'sekolah')) {
                         $builder->whereHas('sekolah', function ($q) use ($instansiId) {
                             $q->where('instansi_id', $instansiId);
                         });
