@@ -17,14 +17,13 @@ trait FilterRegional
             if (Auth::check()) {
                 $user = Auth::user();
 
-                // Admin Pusat / Super Admin dapat melihat seluruh data
+                // Admin Pusat / Administrator dapat melihat seluruh data HANYA jika tidak terikat ke instansi tertentu
                 $role = strtolower($user->role ?? '');
-                if ($role === 'administrator' || $role === 'admin') {
+                $instansiId = $user->instansi_id ?? ($user->pegawaiKcd->instansi_id ?? null);
+
+                if (in_array($role, ['admin', 'administrator']) && is_null($instansiId)) {
                     return;
                 }
-
-                // Ambil instansi_id dari User langsung atau dari profil pegawai_kcd
-                $instansiId = $user->instansi_id ?? ($user->pegawaiKcd->instansi_id ?? null);
 
                 if ($instansiId) {
                     $model = $builder->getModel();
