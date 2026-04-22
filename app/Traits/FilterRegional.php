@@ -21,25 +21,25 @@ trait FilterRegional
                 $role = strtolower($user->role ?? '');
                 $instansiId = $user->instansi_id ?? ($user->pegawaiKcd->instansi_id ?? null);
 
-                // Admin Pusat / Administrator hanya bypass filter jika kaitan instansi_id nya KOSONG
-                if (in_array($role, ['admin', 'administrator']) && (is_null($instansiId) || $instansiId == '')) {
-                    return;
+                // 1. CEK APAKAH DIA SUPER ADMIN GLOBAL?
+                // Syarat: Role 'administrator' DAN instansi_id di tabel users KOSONG.
+                $isSuperAdmin = ($role === 'administrator' && (is_null($user->instansi_id) || $user->instansi_id == ''));
+
+                if ($isSuperAdmin) {
+                    return; // Super Admin bebas akses semua data (termasuk yang NULL)
                 }
 
-                if ($instansiId) {
-                    $tableName = $model->getTable();
-                    $column = ($model instanceof \App\Models\Instansi) ? 'id' : 'instansi_id';
-                    
-                    // DEBUG LOG (Cek di storage/logs/laravel.log jika masih 0)
-                    // Log::debug("Filtering " . get_class($model) . " for instansi_id: " . $instansiId);
+                // 2. UNTUK ADMIN WILAYAH & USER LAINNYA
+                $instansiId = $user->instansi_id ?? ($user->pegawaiKcd->instansi_id ?? null);
+                $tableName = $model->getTable();
+                $column = ($model instanceof \App\Models\Instansi) ? 'id' : 'instansi_id';
 
-                    // Gunakan whereRaw + casting untuk memastikan kecocokan 100%
+                if ($instansiId) {
+                    // WAJIB COCOK (Otomatis mengecualikan yang NULL)
                     $builder->whereRaw("CAST({$tableName}.{$column} AS CHAR) = ?", [(string)$instansiId]);
                 } else {
-                    // Jika user biasa tapi tidak punya instansi_id, kunci datanya
-                    if (!in_array($role, ['admin', 'administrator'])) {
-                        $builder->whereRaw('1 = 0');
-                    }
+                    // Jika data wilayah user tidak ditemukan, kunci datanya
+                    $builder->whereRaw('1 = 0');
                 }
             }
         });
