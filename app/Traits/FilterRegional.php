@@ -15,6 +15,13 @@ trait FilterRegional
     protected static function bootFilterRegional()
     {
         static::addGlobalScope('regional', function (Builder $builder) {
+            // 🔥 Mencegah Infinite Recursion:
+            // Jika kita sedang mengambil data User DAN user tersebut belum ter-resolusi oleh Auth,
+            // maka kita harus bypass filter ini agar tidak terjadi looping maut.
+            if ($builder->getModel() instanceof \App\Models\User && !Auth::hasUser()) {
+                return;
+            }
+
             if (Auth::check()) {
                 $user = Auth::user();
                 $model = $builder->getModel();
