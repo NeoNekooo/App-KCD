@@ -14,20 +14,8 @@ trait FilterRegional
     protected static function bootFilterRegional()
     {
         static::addGlobalScope('regional', function (Builder $builder) {
-            if (Auth::check()) {
-                $user = Auth::user();
-                $model = $builder->getModel();
-                
-                // Role Admin / Administrator
-                $role = strtolower($user->role ?? '');
-                $instansiId = $user->instansi_id ?? ($user->pegawaiKcd->instansi_id ?? null);
-
-                if (in_array($role, ['admin', 'administrator'])) {
-                    // Jika mengakses Profil Instansi, kita saring agar tidak tertukar wilayah lain
-                    if ($model instanceof \App\Models\Instansi && $instansiId) {
-                        $builder->where('id', $instansiId);
-                    }
-                    // Untuk model lain (Siswa, Guru, dll), Admin pusat/wilayah boleh lihat semua data di dashboard
+                if (in_array($role, ['admin', 'administrator']) && (is_null($instansiId) || $instansiId == '')) {
+                    // Hanya Admin Pusat (ID Kosong) yang boleh melihat semua data secara global
                     return;
                 }
 
