@@ -29,30 +29,12 @@ trait FilterRegional
                     $tableName = $model->getTable();
                     
                     // Tentukan kolom filter
-                    $column = 'instansi_id';
+                    $column = ($model instanceof \App\Models\Instansi) ? 'id' : 'instansi_id';
                     
-                    // Case khusus untuk model Instansi: filter berdasarkan 'id'
-                    if ($model instanceof \App\Models\Instansi) {
-                        $column = 'id';
-                    } 
-                    // Atau jika model mendefinisikan kolom regional secara custom
-                    elseif (property_exists($model, 'regionalColumn')) {
-                        $column = $model->regionalColumn;
-                    }
-
-                    // 1. Jika tabel memiliki kolom yang ditentukan (id / instansi_id)
-                    if (Schema::hasColumn($tableName, $column)) {
-                        // Paksa perbandingan sebagai string untuk menghindari mismatch tipe data (int vs string)
-                        $builder->where($tableName . '.' . $column, (string)$instansiId);
-                    } 
-                    // 2. Jika tidak ada kolom instansi_id namun memiliki relasi sekolah, saring via relasi
-                    elseif (method_exists($model, 'sekolah')) {
-                        $builder->whereHas('sekolah', function ($q) use ($instansiId) {
-                            $q->where('instansi_id', (string)$instansiId);
-                        });
-                    }
+                    // Langsung tempel filter tanpa banyak tanya Schema (Lebih agresif)
+                    $builder->where($tableName . '.' . $column, '=', $instansiId);
                 } else {
-                    // Jika user tidak terikat ke instansi manapun, jangan tampilkan data (Kecuali Admin Global)
+                    // Jika user biasa tapi tidak punya instansi_id, kunci datanya
                     if (!in_array($role, ['admin', 'administrator'])) {
                         $builder->whereRaw('1 = 0');
                     }
@@ -66,12 +48,9 @@ trait FilterRegional
                 $user = Auth::user();
                 $role = strtolower($user->role ?? '');
                 
-                // Super Admin / Administrator tidak di-inject otomatis
                 if (!in_array($role, ['admin', 'administrator'])) {
                     $instansiId = $user->instansi_id ?? ($user->pegawaiKcd->instansi_id ?? null);
-                    
-                    // Isi instansi_id jika tabel tujuan memilikinya
-                    if ($instansiId && Schema::hasColumn($model->getTable(), 'instansi_id')) {
+                    if ($instansiId) {
                         $model->instansi_id = $instansiId;
                     }
                 }
