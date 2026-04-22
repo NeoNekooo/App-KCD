@@ -14,8 +14,14 @@ trait FilterRegional
     protected static function bootFilterRegional()
     {
         static::addGlobalScope('regional', function (Builder $builder) {
+            if (Auth::check()) {
+                $user = Auth::user();
+                $model = $builder->getModel();
+                $role = strtolower($user->role ?? '');
+                $instansiId = $user->instansi_id ?? ($user->pegawaiKcd->instansi_id ?? null);
+
+                // Admin Pusat / Administrator hanya bypass filter jika kaitan instansi_id nya KOSONG
                 if (in_array($role, ['admin', 'administrator']) && (is_null($instansiId) || $instansiId == '')) {
-                    // Hanya Admin Pusat (ID Kosong) yang boleh melihat semua data secara global
                     return;
                 }
 
@@ -58,9 +64,10 @@ trait FilterRegional
         static::creating(function ($model) {
             if (Auth::check()) {
                 $user = Auth::user();
+                $role = strtolower($user->role ?? '');
                 
                 // Super Admin / Administrator tidak di-inject otomatis
-                if ($user->role !== 'administrator') {
+                if (!in_array($role, ['admin', 'administrator'])) {
                     $instansiId = $user->instansi_id ?? ($user->pegawaiKcd->instansi_id ?? null);
                     
                     // Isi instansi_id jika tabel tujuan memilikinya
