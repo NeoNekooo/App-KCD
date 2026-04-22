@@ -39,7 +39,10 @@ class InstansiController extends Controller
 
         // --- SINKRONISASI KEPALA (AUTOMATIC) ---
         // Sesuai instansi yang sedang dilihat
-        $jabatanKepala = JabatanKcd::where('nama', 'like', '%Kepala%')->first();
+        $jabatanKepala = JabatanKcd::withoutGlobalScopes()
+                                    ->where('instansi_id', $instansi->id)
+                                    ->where('nama', 'like', '%Kepala%')
+                                    ->first();
         $kepala = null;
         if ($jabatanKepala) {
             // Syarat Tambahan: instansi_id harus cocok dengan instansi yang sedang dilihat
