@@ -30,7 +30,7 @@ class Siswa extends Model
 
     protected $fillable = [
         // ID & Kunci Utama
-        'id', 'peserta_didik_id', 'registrasi_id', 'qr_token',
+        'id', 'peserta_didik_id', 'registrasi_id', 'qr_token', 'sekolah_id', 'instansi_id',
 
         // Identitas Pribadi
         'nama',

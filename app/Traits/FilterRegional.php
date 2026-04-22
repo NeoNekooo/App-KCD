@@ -18,7 +18,8 @@ trait FilterRegional
                 $user = Auth::user();
 
                 // Admin Pusat / Super Admin dapat melihat seluruh data
-                if ($user->role === 'administrator') {
+                $role = strtolower($user->role ?? '');
+                if ($role === 'administrator' || $role === 'admin') {
                     return;
                 }
 
