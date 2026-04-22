@@ -16,17 +16,22 @@ trait FilterRegional
         static::addGlobalScope('regional', function (Builder $builder) {
             if (Auth::check()) {
                 $user = Auth::user();
-
-                // Admin Pusat / Administrator hanya bypass filter jika kaitan instansi_id nya KOSONG
+                $model = $builder->getModel();
+                
+                // Role Admin / Administrator
                 $role = strtolower($user->role ?? '');
                 $instansiId = $user->instansi_id ?? ($user->pegawaiKcd->instansi_id ?? null);
 
-                if (in_array($role, ['admin', 'administrator']) && (is_null($instansiId) || $instansiId == '')) {
+                if (in_array($role, ['admin', 'administrator'])) {
+                    // Jika mengakses Profil Instansi, kita saring agar tidak tertukar wilayah lain
+                    if ($model instanceof \App\Models\Instansi && $instansiId) {
+                        $builder->where('id', $instansiId);
+                    }
+                    // Untuk model lain (Siswa, Guru, dll), Admin pusat/wilayah boleh lihat semua data di dashboard
                     return;
                 }
 
                 if ($instansiId) {
-                    $model = $builder->getModel();
                     $tableName = $model->getTable();
                     
                     // Tentukan kolom filter
