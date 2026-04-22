@@ -5,6 +5,7 @@ namespace App\Traits;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Log;
 
 trait FilterRegional
 {
@@ -27,12 +28,13 @@ trait FilterRegional
 
                 if ($instansiId) {
                     $tableName = $model->getTable();
-                    
-                    // Tentukan kolom filter
                     $column = ($model instanceof \App\Models\Instansi) ? 'id' : 'instansi_id';
                     
-                    // Langsung tempel filter tanpa banyak tanya Schema (Lebih agresif)
-                    $builder->where($tableName . '.' . $column, '=', $instansiId);
+                    // DEBUG LOG (Cek di storage/logs/laravel.log jika masih 0)
+                    // Log::debug("Filtering " . get_class($model) . " for instansi_id: " . $instansiId);
+
+                    // Gunakan whereRaw + casting untuk memastikan kecocokan 100%
+                    $builder->whereRaw("CAST({$tableName}.{$column} AS CHAR) = ?", [(string)$instansiId]);
                 } else {
                     // Jika user biasa tapi tidak punya instansi_id, kunci datanya
                     if (!in_array($role, ['admin', 'administrator'])) {
