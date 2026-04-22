@@ -43,19 +43,20 @@ trait FilterRegional
 
                     // 1. Jika tabel memiliki kolom yang ditentukan (id / instansi_id)
                     if (Schema::hasColumn($tableName, $column)) {
-                        // Gunakan where agar Laravel menangani casting tipe data secara otomatis
-                        $builder->where($tableName . '.' . $column, '=', $instansiId);
+                        // Paksa perbandingan sebagai string untuk menghindari mismatch tipe data (int vs string)
+                        $builder->where($tableName . '.' . $column, (string)$instansiId);
                     } 
                     // 2. Jika tidak ada kolom instansi_id namun memiliki relasi sekolah, saring via relasi
                     elseif (method_exists($model, 'sekolah')) {
                         $builder->whereHas('sekolah', function ($q) use ($instansiId) {
-                            $q->where('instansi_id', $instansiId);
+                            $q->where('instansi_id', (string)$instansiId);
                         });
                     }
                 } else {
-                    // Jika user tidak terikat ke instansi manapun, jangan tampilkan data demi keamanan
-                    // Kecuali untuk role yang memang bersifat global (jika ada role lain di masa depan)
-                    $builder->whereRaw('1 = 0');
+                    // Jika user tidak terikat ke instansi manapun, jangan tampilkan data (Kecuali Admin Global)
+                    if (!in_array($role, ['admin', 'administrator'])) {
+                        $builder->whereRaw('1 = 0');
+                    }
                 }
             }
         });
