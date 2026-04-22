@@ -203,9 +203,16 @@
 @section('content')
     {{-- 2. HEADER --}}
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 animate-entry gap-3">
-        <div>
-            <h4 class="fw-bolder m-0 text-dark">Profil Instansi</h4>
-            <span class="text-muted small">Kelola identitas, branding, dan informasi publik.</span>
+        <div class="d-flex align-items-center">
+            @if($isSuperAdmin && request()->has('id'))
+                <a href="{{ route('admin.instansi.index') }}" class="btn btn-label-secondary btn-icon rounded-circle me-3 shadow-xs" data-bs-toggle="tooltip" title="Kembali ke Daftar">
+                    <i class='bx bx-left-arrow-alt fs-4'></i>
+                </a>
+            @endif
+            <div>
+                <h4 class="fw-bolder m-0 text-dark">Profil Instansi</h4>
+                <span class="text-muted small">Kelola identitas, branding, dan informasi publik.</span>
+            </div>
         </div>
         <button type="submit" form="form-instansi" class="btn btn-primary rounded-pill px-4 shadow-sm fw-bold d-flex align-items-center">
             <i class='bx bx-save me-2 fs-5'></i> Simpan Perubahan
@@ -222,6 +229,9 @@
 
     <form id="form-instansi" action="{{ route('admin.instansi.update') }}" method="POST" enctype="multipart/form-data">
         @csrf @method('PUT')
+        @if($isSuperAdmin && request('id'))
+            <input type="hidden" name="id" value="{{ request('id') }}">
+        @endif
         <div id="hidden-sosmed-inputs"></div>
 
         <div class="row g-4">

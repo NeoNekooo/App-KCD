@@ -10,20 +10,42 @@ use Illuminate\Support\Facades\Storage;
 
 class InstansiController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        // Ambil data pertama, kalau kosong buat baru (default)
-        $instansi = Instansi::first();
+        $user = auth()->user();
+        // Cek apakah dia Super Admin (Role Admin/Administrator tapi instansi_id KOSONG)
+        $isSuperAdmin = in_array(strtolower($user->role ?? ''), ['admin', 'administrator', 'operator kcd']) && empty($user->instansi_id);
+        
+        // 1. Jika Super Admin dan tidak bawa ID -> Tampilkan TABEL LIST SEMUA KCD
+        if ($isSuperAdmin && !$request->has('id')) {
+            $listInstansi = Instansi::orderBy('nama_instansi', 'asc')->get();
+            return view('admin.instansi.list', compact('listInstansi'));
+        }
+
+        // 2. Tampilkan Detail Profil (Untuk Admin Wilayah atau Super Admin yang sudah pilih ID)
+        $targetId = $request->get('id');
+        
+        if ($isSuperAdmin && $targetId) {
+            // Super Admin melihat spesifik ID (Tanpa filter regional)
+            $instansi = Instansi::withoutGlobalScopes()->findOrFail($targetId);
+        } else {
+            // Default (Admin Wilayah akan terfilter otomatis oleh FilterRegional)
+            $instansi = Instansi::first();
+        }
+
         if (!$instansi) {
             $instansi = Instansi::create(['nama_instansi' => 'KCD Wilayah Baru']);
         }
 
         // --- SINKRONISASI KEPALA (AUTOMATIC) ---
-        // Mencari Jabatan yang namanya 'Kepala' atau ID 2
+        // Sesuai instansi yang sedang dilihat
         $jabatanKepala = JabatanKcd::where('nama', 'like', '%Kepala%')->first();
         $kepala = null;
         if ($jabatanKepala) {
-            $kepala = PegawaiKcd::where('jabatan_kcd_id', $jabatanKepala->id)->first();
+            // Syarat Tambahan: instansi_id harus cocok dengan instansi yang sedang dilihat
+            $kepala = PegawaiKcd::where('instansi_id', $instansi->id)
+                                ->where('jabatan_kcd_id', $jabatanKepala->id)
+                                ->first();
             
             // Opsional: Update record instansi agar tetap sinkron di DB
             if ($kepala && ($instansi->nama_kepala !== $kepala->nama || $instansi->nip_kepala !== $kepala->nip)) {
@@ -34,23 +56,26 @@ class InstansiController extends Controller
             }
         }
 
-        return view('admin.instansi.index', compact('instansi', 'kepala'));
+        return view('admin.instansi.index', compact('instansi', 'kepala', 'isSuperAdmin'));
     }
 
     public function update(Request $request)
     {
-        $instansi = Instansi::first();
+        // Ambil target instansi (Prioritaskan ID jika ada, biasanya dari input hidden)
+        $targetId = $request->id;
+        if ($targetId) {
+            $instansi = Instansi::withoutGlobalScopes()->findOrFail($targetId);
+        } else {
+            $instansi = Instansi::first();
+        }
 
         // 1. Validasi Input
         $request->validate([
             'nama_instansi' => 'required|string|max:255',
             'nama_brand'    => 'nullable|string|max:255',
-            // 'nama_kepala'   => 'nullable|string|max:255', // Di-handle otomatis dari Kepegawaian
-            // 'nip_kepala'    => 'nullable|string|max:50',  // Di-handle otomatis dari Kepegawaian
             'peta'          => 'nullable|string',
             'social_media'  => 'nullable|array',
             'logo'          => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
-            // UPDATE: Sekarang support JPG/JPEG selain PNG
             'tanda_tangan'  => 'nullable|image|mimes:png,jpg,jpeg|max:1024',
             'lintang'       => 'nullable|numeric',
             'bujur'         => 'nullable|numeric',
@@ -60,7 +85,7 @@ class InstansiController extends Controller
         ]);
 
         // 2. Ambil data input KECUALI logo, ttd, & social_media
-        $data = $request->except(['logo', 'tanda_tangan', 'social_media', 'nama_kepala', 'nip_kepala']);
+        $data = $request->except(['id', 'logo', 'tanda_tangan', 'social_media', 'nama_kepala', 'nip_kepala']);
 
         // 3. Rapikan Array Social Media
         if ($request->has('social_media')) {

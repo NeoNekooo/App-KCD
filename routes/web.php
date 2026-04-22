@@ -62,7 +62,7 @@ use App\Http\Controllers\Admin\SettingController as WebSettingController;
 use App\Http\Controllers\WelcomeController;
 
 // --- DOMAIN MANAJEMEN / ADMIN (kcd6.hexanusa.com) ---
-Route::domain('kcd6.hexanusa.com')->group(function () {
+Route::domain('mandala.hexanusa.com')->group(function () {
     Route::get('/', function () {
         return redirect()->route('login');
     });
