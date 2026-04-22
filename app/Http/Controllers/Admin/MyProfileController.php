@@ -19,10 +19,24 @@ class MyProfileController extends Controller
     public function show()
     {
         $userId = Auth::id();
-        $pegawai = PegawaiKcd::with('user')->where('user_id', $userId)->firstOrFail();
+        $user = Auth::user();
+        $pegawai = PegawaiKcd::with('user')->where('user_id', $userId)->first();
+        
+        // Handle jika user tidak punya data di tabel pegawai_kcds (seperti Super Admin)
+        if (!$pegawai) {
+            // Jika dia bukan admin sistem, mungkin emang error
+            $isAdmin = in_array(strtolower(trim($user->role)), ['admin', 'administrator', 'operator kcd']);
+            
+            if ($isAdmin) {
+                // Buatkan objek dummy agar view tidak crash, atau arahkan ke dashboard dengan pesan
+                return redirect()->route('admin.dashboard')->with('error', 'Akun Anda adalah Administrator Sistem dan belum dihubungkan ke Data Pegawai. Silakan hubungkan di menu Kepegawaian jika ingin mengelola profil detail.');
+            }
+            
+            abort(404, 'Data pegawai tidak ditemukan untuk akun ini.');
+        }
         
         // Jabatans are needed for the dropdown if the user happens to be an Admin
-        $isAdmin = in_array(strtolower(trim(Auth::user()->role)), ['admin', 'administrator', 'operator kcd']);
+        $isAdmin = in_array(strtolower(trim($user->role)), ['admin', 'administrator', 'operator kcd']);
         $jabatans = $isAdmin ? JabatanKcd::all() : [];
 
         return view('admin.kepegawaian_kcd.show', compact('pegawai', 'jabatans'));
