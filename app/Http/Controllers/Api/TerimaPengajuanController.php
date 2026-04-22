@@ -23,15 +23,16 @@ class TerimaPengajuanController extends Controller
 
         $validator = Validator::make($request->all(), [
             'uuid'            => 'required|uuid',
+            'cadisdik_id'     => 'nullable|uuid', // 🔥 UUID wilayah dari sekolah
             'npsn'            => 'required|string|max:10',
             'nama_sekolah'    => 'required|string|max:255',
             'nama_guru'       => 'required|string|max:255',
             'nip'             => 'nullable|string|max:50',
-            'kategori'        => 'required|string|max:100',
-            'judul'           => 'required|string|max:255',
-            'file_permohonan' => 'required|url',
-            'data_siswa_json' => 'nullable|array', // Snapshot biodata
-            'url_callback'    => 'required|url',
+            'kategori'         => 'required|string|max:100',
+            'judul'            => 'required|string|max:255',
+            'file_permohonan'  => 'required|url',
+            'data_siswa_json'  => 'nullable|array', // Snapshot biodata
+            'url_callback'     => 'required|url',
         ]);
 
         if ($validator->fails()) {
@@ -39,14 +40,26 @@ class TerimaPengajuanController extends Controller
         }
 
         try {
-            // 🔥 SEKARANG MENYIMPAN data_siswa_json KE KOLOM data_profil_json 🔥
+            // 🔥 OTOMATIS CARI instansi_id (Angka) dari cadisdik_id (UUID) 🔥
+            $instansiId = null;
+            if ($request->filled('cadisdik_id')) {
+                $instansiId = \App\Models\Instansi::where('cadisdik_id', $request->cadisdik_id)->value('id');
+            }
+
+            // Jika tidak ketemu via UUID, coba cari via NPSN Sekolah yang sudah ada di database KCD
+            if (!$instansiId) {
+                $instansiId = \App\Models\Sekolah::where('npsn', $request->npsn)->value('instansi_id');
+            }
+
             $pengajuan = PengajuanSekolah::updateOrCreate(
                 ['uuid' => $request->uuid],
                 [
+                    'instansi_id'      => $instansiId, // 🔥 Simpan hasil pencarian otomatis
                     'npsn'             => $request->npsn,
                     'nama_sekolah'     => $request->nama_sekolah,
                     'nama_guru'        => $request->nama_guru,
                     'nip'              => $request->nip,
+                    'tipe_pengaju'     => 'GTK', // 🔥 Tandai sebagai Guru/Tenaga Kependidikan
                     'kategori'         => Str::slug($request->kategori),
                     'judul'            => $request->judul,
                     'file_permohonan'  => $request->file_permohonan,

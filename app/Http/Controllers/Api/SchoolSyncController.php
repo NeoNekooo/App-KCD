@@ -65,9 +65,28 @@ class SchoolSyncController extends Controller
             $errors = [];
 
             // 3. LOOP PENGOLAHAN DATA
+            $instansiCache = []; // 🔥 Cache kilat agar tidak query berulang
             foreach ($input as $index => $row) {
                 try {
                     $row = (array) $row;
+
+                    // --- 🔥 OTOMATISASI INSTANSI_ID (ISOLASI REGIONAL) 🔥 ---
+                    if (!isset($row['instansi_id'])) {
+                        $sid = $row['sekolah_id'] ?? $row['id_sekolah'] ?? null;
+                        $npsn = $row['npsn'] ?? null;
+
+                        if ($sid) {
+                            if (!isset($instansiCache[$sid])) {
+                                $instansiCache[$sid] = DB::table('sekolahs')->where('sekolah_id', $sid)->value('instansi_id');
+                            }
+                            $row['instansi_id'] = $instansiCache[$sid];
+                        } elseif ($npsn) {
+                            if (!isset($instansiCache[$npsn])) {
+                                $instansiCache[$npsn] = DB::table('sekolahs')->where('npsn', $npsn)->value('instansi_id');
+                            }
+                            $row['instansi_id'] = $instansiCache[$npsn];
+                        }
+                    }
                     
                     foreach ($row as $k => $v) {
                         if (is_array($v)) {

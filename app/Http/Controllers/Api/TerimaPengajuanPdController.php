@@ -26,6 +26,7 @@ class TerimaPengajuanPdController extends Controller
         // 2. Validasi: Menggunakan NISN dan Nama Siswa
         $validator = Validator::make($request->all(), [
             'uuid'            => 'required|uuid',
+            'cadisdik_id'     => 'nullable|uuid', // 🔥 UUID wilayah dari sekolah
             'npsn'            => 'required|string|max:10',
             'nama_sekolah'    => 'required|string|max:255',
             'nama_siswa'      => 'required|string|max:255', // Nama Siswa
@@ -42,10 +43,22 @@ class TerimaPengajuanPdController extends Controller
         }
 
         try {
+            // 🔥 OTOMATIS CARI instansi_id (Angka) dari cadisdik_id (UUID) 🔥
+            $instansiId = null;
+            if ($request->filled('cadisdik_id')) {
+                $instansiId = \App\Models\Instansi::where('cadisdik_id', $request->cadisdik_id)->value('id');
+            }
+
+            // Jika tidak ketemu via UUID, coba cari via NPSN Sekolah yang sudah ada di database KCD
+            if (!$instansiId) {
+                $instansiId = \App\Models\Sekolah::where('npsn', $request->npsn)->value('instansi_id');
+            }
+
             // 3. Simpan ke database KCD
             $pengajuan = PengajuanSekolah::updateOrCreate(
                 ['uuid' => $request->uuid],
                 [
+                    'instansi_id'     => $instansiId, // 🔥 Simpan hasil pencarian otomatis
                     'npsn'            => $request->npsn,
                     'nama_sekolah'    => $request->nama_sekolah,
                     'nama_guru'       => $request->nama_siswa, // Simpan ke kolom nama_guru sebagai pengaju
