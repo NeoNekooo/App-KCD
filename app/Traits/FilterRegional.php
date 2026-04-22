@@ -44,7 +44,8 @@ trait FilterRegional
 
                     // 1. Jika tabel memiliki kolom yang ditentukan (id / instansi_id)
                     if (Schema::hasColumn($tableName, $column)) {
-                        $builder->where($tableName . '.' . $column, $instansiId);
+                        // Gunakan where agar Laravel menangani casting tipe data secara otomatis
+                        $builder->where($tableName . '.' . $column, '=', $instansiId);
                     } 
                     // 2. Jika tidak ada kolom instansi_id namun memiliki relasi sekolah, saring via relasi
                     elseif (method_exists($model, 'sekolah')) {
