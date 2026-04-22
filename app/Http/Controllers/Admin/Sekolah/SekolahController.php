@@ -230,8 +230,8 @@ class SekolahController extends Controller
         // 1. Ambil Parameter Filter Jenjang (Status)
         $jenjangTerpilih = $request->input('jenjang');
 
-        // 2. Siapkan Query Agregasi
-        $query = DB::table('sekolahs')
+        // 2. Siapkan Query Agregasi menggunakan Model agar FilterRegional Aktif
+        $query = Sekolah::query()
             ->select(
                 'kabupaten_kota',
                 DB::raw("SUM(CASE WHEN status_sekolah_str LIKE '%Negeri%' THEN 1 ELSE 0 END) as total_negeri"),

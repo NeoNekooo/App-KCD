@@ -30,7 +30,8 @@ class RekapitulasiGtkExport implements FromCollection, WithHeadings, WithMapping
     public function collection()
     {
         // 1. Query Agregasi: Join 'gtks' dengan 'sekolahs'
-        $query = DB::table('gtks')
+        // Menggunakan Model Gtk agar FilterRegional Aktif
+        $query = \App\Models\Gtk::query()
             ->join('sekolahs', 'gtks.sekolah_id', '=', 'sekolahs.sekolah_id')
             ->select(
                 'sekolahs.kabupaten_kota',

@@ -27,8 +27,8 @@ class RekapitulasiSekolahExport implements FromCollection, WithHeadings, WithMap
      */
     public function collection()
     {
-        // 1. Siapkan Query Agregasi
-        $query = DB::table('sekolahs')
+        // 1. Siapkan Query Agregasi menggunakan Model agar FilterRegional Aktif
+        $query = \App\Models\Sekolah::query()
             ->select(
                 'kabupaten_kota',
                 DB::raw("SUM(CASE WHEN status_sekolah_str LIKE '%Negeri%' THEN 1 ELSE 0 END) as total_negeri"),

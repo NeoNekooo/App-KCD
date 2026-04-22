@@ -28,7 +28,8 @@ class RekapitulasiSiswaExport implements FromCollection, WithHeadings, WithMappi
     public function collection()
     {
         // 1. Query Agregasi: Join 'siswas' dengan 'sekolahs'
-        $query = DB::table('siswas')
+        // Menggunakan Model Siswa agar FilterRegional Aktif
+        $query = \App\Models\Siswa::query()
             ->join('sekolahs', 'siswas.sekolah_id', '=', 'sekolahs.sekolah_id')
             ->where('siswas.status', 'Aktif') // Hanya siswa aktif
             ->select(

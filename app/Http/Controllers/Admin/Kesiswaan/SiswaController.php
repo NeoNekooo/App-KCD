@@ -148,7 +148,8 @@ class SiswaController extends Controller
         $jenjangTerpilih = $request->input('jenjang', '');
 
         // 1. Query Agregasi: Join 'siswas' dengan 'sekolahs' (Hanya Siswa Aktif)
-        $query = DB::table('siswas')
+        // Menggunakan Model Siswa agar FilterRegional Aktif
+        $query = Siswa::query()
             ->join('sekolahs', 'siswas.sekolah_id', '=', 'sekolahs.sekolah_id')
             ->where('siswas.status', 'Aktif')
             ->select(

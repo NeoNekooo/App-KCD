@@ -202,7 +202,8 @@ class GtkController extends Controller
         $jenjangTerpilih = $request->input('jenjang', ''); // 'SMA', 'SMK', 'SLB', dll
 
         // 1. Query Agregasi: Join 'gtks' dengan 'sekolahs' agar kita tahu Wilayah dan Jenjang
-        $query = DB::table('gtks')
+        // Menggunakan Model Gtk agar FilterRegional Aktif
+        $query = Gtk::query()
             ->join('sekolahs', 'gtks.sekolah_id', '=', 'sekolahs.sekolah_id')
             ->select(
                 'sekolahs.kabupaten_kota',
