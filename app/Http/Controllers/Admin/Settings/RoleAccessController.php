@@ -15,7 +15,7 @@ class RoleAccessController extends Controller
         $dbRoles = DB::table('jabatan_kcd')->select('role')->distinct()->pluck('role')->toArray();
         
         // 2. Gabungkan dengan role default & pastikan unik
-        $defaultRoles = ['Admin']; // Role super admin yang mungkin tidak ada di tabel jabatan
+        $defaultRoles = ['Administrator', 'Admin']; // Role super admin dan admin wilayah default
         $allRoles = array_unique(array_merge($defaultRoles, $dbRoles));
         sort($allRoles); // Urutkan alphabet
 
