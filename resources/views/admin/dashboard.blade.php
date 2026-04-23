@@ -186,7 +186,11 @@
                                         </a>
                                     </div>
                                     <h3 class="fw-bolder mb-1 text-white text-uppercase" style="letter-spacing: -0.5px;">
-                                        {{ $instansi->nama_instansi ?? 'DASHBOARD KCD' }}
+                                        @if (strtolower($user->role) === 'administrator' && is_null($user->instansi_id))
+                                            MANAGEMENT KANTOR CABANG DINAS
+                                        @else
+                                            {{ $instansi->nama_instansi ?? 'DASHBOARD KCD' }}
+                                        @endif
                                     </h3>
                                     <p class="text-white-50 mb-0 fs-6">
                                         <span id="greeting-text">Halo</span>, <strong>{{ $user->name }}</strong> 👋
