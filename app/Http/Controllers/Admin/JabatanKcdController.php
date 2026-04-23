@@ -16,7 +16,15 @@ class JabatanKcdController extends Controller
      */
     public function index()
     {
-        $jabatans = JabatanKcd::latest()->paginate(10);
+        $query = JabatanKcd::latest();
+
+        // 🛡️ SECURITY FILTER: Admin Wilayah dilarang liat jabatan berbau "Admin"
+        if (!empty(Auth::user()->instansi_id)) {
+            $query->where('nama', 'not like', '%admin%')
+                  ->where('role', 'not like', '%admin%');
+        }
+
+        $jabatans = $query->paginate(10);
         
         // 🔥 Untuk Super Admin: Ambil list instansi buat drop-down
         $instansis = [];
@@ -45,12 +53,7 @@ class JabatanKcdController extends Controller
                 })
             ],
             'role' => 'required|string|max:255',
-            'instansi_id' => [
-                Rule::requiredIf(function() {
-                    return in_array(strtolower(trim(Auth::user()->role)), ['admin', 'administrator']) && empty(Auth::user()->instansi_id);
-                }),
-                'nullable', 'exists:instansis,id'
-            ]
+            'instansi_id' => 'nullable|exists:instansis,id'
         ]);
 
         // 🛡️ SECURITY CHECK: Larang Admin Wilayah bikin jabatan "Admin/Administrator"

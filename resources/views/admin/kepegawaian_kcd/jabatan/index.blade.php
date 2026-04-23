@@ -105,7 +105,8 @@
                                         @if(isset($instansis) && !empty($instansis))
                                         <div class="mb-3">
                                             <label class="form-label small fw-bold text-primary">Target Wilayah / Instansi</label>
-                                            <select name="instansi_id" class="form-select border-primary" required>
+                                            <select name="instansi_id" class="form-select border-primary">
+                                                <option value="">-- Pusat / Global (Kosongkan) --</option>
                                                 @foreach ($instansis as $inst)
                                                     <option value="{{ $inst->id }}" {{ $jabatan->instansi_id == $inst->id ? 'selected' : '' }}>{{ $inst->nama_instansi }}</option>
                                                 @endforeach
@@ -164,8 +165,8 @@
                     @if(isset($instansis) && !empty($instansis))
                     <div class="mb-3">
                         <label class="form-label small fw-bold text-primary">Target Wilayah / Instansi</label>
-                        <select name="instansi_id" class="form-select border-primary" required>
-                            <option value="" selected disabled>-- Pilih Wilayah --</option>
+                        <select name="instansi_id" class="form-select border-primary">
+                            <option value="">-- Pusat / Global (Kosongkan) --</option>
                             @foreach ($instansis as $inst)
                                 <option value="{{ $inst->id }}">{{ $inst->nama_instansi }}</option>
                             @endforeach
