@@ -27,16 +27,21 @@ class MyProfileController extends Controller
         // --- TRIK "AKALIN" AUTO-CREATE ---
         // Jika data pegawai tidak ada tapi dia adalah Admin, buatkan otomatis!
         if (!$pegawai && $isAdmin) {
+            $defaultJabatan = JabatanKcd::first(); // Ambil jabatan apa aja buat pancingan
+            
             $pegawai = PegawaiKcd::create([
-                'user_id'     => $user->id,
-                'nama'        => $user->name,
+                'user_id'       => $user->id,
+                'nama'          => $user->name,
                 'email_pribadi' => $user->email,
-                'jabatan'     => 'Master Administrator',
-                'instansi_id' => $user->instansi_id, // Tetap NULL jika Super Admin
+                'jabatan'       => $defaultJabatan ? $defaultJabatan->nama : 'Master Administrator',
+                'jabatan_kcd_id' => $defaultJabatan ? $defaultJabatan->id : null, 
+                'instansi_id'   => $user->instansi_id, // Tetap NULL jika Super Admin
             ]);
 
             // Update kaitan di tabel users agar sinkron
-            $user->update(['pegawai_kcd_id' => $pegawai->id]);
+            if ($pegawai) {
+                $user->update(['pegawai_kcd_id' => $pegawai->id]);
+            }
         }
 
         if (!$pegawai) {
@@ -45,8 +50,14 @@ class MyProfileController extends Controller
         
         // Jabatans are needed for the dropdown if the user happens to be an Admin
         $jabatans = $isAdmin ? JabatanKcd::all() : [];
+        
+        // 🔥 Tambahkan list instansi buat mutasi wilayah (khusus Super Admin)
+        $instansis = [];
+        if ($isAdmin && empty($user->instansi_id)) {
+             $instansis = \App\Models\Instansi::orderBy('id', 'asc')->get();
+        }
 
-        return view('admin.kepegawaian_kcd.show', compact('pegawai', 'jabatans'));
+        return view('admin.kepegawaian_kcd.show', compact('pegawai', 'jabatans', 'instansis'));
     }
 
     /**
@@ -100,9 +111,16 @@ class MyProfileController extends Controller
                 $isAdmin = in_array(strtolower(trim(Auth::user()->role)), ['admin', 'administrator', 'operator kcd']);
                 if ($isAdmin) {
                     $jabatan = JabatanKcd::find($request->jabatan_kcd_id);
-                    $dataUpdate['jabatan_kcd_id'] = $jabatan->id;
-                    $dataUpdate['jabatan'] = $jabatan->nama; 
+                    if ($jabatan) {
+                        $dataUpdate['jabatan_kcd_id'] = $jabatan->id;
+                        $dataUpdate['jabatan'] = $jabatan->nama; 
+                    }
                     $dataUpdate['nip'] = $request->nip;
+
+                    // 🔥 SUPER ADMIN: Bisa pindahin wilayah sendiri
+                    if (empty(Auth::user()->instansi_id) && $request->filled('instansi_id')) {
+                        $dataUpdate['instansi_id'] = $request->instansi_id;
+                    }
                 }
 
                 $pegawai->update($dataUpdate);

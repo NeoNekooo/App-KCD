@@ -5,6 +5,9 @@
 
     <style>
         /* Gaya Hover Logo */
+        .table-responsive {
+            overflow: visible !important; /* Paksa biar zoom gak kepotong bre */
+        }
         .avatar-hover {
             transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
             cursor: zoom-in;
@@ -13,9 +16,9 @@
             z-index: 10;
         }
         .avatar-hover:hover {
-            transform: scale(2.2); /* Skala aman untuk mode scroll */
-            z-index: 99 !important;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2) !important;
+            transform: scale(2.5); /* Naikin dikit biar makin puas liatnya */
+            z-index: 9999 !important;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3) !important;
             border-radius: 8px !important;
         }
         .instansi-name {
