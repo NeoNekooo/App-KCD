@@ -16,9 +16,8 @@ class InstansiController extends Controller
         // Cek apakah dia Super Admin (Role Admin/Administrator tapi instansi_id KOSONG)
         $isSuperAdmin = in_array(strtolower($user->role ?? ''), ['admin', 'administrator', 'operator kcd']) && empty($user->instansi_id);
         
-        // 1. Jika Super Admin dan tidak bawa ID -> Tampilkan TABEL LIST SEMUA KCD
         if ($isSuperAdmin && !$request->has('id')) {
-            $listInstansi = Instansi::orderBy('nama_instansi', 'asc')->get();
+            $listInstansi = Instansi::orderBy('id', 'asc')->get();
             return view('admin.instansi.list', compact('listInstansi'));
         }
 
