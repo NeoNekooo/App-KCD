@@ -137,15 +137,23 @@ class SchoolSyncController extends Controller
                          unset($row['id']); 
                     }
 
+                    DB::enableQueryLog(); // 🔥 AKTIFKAN PENYADAP QUERY
+
                     if (empty($conditions)) {
-                        // \Log::debug("SYNC_FINAL_SAVE: Insert table [$tableName]");
                         DB::table($tableName)->insert($row);
                     } else {
                         if ($tableName == 'siswas' || $tableName == 'peserta_didik') {
-                            \Log::info("SYNC_DATA_FINAL_SISWA: NISN [" . ($row['nisn'] ?? 'N/A') . "] NIK [" . ($row['nik'] ?? 'N/A') . "]");
+                            // \Log::info("SYNC_DATA_FINAL_SISWA: NISN [" . ($row['nisn'] ?? 'N/A') . "] NIK [" . ($row['nik'] ?? 'N/A') . "]");
                         }
                         DB::table($tableName)->updateOrInsert($conditions, $row);
                     }
+                    
+                    // 🔥 CETAK QUERY KE LOG
+                    $queries = DB::getQueryLog();
+                    if (!empty($queries) && ($tableName == 'siswas' || $tableName == 'peserta_didik')) {
+                        \Log::info("SQL_QUERY_FINAL: " . json_encode($queries));
+                    }
+                    DB::disableQueryLog();
                     
                     $processed++;
                 } catch (\Exception $innerException) {
