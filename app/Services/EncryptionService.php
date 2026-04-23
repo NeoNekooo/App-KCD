@@ -34,9 +34,13 @@ class EncryptionService
 
         foreach ($mapping as $mappedTable => $columns) {
             $mappedTable = strtolower($mappedTable);
+            $isSiswa = ($mappedTable === 'siswas' && (str_contains($tableName, 'peserta_didik') || str_contains($tableName, 'siswa')));
+            $isGtk = ($mappedTable === 'gtks' && (str_contains($tableName, 'gtk') || str_contains($tableName, 'guru') || str_contains($tableName, 'tendik')));
+
             if ($tableName === $mappedTable || 
                 str_ends_with($tableName, $mappedTable) ||
-                str_ends_with($tableName, rtrim($mappedTable, 's'))
+                str_ends_with($tableName, rtrim($mappedTable, 's')) ||
+                $isSiswa || $isGtk
             ) {
                 return in_array($columnName, $columns);
             }
