@@ -1,5 +1,7 @@
 @extends('layouts.admin')
 
+@use('App\Services\EncryptionService')
+
 @section('content')
     <style>
         .rounded-4 {
@@ -183,7 +185,7 @@
                                                     @if ($gtk->nip && trim($gtk->nip) != '-')
                                                         <span class="text-primary">NIP. {{ $gtk->nip }}</span>
                                                     @elseif($gtk->nik && trim($gtk->nik) != '-')
-                                                        <span class="text-info">NIK. {{ $gtk->nik }}</span>
+                                                        <span class="text-info">NIK. {{ EncryptionService::decrypt($gtk->nik) }}</span>
                                                     @else
                                                         <span class="opacity-50">Belum ada Identitas</span>
                                                     @endif

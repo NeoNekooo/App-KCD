@@ -102,8 +102,11 @@ class SchoolSyncController extends Controller
                         }
                     }
                     
+                    // --- 🔥 ENKRIPSI DATA SENSITIF 🔥 ---
                     foreach ($row as $k => $v) {
-                        if (is_array($v)) {
+                        if (EncryptionService::shouldEncrypt($tableName, $k)) {
+                            $row[$k] = EncryptionService::encrypt($v);
+                        } elseif (is_array($v)) {
                             $row[$k] = json_encode($v);
                         }
                     }

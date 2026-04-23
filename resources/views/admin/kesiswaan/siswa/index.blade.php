@@ -2,6 +2,8 @@
 
 @section('content')
 
+@use('App\Services\EncryptionService')
+
 {{-- 🔥 CSS PREMIUM & ANIMASI 🔥 --}}
 <style>
     .rounded-4 { border-radius: 1rem !important; }
@@ -124,7 +126,7 @@
                                     <div class="d-flex flex-column text-truncate" style="max-width: 250px;">
                                         <span class="fw-bold text-dark text-truncate">{{ $siswa->nama }}</span>
                                         <small class="text-muted font-monospace" style="font-size: 0.75rem;">
-                                            TTL: {{ $siswa->tempat_lahir ?? '-' }}, {{ $siswa->tanggal_lahir ? (\Carbon\Carbon::parse($siswa->tanggal_lahir)->format('d-m-Y')) : '-' }}
+                                            TTL: {{ $siswa->tempat_lahir ?? '-' }}, {{ $siswa->tanggal_lahir ? (\Carbon\Carbon::parse(EncryptionService::decrypt($siswa->tanggal_lahir))->format('d-m-Y')) : '-' }}
                                         </small>
                                     </div>
                                 </div>
@@ -141,8 +143,8 @@
                             </td>
                             <td>
                                 <div class="d-flex flex-column">
-                                    <span class="fw-bold small text-primary">NISN: {{ $siswa->nisn ?? '-' }}</span>
-                                    <small class="text-muted">NIK: {{ $siswa->nik ?? '-' }}</small>
+                                    <span class="fw-bold small text-primary">NISN: {{ EncryptionService::decrypt($siswa->nisn) ?? '-' }}</span>
+                                    <small class="text-muted">NIK: {{ EncryptionService::decrypt($siswa->nik) ?? '-' }}</small>
                                 </div>
                             </td>
                             <td>

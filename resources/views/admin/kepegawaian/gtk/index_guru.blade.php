@@ -1,5 +1,7 @@
 @extends('layouts.admin')
 
+@use('App\Services\EncryptionService')
+
 @section('content')
     <style>
         .rounded-4 {
@@ -221,7 +223,7 @@
                                     </td>
                                     <td>
                                         <div class="d-flex flex-column">
-                                            <span class="fw-bold small text-primary">NIK: {{ $gtk->nik ?? '-' }}</span>
+                                            <span class="fw-bold small text-primary">NIK: {{ EncryptionService::decrypt($gtk->nik) ?? '-' }}</span>
                                             <small class="text-muted">NUPTK: {{ $gtk->nuptk ?? '-' }}</small>
                                         </div>
                                     </td>

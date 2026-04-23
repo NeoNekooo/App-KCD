@@ -2,6 +2,8 @@
 
 @section('content')
 
+@use('App\Services\EncryptionService')
+
 {{-- 🔥 CSS PREMIUM & ANIMASI 🔥 --}}
 <style>
     /* Utility & Cards */
@@ -116,7 +118,7 @@
                                     
                                     <div class="d-flex flex-wrap justify-content-center justify-content-md-start gap-2">
                                         <span class="badge bg-label-primary px-3 py-2 rounded-pill shadow-sm-custom">
-                                            <i class='bx bx-id-card me-1'></i> NISN. {{ $siswa->nisn ?? '-' }}
+                                            <i class='bx bx-id-card me-1'></i> NISN. {{ EncryptionService::decrypt($siswa->nisn) ?? '-' }}
                                         </span>
                                         <span class="badge bg-label-{{ ($siswa->jenis_kelamin == 'L' || $siswa->jenis_kelamin == 'Laki-laki') ? 'info' : 'danger' }} px-3 py-2 rounded-pill shadow-sm-custom">
                                             <i class='bx bx-user me-1'></i> {{ ($siswa->jenis_kelamin == 'L' || $siswa->jenis_kelamin == 'Laki-laki') ? 'Laki-laki' : 'Perempuan' }}
@@ -163,14 +165,14 @@
                         <div class="icon-box icon-primary me-3"><i class='bx bx-barcode'></i></div>
                         <div>
                             <span class="d-block small text-muted">NIPD / NIK</span>
-                            <span class="fw-semibold text-dark font-monospace">{{ $siswa->nipd ?? '-' }} / {{ $siswa->nik ?? '-' }}</span>
+                            <span class="fw-semibold text-dark font-monospace">{{ $siswa->nipd ?? '-' }} / {{ EncryptionService::decrypt($siswa->nik) ?? '-' }}</span>
                         </div>
                     </div>
                     <div class="d-flex align-items-center">
                         <div class="icon-box icon-success me-3"><i class='bx bxl-whatsapp'></i></div>
                         <div>
                             <span class="d-block small text-muted">Email / HP</span>
-                            <span class="fw-semibold text-dark">{{ $siswa->email ?? '-' }} <br> {{ $siswa->nomor_telepon_seluler ?? '-' }}</span>
+                            <span class="fw-semibold text-dark">{{ $siswa->email ?? '-' }} <br> {{ EncryptionService::decrypt($siswa->nomor_telepon_seluler) ?? '-' }}</span>
                         </div>
                     </div>
 
@@ -225,7 +227,7 @@
                                 <table class="table table-borderless table-profile w-100 m-0">
                                     <tbody>
                                         <tr><td class="label-td">Nama Lengkap</td><td class="value-td">{{ $siswa->nama }}</td></tr>
-                                        <tr><td class="label-td">Tempat, Tgl Lahir</td><td class="value-td">{{ $siswa->tempat_lahir ?? '-' }}, {{ $siswa->tanggal_lahir ? \Carbon\Carbon::parse($siswa->tanggal_lahir)->translatedFormat('d F Y') : '-' }}</td></tr>
+                                        <tr><td class="label-td">Tempat, Tgl Lahir</td><td class="value-td">{{ $siswa->tempat_lahir ?? '-' }}, {{ $siswa->tanggal_lahir ? \Carbon\Carbon::parse(EncryptionService::decrypt($siswa->tanggal_lahir))->translatedFormat('d F Y') : '-' }}</td></tr>
                                         <tr><td class="label-td">Jenis Kelamin</td><td class="value-td">{{ ($siswa->jenis_kelamin == 'L' || $siswa->jenis_kelamin == 'Laki-laki') ? 'Laki-laki' : 'Perempuan' }}</td></tr>
                                         <tr><td class="label-td">Agama</td><td class="value-td">{{ $siswa->agama_id_str ?? '-' }}</td></tr>
                                         <tr><td class="label-td">Kewarganegaraan</td><td class="value-td">{{ $siswa->kewarganegaraan ?? 'Indonesia' }}</td></tr>
@@ -241,7 +243,7 @@
                             <div class="table-responsive text-nowrap">
                                 <table class="table table-borderless table-profile w-100 m-0">
                                     <tbody>
-                                        <tr><td class="label-td">NISN</td><td class="value-td font-monospace text-primary">{{ $siswa->nisn ?? '-' }}</td></tr>
+                                        <tr><td class="label-td">NISN</td><td class="value-td font-monospace text-primary">{{ EncryptionService::decrypt($siswa->nisn) ?? '-' }}</td></tr>
                                         <tr><td class="label-td">NIPD / Nomor Induk</td><td class="value-td font-monospace">{{ $siswa->nipd ?? '-' }}</td></tr>
                                         <tr><td class="label-td">Kelas Saat Ini</td><td class="value-td"><span class="badge bg-label-info px-3 py-1">{{ $siswa->rombel->nama ?? 'Belum Ditentukan' }}</span></td></tr>
                                         <tr><td class="label-td">Tingkat</td><td class="value-td">{{ $siswa->tingkat_pendidikan_id ?? '-' }}</td></tr>

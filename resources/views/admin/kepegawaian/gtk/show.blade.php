@@ -1,5 +1,7 @@
 @extends('layouts.admin')
 
+@use('App\Services\EncryptionService')
+
 @section('content')
     {{-- 🔥 CSS PREMIUM & ANIMASI 🔥 --}}
     <style>
@@ -342,7 +344,7 @@
                             <div>
                                 <span class="d-block small text-muted">Nomor HP/WA</span>
                                 <span
-                                    class="fw-semibold text-dark">{{ $gtk->no_hp ?? ($gtk->no_telepon_rumah ?? 'Tidak tersedia') }}</span>
+                                    class="fw-semibold text-dark">{{ EncryptionService::decrypt($gtk->no_hp) ?? (EncryptionService::decrypt($gtk->no_telepon_rumah) ?? 'Tidak tersedia') }}</span>
                             </div>
                         </div>
                         <div class="d-flex align-items-center">
@@ -416,7 +418,7 @@
                                             </tr>
                                             <tr>
                                                 <td class="label-td">NIK KTP</td>
-                                                <td class="value-td font-monospace text-primary">{{ $gtk->nik ?? '-' }}
+                                                <td class="value-td font-monospace text-primary">{{ EncryptionService::decrypt($gtk->nik) ?? '-' }}
                                                 </td>
                                             </tr>
                                             <tr>
