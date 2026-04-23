@@ -46,9 +46,11 @@ class EncryptionService
 
     public static function encrypt($value): ?string
     {
-        if ($value === null || $value === '' || !is_string($value)) {
+        if ($value === null || $value === '') {
             return $value;
         }
+
+        $value = (string) $value; // Paksa jadi string dulu biar bisa dienkrip
 
         // Jangan enkripsi jika sudah terenkripsi
         if (strpos($value, 'eyJpdi') !== false) {
@@ -56,9 +58,9 @@ class EncryptionService
         }
 
         try {
-            return Crypt::encryptString((string) $value);
+            return Crypt::encryptString($value);
         } catch (\Throwable $e) {
-            return (string) $value;
+            return $value;
         }
     }
 
