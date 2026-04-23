@@ -180,6 +180,9 @@
                         <thead class="bg-light">
                             <tr>
                                 <th class="ps-4 py-3 text-uppercase text-muted" style="font-size: 0.75rem; font-weight: 700; letter-spacing: 0.5px;">Profil Pegawai</th>
+                                @if(auth()->user()->hasRole('Super Admin'))
+                                <th class="py-3 text-uppercase text-muted" style="font-size: 0.75rem; font-weight: 700; letter-spacing: 0.5px;">Wilayah / Instansi</th>
+                                @endif
                                 <th class="py-3 text-uppercase text-muted" style="font-size: 0.75rem; font-weight: 700; letter-spacing: 0.5px;">Jabatan</th>
                                 <th class="py-3 text-uppercase text-muted" style="font-size: 0.75rem; font-weight: 700; letter-spacing: 0.5px;">Kontak</th>
                                 <th class="py-3 text-uppercase text-muted" style="font-size: 0.75rem; font-weight: 700; letter-spacing: 0.5px;">Akun Login</th>
@@ -213,6 +216,23 @@
                                             </div>
                                         </div>
                                     </td>
+                                    
+                                    {{-- Asal Wilayah (Khusus Super Admin) --}}
+                                    @if(auth()->user()->hasRole('Super Admin'))
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            @if($item->instansi_id)
+                                                <div class="badge bg-label-info rounded px-2 py-1 fw-bold text-uppercase d-flex align-items-center" style="font-size: 0.65rem;">
+                                                    <i class="bx bx-buildings me-1"></i> {{ $item->instansi->nama_brand ?? $item->instansi->nama_instansi }}
+                                                </div>
+                                            @else
+                                                <div class="badge bg-label-secondary rounded px-2 py-1 fw-bold text-uppercase d-flex align-items-center" style="font-size: 0.65rem;">
+                                                    <i class="bx bx-crown me-1"></i> Pusat
+                                                </div>
+                                            @endif
+                                        </div>
+                                    </td>
+                                    @endif
 
                                     {{-- Jabatan --}}
                                     <td>
@@ -288,7 +308,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="5" class="text-center py-5">
+                                    <td colspan="{{ auth()->user()->hasRole('Super Admin') ? 6 : 5 }}" class="text-center py-5">
                                         <div class="d-flex flex-column align-items-center my-3">
                                             <div class="avatar avatar-xl bg-label-secondary rounded-circle mb-3 d-flex justify-content-center align-items-center">
                                                 <i class='bx bx-user-x fs-1'></i>
@@ -311,23 +331,25 @@
                     <div class="modal fade text-start" id="modalEdit{{ $item->id }}" tabindex="-1" aria-hidden="true">
                         <div class="modal-dialog modal-dialog-centered">
                             <div class="modal-content border-0 shadow-lg rounded-4">
-                                <div class="modal-header border-bottom py-3 px-4 bg-light-subtle">
-                                    <h5 class="modal-title fw-bold text-dark m-0"><i class="bx bx-edit text-primary me-2 fs-4" style="vertical-align: middle;"></i>Edit Data Pegawai</h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                <div class="modal-header border-0 p-4" style="background: linear-gradient(135deg, #696cff 0%, #4345eb 100%);">
+                                    <h5 class="modal-title text-white fw-bold d-flex align-items-center m-0">
+                                        <i class="bx bx-edit fs-3 me-2"></i> Edit Data Pegawai
+                                    </h5>
+                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                                 </div>
                                 <form action="{{ route('admin.kepegawaian.update', $item->id) }}" method="POST">
                                     @csrf @method('PUT')
                                     <div class="modal-body p-4">
                                         <div class="mb-4">
                                             <label class="form-label small fw-bold text-muted text-uppercase mb-1">Nama Lengkap <span class="text-danger">*</span></label>
-                                            <input type="text" name="nama" class="form-control form-control-lg fs-6 fw-semibold bg-light border-0 shadow-none" value="{{ $item->nama }}" required>
+                                            <input type="text" name="nama" class="form-control form-control-lg fs-6 fw-semibold bg-light border shadow-none" style="border-color: #e4e6ef !important;" value="{{ $item->nama }}" required>
                                         </div>
 
                                         {{-- 🔥 KHUSUS SUPER ADMIN: PILIH WILAYAH SAAT EDIT --}}
                                         @if(isset($instansis) && !empty($instansis))
                                         <div class="mb-4">
                                             <label class="form-label small fw-bold text-muted text-uppercase mb-1">Wilayah / Instansi <span class="text-danger">*</span></label>
-                                            <select name="instansi_id" class="form-select bg-light border-0 shadow-none fw-medium" required>
+                                            <select name="instansi_id" class="form-select bg-light border shadow-none fw-medium" style="border-color: #e4e6ef !important;" required>
                                                 @foreach ($instansis as $inst)
                                                     <option value="{{ $inst->id }}" {{ $item->instansi_id == $inst->id ? 'selected' : '' }}>{{ $inst->nama_instansi }}</option>
                                                 @endforeach
@@ -337,11 +359,11 @@
                                         <div class="row g-4">
                                             <div class="col-sm-6">
                                                 <label class="form-label small fw-bold text-muted text-uppercase mb-1">NIP</label>
-                                                <input type="text" name="nip" class="form-control bg-light border-0 shadow-none fw-medium" value="{{ $item->nip }}">
+                                                <input type="text" name="nip" class="form-control border shadow-none fw-medium" style="border-color: #e4e6ef !important;" value="{{ $item->nip }}" placeholder="-">
                                             </div>
                                             <div class="col-sm-6">
                                                 <label class="form-label small fw-bold text-muted text-uppercase mb-1">Jabatan <span class="text-danger">*</span></label>
-                                                <select name="jabatan_kcd_id" class="form-select bg-light border-0 shadow-none fw-medium" required>
+                                                <select name="jabatan_kcd_id" class="form-select border shadow-none fw-bold" style="border-color: #e4e6ef !important;" required>
                                                     @foreach ($jabatans as $jab)
                                                         <option value="{{ $jab->id }}" {{ $item->jabatan_kcd_id == $jab->id ? 'selected' : '' }}>{{ $jab->nama }}</option>
                                                     @endforeach
@@ -376,18 +398,20 @@
     <div class="modal fade" id="modalTambah" tabindex="-1">
         <div class="modal-dialog modal-lg modal-dialog-centered">
             <div class="modal-content border-0 shadow-lg rounded-4">
-                <div class="modal-header bg-primary text-white py-3 px-4">
-                    <h5 class="modal-title text-white fw-bold m-0"><i class='bx bx-user-plus me-2 fs-4' style="vertical-align: middle;"></i>Tambah Pegawai Baru</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                <div class="modal-header border-0 p-4" style="background: linear-gradient(135deg, #696cff 0%, #4345eb 100%);">
+                    <h5 class="modal-title text-white fw-bold d-flex align-items-center m-0">
+                        <i class="bx bx-user-plus fs-3 me-2"></i> Tambah Pegawai Baru
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <form action="{{ route('admin.kepegawaian.store') }}" method="POST" enctype="multipart/form-data">
                     @csrf
                     <div class="modal-body p-4">
                         {{-- 🔥 KHUSUS SUPER ADMIN: PILIH WILAYAH SAAT TAMBAH --}}
                         @if(isset($instansis) && !empty($instansis))
-                        <div class="mb-4 p-3 bg-label-primary rounded-4">
+                        <div class="mb-4 p-3 bg-label-primary rounded-4 border border-primary border-opacity-25">
                             <label class="form-label small fw-bold text-primary text-uppercase mb-1">Penempatan Wilayah / Instansi <span class="text-danger">*</span></label>
-                            <select name="instansi_id" class="form-select bg-white border-0 shadow-sm fw-bold" required>
+                            <select name="instansi_id" class="form-select border shadow-none fw-bold" style="border-color: #696cff50 !important;" required>
                                 <option value="" selected disabled>-- Pilih Wilayah Penempatan --</option>
                                 @foreach ($instansis as $inst)
                                 <option value="{{ $inst->id }}">{{ $inst->nama_instansi }}</option>
@@ -400,16 +424,16 @@
                         <div class="row g-4">
                             <div class="col-md-6">
                                 <label class="form-label small fw-bold text-muted text-uppercase mb-1">Nama Lengkap <span class="text-danger">*</span></label>
-                                <input type="text" name="nama" class="form-control bg-light border-0 shadow-none fw-medium" placeholder="Contoh: Budi Santoso, S.Kom" required autofocus>
+                                <input type="text" name="nama" class="form-control border shadow-none" style="border-color: #e4e6ef !important;" placeholder="Contoh: Budi Santoso, S.Kom" required autofocus>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label small fw-bold text-muted text-uppercase mb-1">NIP / Username</label>
-                                <input type="text" name="nip" class="form-control bg-light border-0 shadow-none fw-medium" placeholder="Kosongkan jika belum punya">
+                                <input type="text" name="nip" class="form-control border shadow-none" style="border-color: #e4e6ef !important;" placeholder="Kosongkan jika belum punya">
                             </div>
 
                             <div class="col-md-6">
                                 <label class="form-label small fw-bold text-muted text-uppercase mb-1">Posisi Jabatan <span class="text-danger">*</span></label>
-                                <select name="jabatan_kcd_id" class="form-select bg-light border-0 shadow-none fw-medium" required>
+                                <select name="jabatan_kcd_id" class="form-select border shadow-none fw-bold" style="border-color: #e4e6ef !important;" required>
                                     <option value="" selected disabled>-- Pilih Jabatan --</option>
                                     @foreach ($jabatans as $jab)
                                     <option value="{{ $jab->id }}">{{ $jab->nama }}</option>
@@ -418,7 +442,7 @@
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label small fw-bold text-muted text-uppercase mb-1">Jenis Kelamin</label>
-                                <select name="jenis_kelamin" class="form-select bg-light border-0 shadow-none fw-medium" required>
+                                <select name="jenis_kelamin" class="form-select border shadow-none" style="border-color: #e4e6ef !important;" required>
                                     <option value="L">Laki-laki</option>
                                     <option value="P">Perempuan</option>
                                 </select>

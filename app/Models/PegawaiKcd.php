@@ -12,7 +12,6 @@ class PegawaiKcd extends Model
 
     protected $table = 'pegawai_kcds';
 
-    // Kita definisikan $fillable biar aman dan jelas kolom apa aja yang boleh diisi
     protected $fillable = [
         'instansi_id',
         'user_id', 
@@ -44,5 +43,11 @@ class PegawaiKcd extends Model
     public function jabatanKcd()
     {
         return $this->belongsTo(JabatanKcd::class);
+    }
+
+    // Relasi ke Instansi
+    public function instansi()
+    {
+        return $this->belongsTo(Instansi::class);
     }
 }

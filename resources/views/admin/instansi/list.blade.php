@@ -62,7 +62,10 @@
                             <small class="text-muted font-monospace">{{ $instansi->nip_kepala ?? '-' }}</small>
                         </td>
                         <td>
-                            <div class="small"><i class='bx bx-map text-danger me-1'></i>{{ $instansi->kabupaten_kota ?? 'Belum diatur' }}</div>
+                            <div class="small fw-medium text-muted">
+                                <i class='bx bx-map text-danger me-1'></i>
+                                {{ $instansi->alamat ? \Illuminate\Support\Str::limit($instansi->alamat, 40) : 'Belum diatur' }}
+                            </div>
                         </td>
                         <td class="pe-4 text-end">
                             <a href="{{ route('admin.instansi.index', ['id' => $instansi->id]) }}" class="btn btn-sm btn-primary rounded-pill px-3 shadow-xs">

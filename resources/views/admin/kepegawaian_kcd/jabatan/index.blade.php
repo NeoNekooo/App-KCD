@@ -86,21 +86,21 @@
                     <div class="modal fade" id="modalEdit{{ $jabatan->id }}" tabindex="-1" aria-hidden="true">
                         <div class="modal-dialog modal-sm modal-dialog-centered">
                             <div class="modal-content border-0 shadow-lg rounded-4">
-                                <div class="modal-header border-bottom py-3 bg-light">
-                                    <h6 class="modal-title fw-bold">Edit Jabatan</h6>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                <div class="modal-header border-0 p-3" style="background: linear-gradient(135deg, #696cff 0%, #4345eb 100%);">
+                                    <h6 class="modal-title fw-bold text-white"><i class='bx bx-edit-alt me-2'></i> Edit Jabatan</h6>
+                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                                 </div>
                                 <form action="{{ route('admin.kepegawaian_kcd.jabatan.update', $jabatan->id) }}" method="POST">
                                     @csrf @method('PUT')
                                     <div class="modal-body p-4 text-start">
                                         <div class="mb-3">
-                                            <label class="form-label small fw-bold">Nama Jabatan</label>
-                                            <input type="text" name="nama" class="form-control" value="{{ $jabatan->nama }}" required>
+                                            <label class="form-label small fw-bold text-muted text-uppercase mb-1">Nama Jabatan</label>
+                                            <input type="text" name="nama" class="form-control border shadow-none" style="border-color: #e4e6ef !important;" value="{{ $jabatan->nama }}" required>
                                         </div>
                                         <div class="mb-3">
-                                            <label class="form-label small fw-bold">Role</label>
-                                            <input type="text" name="role" class="form-control" value="{{ $jabatan->role }}" required>
-                                            <small class="form-text">Role ini akan menentukan hak akses user.</small>
+                                            <label class="form-label small fw-bold text-muted text-uppercase mb-1">Role</label>
+                                            <input type="text" name="role" class="form-control border shadow-none" style="border-color: #e4e6ef !important;" value="{{ $jabatan->role }}" required>
+                                            <small class="form-text mt-1 d-block opacity-75">Role ini akan menentukan hak akses user.</small>
                                         </div>
                                         @if(isset($instansis) && !empty($instansis))
                                         <div class="mb-3">
@@ -146,21 +146,21 @@
 <div class="modal fade" id="modalTambah" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-sm modal-dialog-centered">
         <div class="modal-content border-0 shadow-lg rounded-4">
-            <div class="modal-header border-bottom py-3 bg-light">
-                <h6 class="modal-title fw-bold">Tambah Jabatan Baru</h6>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            <div class="modal-header border-0 p-3" style="background: linear-gradient(135deg, #696cff 0%, #4345eb 100%);">
+                <h6 class="modal-title fw-bold text-white"><i class='bx bx-plus me-2'></i> Tambah Jabatan Baru</h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <form action="{{ route('admin.kepegawaian_kcd.jabatan.store') }}" method="POST">
                 @csrf
                 <div class="modal-body p-4 text-start">
                     <div class="mb-3">
-                        <label class="form-label small fw-bold">Nama Jabatan</label>
-                        <input type="text" name="nama" class="form-control" placeholder="Contoh: Staff Keuangan" required>
+                        <label class="form-label small fw-bold text-muted text-uppercase mb-1">Nama Jabatan</label>
+                        <input type="text" name="nama" class="form-control border shadow-none" style="border-color: #e4e6ef !important;" placeholder="Contoh: Staff Keuangan" required>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label small fw-bold">Role</label>
-                        <input type="text" name="role" class="form-control" placeholder="Contoh: Staff" required>
-                        <small class="form-text">Role ini akan menentukan hak akses user.</small>
+                        <label class="form-label small fw-bold text-muted text-uppercase mb-1">Role</label>
+                        <input type="text" name="role" class="form-control border shadow-none" style="border-color: #e4e6ef !important;" placeholder="Contoh: Staff" required>
+                        <small class="form-text mt-1 d-block opacity-75">Role ini akan menentukan hak akses user.</small>
                     </div>
                     @if(isset($instansis) && !empty($instansis))
                     <div class="mb-3">
