@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 
 @section('content')
-<div class="container flex-grow-1 container-p-y">
+<div class="container-xxl flex-grow-1 container-p-y">
 
     <style>
         .avatar-hover {
