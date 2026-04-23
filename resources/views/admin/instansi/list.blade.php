@@ -9,14 +9,18 @@
             transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
             cursor: zoom-in;
             position: relative;
-            transform-origin: center center; /* Zoom dari tengah biar aman */
+            transform-origin: center left; /* Zoom ke arah KANAN biar gak kepotong kiri */
             z-index: 1;
         }
         .avatar-hover:hover {
-            transform: scale(2.5); /* Skala 2.5x lebih aman buat layout */
-            z-index: 99 !important;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.2) !important;
+            transform: scale(3.5); /* Naikin sedikit lagi biar gagah */
+            z-index: 9999 !important;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3) !important;
             border-radius: 8px !important;
+        }
+        /* Buka segel agar zoom tidak kepotong */
+        .table-responsive {
+            overflow: visible !important;
         }
         .instansi-name {
             white-space: normal !important;
@@ -26,7 +30,7 @@
         tr:hover {
             z-index: 50;
             position: relative;
-            background-color: rgba(105, 108, 255, 0.02) !important;
+            background-color: rgba(105, 108, 255, 0.04) !important;
         }
         td {
             position: relative;
@@ -56,7 +60,7 @@
             <span class="badge bg-label-primary rounded-pill px-3">{{ $listInstansi->count() }} Wilayah</span>
         </div>
 
-        <div class="table-responsive text-nowrap">
+        <div class="table-responsive">
             <table class="table table-hover align-middle table-borderless">
                 <thead class="bg-light">
                     <tr>
