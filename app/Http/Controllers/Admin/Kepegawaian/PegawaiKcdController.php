@@ -200,7 +200,8 @@ class PegawaiKcdController extends Controller
             'password'      => 'nullable|string|min:6',
         ];
 
-        if (Auth::user()->role === 'Admin') {
+        $isAdminRole = in_array(strtolower(trim(Auth::user()->role)), ['admin', 'administrator']);
+        if ($isAdminRole) {
             $rules['nip'] = 'nullable|string|max:50|unique:pegawai_kcds,nip,' . $id;
             $rules['jabatan_kcd_id'] = 'required|exists:jabatan_kcd,id';
         }

@@ -399,7 +399,10 @@
                                                 <label class="form-label fw-bold text-primary small d-block mb-2 text-uppercase">Posisi / Jabatan</label>
                                                 <span class="text-dark fw-bold view-element fs-6">{{ $pegawai->jabatan }}</span>
 
-                                                @if (Auth::user()->role === 'Admin')
+                                                @php
+                                                    $isFullAdmin = in_array(strtolower(trim(Auth::user()->role)), ['admin', 'administrator']);
+                                                @endphp
+                                                @if ($isFullAdmin)
                                                     <select name="jabatan_kcd_id" class="form-select input-modern edit-element d-none border-primary">
                                                         @foreach ($jabatans as $jab)
                                                             <option value="{{ $jab->id }}" {{ $pegawai->jabatan_kcd_id == $jab->id ? 'selected' : '' }}>{{ $jab->nama }}</option>
