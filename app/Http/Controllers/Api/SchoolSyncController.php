@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 
 use App\Services\EncryptionService;
+use App\Models\SyncLog;
 
 class SchoolSyncController extends Controller
 {
@@ -30,6 +31,19 @@ class SchoolSyncController extends Controller
             $tableName = $table; 
             $firstRow = (array) $input[0];
             $columns = array_keys($firstRow);
+
+            // 🔥 Ambil identitas sekolah dari data yang dikirim buat log
+            $npsn = $firstRow['npsn'] ?? null;
+            $namaSekolah = $firstRow['nama'] ?? $firstRow['nama_sekolah'] ?? null;
+            
+            // Jika NPSN tidak ada di row, coba cari manual di database sekolahs via sekolah_id
+            if (!$npsn && isset($firstRow['sekolah_id'])) {
+                $sekolahData = DB::table('sekolahs')->where('sekolah_id', $firstRow['sekolah_id'])->first();
+                if ($sekolahData) {
+                    $npsn = $sekolahData->npsn;
+                    $namaSekolah = $sekolahData->nama;
+                }
+            }
 
             // 1. AUTO-SCHEMA
             if (!Schema::hasTable($tableName)) {
@@ -134,9 +148,26 @@ class SchoolSyncController extends Controller
                 $msg .= " Gagal: " . count($errors) . " data.";
             }
 
+            // 🔥 CATAT LOG BERHASIL
+            if ($npsn) {
+                SyncLog::create([
+                    'npsn'          => $npsn,
+                    'nama_sekolah'  => $namaSekolah,
+                    'status'        => "Berhasil ($processed)"
+                ]);
+            }
+
             return response()->json(['success' => true, 'message' => $msg]);
 
         } catch (\Exception $outerException) {
+            // 🔥 CATAT LOG GAGAL
+            if (isset($npsn) && $npsn) {
+                SyncLog::create([
+                    'npsn'          => $npsn,
+                    'nama_sekolah'  => $namaSekolah ?? 'Unknown',
+                    'status'        => "Gagal: " . substr($outerException->getMessage(), 0, 50)
+                ]);
+            }
             return response()->json(['success' => false, 'message' => $outerException->getMessage()], 500);
        }
     }

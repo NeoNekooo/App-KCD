@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 
 use App\Services\EncryptionService;
+use App\Models\SyncLog;
 
 class GenericSyncController extends Controller
 {
@@ -29,6 +30,18 @@ class GenericSyncController extends Controller
             $tableName = Str::plural(Str::snake($entity));
             $firstRow = (array) $dataFromDapodik[0];
             $dapodikColumns = array_keys($firstRow);
+
+            // 🔥 IDENTITAS SEKOLAH
+            $npsn = $firstRow['npsn'] ?? null;
+            $namaSekolah = $firstRow['nama'] ?? $firstRow['nama_sekolah'] ?? null;
+            
+            if (!$npsn && isset($firstRow['sekolah_id'])) {
+                $sekolahData = DB::table('sekolahs')->where('sekolah_id', $firstRow['sekolah_id'])->first();
+                if ($sekolahData) {
+                    $npsn = $sekolahData->npsn;
+                    $namaSekolah = $sekolahData->nama;
+                }
+            }
 
             // SCHEMA HANDLING
             if (!Schema::hasTable($tableName)) {
@@ -91,9 +104,26 @@ class GenericSyncController extends Controller
                 $processed++;
             }
 
+            // 🔥 CATAT LOG
+            if ($npsn) {
+                SyncLog::create([
+                    'npsn'          => $npsn,
+                    'nama_sekolah'  => $namaSekolah,
+                    'status'        => "Berhasil ($entity: $processed)"
+                ]);
+            }
+
             return response()->json(['success' => true, 'message' => 'Selesai.', 'details' => $processed . ' data.'], 200);
 
         } catch (\Exception $e) {
+             // 🔥 CATAT LOG GAGAL
+             if (isset($npsn) && $npsn) {
+                SyncLog::create([
+                    'npsn'          => $npsn,
+                    'nama_sekolah'  => $namaSekolah ?? 'Unknown',
+                    'status'        => "Gagal ($entity): " . substr($e->getMessage(), 0, 50)
+                ]);
+            }
             return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
     }
