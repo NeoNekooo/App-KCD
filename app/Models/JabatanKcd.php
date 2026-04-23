@@ -18,4 +18,9 @@ class JabatanKcd extends Model
         'nama',
         'role',
     ];
+
+    public function instansi()
+    {
+        return $this->belongsTo(Instansi::class);
+    }
 }

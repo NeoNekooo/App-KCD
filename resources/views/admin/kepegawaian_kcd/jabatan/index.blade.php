@@ -48,6 +48,9 @@
                 <thead class="bg-light">
                     <tr>
                         <th class="ps-4 py-3 text-uppercase small fw-bold text-muted">Nama Jabatan</th>
+                        @if(isset($instansis) && !empty($instansis))
+                            <th class="py-3 text-uppercase small fw-bold text-muted">Wilayah / Instansi</th>
+                        @endif
                         <th class="py-3 text-uppercase small fw-bold text-muted">Role Access</th>
                         <th class="pe-4 py-3 text-end text-uppercase small fw-bold text-muted">Opsi</th>
                     </tr>
@@ -56,6 +59,13 @@
                     @forelse($jabatans as $jabatan)
                     <tr class="border-bottom">
                         <td class="ps-4 fw-semibold">{{ $jabatan->nama }}</td>
+                        @if(isset($instansis) && !empty($instansis))
+                            <td>
+                                <span class="badge bg-label-primary px-2 rounded fw-bold small">
+                                    <i class="bx bx-map-pin me-1"></i> {{ $jabatan->instansi->nama_instansi ?? 'Pusat' }}
+                                </span>
+                            </td>
+                        @endif
                         <td>
                             <span class="badge bg-label-secondary rounded px-2 text-uppercase fw-bold">{{ $jabatan->role }}</span>
                         </td>
@@ -92,6 +102,16 @@
                                             <input type="text" name="role" class="form-control" value="{{ $jabatan->role }}" required>
                                             <small class="form-text">Role ini akan menentukan hak akses user.</small>
                                         </div>
+                                        @if(isset($instansis) && !empty($instansis))
+                                        <div class="mb-3">
+                                            <label class="form-label small fw-bold text-primary">Target Wilayah / Instansi</label>
+                                            <select name="instansi_id" class="form-select border-primary" required>
+                                                @foreach ($instansis as $inst)
+                                                    <option value="{{ $inst->id }}" {{ $jabatan->instansi_id == $inst->id ? 'selected' : '' }}>{{ $inst->nama_instansi }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                        @endif
                                     </div>
                                     <div class="modal-footer border-top bg-light py-2">
                                         <button type="button" class="btn btn-sm btn-label-secondary rounded-pill" data-bs-dismiss="modal">Batal</button>
@@ -141,6 +161,17 @@
                         <input type="text" name="role" class="form-control" placeholder="Contoh: Staff" required>
                         <small class="form-text">Role ini akan menentukan hak akses user.</small>
                     </div>
+                    @if(isset($instansis) && !empty($instansis))
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-primary">Target Wilayah / Instansi</label>
+                        <select name="instansi_id" class="form-select border-primary" required>
+                            <option value="" selected disabled>-- Pilih Wilayah --</option>
+                            @foreach ($instansis as $inst)
+                                <option value="{{ $inst->id }}">{{ $inst->nama_instansi }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    @endif
                 </div>
                 <div class="modal-footer border-top bg-light py-2">
                     <button type="button" class="btn btn-sm btn-label-secondary rounded-pill" data-bs-dismiss="modal">Batal</button>

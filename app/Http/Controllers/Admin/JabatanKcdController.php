@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\JabatanKcd;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use App\Models\Instansi;
+use Illuminate\Support\Facades\Auth;
 
 class JabatanKcdController extends Controller
 {
@@ -15,7 +17,14 @@ class JabatanKcdController extends Controller
     public function index()
     {
         $jabatans = JabatanKcd::latest()->paginate(10);
-        return view('admin.kepegawaian_kcd.jabatan.index', compact('jabatans'));
+        
+        // 🔥 Untuk Super Admin: Ambil list instansi buat drop-down
+        $instansis = [];
+        if (in_array(strtolower(trim(Auth::user()->role)), ['admin', 'administrator']) && empty(Auth::user()->instansi_id)) {
+            $instansis = Instansi::orderBy('id', 'asc')->get();
+        }
+
+        return view('admin.kepegawaian_kcd.jabatan.index', compact('jabatans', 'instansis'));
     }
 
     /**
@@ -23,14 +32,25 @@ class JabatanKcdController extends Controller
      */
     public function store(Request $request)
     {
+        // Tentukan Instansi ID yang akan dipake divalidasi & simpan
+        $targetInstansiId = (in_array(strtolower(trim(Auth::user()->role)), ['admin', 'administrator']) && empty(Auth::user()->instansi_id))
+            ? $request->instansi_id
+            : Auth::user()->instansi_id;
+
         $request->validate([
             'nama' => [
                 'required', 'string', 'max:255',
-                Rule::unique('jabatan_kcd')->where(function ($query) {
-                    return $query->where('instansi_id', auth()->user()->instansi_id);
+                Rule::unique('jabatan_kcd')->where(function ($query) use ($targetInstansiId) {
+                    return $query->where('instansi_id', $targetInstansiId);
                 })
             ],
             'role' => 'required|string|max:255',
+            'instansi_id' => [
+                Rule::requiredIf(function() {
+                    return in_array(strtolower(trim(Auth::user()->role)), ['admin', 'administrator']) && empty(Auth::user()->instansi_id);
+                }),
+                'nullable', 'exists:instansis,id'
+            ]
         ]);
 
         // 🛡️ SECURITY CHECK: Larang Admin Wilayah bikin jabatan "Admin/Administrator"
@@ -40,7 +60,7 @@ class JabatanKcdController extends Controller
         }
 
         $data = $request->all();
-        $data['instansi_id'] = auth()->user()->instansi_id;
+        $data['instansi_id'] = $targetInstansiId;
 
         JabatanKcd::create($data);
 
@@ -52,14 +72,20 @@ class JabatanKcdController extends Controller
      */
     public function update(Request $request, string $id)
     {
+        // Tentukan Instansi ID
+        $targetInstansiId = (in_array(strtolower(trim(Auth::user()->role)), ['admin', 'administrator']) && empty(Auth::user()->instansi_id))
+            ? $request->instansi_id
+            : Auth::user()->instansi_id;
+
         $request->validate([
             'nama' => [
                 'required', 'string', 'max:255',
-                Rule::unique('jabatan_kcd')->where(function ($query) {
-                    return $query->where('instansi_id', auth()->user()->instansi_id);
+                Rule::unique('jabatan_kcd')->where(function ($query) use ($targetInstansiId) {
+                    return $query->where('instansi_id', $targetInstansiId);
                 })->ignore($id)
             ],
             'role' => 'required|string|max:255',
+            'instansi_id' => 'sometimes|nullable|exists:instansis,id'
         ]);
 
         // 🛡️ SECURITY CHECK
@@ -69,7 +95,11 @@ class JabatanKcdController extends Controller
         }
 
         $jabatan = JabatanKcd::findOrFail($id);
-        $jabatan->update($request->all());
+        
+        $data = $request->all();
+        $data['instansi_id'] = $targetInstansiId;
+
+        $jabatan->update($data);
 
         return back()->with('success', 'Jabatan berhasil diperbarui.');
     }
