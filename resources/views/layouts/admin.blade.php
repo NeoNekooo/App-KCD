@@ -18,7 +18,17 @@
     />
     <meta name="csrf-token" content="{{ csrf_token() }}">
     
-    <title>@yield('title', 'KCD System')</title>
+    <title>{{ $appSettings['site_name'] ?? 'MANDALA' }} | @yield('title')</title>
+
+    <!-- Favicon -->
+    @if(isset($appSettings['site_favicon']))
+        <link rel="icon" type="image/x-icon" href="{{ asset('storage/' . $appSettings['site_favicon']) }}" />
+    @else
+        <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}" />
+    @endif
+    <link rel="apple-touch-icon" href="{{ asset('logo.png') }}" />
+
+    <!-- Fonts & Icons -->
     <link rel="stylesheet" href="{{ asset('vendor/fonts/boxicons.css') }}">
 
     {{-- Tailwind + Vite --}}

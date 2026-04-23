@@ -11,16 +11,25 @@ class SettingController extends Controller
 {
     public function index()
     {
+        if (strtolower(auth()->user()->role) !== 'administrator') {
+            abort(403, 'Akses ditolak. Hanya Super Administrator yang dapat mengubah pengaturan.');
+        }
+
         $settings = Setting::pluck('value', 'key')->toArray();
         return view('admin.settings.index', compact('settings'));
     }
 
     public function update(Request $request)
     {
-        $data = $request->validate([
+        if (strtolower(auth()->user()->role) !== 'administrator') {
+            abort(403, 'Akses ditolak.');
+        }
+
+        $request->validate([
             'site_name' => 'required|string|max:255',
             'site_slogan' => 'required|string|max:255',
             'site_logo' => 'nullable|image|mimes:jpeg,png,jpg,svg|max:2048',
+            'site_favicon' => 'nullable|image|mimes:jpeg,png,jpg,svg,ico|max:1024',
         ]);
 
         // Update Text Settings
@@ -37,6 +46,16 @@ class SettingController extends Controller
             Setting::updateOrCreate(['key' => 'site_logo'], ['value' => $logoPath]);
         }
 
-        return redirect()->back()->with('success', 'Pengaturan berhasil diperbarui!');
+        // Handle Favicon Upload
+        if ($request->hasFile('site_favicon')) {
+            $oldFavicon = Setting::get('site_favicon');
+            if ($oldFavicon) {
+                Storage::disk('public')->delete($oldFavicon);
+            }
+            $faviconPath = $request->file('site_favicon')->store('settings', 'public');
+            Setting::updateOrCreate(['key' => 'site_favicon'], ['value' => $faviconPath]);
+        }
+
+        return redirect()->back()->with('success', 'Pengaturan sistem berhasil diperbarui!');
     }
 }

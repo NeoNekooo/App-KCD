@@ -8,12 +8,12 @@ use App\Traits\FilterRegional;
 
 class Setting extends Model
 {
-    use FilterRegional;
+    use HasFactory;
 
-    protected $fillable = ['instansi_id', 'key', 'value'];
+    protected $fillable = ['key', 'value'];
 
     /**
-     * Helper to get setting value by key
+     * Helper to get setting value by key (Global Settings)
      */
     public static function get($key, $default = null)
     {

@@ -12,6 +12,7 @@ use App\Models\ProfilSekolah;
 use App\Models\KontakPpdb;
 use App\Models\PengajuanSekolah; 
 use App\Models\TugasPegawaiKcd; 
+use App\Models\Setting;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -35,6 +36,14 @@ class AppServiceProvider extends ServiceProvider
         }
         if (Schema::hasTable('kontak_ppdbs')) {
             try { View::share('kontakPpdb', KontakPpdb::first()); } catch (\Exception $e) {}
+        }
+
+        // 🟢 LOAD SETTINGAN GLOBAL UNTUK SELURUH VIEW
+        if (Schema::hasTable('settings')) {
+            try {
+                $settings = Setting::pluck('value', 'key')->toArray();
+                View::share('appSettings', $settings);
+            } catch (\Exception $e) {}
         }
 
         /**
