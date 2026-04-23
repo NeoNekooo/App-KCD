@@ -17,16 +17,16 @@
             box-shadow: 0 15px 35px rgba(0,0,0,0.4) !important;
             border-radius: 8px !important;
         }
-        /* Mencegah gambar kepotong batas tabel */
+        /* Mencegah gambar kepotong batas tabel tanpa ngerusak layout */
         .table-responsive {
             overflow: visible !important;
-            padding-bottom: 50px; /* Kasih ruang buat zoom baris paling bawah */
-            padding-top: 50px;    /* Kasih ruang buat zoom baris paling atas */
-            margin-top: -50px;
-            margin-bottom: -50px;
         }
         tr:hover {
-            z-index: 10;
+            z-index: 50;
+            position: relative;
+            background-color: rgba(105, 108, 255, 0.02) !important;
+        }
+        td {
             position: relative;
         }
     </style>
