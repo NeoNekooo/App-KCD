@@ -4,22 +4,24 @@
 <div class="container-xxl flex-grow-1 container-p-y">
 
     <style>
+        /* Gaya Hover Logo */
         .avatar-hover {
             transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
             cursor: zoom-in;
             position: relative;
-            transform-origin: left center;
+            transform-origin: center center; /* Zoom dari tengah biar aman */
             z-index: 1;
         }
         .avatar-hover:hover {
-            transform: scale(4.5);
-            z-index: 9999 !important;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.4) !important;
+            transform: scale(2.5); /* Skala 2.5x lebih aman buat layout */
+            z-index: 99 !important;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2) !important;
             border-radius: 8px !important;
         }
-        /* Mencegah gambar kepotong batas tabel tanpa ngerusak layout */
-        .table-responsive {
-            overflow: visible !important;
+        .instansi-name {
+            white-space: normal !important;
+            min-width: 250px;
+            line-height: 1.4;
         }
         tr:hover {
             z-index: 50;
@@ -79,7 +81,7 @@
                                     </div>
                                 @endif
                                 <div>
-                                    <div class="fw-bold text-dark">{{ $instansi->nama_instansi }}</div>
+                                    <div class="fw-bold text-dark instansi-name">{{ $instansi->nama_instansi }}</div>
                                     <small class="text-muted">{{ $instansi->nama_brand ?? '-' }}</small>
                                 </div>
                             </div>
