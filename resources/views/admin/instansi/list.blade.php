@@ -58,10 +58,10 @@
                         <td>
                             <div class="d-flex align-items-center">
                                 @if($instansi->logo)
-                                    <img src="{{ Storage::url($instansi->logo) }}" class="rounded me-2 avatar-hover shadow-sm" style="width: 32px; height: 32px; object-fit: cover;">
+                                    <img src="{{ Storage::url($instansi->logo) }}" class="rounded-3 me-3 avatar-hover shadow-sm" style="width: 48px; height: 48px; object-fit: cover;">
                                 @else
-                                    <div class="rounded me-2 bg-label-primary d-flex align-items-center justify-content-center shadow-xs" style="width: 32px; height: 32px;">
-                                        <i class='bx bx-building small'></i>
+                                    <div class="rounded-3 me-3 bg-label-primary d-flex align-items-center justify-content-center shadow-xs" style="width: 48px; height: 48px;">
+                                        <i class='bx bx-building fs-4'></i>
                                     </div>
                                 @endif
                                 <div>
