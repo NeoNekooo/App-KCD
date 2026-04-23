@@ -1,19 +1,33 @@
 @extends('layouts.admin')
 
 @section('content')
-<div class="container-xxl flex-grow-1 container-p-y">
+<div class="flex-grow-1 container-p-y">
 
     <style>
         .avatar-hover {
             transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
             cursor: zoom-in;
             position: relative;
+            transform-origin: left center;
+            z-index: 1;
         }
         .avatar-hover:hover {
-            transform: scale(4);
-            z-index: 999;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.3) !important;
+            transform: scale(4.5);
+            z-index: 9999 !important;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.4) !important;
             border-radius: 8px !important;
+        }
+        /* Mencegah gambar kepotong batas tabel */
+        .table-responsive {
+            overflow: visible !important;
+            padding-bottom: 50px; /* Kasih ruang buat zoom baris paling bawah */
+            padding-top: 50px;    /* Kasih ruang buat zoom baris paling atas */
+            margin-top: -50px;
+            margin-bottom: -50px;
+        }
+        tr:hover {
+            z-index: 10;
+            position: relative;
         }
     </style>
     {{-- HERO --}}
