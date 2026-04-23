@@ -53,11 +53,16 @@ class MyProfileController extends Controller
 
         // --- SELF HEALING: Benerin Jabatan lu yang 'STAFF' ---
         if ($pegawai && strtolower(trim($user->role)) === 'administrator') {
-            if ($pegawai->jabatan !== 'Super Administrator') {
-                $jabatanSuper = JabatanKcd::firstOrCreate(
-                    ['nama' => 'Super Administrator'],
-                    ['role' => 'administrator']
-                );
+            // Pastikan dia pake jabatan yang namanya bener, bukan ID punya staff
+            if (!$pegawai->jabatanKcd || $pegawai->jabatanKcd->nama !== 'Super Administrator') {
+                $jabatanSuper = JabatanKcd::where('nama', 'Super Administrator')->first();
+                if (!$jabatanSuper) {
+                    $jabatanSuper = JabatanKcd::create([
+                        'nama' => 'Super Administrator',
+                        'role' => 'administrator'
+                    ]);
+                }
+                
                 $pegawai->update([
                     'jabatan_kcd_id' => $jabatanSuper->id,
                     'jabatan' => $jabatanSuper->nama
