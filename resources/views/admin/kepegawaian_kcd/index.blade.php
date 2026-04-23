@@ -236,8 +236,12 @@
 
                                     {{-- Jabatan --}}
                                     <td>
-                                        <span class="badge bg-label-primary rounded-pill px-3 py-2 fw-bold text-wrap" style="font-size: 0.7rem; max-width: 150px; line-height: 1.2;">
-                                            {{ $item->jabatanKcd->nama ?? $item->jabatan }}
+                                        @php
+                                            $jabatanName = $item->jabatanKcd->nama ?? $item->jabatan;
+                                            $badgeClass = ($jabatanName === 'Super Administrator') ? 'bg-label-info' : 'bg-label-primary';
+                                        @endphp
+                                        <span class="badge {{ $badgeClass }} rounded-pill px-3 py-2 fw-bold text-wrap" style="font-size: 0.7rem; max-width: 150px; line-height: 1.2;">
+                                            {{ $jabatanName }}
                                         </span>
                                     </td>
 

@@ -19,6 +19,21 @@ class PegawaiKcdController extends Controller
 {
     public function index(Request $request)
     {
+        // 🔥 SELF-HEALING: Otomatis benerin jabatan Admin biar gak 'STAFF'
+        if (Auth::check() && strtolower(trim(Auth::user()->role)) === 'administrator') {
+            $pegawaiAdmin = Auth::user()->pegawaiKcd;
+            if ($pegawaiAdmin && (!$pegawaiAdmin->jabatanKcd || $pegawaiAdmin->jabatanKcd->nama !== 'Super Administrator')) {
+                $jabatanSuper = JabatanKcd::firstOrCreate(
+                    ['nama' => 'Super Administrator'],
+                    ['role' => 'administrator']
+                );
+                $pegawaiAdmin->update([
+                    'jabatan_kcd_id' => $jabatanSuper->id,
+                    'jabatan' => $jabatanSuper->nama
+                ]);
+            }
+        }
+
         $query = PegawaiKcd::with('user', 'jabatanKcd');
 
         // 🔥 Logic Pencarian (Search) se-Database 🔥
