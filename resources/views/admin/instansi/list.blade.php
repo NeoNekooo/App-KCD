@@ -3,6 +3,19 @@
 @section('content')
 <div class="container-xxl flex-grow-1 container-p-y">
 
+    <style>
+        .avatar-hover {
+            transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            cursor: zoom-in;
+            position: relative;
+        }
+        .avatar-hover:hover {
+            transform: scale(4);
+            z-index: 999;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3) !important;
+            border-radius: 8px !important;
+        }
+    </style>
     {{-- HERO --}}
     <div class="row g-3 mb-4 animate-entry">
         <div class="col-md-12">
@@ -45,9 +58,9 @@
                         <td>
                             <div class="d-flex align-items-center">
                                 @if($instansi->logo)
-                                    <img src="{{ Storage::url($instansi->logo) }}" class="rounded me-2" style="width: 32px; height: 32px; object-fit: cover;">
+                                    <img src="{{ Storage::url($instansi->logo) }}" class="rounded me-2 avatar-hover shadow-sm" style="width: 32px; height: 32px; object-fit: cover;">
                                 @else
-                                    <div class="rounded me-2 bg-label-primary d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
+                                    <div class="rounded me-2 bg-label-primary d-flex align-items-center justify-content-center shadow-xs" style="width: 32px; height: 32px;">
                                         <i class='bx bx-building small'></i>
                                     </div>
                                 @endif
@@ -62,7 +75,11 @@
                             <small class="text-muted font-monospace">{{ $instansi->nip_kepala ?? '-' }}</small>
                         </td>
                         <td>
-                            <div class="small fw-medium text-muted">
+                            <div class="small fw-medium text-muted cursor-pointer" 
+                                 data-bs-toggle="tooltip" 
+                                 data-bs-placement="top" 
+                                 data-bs-html="true" 
+                                 title="<div class='text-start'><i class='bx bx-map-pin me-1 text-danger'></i><b>Alamat Lengkap:</b><br>{{ $instansi->alamat ?? 'Belum ada alamat' }}</div>">
                                 <i class='bx bx-map text-danger me-1'></i>
                                 {{ $instansi->alamat ? \Illuminate\Support\Str::limit($instansi->alamat, 40) : 'Belum diatur' }}
                             </div>
@@ -100,5 +117,15 @@
     }
     .delay-1 { animation-delay: 0.1s; }
     .shadow-xs { box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.05) !important; }
+    .cursor-pointer { cursor: pointer; }
 </style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        })
+    });
+</script>
 @endsection
