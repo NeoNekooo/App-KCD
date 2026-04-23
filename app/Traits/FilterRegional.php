@@ -55,13 +55,11 @@ trait FilterRegional
         static::creating(function ($model) {
             if (Auth::check()) {
                 $user = Auth::user();
-                $role = strtolower($user->role ?? '');
+                $instansiId = $user->instansi_id ?? ($user->pegawaiKcd->instansi_id ?? null);
                 
-                if (!in_array($role, ['admin', 'administrator'])) {
-                    $instansiId = $user->instansi_id ?? ($user->pegawaiKcd->instansi_id ?? null);
-                    if ($instansiId) {
-                        $model->instansi_id = $instansiId;
-                    }
+                // 🔥 Jika user punya wilayah (Admin Wilayah), pasang identitas wilayahnya secara otomatis
+                if ($instansiId && empty($model->instansi_id)) {
+                    $model->instansi_id = $instansiId;
                 }
             }
         });
