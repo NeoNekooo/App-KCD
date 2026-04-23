@@ -419,7 +419,7 @@
                                                 <label class="form-label fw-bold text-info small d-block mb-2 text-uppercase">NIP (Username Sistem)</label>
                                                 <span class="text-dark fw-bold view-element fs-6">{{ $pegawai->nip ?? '-' }}</span>
 
-                                                @if (Auth::user()->role === 'Admin')
+                                                @if (Auth::user()->role === 'Admin' || Auth::user()->role === 'Administrator')
                                                     <input type="text" name="nip" class="form-control input-modern edit-element d-none border-info" value="{{ $pegawai->nip }}" placeholder="-">
                                                 @else
                                                     <input type="hidden" name="nip" value="{{ $pegawai->nip }}">
@@ -428,6 +428,21 @@
                                                 @endif
                                             </div>
                                         </div>
+
+                                        {{-- 🔥 SUPER ADMIN ONLY: PILIHAN WILAYAH (INSTANSI) 🔥 --}}
+                                        @if(isset($instansis) && !empty($instansis))
+                                        <div class="col-12 edit-element d-none">
+                                            <div class="p-3 border border-warning border-opacity-25 rounded-4 bg-label-warning h-100">
+                                                <label class="form-label fw-bold text-warning small d-block mb-2 text-uppercase">Penempatan Wilayah / Instansi <span class="text-danger">*</span></label>
+                                                <select name="instansi_id" class="form-select input-modern border-warning">
+                                                    @foreach ($instansis as $inst)
+                                                        <option value="{{ $inst->id }}" {{ $pegawai->instansi_id == $inst->id ? 'selected' : '' }}>{{ $inst->nama_instansi }}</option>
+                                                    @endforeach
+                                                </select>
+                                                <small class="text-muted mt-1 d-block" style="font-size: 0.7rem;">Ganti pilihan ini jika ingin memindahkan pegawai ke wilayah lain.</small>
+                                            </div>
+                                        </div>
+                                        @endif
 
                                         {{-- INFO TAMBAHAN --}}
                                         <div class="col-12 mt-4">

@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use App\Models\Instansi;
 
 class PegawaiKcdController extends Controller
 {
@@ -49,7 +50,13 @@ class PegawaiKcdController extends Controller
         $pegawais = $query->paginate(10)->appends($request->query());
         $jabatans = JabatanKcd::all();
 
-        return view('admin.kepegawaian_kcd.index', compact('pegawais', 'jabatans', 'request'));
+        // 🔥 Untuk Super Admin: Ambil list instansi buat drop-down
+        $instansis = [];
+        if (in_array(strtolower(trim(Auth::user()->role)), ['admin', 'administrator']) && empty(Auth::user()->instansi_id)) {
+            $instansis = Instansi::orderBy('id', 'asc')->get();
+        }
+
+        return view('admin.kepegawaian_kcd.index', compact('pegawais', 'jabatans', 'instansis', 'request'));
     }
 
     public function showMe()
@@ -80,6 +87,12 @@ class PegawaiKcdController extends Controller
             'alamat'         => 'nullable|string',
             'foto'           => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
             'password'       => 'nullable|string|min:6',
+            'instansi_id'    => [
+                Rule::requiredIf(function() {
+                    return in_array(strtolower(trim(Auth::user()->role)), ['admin', 'administrator']) && empty(Auth::user()->instansi_id);
+                }),
+                'nullable', 'exists:instansis,id'
+            ]
         ]);
 
         try {
@@ -109,18 +122,25 @@ class PegawaiKcdController extends Controller
                 $emailLogin = $request->email_pribadi ?: $username . '@kcd.system';
                 $passwordFix = $request->password ?: 'kcd123';
 
+                // Tentukan Instansi ID
+                $finalInstansiId = (in_array(strtolower(trim(Auth::user()->role)), ['admin', 'administrator']) && empty(Auth::user()->instansi_id))
+                    ? $request->instansi_id
+                    : Auth::user()->instansi_id;
+
                 // 3. BUAT USER (AKUN LOGIN)
                 $user = User::create([
-                    'name'     => $request->nama,
-                    'username' => $username,
-                    'email'    => $emailLogin,
-                    'password' => Hash::make($passwordFix),
-                    'role'     => $jabatan->role, 
+                    'name'        => $request->nama,
+                    'username'    => $username,
+                    'email'       => $emailLogin,
+                    'password'    => Hash::make($passwordFix),
+                    'role'        => $jabatan->role, 
+                    'instansi_id' => $finalInstansiId,
                 ]);
 
                 // 4. BUAT DATA PEGAWAI (BIODATA)
                 $pegawai = PegawaiKcd::create([
                     'user_id'        => $user->id,
+                    'instansi_id'    => $finalInstansiId,
                     'nama'           => $request->nama,
                     'nip'            => $request->nip,
                     'nik'            => $request->nik,
@@ -152,13 +172,13 @@ class PegawaiKcdController extends Controller
         $pegawai = PegawaiKcd::with('user')->findOrFail($id);
         $jabatans = JabatanKcd::all();
 
-        // Validasi Akses: Hanya Admin atau pemilik data yang boleh lihat
-        $isAdmin = in_array(strtolower(trim(Auth::user()->role)), ['admin', 'administrator', 'operator kcd']);
-        if (!$isAdmin && $pegawai->user_id !== Auth::id()) {
-            abort(403, 'Anda tidak memiliki akses ke profil ini.');
+        // 🔥 Untuk Super Admin: Ambil list instansi buat kalau mau mutasi wilayah
+        $instansis = [];
+        if (in_array(strtolower(trim(Auth::user()->role)), ['admin', 'administrator']) && empty(Auth::user()->instansi_id)) {
+            $instansis = Instansi::orderBy('id', 'asc')->get();
         }
 
-        return view('admin.kepegawaian_kcd.show', compact('pegawai', 'jabatans'));
+        return view('admin.kepegawaian_kcd.show', compact('pegawai', 'jabatans', 'instansis'));
     }
 
     // --- UPDATE: EDIT DATA ---
@@ -228,6 +248,13 @@ class PegawaiKcdController extends Controller
                     $dataUpdate['jabatan_kcd_id'] = $jabatan->id;
                     $dataUpdate['jabatan'] = $jabatan->nama; 
                     $dataUpdate['nip'] = $request->nip;
+
+                    // 🔥 SUPER ADMIN: Bisa pindahin wilayah pegawai
+                    if (in_array(strtolower(trim(Auth::user()->role)), ['admin', 'administrator']) && empty(Auth::user()->instansi_id)) {
+                        if ($request->filled('instansi_id')) {
+                            $dataUpdate['instansi_id'] = $request->instansi_id;
+                        }
+                    }
                 }
 
                 // 2. Update Data Pegawai
@@ -245,6 +272,11 @@ class PegawaiKcdController extends Controller
                         $userUpdate['role'] = $jabatan->role;
                         if ($request->nip) {
                             $userUpdate['username'] = $request->nip;
+                        }
+
+                        // 🔥 Sinkronkan Instansi ID ke User
+                        if (isset($dataUpdate['instansi_id'])) {
+                            $userUpdate['instansi_id'] = $dataUpdate['instansi_id'];
                         }
                     }
 

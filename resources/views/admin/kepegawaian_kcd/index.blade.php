@@ -322,6 +322,18 @@
                                             <label class="form-label small fw-bold text-muted text-uppercase mb-1">Nama Lengkap <span class="text-danger">*</span></label>
                                             <input type="text" name="nama" class="form-control form-control-lg fs-6 fw-semibold bg-light border-0 shadow-none" value="{{ $item->nama }}" required>
                                         </div>
+
+                                        {{-- 🔥 KHUSUS SUPER ADMIN: PILIH WILAYAH SAAT EDIT --}}
+                                        @if(isset($instansis) && !empty($instansis))
+                                        <div class="mb-4">
+                                            <label class="form-label small fw-bold text-muted text-uppercase mb-1">Wilayah / Instansi <span class="text-danger">*</span></label>
+                                            <select name="instansi_id" class="form-select bg-light border-0 shadow-none fw-medium" required>
+                                                @foreach ($instansis as $inst)
+                                                    <option value="{{ $inst->id }}" {{ $item->instansi_id == $inst->id ? 'selected' : '' }}>{{ $inst->nama_instansi }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                        @endif
                                         <div class="row g-4">
                                             <div class="col-sm-6">
                                                 <label class="form-label small fw-bold text-muted text-uppercase mb-1">NIP</label>
@@ -371,6 +383,20 @@
                 <form action="{{ route('admin.kepegawaian.store') }}" method="POST" enctype="multipart/form-data">
                     @csrf
                     <div class="modal-body p-4">
+                        {{-- 🔥 KHUSUS SUPER ADMIN: PILIH WILAYAH SAAT TAMBAH --}}
+                        @if(isset($instansis) && !empty($instansis))
+                        <div class="mb-4 p-3 bg-label-primary rounded-4">
+                            <label class="form-label small fw-bold text-primary text-uppercase mb-1">Penempatan Wilayah / Instansi <span class="text-danger">*</span></label>
+                            <select name="instansi_id" class="form-select bg-white border-0 shadow-sm fw-bold" required>
+                                <option value="" selected disabled>-- Pilih Wilayah Penempatan --</option>
+                                @foreach ($instansis as $inst)
+                                <option value="{{ $inst->id }}">{{ $inst->nama_instansi }}</option>
+                                @endforeach
+                            </select>
+                            <div class="form-text mt-1 text-primary small"><i class="bx bx-info-circle me-1"></i>Pilih wilayah tempat pegawai ini ditugaskan.</div>
+                        </div>
+                        @endif
+
                         <div class="row g-4">
                             <div class="col-md-6">
                                 <label class="form-label small fw-bold text-muted text-uppercase mb-1">Nama Lengkap <span class="text-danger">*</span></label>

@@ -33,7 +33,16 @@ class JabatanKcdController extends Controller
             'role' => 'required|string|max:255',
         ]);
 
-        JabatanKcd::create($request->all());
+        // 🛡️ SECURITY CHECK: Larang Admin Wilayah bikin jabatan "Admin/Administrator"
+        $forbidden = ['admin', 'administrator'];
+        if (in_array(strtolower(trim($request->nama)), $forbidden) && !empty(auth()->user()->instansi_id)) {
+            return back()->with('error', 'Ops! Nama jabatan "' . $request->nama . '" dilarang digunakan di tingkat wilayah.')->withInput();
+        }
+
+        $data = $request->all();
+        $data['instansi_id'] = auth()->user()->instansi_id;
+
+        JabatanKcd::create($data);
 
         return back()->with('success', 'Jabatan berhasil ditambahkan.');
     }
@@ -52,6 +61,12 @@ class JabatanKcdController extends Controller
             ],
             'role' => 'required|string|max:255',
         ]);
+
+        // 🛡️ SECURITY CHECK
+        $forbidden = ['admin', 'administrator'];
+        if (in_array(strtolower(trim($request->nama)), $forbidden) && !empty(auth()->user()->instansi_id)) {
+            return back()->with('error', 'Ops! Nama jabatan "' . $request->nama . '" dilarang digunakan di tingkat wilayah.')->withInput();
+        }
 
         $jabatan = JabatanKcd::findOrFail($id);
         $jabatan->update($request->all());
