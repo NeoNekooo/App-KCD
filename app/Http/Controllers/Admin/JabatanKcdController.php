@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\JabatanKcd;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class JabatanKcdController extends Controller
 {
@@ -23,7 +24,12 @@ class JabatanKcdController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'nama' => 'required|string|max:255|unique:jabatan_kcd,nama',
+            'nama' => [
+                'required', 'string', 'max:255',
+                Rule::unique('jabatan_kcd')->where(function ($query) {
+                    return $query->where('instansi_id', auth()->user()->instansi_id);
+                })
+            ],
             'role' => 'required|string|max:255',
         ]);
 
@@ -38,7 +44,12 @@ class JabatanKcdController extends Controller
     public function update(Request $request, string $id)
     {
         $request->validate([
-            'nama' => 'required|string|max:255|unique:jabatan_kcd,nama,' . $id,
+            'nama' => [
+                'required', 'string', 'max:255',
+                Rule::unique('jabatan_kcd')->where(function ($query) {
+                    return $query->where('instansi_id', auth()->user()->instansi_id);
+                })->ignore($id)
+            ],
             'role' => 'required|string|max:255',
         ]);
 
