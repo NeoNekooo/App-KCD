@@ -28,8 +28,8 @@ class SettingController extends Controller
         $request->validate([
             'site_name' => 'required|string|max:255',
             'site_slogan' => 'required|string|max:255',
-            'site_logo' => 'nullable|image|mimes:jpeg,png,jpg,svg|max:2048',
-            'site_favicon' => 'nullable|image|mimes:jpeg,png,jpg,svg,ico|max:1024',
+            'site_logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'site_favicon' => 'nullable|mimes:jpeg,png,jpg,gif,svg,ico|max:1024',
         ]);
 
         // Update Text Settings
