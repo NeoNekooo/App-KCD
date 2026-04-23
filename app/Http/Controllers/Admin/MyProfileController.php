@@ -27,20 +27,41 @@ class MyProfileController extends Controller
         // --- TRIK "AKALIN" AUTO-CREATE ---
         // Jika data pegawai tidak ada tapi dia adalah Admin, buatkan otomatis!
         if (!$pegawai && $isAdmin) {
-            $defaultJabatan = JabatanKcd::first(); // Ambil jabatan apa aja buat pancingan
+            // 🔥 Cari atau bikin jabatan 'Super Administrator' biar keren bre
+            if (strtolower(trim($user->role)) === 'administrator') {
+                $jabatanDefault = JabatanKcd::firstOrCreate(
+                    ['nama' => 'Super Administrator'],
+                    ['role' => 'administrator']
+                );
+            } else {
+                $jabatanDefault = JabatanKcd::first();
+            }
             
             $pegawai = PegawaiKcd::create([
                 'user_id'       => $user->id,
                 'nama'          => $user->name,
                 'email_pribadi' => $user->email,
-                'jabatan'       => $defaultJabatan ? $defaultJabatan->nama : 'Master Administrator',
-                'jabatan_kcd_id' => $defaultJabatan ? $defaultJabatan->id : null, 
-                'instansi_id'   => $user->instansi_id, // Tetap NULL jika Super Admin
+                'jabatan'       => $jabatanDefault ? $jabatanDefault->nama : 'Super Administrator',
+                'jabatan_kcd_id' => $jabatanDefault ? $jabatanDefault->id : null, 
+                'instansi_id'   => $user->instansi_id, 
             ]);
 
-            // Update kaitan di tabel users agar sinkron
             if ($pegawai) {
                 $user->update(['pegawai_kcd_id' => $pegawai->id]);
+            }
+        }
+
+        // --- SELF HEALING: Benerin Jabatan lu yang 'STAFF' ---
+        if ($pegawai && strtolower(trim($user->role)) === 'administrator') {
+            if ($pegawai->jabatan !== 'Super Administrator') {
+                $jabatanSuper = JabatanKcd::firstOrCreate(
+                    ['nama' => 'Super Administrator'],
+                    ['role' => 'administrator']
+                );
+                $pegawai->update([
+                    'jabatan_kcd_id' => $jabatanSuper->id,
+                    'jabatan' => $jabatanSuper->nama
+                ]);
             }
         }
 
