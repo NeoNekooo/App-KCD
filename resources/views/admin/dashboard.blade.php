@@ -166,11 +166,14 @@
                             <div class="d-flex align-items-center gap-4">
                                 <div class="bg-white p-2 rounded-4 d-flex align-items-center justify-content-center shadow-lg"
                                     style="width: 130px; height: 130px; flex-shrink: 0;">
-                                    @if (!empty($instansi->logo) && \Storage::disk('public')->exists($instansi->logo))
+                                    @if (strtolower($user->role) === 'administrator' && is_null($user->instansi_id) && isset($appSettings['site_logo']))
+                                        <img src="{{ asset('storage/' . $appSettings['site_logo']) }}"
+                                            class="img-fluid rounded-3 w-100 h-100 object-fit-contain" alt="App Logo">
+                                    @elseif (!empty($instansi->logo) && \Storage::disk('public')->exists($instansi->logo))
                                         <img src="{{ \Storage::url($instansi->logo) }}"
                                             class="img-fluid rounded-3 w-100 h-100 object-fit-contain" alt="Logo">
                                     @else
-                                        <img src="https://ui-avatars.com/api/?name={{ urlencode($instansi->nama_instansi ?? 'KCD') }}&background=696cff&color=fff&size=128&font-size=0.33"
+                                        <img src="https://ui-avatars.com/api/?name={{ urlencode($instansi->nama_instansi ?? ($appSettings['site_name'] ?? 'KCD')) }}&background=696cff&color=fff&size=128&font-size=0.33"
                                             class="img-fluid rounded-3" alt="Logo">
                                     @endif
                                 </div>

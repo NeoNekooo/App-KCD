@@ -5,7 +5,7 @@
         <a href="{{ in_array(strtolower(Auth::user()->role ?? ''), ['admin', 'administrator', 'operator kcd']) ? route('admin.dashboard') : route('admin.dashboard.pegawai') }}"
             class="app-brand-link">
             <span class="app-brand-text demo menu-text fw-bolder ms-2 text-uppercase">
-                {{ config('app.name') }}
+                {{ $appSettings['site_name'] ?? config('app.name') }}
             </span>
         </a>
 
