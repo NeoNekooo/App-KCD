@@ -68,7 +68,7 @@
                                             </div>
                                         </div>
                                         <div class="px-2">
-                                            <input class="form-control form-control-sm" type="file" name="site_favicon" accept="image/x-icon,image/png,image/jpg" onchange="previewImage(event, 'preview-favicon', 'placeholder-favicon')" />
+                                            <input class="form-control form-control-sm" type="file" name="site_favicon" accept="image/*" onchange="previewImage(event, 'preview-favicon', 'placeholder-favicon')" />
                                         </div>
                                     </div>
                                 </div>
