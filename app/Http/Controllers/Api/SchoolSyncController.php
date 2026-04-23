@@ -104,8 +104,11 @@ class SchoolSyncController extends Controller
                     
                     // --- 🔥 ENKRIPSI DATA SENSITIF 🔥 ---
                     foreach ($row as $k => $v) {
-                        if (EncryptionService::shouldEncrypt($tableName, $k)) {
+                        $isSensitif = EncryptionService::shouldEncrypt($tableName, $k);
+                        if ($isSensitif) {
+                            $oldVal = $v;
                             $row[$k] = EncryptionService::encrypt($v);
+                            // \Log::debug("SYNC_ENCRYPT: Table [$tableName] Column [$k] encrypted.");
                         } elseif (is_array($v)) {
                             $row[$k] = json_encode($v);
                         }
@@ -135,8 +138,12 @@ class SchoolSyncController extends Controller
                     }
 
                     if (empty($conditions)) {
+                        // \Log::debug("SYNC_FINAL_SAVE: Insert table [$tableName]");
                         DB::table($tableName)->insert($row);
                     } else {
+                        if ($tableName == 'siswas' || $tableName == 'peserta_didik') {
+                            \Log::info("SYNC_DATA_FINAL_SISWA: NISN [" . ($row['nisn'] ?? 'N/A') . "] NIK [" . ($row['nik'] ?? 'N/A') . "]");
+                        }
                         DB::table($tableName)->updateOrInsert($conditions, $row);
                     }
                     

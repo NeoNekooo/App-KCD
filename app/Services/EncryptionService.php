@@ -42,9 +42,19 @@ class EncryptionService
                 str_ends_with($tableName, rtrim($mappedTable, 's')) ||
                 $isSiswa || $isGtk
             ) {
-                return in_array($columnName, $columns);
+                $check = in_array($columnName, $columns);
+                if ($check) {
+                    \Log::info("ENCRYPTION_MATCH: Table [$tableName] Column [$columnName] matched with [$mappedTable]");
+                }
+                return $check;
             }
         }
+        
+        // Log kalau tabel gak dikenal sama sekali
+        if (in_array($columnName, ['nisn', 'nik', 'no_kk'])) {
+            \Log::warning("ENCRYPTION_MISS: Table [$tableName] Column [$columnName] NOT matched with any mapping.");
+        }
+
         return false;
     }
 
