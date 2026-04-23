@@ -271,7 +271,12 @@ class PegawaiKcdController extends Controller
                     $isAdmin = in_array(strtolower(trim(Auth::user()->role)), ['admin', 'administrator', 'operator kcd']);
                     if ($isAdmin) {
                         $jabatan = JabatanKcd::find($request->jabatan_kcd_id);
-                        $userUpdate['role'] = $jabatan->role;
+                        
+                        // 🔥 JANGAN ubah role kalau TARGET user rolenya adalah 'administrator' (Super Admin)
+                        if ($jabatan && strtolower(trim($pegawai->user->role ?? '')) !== 'administrator') {
+                            $userUpdate['role'] = $jabatan->role;
+                        }
+
                         if ($request->nip) {
                             $userUpdate['username'] = $request->nip;
                         }

@@ -131,7 +131,13 @@ class MyProfileController extends Controller
                     $isAdmin = in_array(strtolower(trim(Auth::user()->role)), ['admin', 'administrator', 'operator kcd']);
                     if ($isAdmin) {
                         $jabatan = JabatanKcd::find($request->jabatan_kcd_id);
-                        $userUpdate['role'] = $jabatan->role;
+                        
+                        // 🔥 JANGAN ubah role kalau rolenya adalah 'administrator' (Super Admin)
+                        // Biar gak 'turun kasta' jadi staff gara-gara jabatan fungsional
+                        if ($jabatan && strtolower(trim(Auth::user()->role)) !== 'administrator') {
+                            $userUpdate['role'] = $jabatan->role;
+                        }
+
                         if ($request->nip) {
                             $userUpdate['username'] = $request->nip;
                         }
