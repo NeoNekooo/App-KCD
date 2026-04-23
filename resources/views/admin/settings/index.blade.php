@@ -86,22 +86,31 @@
 
 @push('scripts')
     <script>
-        function previewImage(event) {
-            var input = event.target;
-            var reader = new FileReader();
-            reader.onload = function() {
-                var dataURL = reader.result;
-                var output = document.getElementById('preview-img');
-                var placeholder = document.getElementById('preview-placeholder');
-                
-                output.src = dataURL;
-                output.style.display = 'block';
-                
-                if(placeholder) {
-                    placeholder.style.display = 'none';
-                }
-            };
-            if (input.files[0]) {
+        function previewImage(event, previewId, placeholderId) {
+            const input = event.target;
+            const preview = document.getElementById(previewId);
+            const placeholder = document.getElementById(placeholderId);
+            
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    // Jika elemen img belum ada (misal sebelumnya pake placeholder)
+                    if (!preview) {
+                        const imgContainer = placeholder.parentElement;
+                        const newImg = document.createElement('img');
+                        newImg.id = previewId;
+                        newImg.style.maxWidth = '100%';
+                        newImg.style.maxHeight = '100%';
+                        newImg.style.objectFit = 'contain';
+                        newImg.src = e.target.result;
+                        imgContainer.appendChild(newImg);
+                        placeholder.style.display = 'none';
+                    } else {
+                        preview.src = e.target.result;
+                        preview.style.display = 'block';
+                        if (placeholder) placeholder.style.display = 'none';
+                    }
+                };
                 reader.readAsDataURL(input.files[0]);
             }
         }
