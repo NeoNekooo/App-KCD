@@ -201,21 +201,10 @@
                             <div class="col-12 col-md-auto text-center text-md-start">
                                 <div
                                     class="avatar-profile rounded-circle mx-auto mx-md-0 d-flex align-items-center justify-content-center p-1 bg-white">
-                                    @php
-                                        $cleanPath = str_replace('public/', '', $gtk->foto ?? '');
-                                        $fileExists = !empty($cleanPath) && Storage::disk('public')->exists($cleanPath);
-                                    @endphp
-                                    @if ($fileExists)
-                                        <img src="{{ asset('storage/' . $cleanPath) }}" alt="Avatar"
-                                            class="rounded-circle w-100 h-100" style="object-fit: cover;">
-                                    @else
-                                        {{-- Ganti alfabet jadi ikon bx-user --}}
-                                        <span
-                                            class="rounded-circle bg-label-primary fs-1 fw-bold text-uppercase w-100 h-100 d-flex align-items-center justify-content-center"
-                                            style="font-size: 3.5rem !important;">
-                                            <i class='bx bx-user'></i>
-                                        </span>
-                                    @endif
+                                    <img src="{{ $gtk->foto_url }}" alt="Avatar"
+                                        class="rounded-circle w-100 h-100" style="object-fit: cover;"
+                                        loading="lazy"
+                                        onerror="this.onerror=null;this.src='{{ asset('assets/img/avatars/1.png') }}';">
                                 </div>
                             </div>
 

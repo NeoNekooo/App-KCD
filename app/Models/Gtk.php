@@ -24,44 +24,44 @@ class Gtk extends Model
     }
 
     /**
-     * Accessor Foto URL (SUPER CLEAN & DYNAMIC BASE URL)
+     * Accessor Foto URL (SUPER SMART + OPTIMIZED)
      */
     public function getFotoUrlAttribute()
     {
-        if (!$this->foto) {
-            return asset('assets/img/avatars/1.png');
+        // 1. Placeholder Default
+        $default = asset('assets/img/avatars/1.png');
+
+        if (!$this->foto || str_contains($this->foto, 'default')) {
+            return $default;
         }
 
-        // 1. Bersihkan path murni
+        // 2. Bersihkan path murni
         $cleanPath = str_replace(['public/', 'storage/', '/public/', '/storage/'], '', $this->foto);
         $cleanPath = ltrim($cleanPath, '/');
 
-        // 2. Cek Lokal KCD
+        // 3. Cek Lokal KCD
         if (\Storage::disk('public')->exists($cleanPath)) {
             return \Storage::disk('public')->url($cleanPath);
         }
 
-        // 3. Tentukan Base URL
+        // 4. Remote Discovery
         $baseUrl = null;
-        
-        // PINTER: Ekstrak domain dari qr_token kalau isinya link
-        if ($this->qr_token && (str_starts_with($this->qr_token, 'http'))) {
-            $parsedUrl = parse_url($this->qr_token);
-            if (isset($parsedUrl['scheme']) && isset($parsedUrl['host'])) {
-                $baseUrl = $parsedUrl['scheme'] . '://' . $parsedUrl['host'];
+        if ($this->qr_token && str_starts_with($this->qr_token, 'http')) {
+            $parsed = parse_url($this->qr_token);
+            if (isset($parsed['scheme']) && isset($parsed['host'])) {
+                $baseUrl = $parsed['scheme'] . '://' . $parsed['host'];
             }
         }
 
-        // Kalau qr_token gak bantu, pake website sekolah
         if (!$baseUrl && $this->sekolah && $this->sekolah->website) {
             $baseUrl = rtrim($this->sekolah->website, '/');
         }
 
-        // 4. Rakit URL Remote
+        // 5. Rakit URL Remote
         if ($baseUrl) {
             return $baseUrl . '/storage/' . $cleanPath;
         }
 
-        return asset('assets/img/avatars/1.png');
+        return $default;
     }
 }

@@ -158,7 +158,9 @@
                                     <td>
                                         <div class="d-flex align-items-center">
                                             <div class="avatar avatar-md me-3 flex-shrink-0">
-                                                <img src="{{ $gtk->foto_url }}" alt="Avatar" class="rounded-circle shadow-xs" style="object-fit: cover;">
+                                                <img src="{{ $gtk->foto_url }}" alt="Avatar" class="rounded-circle shadow-xs" 
+                                    style="object-fit: cover;" loading="lazy"
+                                    onerror="this.onerror=null;this.src='{{ asset('assets/img/avatars/1.png') }}';">
                                             </div>
                                             <div class="d-flex flex-column text-truncate" style="max-width: 250px;">
                                                 <a href="{{ route('admin.gtk.show', $gtk->id) }}"

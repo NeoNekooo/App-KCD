@@ -243,7 +243,9 @@
                             <td style="min-width: 250px;">
                                 <div class="d-flex align-items-center">
                                     <div class="avatar me-3 flex-shrink-0">
-                                        <img src="{{ $sekolah->logo_url }}" alt="Logo" class="rounded-circle shadow-xs" style="object-fit: cover; border: 2px solid #fff;">
+                                        <img src="{{ $sekolah->logo_url }}" alt="Logo" class="rounded-circle shadow-xs" 
+                                            style="object-fit: cover; border: 2px solid #fff;" loading="lazy"
+                                            onerror="this.onerror=null;this.src='{{ asset('assets/img/avatars/default-school.png') }}';">
                                     </div>
                                     <div class="d-flex flex-column text-truncate" style="max-width: 280px;">
                                         <a href="{{ route('admin.sekolah.show', $sekolah->id) }}" class="fw-bold text-dark text-truncate text-decoration-none hover-primary" title="Lihat Detail">{{ $sekolah->nama }}</a>
