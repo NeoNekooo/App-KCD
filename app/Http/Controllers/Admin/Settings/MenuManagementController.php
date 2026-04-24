@@ -9,9 +9,9 @@ use Illuminate\Support\Facades\DB;
 
 class MenuManagementController extends Controller
 {
-    // 🔥 UPDATE: Ganti 'Administrator' jadi 'Admin' biar sinkron sama Seeder
     private $roles = [
-        'Admin',       // <--- INI YANG DIGANTI
+        'Administrator',
+        'Admin',
         'Kepala',
         'Kasubag',
         'Kepegawaian',
