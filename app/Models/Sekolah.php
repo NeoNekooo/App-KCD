@@ -43,16 +43,27 @@ class Sekolah extends Model
         $cleanPath = str_replace(['public/', 'storage/', '/public/', '/storage/'], '', $this->logo);
         $cleanPath = ltrim($cleanPath, '/');
 
+        // 1. Cek Lokal
         if (\Storage::disk('public')->exists($cleanPath)) {
             return \Storage::disk('public')->url($cleanPath);
         }
 
+        // 2. Cek Remote
         if ($this->website) {
-            $base_url = rtrim($this->website, '/');
+            $urlParts = parse_url($this->website);
+            $host = $urlParts['host'] ?? $this->website;
+            $scheme = $urlParts['scheme'] ?? 'https';
             
-            // Jika di database cuma simpan 'logos/xxx.png', coba asumsikan dia ada di folder storage remote
-            // Tapi kalau link ini mati, kita percayakan ke onerror di view
-            return $base_url . '/storage/' . $cleanPath;
+            // Coba gunakan website apa adanya
+            $baseUrl = $scheme . '://' . rtrim($host, '/');
+            
+            // Jika host tidak mengandung 'simak.' atau 'siakad.', kita coba tambahkan 'simak.' 
+            // sebagai probabilitas tertinggi berdasarkan arsitektur aplikasi ini
+            if (!str_contains($host, 'simak.') && !str_contains($host, 'siakad.')) {
+                $baseUrl = $scheme . '://simak.' . ltrim($host, 'www.');
+            }
+
+            return $baseUrl . '/storage/' . $cleanPath;
         }
 
         return asset('assets/img/avatars/default-school.png');
