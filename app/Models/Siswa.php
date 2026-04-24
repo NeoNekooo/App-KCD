@@ -16,7 +16,8 @@ class Siswa extends Model
         'sekolah_id', 'nama', 'nipd', 'jenis_kelamin', 'nisn', 'tempat_lahir', 
         'tanggal_lahir', 'nik', 'agama_id', 'agama_id_str', 'alamat_jalan', 
         'rt', 'rw', 'nama_dusun', 'desa_kelurahan', 'kecamatan', 
-        'kabupaten_kota', 'kode_pos', 'foto', 'status', 'qr_token', 'sekolah_id'
+        'kabupaten_kota', 'kode_pos', 'foto', 'status', 'qr_token', 
+        'rombel_id', 'rombongan_belajar_id', 'nama_rombel'
     ];
 
     public function sekolah()

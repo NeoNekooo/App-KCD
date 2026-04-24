@@ -141,7 +141,7 @@
                             </td>
                             <td>
                                 <span class="badge bg-label-info rounded-pill px-3 py-1 fw-bold" style="font-size: 0.7rem;">
-                                    {{ $siswa->rombel ? $siswa->rombel->nama : 'Belum Masuk Kelas' }}
+                                    {{ $siswa->nama_rombel ?? ($siswa->rombel ? $siswa->rombel->nama : 'Belum Masuk Kelas') }}
                                 </span>
                             </td>
                             <td class="text-end pe-4">
