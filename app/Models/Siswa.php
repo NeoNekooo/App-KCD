@@ -16,7 +16,7 @@ class Siswa extends Model
         'sekolah_id', 'nama', 'nipd', 'jenis_kelamin', 'nisn', 'tempat_lahir', 
         'tanggal_lahir', 'nik', 'agama_id', 'agama_id_str', 'alamat_jalan', 
         'rt', 'rw', 'nama_dusun', 'desa_kelurahan', 'kecamatan', 
-        'kabupaten_kota', 'kode_pos', 'foto', 'status', 'sekolah_id'
+        'kabupaten_kota', 'kode_pos', 'foto', 'status', 'qr_token', 'sekolah_id'
     ];
 
     public function sekolah()
@@ -30,7 +30,7 @@ class Siswa extends Model
     }
 
     /**
-     * Accessor Foto URL (SUPER CLEAN & PINTER)
+     * Accessor Foto URL (SUPER CLEAN & DYNAMIC BASE URL)
      */
     public function getFotoUrlAttribute()
     {
@@ -38,22 +38,34 @@ class Siswa extends Model
             return asset('assets/img/avatars/1.png');
         }
 
-        // 1. Bersihkan path dari segala jenis prefix yang mengganggu
-        // Kita mau dapet path murni: "siswas/namafoto.jpg"
+        // 1. Bersihkan path murni
         $cleanPath = str_replace(['public/', 'storage/', '/public/', '/storage/'], '', $this->foto);
         $cleanPath = ltrim($cleanPath, '/');
 
-        // 2. Cek Lokal KCD (Disk 'public' otomatis lari ke storage/app/public)
+        // 2. Cek Lokal KCD
         if (\Storage::disk('public')->exists($cleanPath)) {
             return \Storage::disk('public')->url($cleanPath);
         }
 
-        // 3. Cek Remote (Web Sekolah)
-        if ($this->sekolah && $this->sekolah->website) {
-            $base_url = rtrim($this->sekolah->website, '/');
-            
-            // Rakit URL: website.sch.id/storage/siswas/namafoto.jpg
-            return $base_url . '/storage/' . $cleanPath;
+        // 3. Tentukan Base URL (Nyari dari qr_token dulu baru ke website sekolah)
+        $baseUrl = null;
+        
+        // PINTER: Ekstrak domain dari qr_token kalau isinya link (misal: https://simak...)
+        if ($this->qr_token && (str_starts_with($this->qr_token, 'http'))) {
+            $parsedUrl = parse_url($this->qr_token);
+            if (isset($parsedUrl['scheme']) && isset($parsedUrl['host'])) {
+                $baseUrl = $parsedUrl['scheme'] . '://' . $parsedUrl['host'];
+            }
+        }
+
+        // Kalau qr_token gak bantu, pake website sekolah
+        if (!$baseUrl && $this->sekolah && $this->sekolah->website) {
+            $baseUrl = rtrim($this->sekolah->website, '/');
+        }
+
+        // 4. Rakit URL Remote
+        if ($baseUrl) {
+            return $baseUrl . '/storage/' . $cleanPath;
         }
 
         return asset('assets/img/avatars/1.png');

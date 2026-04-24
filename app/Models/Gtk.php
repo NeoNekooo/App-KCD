@@ -15,7 +15,7 @@ class Gtk extends Model
     protected $fillable = [
         'sekolah_id', 'nama', 'nuptk', 'jenis_kelamin', 'tempat_lahir', 
         'tanggal_lahir', 'nip', 'status_kepegawaian_id_str', 'jenis_ptk_id_str',
-        'foto', 'status', 'sekolah_id'
+        'foto', 'status', 'qr_token', 'sekolah_id'
     ];
 
     public function sekolah()
@@ -24,7 +24,7 @@ class Gtk extends Model
     }
 
     /**
-     * Accessor Foto URL (SUPER CLEAN & PINTER)
+     * Accessor Foto URL (SUPER CLEAN & DYNAMIC BASE URL)
      */
     public function getFotoUrlAttribute()
     {
@@ -32,7 +32,7 @@ class Gtk extends Model
             return asset('assets/img/avatars/1.png');
         }
 
-        // 1. Bersihkan prefix-prefix nakal
+        // 1. Bersihkan path murni
         $cleanPath = str_replace(['public/', 'storage/', '/public/', '/storage/'], '', $this->foto);
         $cleanPath = ltrim($cleanPath, '/');
 
@@ -41,10 +41,25 @@ class Gtk extends Model
             return \Storage::disk('public')->url($cleanPath);
         }
 
-        // 3. Cek Remote (Web Sekolah)
-        if ($this->sekolah && $this->sekolah->website) {
-            $base_url = rtrim($this->sekolah->website, '/');
-            return $base_url . '/storage/' . $cleanPath;
+        // 3. Tentukan Base URL
+        $baseUrl = null;
+        
+        // PINTER: Ekstrak domain dari qr_token kalau isinya link
+        if ($this->qr_token && (str_starts_with($this->qr_token, 'http'))) {
+            $parsedUrl = parse_url($this->qr_token);
+            if (isset($parsedUrl['scheme']) && isset($parsedUrl['host'])) {
+                $baseUrl = $parsedUrl['scheme'] . '://' . $parsedUrl['host'];
+            }
+        }
+
+        // Kalau qr_token gak bantu, pake website sekolah
+        if (!$baseUrl && $this->sekolah && $this->sekolah->website) {
+            $baseUrl = rtrim($this->sekolah->website, '/');
+        }
+
+        // 4. Rakit URL Remote
+        if ($baseUrl) {
+            return $baseUrl . '/storage/' . $cleanPath;
         }
 
         return asset('assets/img/avatars/1.png');
