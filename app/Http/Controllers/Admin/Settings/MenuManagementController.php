@@ -103,6 +103,7 @@ class MenuManagementController extends Controller
                 'title'     => $request->title,
                 'slug'      => $request->slug,
                 'icon'      => $request->icon,
+                'color'     => $request->color ?? 'normal', // Tambahin ini
                 'route'     => $request->route_name,
                 'parent_id' => $request->parent_id,
                 'urutan'    => $request->urutan ?? 0,
@@ -135,6 +136,7 @@ class MenuManagementController extends Controller
                 'title'       => $request->title,
                 'slug'        => $request->slug,
                 'icon'        => $request->icon,
+                'color'       => $request->color ?? 'normal', // Tambahin ini
                 'route'       => $request->route_name,
                 'parent_id'   => $request->parent_id,
                 'urutan'      => $request->urutan ?? 0,

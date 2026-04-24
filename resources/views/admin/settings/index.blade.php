@@ -28,6 +28,17 @@
                                     <label class="form-label" for="site_slogan">Slogan Aplikasi (Sub-teks)</label>
                                     <input type="text" class="form-control" id="site_slogan" name="site_slogan" value="{{ old('site_slogan', $settings['site_slogan'] ?? 'Sistem Monitoring Wilayah Jabar') }}" required />
                                 </div>
+                                <hr class="my-4">
+                                <div class="mb-3">
+                                    <label class="form-label text-primary fw-bold" for="site_name_badge">Judul Badge Dashboard (Running Text Atas)</label>
+                                    <input type="text" class="form-control" id="site_name_badge" name="site_name_badge" value="{{ old('site_name_badge', $settings['site_name_badge'] ?? 'SISTEM MONITORING WILAYAH') }}" placeholder="Contoh: SISTEM MONITORING WILAYAH" />
+                                    <div class="form-text">Tampilan teks kecil di dashboard (Badge Kuning).</div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label text-primary fw-bold" for="site_name_hero">Judul Hero Dashboard (Teks Utama)</label>
+                                    <input type="text" class="form-control" id="site_name_hero" name="site_name_hero" value="{{ old('site_name_hero', $settings['site_name_hero'] ?? 'MANAGEMENT KANTOR CABANG DINAS') }}" placeholder="Contoh: MANAGEMENT KANTOR CABANG DINAS" />
+                                    <div class="form-text">Tampilan judul besar di dashboard Super Admin.</div>
+                                </div>
                                 <div class="mt-4">
                                     <button type="submit" class="btn btn-primary btn-lg shadow-sm">
                                         <i class="bx bx-save me-1"></i> Simpan Konfigurasi Pusat

@@ -30,10 +30,10 @@
             }
         @endphp
 
-        <a href="{{ $menuUrl }}" class="menu-link {{ $hasChildren ? 'menu-toggle' : '' }}">
+        <a href="{{ $menuUrl }}" class="menu-link {{ $hasChildren ? 'menu-toggle' : '' }} {{ ($menuItem->color ?? 'normal') === 'danger' ? 'text-danger' : '' }}">
 
             @if ($menuItem->icon)
-                <i class="menu-icon tf-icons {{ $menuItem->icon }}"></i>
+                <i class="menu-icon tf-icons {{ $menuItem->icon }} {{ ($menuItem->color ?? 'normal') === 'danger' ? 'text-danger' : '' }}"></i>
             @endif
 
             <div data-i18n="{{ $menuItem->title }}">{{ $menuItem->title }}</div>

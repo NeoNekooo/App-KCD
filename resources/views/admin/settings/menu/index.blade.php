@@ -244,7 +244,17 @@
                                 </div>
                             </div>
 
-                            {{-- 4. URUTAN --}}
+                            {{-- 4. WARNA MENU --}}
+                            <div class="mb-4">
+                                <label class="form-label text-muted text-uppercase fw-bold"
+                                    style="font-size: 0.75rem; letter-spacing: 0.5px;">Warna Menu</label>
+                                <select class="form-select shadow-sm" name="color" id="color">
+                                    <option value="normal">Normal (Default)</option>
+                                    <option value="danger" class="text-danger">Danger (Merah)</option>
+                                </select>
+                            </div>
+
+                            {{-- 5. URUTAN --}}
                             <div class="mb-4">
                                 <label class="form-label text-muted text-uppercase fw-bold"
                                     style="font-size: 0.75rem; letter-spacing: 0.5px;">Urutan Tampil</label>
@@ -424,6 +434,7 @@
             document.getElementById('route_name').value = menu.route || '';
             document.getElementById('urutan').value = menu.urutan;
             document.getElementById('parent_id').value = menu.parent_id || '';
+            document.getElementById('color').value = menu.color || 'normal';
 
             if (menu.icon) {
                 document.getElementById('iconPreviewAddon').innerHTML = `<i class='${menu.icon} fs-5'></i>`;

@@ -28,6 +28,8 @@ class SettingController extends Controller
         $request->validate([
             'site_name' => 'required|string|max:255',
             'site_slogan' => 'required|string|max:255',
+            'site_name_badge' => 'nullable|string|max:255',
+            'site_name_hero' => 'nullable|string|max:255',
             'site_logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'site_favicon' => 'nullable|mimes:jpeg,png,jpg,gif,svg,ico|max:1024',
         ]);
@@ -35,10 +37,12 @@ class SettingController extends Controller
         // Update Text Settings
         Setting::updateOrCreate(['key' => 'site_name'], ['value' => $request->site_name]);
         Setting::updateOrCreate(['key' => 'site_slogan'], ['value' => $request->site_slogan]);
+        Setting::updateOrCreate(['key' => 'site_name_badge'], ['value' => $request->site_name_badge]);
+        Setting::updateOrCreate(['key' => 'site_name_hero'], ['value' => $request->site_name_hero]);
 
         // Handle Logo Upload
         if ($request->hasFile('site_logo')) {
-            $oldLogo = Setting::get('site_logo');
+            $oldLogo = Setting::where('key', 'site_logo')->value('value');
             if ($oldLogo) {
                 Storage::disk('public')->delete($oldLogo);
             }
@@ -48,7 +52,7 @@ class SettingController extends Controller
 
         // Handle Favicon Upload
         if ($request->hasFile('site_favicon')) {
-            $oldFavicon = Setting::get('site_favicon');
+            $oldFavicon = Setting::where('key', 'site_favicon')->value('value');
             if ($oldFavicon) {
                 Storage::disk('public')->delete($oldFavicon);
             }

@@ -56,9 +56,14 @@
                 </div>
                 <div>
                     <span class="fw-semibold text-dark" style="font-size: 0.95rem;">{{ $menu->title }}</span>
-                    @if ($menu->urutan)
-                        <div class="small fw-semibold mt-1" style="color: #a1acb8; font-size: 0.75rem;">
-                            <i class='bx bx-sort-asc'></i> Urutan: {{ $menu->urutan }}
+                    @if ($menu->urutan || $menu->color)
+                        <div class="small fw-semibold mt-1 d-flex gap-2" style="color: #a1acb8; font-size: 0.75rem;">
+                            @if($menu->urutan)
+                                <span><i class='bx bx-sort-asc'></i> {{ $menu->urutan }}</span>
+                            @endif
+                            @if(($menu->color ?? 'normal') !== 'normal')
+                                <span class="text-danger fw-bold"><i class='bx bxs-circle'></i> {{ strtoupper($menu->color) }}</span>
+                            @endif
                         </div>
                     @endif
                 </div>

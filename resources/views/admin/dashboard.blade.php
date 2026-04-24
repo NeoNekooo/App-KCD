@@ -181,7 +181,7 @@
                                     <div class="d-flex align-items-center gap-2 mb-1">
                                         <span class="badge bg-label-warning text-uppercase fw-bold"
                                             style="letter-spacing: 1px; font-size: 0.7rem;">
-                                            SISTEM MONITORING WILAYAH
+                                            {{ $appSettings['site_name_badge'] ?? 'SISTEM MONITORING WILAYAH' }}
                                         </span>
                                         <a href="{{ route('admin.instansi.index') }}" class="text-white-50 hover-white"
                                             data-bs-toggle="tooltip" title="Edit Profil Instansi">
@@ -190,7 +190,7 @@
                                     </div>
                                     <h3 class="fw-bolder mb-1 text-white text-uppercase" style="letter-spacing: -0.5px;">
                                         @if (strtolower($user->role) === 'administrator' && is_null($user->instansi_id))
-                                            MANAGEMENT KANTOR CABANG DINAS
+                                            {{ $appSettings['site_name_hero'] ?? 'MANAGEMENT KANTOR CABANG DINAS' }}
                                         @else
                                             {{ $instansi->nama_instansi ?? 'DASHBOARD KCD' }}
                                         @endif

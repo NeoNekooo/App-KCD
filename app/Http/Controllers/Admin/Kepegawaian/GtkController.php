@@ -17,7 +17,9 @@ class GtkController extends Controller
     // --- 1. INDEX GURU ---
     public function indexGuru(Request $request)
     {
-        $query = Gtk::with(['sekolah'])->where('jenis_ptk_id_str', 'LIKE', '%Guru%');
+        $query = Gtk::with(['sekolah'])
+                    ->where('status', 'Aktif')
+                    ->where('jenis_ptk_id_str', 'LIKE', '%Guru%');
         
         $user = Auth::user();
         
@@ -75,7 +77,9 @@ class GtkController extends Controller
     // --- 2. INDEX TENDIK ---
     public function indexTendik(Request $request)
     {
-        $query = Gtk::with(['sekolah'])->where('jenis_ptk_id_str', 'NOT LIKE', '%Guru%');
+        $query = Gtk::with(['sekolah'])
+                    ->where('status', 'Aktif')
+                    ->where('jenis_ptk_id_str', 'NOT LIKE', '%Guru%');
         
         $user = Auth::user();
         
@@ -128,6 +132,44 @@ class GtkController extends Controller
         }
 
         return view('admin.kepegawaian.gtk.index_tendik', compact('tendiks', 'listKabupaten', 'listKecamatan', 'listSekolah'));
+    }
+
+    // --- 2.1 INDEX NON-AKTIF ---
+    public function indexNonaktif(Request $request)
+    {
+        $query = Gtk::with(['sekolah'])->where('status', '!=', 'Aktif');
+        
+        $user = Auth::user();
+        $this->applyGtkFilters($query, $request, $user);
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('nama', 'like', "%{$search}%")
+                  ->orWhere('nip', 'like', "%{$search}%")
+                  ->orWhere('nik', 'like', "%{$search}%")
+                  ->orWhere('status', 'like', "%{$search}%");
+            });
+        }
+
+        $perPage = $request->input('per_page', 15);
+        $gtks = $query->latest('updated_at')->paginate($perPage)->withQueryString();
+
+        // Decryption
+        $gtks->through(function ($gtk) {
+            $cols = \App\Services\EncryptionService::getEncryptedColumns()['gtks'] ?? [];
+            foreach ($cols as $col) {
+                if (isset($gtk->$col)) {
+                    $gtk->$col = \App\Services\EncryptionService::decrypt($gtk->$col);
+                }
+            }
+            return $gtk;
+        });
+
+        // Dropdowns
+        $listKabupaten = Sekolah::select('kabupaten_kota')->distinct()->orderBy('kabupaten_kota')->pluck('kabupaten_kota');
+        
+        return view('admin.kepegawaian.gtk.index_nonaktif', compact('gtks', 'listKabupaten'));
     }
 
     // --- HELPER LOGIKA FILTER (LANGSUNG KE TABEL GTKS) ---

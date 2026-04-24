@@ -96,6 +96,47 @@ class SiswaController extends Controller
     }
 
     /**
+     * Menampilkan Daftar Siswa Non-Aktif
+     */
+    public function indexNonaktif(Request $request)
+    {
+        $query = Siswa::with(['rombel', 'sekolah'])->where('status', '!=', 'Aktif');
+        $user = Auth::user();
+
+        // Filter Wilayah
+        if ($user && !empty($user->sekolah_id)) {
+            $query->where('sekolah_id', $user->sekolah_id);
+        }
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($sub) use ($search) {
+                $sub->where('nama', 'like', "%{$search}%")
+                    ->orWhere('nisn', 'like', "%{$search}%")
+                    ->orWhere('status', 'like', "%{$search}%");
+            });
+        }
+
+        $perPage = $request->input('per_page', 15);
+        $siswas = $query->orderBy('nama', 'asc')->paginate($perPage)->withQueryString();
+
+        // Decryption
+        $siswas->through(function ($siswa) {
+            $cols = \App\Services\EncryptionService::getEncryptedColumns()['siswas'] ?? [];
+            foreach ($cols as $col) {
+                if (isset($siswa->$col)) {
+                    $siswa->$col = \App\Services\EncryptionService::decrypt($siswa->$col);
+                }
+            }
+            return $siswa;
+        });
+
+        $listKabupaten = Sekolah::select('kabupaten_kota')->distinct()->orderBy('kabupaten_kota')->pluck('kabupaten_kota');
+
+        return view('admin.kesiswaan.siswa.index_nonaktif', compact('siswas', 'listKabupaten'));
+    }
+
+    /**
      * Menampilkan Detail Profil Siswa (Single)
      */
     public function show($id)

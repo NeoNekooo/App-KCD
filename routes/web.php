@@ -313,6 +313,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
             Route::get('rekapitulasi/export-excel', 'exportRekapitulasi')->name('rekapitulasi.export-excel'); // Cetak Excel GTK
             Route::get('guru', 'indexGuru')->name('guru.index');
             Route::get('tenaga-kependidikan', 'indexTendik')->name('tendik.index');
+            Route::get('nonaktif', 'indexNonaktif')->name('nonaktif.index');
             Route::get('show-multiple', 'showMultiple')->name('show-multiple');
             Route::get('{id}', 'show')->name('show');
         });
@@ -323,6 +324,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
             Route::get('siswa/rekapitulasi', [SiswaController::class, 'rekapitulasi'])->name('siswa.rekapitulasi');
             Route::get('siswa/rekapitulasi/export-excel', [SiswaController::class, 'exportRekapitulasi'])->name('siswa.rekapitulasi.export-excel');
             Route::get('siswa/export-excel', [SiswaController::class, 'exportExcel'])->name('siswa.export-excel');
+            Route::get('siswa/nonaktif', [SiswaController::class, 'indexNonaktif'])->name('siswa.nonaktif.index');
             Route::get('siswa/show-multiple', [SiswaController::class, 'showMultiple'])->name('siswa.show-multiple');
             Route::resource('siswa', SiswaController::class)->only(['index', 'show']);
         });
