@@ -40,18 +40,18 @@ class Sekolah extends Model
             return asset('assets/img/avatars/default-school.png');
         }
 
-        // 1. Bersihkan prefix-prefix nakal
         $cleanPath = str_replace(['public/', 'storage/', '/public/', '/storage/'], '', $this->logo);
         $cleanPath = ltrim($cleanPath, '/');
 
-        // 2. Cek lokal KCD
         if (\Storage::disk('public')->exists($cleanPath)) {
             return \Storage::disk('public')->url($cleanPath);
         }
 
-        // 3. Cek Remote (Web Sekolah)
         if ($this->website) {
             $base_url = rtrim($this->website, '/');
+            
+            // Jika di database cuma simpan 'logos/xxx.png', coba asumsikan dia ada di folder storage remote
+            // Tapi kalau link ini mati, kita percayakan ke onerror di view
             return $base_url . '/storage/' . $cleanPath;
         }
 

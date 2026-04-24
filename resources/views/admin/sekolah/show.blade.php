@@ -70,10 +70,10 @@
                             <div class="col-sm-auto text-center text-sm-start mt-n5">
                                 <div class="d-flex justify-content-center justify-content-sm-start flex-column align-items-center">
                                     <div class="avatar-profile-wrapper rounded-circle d-flex align-items-center justify-content-center">
-                                        <img src="{{ $sekolah->logo_url }}" alt="Logo" class="img-fluid rounded-circle" 
+                                        <img src="{{ $sekolah->logo_url }}" alt="" class="img-fluid rounded-3" 
                                             style="object-fit: cover; width: 100%; height: 100%;" 
                                             loading="lazy"
-                                            onerror="this.onerror=null;this.src='{{ asset('assets/img/avatars/default-school.png') }}';">
+                                            onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name={{ urlencode($sekolah->nama) }}&background=696cff&color=fff';">
                                     </div>
                                 </div>
                             </div>
