@@ -94,10 +94,17 @@
                     <div class="row">
                         {{-- FOTO PROFIL --}}
                         <div class="col-12 col-md-auto text-center text-md-start">
-                            <div class="avatar-profile rounded-3 mx-auto mx-md-0 d-flex align-items-center justify-content-center p-1">
-                                <img src="{{ $siswa->foto_url }}" alt="" class="rounded-3 shadow-sm w-100 h-100" 
-                                    style="object-fit: cover;" loading="lazy"
-                                    onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name={{ urlencode($siswa->nama) }}&background=696cff&color=fff';">
+                            <div class="position-relative d-inline-block">
+                                <div class="avatar-profile rounded-3 shadow-sm" style="width: 150px; height: 180px; overflow: hidden; border: 3px solid #fff;">
+                                    <img src="{{ $siswa->foto_url }}" alt="" class="w-100 h-100" 
+                                        style="object-fit: cover;" loading="lazy"
+                                        onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name={{ urlencode($siswa->nama) }}&background=696cff&color=fff';">
+                                </div>
+                                <div class="position-absolute bottom-0 end-0 mb-n2 me-n2">
+                                    <div class="bg-white rounded-circle shadow-sm d-flex align-items-center justify-content-center" style="width: 35px; height: 35px; border: 2px solid #f8f9fa;">
+                                        <i class='bx bx-camera text-primary' style="font-size: 1.2rem;"></i>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
