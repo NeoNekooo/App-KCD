@@ -166,10 +166,25 @@ class GtkController extends Controller
             return $gtk;
         });
 
-        // Dropdowns
-        $listKabupaten = Sekolah::select('kabupaten_kota')->distinct()->orderBy('kabupaten_kota')->pluck('kabupaten_kota');
+        // Dropdowns Berjenjang
+        $listKabupaten = Sekolah::select('kabupaten_kota')->whereNotNull('kabupaten_kota')->distinct()->orderBy('kabupaten_kota')->pluck('kabupaten_kota');
         
-        return view('admin.kepegawaian.gtk.index_nonaktif', compact('gtks', 'listKabupaten'));
+        $listKecamatan = [];
+        if ($request->filled('kabupaten_kota')) {
+            $listKecamatan = Sekolah::where('kabupaten_kota', 'LIKE', '%' . $request->kabupaten_kota . '%')
+                ->select('kecamatan')->whereNotNull('kecamatan')->distinct()->orderBy('kecamatan')->pluck('kecamatan');
+        }
+
+        $listSekolah = [];
+        if ($request->filled('kecamatan')) {
+            $sekolahQuery = Sekolah::where('kecamatan', 'LIKE', '%' . $request->kecamatan . '%');
+            if ($request->filled('kabupaten_kota')) {
+                $sekolahQuery->where('kabupaten_kota', 'LIKE', '%' . $request->kabupaten_kota . '%');
+            }
+            $listSekolah = $sekolahQuery->orderBy('nama')->pluck('nama', 'sekolah_id');
+        }
+        
+        return view('admin.kepegawaian.gtk.index_nonaktif', compact('gtks', 'listKabupaten', 'listKecamatan', 'listSekolah'));
     }
 
     // --- HELPER LOGIKA FILTER (LANGSUNG KE TABEL GTKS) ---

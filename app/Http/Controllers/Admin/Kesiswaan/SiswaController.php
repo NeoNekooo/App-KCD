@@ -131,9 +131,25 @@ class SiswaController extends Controller
             return $siswa;
         });
 
-        $listKabupaten = Sekolah::select('kabupaten_kota')->distinct()->orderBy('kabupaten_kota')->pluck('kabupaten_kota');
+        // Dropdown Berjenjang
+        $listKabupaten = Sekolah::select('kabupaten_kota')->whereNotNull('kabupaten_kota')->distinct()->orderBy('kabupaten_kota')->pluck('kabupaten_kota');
+        
+        $listKecamatan = [];
+        if ($request->filled('kabupaten_kota')) {
+            $listKecamatan = Sekolah::where('kabupaten_kota', 'LIKE', '%' . $request->kabupaten_kota . '%')
+                ->select('kecamatan')->whereNotNull('kecamatan')->distinct()->orderBy('kecamatan')->pluck('kecamatan');
+        }
 
-        return view('admin.kesiswaan.siswa.index_nonaktif', compact('siswas', 'listKabupaten'));
+        $listSekolah = [];
+        if ($request->filled('kecamatan')) {
+            $sekolahQuery = Sekolah::where('kecamatan', 'LIKE', '%' . $request->kecamatan . '%');
+            if ($request->filled('kabupaten_kota')) {
+                $sekolahQuery->where('kabupaten_kota', 'LIKE', '%' . $request->kabupaten_kota . '%');
+            }
+            $listSekolah = $sekolahQuery->orderBy('nama')->pluck('nama', 'sekolah_id');
+        }
+
+        return view('admin.kesiswaan.siswa.index_nonaktif', compact('siswas', 'listKabupaten', 'listKecamatan', 'listSekolah'));
     }
 
     /**
