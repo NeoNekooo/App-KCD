@@ -4,67 +4,49 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Traits\EncryptsSensitiveData;
 use App\Traits\FilterRegional;
 
 class Gtk extends Model
 {
-    use HasFactory, EncryptsSensitiveData, FilterRegional;
+    use HasFactory, FilterRegional;
 
-    protected $guarded = [];
+    protected $table = 'gtks';
 
-    public $incrementing = false;
-    protected $keyType = 'string';
-
-    public function riwayatTugas()
-    {
-       return $this->hasMany(TugasPegawai::class, 'pegawai_id', 'ptk_id');
-    }
-
-    public function rombelWali()
-    {
-        return $this->hasOne(Rombel::class, 'ptk_id', 'ptk_id');
-    }
-
-    public function pengguna()
-    {
-        return $this->hasOne(Pengguna::class, 'ptk_id', 'ptk_id');
-    }
-
-    public function mutasiKeluar()
-    {
-        return $this->morphOne(MutasiKeluar::class, 'keluarable');
-    }
-
-    public function getEmailAttribute($value)
-    {
-        return $this->relationLoaded('pengguna') ? ($this->pengguna?->email ?? $value) : ($this->pengguna()->value('email') ?? $value);
-    }
-
-    public function getNoHpAttribute($value)
-    {
-        return $this->relationLoaded('pengguna') ? ($this->pengguna?->no_hp ?? $value) : ($this->pengguna()->value('no_hp') ?? $value);
-    }
+    protected $fillable = [
+        'sekolah_id', 'nama', 'nuptk', 'jenis_kelamin', 'tempat_lahir', 
+        'tanggal_lahir', 'nip', 'status_kepegawaian_id_str', 'jenis_ptk_id_str',
+        'foto', 'status', 'sekolah_id'
+    ];
 
     public function sekolah()
     {
         return $this->belongsTo(Sekolah::class, 'sekolah_id', 'sekolah_id');
     }
 
-    // Accessor Foto URL (PENTING: Biar bisa nampilin foto dari website sekolah asal)
+    /**
+     * Accessor Foto URL (SUPER CLEAN & PINTER)
+     */
     public function getFotoUrlAttribute()
     {
-        // 1. Cek lokal KCD
-        if ($this->foto && \Storage::disk('public')->exists($this->foto)) {
-            return \Storage::disk('public')->url($this->foto);
+        if (!$this->foto) {
+            return asset('assets/img/avatars/1.png');
         }
 
-        // 2. Cek Website Sekolah (Kalau file fisik belum disinkronisasi ke KCD)
-        if ($this->foto && $this->sekolah?->website) {
+        // 1. Bersihkan prefix-prefix nakal
+        $cleanPath = str_replace(['public/', 'storage/', '/public/', '/storage/'], '', $this->foto);
+        $cleanPath = ltrim($cleanPath, '/');
+
+        // 2. Cek Lokal KCD
+        if (\Storage::disk('public')->exists($cleanPath)) {
+            return \Storage::disk('public')->url($cleanPath);
+        }
+
+        // 3. Cek Remote (Web Sekolah)
+        if ($this->sekolah && $this->sekolah->website) {
             $base_url = rtrim($this->sekolah->website, '/');
-            return $base_url . '/storage/' . $this->foto;
+            return $base_url . '/storage/' . $cleanPath;
         }
 
-        return asset('assets/img/avatars/default.png');
+        return asset('assets/img/avatars/1.png');
     }
 }
