@@ -95,17 +95,7 @@
                         {{-- FOTO PROFIL --}}
                         <div class="col-12 col-md-auto text-center text-md-start">
                             <div class="avatar-profile rounded-circle mx-auto mx-md-0 d-flex align-items-center justify-content-center p-1">
-                                @php
-                                    $cleanPath = str_replace('public/', '', $siswa->foto ?? '');
-                                    $fileExists = !empty($cleanPath) && \Illuminate\Support\Facades\Storage::disk('public')->exists($cleanPath);
-                                @endphp
-                                @if($fileExists)
-                                    <img src="{{ asset('storage/' . $cleanPath) }}" alt="Avatar" class="rounded-circle w-100 h-100" style="object-fit: cover;">
-                                @else
-                                    <span class="rounded-circle bg-label-info fs-1 fw-bold text-uppercase w-100 h-100 d-flex align-items-center justify-content-center" style="font-size: 2.5rem !important;">
-                                        <i class='bx bx-user'></i>
-                                    </span>
-                                @endif
+                                <img src="{{ $siswa->foto_url }}" alt="Avatar" class="rounded-circle w-100 h-100" style="object-fit: cover;">
                             </div>
                         </div>
 

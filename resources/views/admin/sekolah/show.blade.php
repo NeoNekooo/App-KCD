@@ -70,11 +70,7 @@
                             <div class="col-sm-auto text-center text-sm-start mt-n5">
                                 <div class="d-flex justify-content-center justify-content-sm-start flex-column align-items-center">
                                     <div class="avatar-profile-wrapper rounded-circle d-flex align-items-center justify-content-center">
-                                        @if(!empty($sekolah->logo) && Storage::disk('public')->exists($sekolah->logo))
-                                            <img src="{{ asset('storage/' . $sekolah->logo) }}" alt="Logo" class="img-fluid rounded-circle" style="object-fit: cover; width: 100%; height: 100%;">
-                                        @else
-                                            <span class="avatar-initial rounded-circle bg-label-primary fw-bolder text-uppercase" style="font-size: 3.5rem;">{{ substr($sekolah->nama, 0, 2) }}</span>
-                                        @endif
+                                        <img src="{{ $sekolah->logo_url }}" alt="Logo" class="img-fluid rounded-circle" style="object-fit: cover; width: 100%; height: 100%;">
                                     </div>
                                 </div>
                             </div>

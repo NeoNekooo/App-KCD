@@ -65,4 +65,21 @@ class Sekolah extends Model
         // Relasi ke model Pengguna berdasarkan 'sekolah_id' (UUID)
         return $this->hasMany(Pengguna::class, 'sekolah_id', 'sekolah_id');
     }
+
+    // Accessor Logo URL (PENTING: Biar bisa nampilin logo dari website sekolah asal)
+    public function getLogoUrlAttribute()
+    {
+        // 1. Cek lokal KCD
+        if ($this->logo && \Storage::disk('public')->exists($this->logo)) {
+            return \Storage::disk('public')->url($this->logo);
+        }
+
+        // 2. Cek Website Sekolah (Kalau di KCD gak ada filenya)
+        if ($this->logo && $this->website) {
+            $base_url = rtrim($this->website, '/');
+            return $base_url . '/storage/' . $this->logo;
+        }
+
+        return asset('assets/img/avatars/default-school.png');
+    }
 }

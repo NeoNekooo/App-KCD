@@ -15,7 +15,6 @@ class Gtk extends Model
 
     public $incrementing = false;
     protected $keyType = 'string';
-    //protected $fillable = ['status'];
 
     public function riwayatTugas()
     {
@@ -47,9 +46,25 @@ class Gtk extends Model
         return $this->relationLoaded('pengguna') ? ($this->pengguna?->no_hp ?? $value) : ($this->pengguna()->value('no_hp') ?? $value);
     }
 
-    // 🔥 TAMBAHKAN KODE INI DI SINI 🔥
     public function sekolah()
     {
         return $this->belongsTo(Sekolah::class, 'sekolah_id', 'sekolah_id');
+    }
+
+    // Accessor Foto URL (PENTING: Biar bisa nampilin foto dari website sekolah asal)
+    public function getFotoUrlAttribute()
+    {
+        // 1. Cek lokal KCD
+        if ($this->foto && \Storage::disk('public')->exists($this->foto)) {
+            return \Storage::disk('public')->url($this->foto);
+        }
+
+        // 2. Cek Website Sekolah (Kalau file fisik belum disinkronisasi ke KCD)
+        if ($this->foto && $this->sekolah?->website) {
+            $base_url = rtrim($this->sekolah->website, '/');
+            return $base_url . '/storage/' . $this->foto;
+        }
+
+        return asset('assets/img/avatars/default.png');
     }
 }

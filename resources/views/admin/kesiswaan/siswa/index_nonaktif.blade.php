@@ -102,17 +102,7 @@
                                 <td>
                                     <div class="d-flex align-items-center">
                                         <div class="avatar avatar-md me-3 flex-shrink-0">
-                                            @php
-                                                $cleanPath = str_replace('public/', '', $siswa->foto ?? '');
-                                                $fileExists = !empty($cleanPath) && Storage::disk('public')->exists($cleanPath);
-                                            @endphp
-                                            @if($fileExists)
-                                                <img src="{{ asset('storage/' . $cleanPath) }}" alt="Avatar" class="rounded-circle shadow-xs" style="object-fit: cover;">
-                                            @else
-                                                <div class="avatar-initial rounded-circle bg-label-primary shadow-xs d-flex align-items-center justify-content-center">
-                                                    <i class='bx bx-user fs-4'></i>
-                                                </div>
-                                            @endif
+                                            <img src="{{ $siswa->foto_url }}" alt="Avatar" class="rounded-circle shadow-xs" style="object-fit: cover;">
                                         </div>
                                         <div class="d-flex flex-column text-truncate" style="max-width: 250px;">
                                             <span class="fw-bold text-dark text-truncate">{{ $siswa->nama }}</span>

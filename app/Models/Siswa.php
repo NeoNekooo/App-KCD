@@ -178,9 +178,18 @@ class Siswa extends Model
 
     public function getFotoUrlAttribute()
     {
+        // 1. Cek lokal KCD
         if ($this->foto && Storage::disk('public')->exists($this->foto)) {
             return Storage::disk('public')->url($this->foto);
         }
+
+        // 2. Cek Website Sekolah (Remoting ke Server Sekolah Asal)
+        if ($this->foto && $this->sekolah?->website) {
+            $base_url = rtrim($this->sekolah->website, '/');
+            // Biasanya file di Laravel disimpan di folder storage
+            return $base_url . '/storage/' . $this->foto;
+        }
+
         return asset('assets/img/avatars/default.png');
     }
 
