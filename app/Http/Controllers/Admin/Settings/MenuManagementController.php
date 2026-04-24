@@ -11,7 +11,6 @@ class MenuManagementController extends Controller
 {
     private $roles = [
         'Administrator',
-        'Admin',
         'Kepala',
         'Kasubag',
         'Kepegawaian',

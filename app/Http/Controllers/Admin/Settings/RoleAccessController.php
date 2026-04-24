@@ -14,9 +14,9 @@ class RoleAccessController extends Controller
         // 1. Ambil Role secara dinamis dari Jabatan yang ada
         $dbRoles = DB::table('jabatan_kcd')->select('role')->distinct()->pluck('role')->toArray();
         
-        // 2. Gabungkan dengan role default & pastikan unik
-        $defaultRoles = ['Administrator']; // Pake ini sebagai default utama
-        $allRoles = array_unique(array_merge($defaultRoles, $dbRoles, ['Admin']));
+        // 2. Gabungkan dengan role default (Administrator wajib ada)
+        $defaultRoles = ['Administrator'];
+        $allRoles = array_unique(array_merge($defaultRoles, $dbRoles));
         
         // Filter & Sort, tapi paksa Administrator di depan
         $otherRoles = array_filter($allRoles, fn($r) => $r !== 'Administrator');
