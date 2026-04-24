@@ -200,11 +200,11 @@
                             {{-- FOTO PROFIL --}}
                             <div class="col-12 col-md-auto text-center text-md-start">
                                 <div
-                                    class="avatar-profile rounded-circle mx-auto mx-md-0 d-flex align-items-center justify-content-center p-1 bg-white">
-                                    <img src="{{ $gtk->foto_url }}" alt="Avatar"
-                                        class="rounded-circle w-100 h-100" style="object-fit: cover;"
+                                    class="avatar-profile rounded-3 mx-auto mx-md-0 d-flex align-items-center justify-content-center p-1 bg-white">
+                                    <img src="{{ $gtk->foto_url }}" alt=""
+                                        class="rounded-3 w-100 h-100" style="object-fit: cover;"
                                         loading="lazy"
-                                        onerror="this.onerror=null;this.src='{{ asset('assets/img/avatars/1.png') }}';">
+                                        onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name={{ urlencode($gtk->nama) }}&background=696cff&color=fff';">
                                 </div>
                             </div>
 

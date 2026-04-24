@@ -111,9 +111,9 @@
                             <td>
                                 <div class="d-flex align-items-center">
                                     <div class="avatar avatar-md me-3 flex-shrink-0">
-                                        <img src="{{ $siswa->foto_url }}" alt="Avatar" class="rounded-circle shadow-xs" 
+                                        <img src="{{ $siswa->foto_url }}" alt="" class="rounded-3 shadow-xs" 
                                     style="object-fit: cover;" loading="lazy"
-                                    onerror="this.onerror=null;this.src='{{ asset('assets/img/avatars/1.png') }}';">
+                                    onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name={{ urlencode($siswa->nama) }}&background=696cff&color=fff';">
                                     </div>
                                     <div class="d-flex flex-column text-truncate" style="max-width: 250px;">
                                         <span class="fw-bold text-dark text-truncate">{{ $siswa->nama }}</span>
