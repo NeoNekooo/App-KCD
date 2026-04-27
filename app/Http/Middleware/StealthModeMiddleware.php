@@ -34,10 +34,28 @@ class StealthModeMiddleware
     <meta charset="utf-8">
     <meta name="robots" content="noindex, nofollow">
     <title>System Loading...</title>
-    <style>body{background:#f5f5f9;margin:0;display:flex;align-items:center;justify-content:center;height:100vh;font-family:sans-serif;color:#696cff;}</style>
+    <style>
+        #_sys_wrapper {
+            background: #f5f5f9;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            width: 100vw;
+            position: fixed;
+            top: 0;
+            left: 0;
+            font-family: sans-serif;
+            color: #696cff;
+            z-index: 999999;
+        }
+    </style>
 </head>
 <body>
-    <div id="_sys_loader">Initializing Secure Session...</div>
+    <div id="_sys_wrapper">
+        <div id="_sys_loader">Initializing Secure Session...</div>
+    </div>
     <script>
         (function(){
             try {
