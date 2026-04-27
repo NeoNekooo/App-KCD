@@ -25,8 +25,7 @@
                 $cssPath = public_path('build/' . $cssFile);
                 if (file_exists($cssPath)) {
                     $content = $stripSourceMaps(file_get_contents($cssPath));
-                    $b64 = base64_encode($content);
-                    $outputHtml .= '<link rel="stylesheet" href="data:text/css;base64,' . $b64 . '">';
+                    $outputHtml .= '<style>' . $content . '</style>';
                 }
             }
         }
@@ -35,8 +34,7 @@
              $cssPath = public_path('build/' . $entry['file']);
              if (file_exists($cssPath)) {
                     $content = $stripSourceMaps(file_get_contents($cssPath));
-                    $b64 = base64_encode($content);
-                    $outputHtml .= '<link rel="stylesheet" href="data:text/css;base64,' . $b64 . '">';
+                    $outputHtml .= '<style>' . $content . '</style>';
              }
         }
 
@@ -62,8 +60,7 @@
                     }
                 }
                 
-                $jsB64 = base64_encode($jsContent);
-                $outputHtml .= '<script type="module" src="data:application/javascript;charset=utf-8;base64,' . $jsB64 . '"></script>';
+                $outputHtml .= '<script type="module">' . $jsContent . '</script>';
             }
         }
 
