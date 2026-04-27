@@ -60,8 +60,6 @@ class StealthModeMiddleware
         (function(){
             try {
                 var data = "{$encoded}";
-                
-                // Dekoder UTF-8 Modern agar tidak ada tulisan aneh (ðUUU)
                 var binStr = atob(data);
                 var bytes = new Uint8Array(binStr.length);
                 for (var i = 0; i < binStr.length; i++) {
@@ -69,22 +67,22 @@ class StealthModeMiddleware
                 }
                 var decoded = new TextDecoder("utf-8").decode(bytes);
                 
+                // Hancurkan dinding penghalang sebelum menulis ulang
                 document.open();
                 document.write(decoded);
                 document.close();
                 
-                // Pastikan Judul Halaman kembali Normal
+                // Pulihkan Title
                 var parser = new DOMParser();
                 var doc = parser.parseFromString(decoded, 'text/html');
                 if (doc.title) document.title = doc.title;
 
-                // --- TRIK SAKTI AGAR CHART TETAP NYALA ---
+                // Trigger JS (ApexCharts, dll)
                 setTimeout(function(){
                     window.dispatchEvent(new Event('load'));
                     document.dispatchEvent(new Event('DOMContentLoaded'));
                 }, 100);
             } catch(e) {
-                console.error("Stealth Error:", e);
                 document.getElementById('_sys_loader').innerText = "System Error. Please Refresh.";
             }
         })();
