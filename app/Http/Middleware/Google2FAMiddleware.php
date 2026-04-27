@@ -18,11 +18,24 @@ class Google2FAMiddleware
     {
         $user = $request->user();
 
-        // Jika user belum login atau tidak mengaktifkan 2FA, loloskan
-        if (!$user || !$user->google2fa_enabled) {
+        // 1. Jika belum login, biarin aja (middleware Auth yang urus)
+        if (!$user) {
             return $next($request);
         }
 
+        // 2. Jika user BELUM mengaktifkan 2FA
+        if (!$user->google2fa_enabled) {
+            // Biarkan lewat jika sedang di halaman setup, proses aktifasi, atau logout
+            if ($request->is('admin/settings/security/2fa*') || $request->is('logout')) {
+                return $next($request);
+            }
+
+            // Paksa ke halaman setup 2FA
+            return redirect()->route('admin.settings.2fa')->with('warning', 'Demi keamanan, Anda wajib mengaktifkan Google 2FA sebelum melanjutkan.');
+        }
+
+        // 3. Jika user SUDAH mengaktifkan 2FA
+        
         // Jangan cegat jika sedang berada di halaman verifikasi 2FA atau sedang logout
         if ($request->is('2fa/verify') || $request->is('logout')) {
             return $next($request);
