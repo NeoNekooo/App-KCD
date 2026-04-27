@@ -71,6 +71,21 @@
             border-bottom: 2px dashed #d9dee3;
             pointer-events: none;
         }
+
+        /* 🔥 STYLE TOMBOL 2FA KLIK-ABLE 🔥 */
+        .btn-2fa-setup {
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            cursor: pointer;
+            border: 1px solid transparent;
+        }
+        .btn-2fa-setup:hover {
+            transform: scale(1.05) translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            filter: brightness(0.95);
+        }
+        .btn-2fa-setup:active {
+            transform: scale(0.98);
+        }
     </style>
 
     <div class="container-xxl flex-grow-1 container-p-y">
@@ -159,6 +174,17 @@
                                         
                                         @if ($pegawai->user)
                                             <span class="badge bg-label-success px-3 py-2 rounded-pill"><i class='bx bx-check-shield me-1'></i> Aktif</span>
+                                            
+                                            {{-- 🔥 TOMBOL 2FA KLIK-ABLE 🔥 --}}
+                                            @if ($pegawai->user->google2fa_enabled)
+                                                <a href="{{ route('admin.settings.2fa') }}" class="badge bg-label-success btn-2fa-setup px-3 py-2 rounded-pill text-decoration-none border-success border-opacity-25" title="Klik untuk Pengaturan Keamanan">
+                                                    <i class='bx bxs-lock-alt me-1'></i> Google Auth: Aktif
+                                                </a>
+                                            @else
+                                                <a href="{{ route('admin.settings.2fa') }}" class="badge bg-label-secondary btn-2fa-setup px-3 py-2 rounded-pill text-decoration-none border-secondary border-opacity-25" title="Klik untuk Aktifkan Keamanan Ganda">
+                                                    <i class='bx bx-lock-open-alt me-1'></i> Setup Google Auth
+                                                </a>
+                                            @endif
                                         @else
                                             <span class="badge bg-label-warning px-3 py-2 rounded-pill"><i class='bx bx-x-circle me-1'></i> Belum Ada Akun</span>
                                         @endif
@@ -311,7 +337,17 @@
                             {{-- PASSWORD (Hanya muncul saat Edit) --}}
                             <div class="edit-element d-none mt-4 p-3 bg-label-danger rounded-4 border border-danger border-opacity-25">
                                 <label class="form-label fw-bold text-danger small mb-2 d-flex align-items-center"><i class='bx bx-lock-alt me-1 fs-5'></i> Ganti Password (Opsional)</label>
-                                <input type="password" name="password" class="form-control bg-white border-danger shadow-none" placeholder="Isi jika ingin ubah password...">
+                                <input type="password" name="password" class="form-control bg-white border-danger shadow-none mb-2" placeholder="Isi jika ingin ubah password...">
+                                
+                                {{-- 🔥 INPUT OTP: CUMA MUNCUL KALO 2FA AKTIF 🔥 --}}
+                                @if(Auth::user()->google2fa_enabled)
+                                    <div class="mt-3 p-2 bg-white rounded-3 border border-danger border-opacity-25">
+                                        <label class="form-label fw-bold text-danger small mb-1"><i class='bx bx-mobile-alt me-1'></i> Konfirmasi OTP Google Authenticator</label>
+                                        <input type="text" name="one_time_password" class="form-control form-control-sm border-danger border-opacity-50" placeholder="Kode 6-digit dari HP" maxlength="6">
+                                        <small class="text-muted d-block mt-1" style="font-size: 0.65rem;">Wajib diisi karena Anda telah mengaktifkan 2FA.</small>
+                                    </div>
+                                @endif
+
                                 <small class="text-muted mt-1 d-block" style="font-size: 0.7rem;">Biarkan kosong jika tidak ingin mengubah sandi.</small>
                             </div>
 

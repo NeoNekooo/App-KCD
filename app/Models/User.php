@@ -26,7 +26,9 @@ class User extends Authenticatable
         'password',
         'username',
         'role',
-        'pegawai_kcd_id', // Menghubungkan user ke data pegawai
+        'pegawai_kcd_id',
+        'google2fa_secret',
+        'google2fa_enabled',
     ];
 
     /**
@@ -37,6 +39,7 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
+        'google2fa_secret',
     ];
 
     /**

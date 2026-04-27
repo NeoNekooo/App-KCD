@@ -53,6 +53,18 @@ use App\Http\Controllers\Admin\SliderController;
 use App\Http\Controllers\Admin\WelcomeMessageController;
 use App\Http\Controllers\Admin\SettingController as WebSettingController;
 
+// --- Rute 2FA Google Authenticator ---
+use App\Http\Controllers\Auth\Google2FAController;
+Route::middleware(['auth'])->group(function () {
+    Route::get('/2fa/verify', [Google2FAController::class, 'showVerifyForm'])->name('2fa.verify');
+    Route::post('/2fa/verify', [Google2FAController::class, 'verify']);
+    
+    // Pengaturan 2FA di profil/settings
+    Route::get('/admin/settings/security/2fa', [Google2FAController::class, 'showSettings'])->name('admin.settings.2fa');
+    Route::post('/admin/settings/security/2fa/enable', [Google2FAController::class, 'enable'])->name('admin.settings.2fa.enable');
+    Route::post('/admin/settings/security/2fa/disable', [Google2FAController::class, 'disable'])->name('admin.settings.2fa.disable');
+});
+
 /*
 |--------------------------------------------------------------------------
 | Rute Web Utama
@@ -188,8 +200,8 @@ Route::get('/home', function () {
 Route::get('/cetak-sk/{uuid}', [CetakSkController::class, 'cetakSk'])->name('cetak.sk');
 
 // --- BUKU TAMU & TIKET ANTRIAN (PUBLIC) ---
-Route::get('/buku-tamu', [GuestBookController::class, 'index'])->name('guest.buku-tamu');
-Route::post('/buku-tamu', [GuestBookController::class, 'store'])->name('guest.buku-tamu.store');
+Route::get('/buku-tamu/wilayah-{cadisdik_id}', [GuestBookController::class, 'index'])->name('guest.buku-tamu');
+Route::post('/buku-tamu/wilayah-{cadisdik_id}', [GuestBookController::class, 'store'])->name('guest.buku-tamu.store');
 Route::post('/buku-tamu/{id}/print', [GuestBookController::class, 'requestPrint'])->name('guest.buku-tamu.print');
 
 
@@ -198,7 +210,7 @@ Route::post('/buku-tamu/{id}/print', [GuestBookController::class, 'requestPrint'
 | PANEL ADMIN (Backend)
 |--------------------------------------------------------------------------
 */
-Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () {
+Route::prefix('admin')->name('admin.')->middleware(['auth', '2fa'])->group(function () {
 
     // 1. DASHBOARD
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
@@ -246,9 +258,9 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
             Route::delete('/kategori/{id}', 'destroyCategory')->name('kategori.destroy');
         });
 
-    // LAYAR TV DISPLAY (Admin Only / Ruang KCD)
-    Route::get('/display-antrian', [AntrianDisplayController::class, 'index'])->name('display.antrian');
-    Route::get('/display-antrian/updates', [AntrianDisplayController::class, 'getUpdates'])->name('display.antrian.updates');
+    // --- MONITOR ANTRIAN TV (PUBLIC/OFFICE) ---
+    Route::get('/display-antrian/wilayah-{cadisdik_id}', [AntrianDisplayController::class, 'index'])->name('display.antrian');
+    Route::get('/display-antrian/wilayah-{cadisdik_id}/updates', [AntrianDisplayController::class, 'getUpdates'])->name('display.antrian.updates');
     Route::get('/display-antrian/ticket/{id}', [AntrianDisplayController::class, 'ticketThermal'])->name('display.antrian.ticket');
     Route::put('/display-antrian/mark-printed/{id}', [AntrianDisplayController::class, 'markAsPrinted'])->name('display.antrian.mark-printed');
 

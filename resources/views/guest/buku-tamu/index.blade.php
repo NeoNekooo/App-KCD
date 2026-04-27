@@ -221,7 +221,7 @@
                             onclick="requestPrint({{ session('tiket_id') }})">
                             <i class='bx bx-printer me-2'></i>CETAK TIKET FISIK
                         </button>
-                        <a href="{{ route('guest.buku-tamu') }}"
+                        <a href="{{ route('guest.buku-tamu', $instansi->cadisdik_id) }}"
                             class="btn btn-outline-secondary w-100 rounded-pill">Kembali ke Beranda</a>
                     </div>
                 </div>
@@ -287,7 +287,7 @@
                         </div>
                     @endif
 
-                    <form action="{{ route('guest.buku-tamu.store') }}" method="POST">
+                    <form action="{{ route('guest.buku-tamu.store', $instansi->cadisdik_id) }}" method="POST">
                         @csrf
 
                         <div class="row g-4">

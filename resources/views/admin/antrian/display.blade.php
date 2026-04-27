@@ -487,10 +487,10 @@
         let lastCallCount = 0;
         let isSpeaking = false; // Grendel Anti-Gema
 
-        // 1. QR Code (DI-GEDE-IN)
+        // 1. QR Code (DI-GEDE-IN & DINAMIS WILAYAH)
         try {
             new QRCode(document.getElementById("qrcode"), {
-                text: window.location.origin + "/buku-tamu",
+                text: window.location.origin + "/buku-tamu/wilayah-{{ $instansi->cadisdik_id }}",
                 width: 200,
                 height: 200
             });
@@ -690,7 +690,7 @@
 
         function fetchUpdates() {
             $.ajax({
-                url: "/admin/display-antrian/updates",
+                url: "{{ route('admin.display.antrian.updates', $instansi->cadisdik_id) }}",
                 type: "GET",
                 success: function(res) {
                     // --- A. Handling Panggilan Suara & Visual ---

@@ -29,6 +29,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'check_menu' => CheckMenuAccess::class,
             'is_admin' => \App\Http\Middleware\CheckAdminRole::class,
+            '2fa' => \App\Http\Middleware\Google2FAMiddleware::class,
         ]);
         
     })

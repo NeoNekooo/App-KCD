@@ -11,30 +11,29 @@ use Carbon\Carbon;
 class AntrianDisplayController extends Controller
 {
     /**
-     * Halaman Utama TV KCD Display Layar (Admin Only)
+     * Halaman Utama TV KCD Display Layar per wilayah
      */
-    public function index()
+    public function index($cadisdik_id)
     {
-        $instansi = \App\Models\Instansi::first();
+        $instansi = \App\Models\Instansi::where('cadisdik_id', $cadisdik_id)->firstOrFail();
         return view('admin.antrian.display', compact('instansi'));
     }
 
     /**
-     * AJAX endpoint for pulling updates every X seconds
-     * Returns:
-     * - Antrian yang sedang dipanggil (status = 'dipanggil') 
-     * - Daftar antrian yang masih menunggu (status = 'menunggu')
-     * - Trigger triggerVoiceCall bila ada ID baru yang dipanggil.
+     * AJAX endpoint for pulling updates every X seconds (Per Wilayah)
      */
-    public function getUpdates(Request $request)
+    public function getUpdates(Request $request, $cadisdik_id)
     {
         $today = Carbon::today();
+        $instansi = \App\Models\Instansi::where('cadisdik_id', $cadisdik_id)->firstOrFail();
         
         // Yg sedang dipanggil saat ini ditaruh kiri
-        $sedangDipanggil = AntrianTamu::with('tujuanPegawai.jabatanKcd')
+        $sedangDipanggil = AntrianTamu::withoutGlobalScopes()
+            ->with('tujuanPegawai.jabatanKcd')
+            ->where('instansi_id', $instansi->id)
             ->whereDate('created_at', $today)
             ->where('status', 'dipanggil')
-            ->orderBy('waktu_panggilan', 'desc') // Yg terbaru dipanggil di atas
+            ->orderBy('waktu_panggilan', 'desc')
             ->get()
             ->map(function ($q) {
                 return [
@@ -50,10 +49,12 @@ class AntrianDisplayController extends Controller
             });
 
         // Yg masih antre / menunggu (untuk list kanan)
-        $daftarMenunggu = AntrianTamu::with('tujuanPegawai.jabatanKcd')
+        $daftarMenunggu = AntrianTamu::withoutGlobalScopes()
+            ->with('tujuanPegawai.jabatanKcd')
+            ->where('instansi_id', $instansi->id)
             ->whereDate('created_at', $today)
             ->where('status', 'menunggu')
-            ->orderBy('id', 'asc') // First in first out
+            ->orderBy('id', 'asc')
             ->get()
             ->map(function ($q) {
                 return [
@@ -68,7 +69,9 @@ class AntrianDisplayController extends Controller
             });
 
         // Antrian yang minta dicetak oleh tamu dari HP
-        $toPrint = AntrianTamu::whereDate('created_at', $today)
+        $toPrint = AntrianTamu::withoutGlobalScopes()
+            ->where('instansi_id', $instansi->id)
+            ->whereDate('created_at', $today)
             ->where('print_requested', true)
             ->get();
 
@@ -84,8 +87,8 @@ class AntrianDisplayController extends Controller
      */
     public function ticketThermal($id)
     {
-        $antrian = AntrianTamu::with('tujuanPegawai')->findOrFail($id);
-        $instansi = \App\Models\Instansi::first();
+        $antrian = AntrianTamu::withoutGlobalScopes()->with('tujuanPegawai')->findOrFail($id);
+        $instansi = \App\Models\Instansi::find($antrian->instansi_id) ?? \App\Models\Instansi::first();
         return view('admin.antrian.ticket_thermal', compact('antrian', 'instansi'));
     }
 

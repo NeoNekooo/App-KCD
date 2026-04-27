@@ -103,10 +103,16 @@ class MyProfileController extends Controller
         ];
 
         // Admin-specific rules, in case an admin is editing their own profile
-        $isAdmin = in_array(strtolower(trim(Auth::user()->role)), ['admin', 'administrator', 'operator kcd']);
+        $user = Auth::user();
+        $isAdmin = in_array(strtolower(trim($user->role)), ['admin', 'administrator', 'operator kcd']);
         if ($isAdmin) {
             $rules['nip'] = 'nullable|string|max:50|unique:pegawai_kcds,nip,' . $id;
             $rules['jabatan_kcd_id'] = 'required|exists:jabatan_kcd,id';
+        }
+
+        // 🔥 Tambah validasi OTP jika ganti password & 2FA aktif
+        if ($request->filled('password') && $user->google2fa_enabled) {
+            $rules['one_time_password'] = 'required';
         }
 
         $validator = \Illuminate\Support\Facades\Validator::make($request->all(), $rules);
@@ -117,6 +123,14 @@ class MyProfileController extends Controller
                 return redirect()->back()->withInput()->with('error', $nikError);
             }
             return redirect()->back()->withErrors($validator)->withInput();
+        }
+
+        // 🔥 Verifikasi OTP jika 2FA aktif dan ganti password
+        if ($request->filled('password') && Auth::user()->google2fa_enabled) {
+            $google2fa = app('pragmarx.google2fa');
+            if (!$google2fa->verifyKey(Auth::user()->google2fa_secret, $request->one_time_password)) {
+                return redirect()->back()->withErrors(['one_time_password' => 'Kode OTP (2FA) salah.'])->withInput();
+            }
         }
 
         try {
@@ -193,15 +207,30 @@ class MyProfileController extends Controller
      */
     public function changePassword(Request $request)
     {
-        $request->validate([
+        $user = Auth::user();
+        
+        $rules = [
             'current_password' => 'required',
             'new_password'     => 'required|min:6|confirmed', 
-        ]);
+        ];
 
-        $user = Auth::user();
+        // Tambah validasi OTP jika 2FA aktif
+        if ($user->google2fa_enabled) {
+            $rules['one_time_password'] = 'required';
+        }
+
+        $request->validate($rules);
 
         if (!Hash::check($request->current_password, $user->password)) {
             return back()->withErrors(['current_password' => 'Password lama salah!'])->withInput();
+        }
+
+        // Verifikasi OTP jika 2FA aktif
+        if ($user->google2fa_enabled) {
+            $google2fa = app('pragmarx.google2fa');
+            if (!$google2fa->verifyKey($user->google2fa_secret, $request->one_time_password)) {
+                return back()->withErrors(['one_time_password' => 'Kode OTP (2FA) salah.'])->withInput();
+            }
         }
 
         $user->update([

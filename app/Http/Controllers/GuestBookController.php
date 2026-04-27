@@ -13,22 +13,33 @@ use Illuminate\Support\Str;
 class GuestBookController extends Controller
 {
     /**
-     * Menampilkan Form Buku Tamu QR Code (Public Landing Page)
+     * Menampilkan Form Buku Tamu (Public Landing Page) per wilayah
      */
-    public function index()
+    public function index($cadisdik_id)
     {
-        // Ambil data Pejabat/Pegawai KCD untuk Dropdown 'Ingin Bertemu Siapa'
-        $pegawais = PegawaiKcd::with('jabatanKcd')->orderBy('nama', 'asc')->get();
-        $instansi = \App\Models\Instansi::first();
-        $categories = KeperluanCategory::orderBy('name', 'asc')->get();
+        // Cari instansi/wilayah berdasarkan cadisdik_id
+        $instansi = \App\Models\Instansi::where('cadisdik_id', $cadisdik_id)->firstOrFail();
+        
+        // Ambil data Pejabat/Pegawai KCD yang hanya ada di wilayah tersebut
+        $pegawais = PegawaiKcd::withoutGlobalScopes() // Lepas filter regional bawaan biar guest bisa liat
+            ->where('instansi_id', $instansi->id)
+            ->with('jabatanKcd')
+            ->orderBy('nama', 'asc')
+            ->get();
+
+        // Ambil kategori keperluan hanya untuk wilayah tersebut
+        $categories = KeperluanCategory::withoutGlobalScopes()
+            ->where('instansi_id', $instansi->id)
+            ->orderBy('name', 'asc')
+            ->get();
 
         return view('guest.buku-tamu.index', compact('pegawais', 'instansi', 'categories'));
     }
 
     /**
-     * Menyimpan data form tamu dan membuat Nomor Antrian
+     * Menyimpan data form tamu dan membuat Nomor Antrian per wilayah
      */
-    public function store(Request $request)
+    public function store(Request $request, $cadisdik_id)
     {
         $request->validate([
             'nama'              => 'required|string|max:255',
@@ -39,17 +50,24 @@ class GuestBookController extends Controller
             'keperluan'         => 'required|string|max:500',
         ]);
 
-        // Logic Auto Generate Nomer Antrian (langsung angka, e.g., 001)
+        // Cari instansi/wilayah
+        $instansi = \App\Models\Instansi::where('cadisdik_id', $cadisdik_id)->firstOrFail();
+
+        // Logic Auto Generate Nomer Antrian (per wilayah & per hari)
         $today = Carbon::today();
         
-        $countToday = AntrianTamu::whereDate('created_at', $today)->count();
+        $countToday = AntrianTamu::withoutGlobalScopes()
+            ->where('instansi_id', $instansi->id)
+            ->whereDate('created_at', $today)
+            ->count();
         $urutan = $countToday + 1;
 
-        // Format nomor: Langsung angka dengan padding 3 digit
+        // Format nomor: Langsung angka dengan padding 3 digit (e.g., 001)
         $nomorBaru = str_pad($urutan, 3, '0', STR_PAD_LEFT);
 
         // Simpan Data
         $antrian = AntrianTamu::create([
+            'instansi_id'       => $instansi->id, // KUNCI UTAMA: Biar masuk ke wilayah yang bener
             'nomor_antrian'     => $nomorBaru,
             'nama'              => $request->nama,
             'npsn'              => $request->npsn,
@@ -57,7 +75,7 @@ class GuestBookController extends Controller
             'asal_instansi'     => $request->asal_instansi,
             'jabatan_pengunjung' => $request->jabatan_pengunjung,
             'keperluan'         => $request->keperluan,
-            'tujuan_pegawai_id' => $request->tujuan_pegawai_id, // Tambahkan ini biar tersimpan!
+            'tujuan_pegawai_id' => $request->tujuan_pegawai_id,
             'status'            => 'menunggu', 
             'jumlah_panggilan'  => 0,
         ]);
