@@ -1,44 +1,3 @@
-@php
-    header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
-    header("Cache-Control: post-check=0, pre-check=0", false);
-    header("Pragma: no-cache");
-
-    if (!function_exists('injectViteAsset')) {
-        function injectViteAsset($resourcePath) {
-            $manifestPath = public_path('build/manifest.json');
-            if (!file_exists($manifestPath)) return app(\Illuminate\Foundation\Vite::class)([$resourcePath])->toHtml();
-            $manifest = json_decode(file_get_contents($manifestPath), true);
-            if (!isset($manifest[$resourcePath])) return '';
-            $entry = $manifest[$resourcePath];
-            $filename = $entry['file'];
-
-            // Pakai Jalur Siluman Global (LEBIH CEPAT & STABIL)
-            $secureUrl = url("/system/core/" . $filename);
-
-            if (str_ends_with($resourcePath, '.css')) {
-                return '<link rel="stylesheet" href="' . $secureUrl . '">';
-            }
-            if (str_ends_with($resourcePath, '.js')) {
-                return '<script type="module" src="' . $secureUrl . '"></script>';
-            }
-            return '';
-        }
-    }
-
-    $boxiconsTag = '';
-    $boxiconsPath = public_path('vendor/fonts/boxicons.css');
-    if (file_exists($boxiconsPath)) {
-        $content = file_get_contents($boxiconsPath);
-        $woff2Path = public_path('vendor/fonts/boxicons/boxicons.woff2');
-        if (file_exists($woff2Path)) {
-            $woff2B64 = base64_encode(file_get_contents($woff2Path));
-            $woff2DataUri = "data:font/woff2;charset=utf-8;base64," . $woff2B64;
-            $newFontFace = "@font-face { font-family: 'boxicons'; font-weight: normal; font-style: normal; src: url('$woff2DataUri') format('woff2'); }";
-            $content = preg_replace('/@font-face\s*\{[^}]+\}/is', $newFontFace, $content);
-        }
-        $boxiconsTag = '<style id="_bx_gh_admin">' . $content . '</style>';
-    }
-@endphp
 <!DOCTYPE html>
 <html lang="en" class="light-style layout-menu-fixed" dir="ltr" data-theme="theme-default" data-assets-path="{{ asset('assets/') }}" data-template="vertical-menu-template-free" data-layout="wide">
 <head>
@@ -47,9 +6,8 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ $appSettings['site_name'] ?? 'MANDALA' }} | @yield('title')</title>
 
-    {!! $boxiconsTag !!}
-    {!! injectViteAsset('resources/css/app.css') !!}
-    {!! injectViteAsset('resources/js/app.js') !!}
+    <link rel="stylesheet" href="{{ asset('vendor/fonts/boxicons.css') }}" />
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
     @stack('styles')
 </head>
 <body style="background-color: #f5f5f9;">

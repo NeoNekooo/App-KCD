@@ -97,13 +97,8 @@ Route::domain('mandala.hexanusa.com')->group(function () {
         ];
         
         $contentType = $mimeTypes[$extension] ?? 'application/octet-stream';
-        $content = file_get_contents($fullPath);
-
-        if (in_array($extension, ['js', 'css'])) {
-            $content = preg_replace('/(\/\/[#@]\s*sourceMappingURL=[\s\S]*?$|\/\*[\s\S]*?sourceMappingURL=[\s\S]*?\*\/)/i', '', $content);
-        }
-
-        return response($content)
+        
+        return response(file_get_contents($fullPath))
             ->header('Content-Type', $contentType)
             ->header('Access-Control-Allow-Origin', '*');
     })->where('path', '.*')->name('system.core');
