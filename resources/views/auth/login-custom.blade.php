@@ -48,30 +48,30 @@
 
             // 2. Tangani JS (Inline script agar ES6 imports tidak rusak)
             if (str_ends_with($resourcePath, '.js')) {
-                // Masukkan dependencies dulu
-                if (isset($entry['imports'])) {
-                    foreach ($entry['imports'] as $imp) {
-                        $impPath = public_path('build/' . $manifest[$imp]['file']);
-                        if (file_exists($impPath)) {
-                            // script type="module" untuk import
-                            $content = file_get_contents($impPath);
-                            // Mengubah URL import relative menjadi absolute blob/data tidak perlu jika inlined, TAPI vite module pakai nama file.
-                            $outputHtml .= '<script type="module" src="'.asset('build/'.$manifest[$imp]['file']).'"></script>';
+                $jsPath = public_path('build/' . $entry['file']);
+                if (file_exists($jsPath)) {
+                    $jsContent = file_get_contents($jsPath);
+                    
+                    // Kalau ada imports, kita REPLACE dependencies-nya dengan Base64!
+                    if (isset($entry['imports'])) {
+                        foreach ($entry['imports'] as $imp) {
+                            $impEntry = $manifest[$imp];
+                            $impPathReal = public_path('build/' . $impEntry['file']);
+                            if (file_exists($impPathReal)) {
+                                $impContent = file_get_contents($impPathReal);
+                                $impDataUri = "data:application/javascript;charset=utf-8;base64," . base64_encode($impContent);
+                                
+                                // Ganti "./module.esm-XXX.js" dengan Data URI
+                                $basename = basename($impEntry['file']); 
+                                $jsContent = str_replace('"./' . $basename . '"', '"' . $impDataUri . '"', $jsContent);
+                                $jsContent = str_replace("'" . './' . $basename . "'", "'" . $impDataUri . "'", $jsContent);
+                            }
                         }
                     }
-                }
-                
-                // Masukkan file utama menjadi JS base64 jika bisa, tapi karena ada import, kita pake asset default aja, 
-                // ATAU biarkan sebagai src biasa tapi kita sembunyikan src-nya via JS? 
-                // Paling aman untuk JS: kita gunakan inline jika tidak ada deps, kalau ada deps, terpaksa pakai script module biasa agar tidak error module.
-                if (!isset($entry['imports']) || empty($entry['imports'])) {
-                    $jsPath = public_path('build/' . $entry['file']);
-                    if (file_exists($jsPath)) {
-                         $b64 = base64_encode(file_get_contents($jsPath));
-                         $outputHtml .= '<script src="data:application/javascript;base64,' . $b64 . '"></script>';
-                    }
-                } else {
-                     $outputHtml .= '<script type="module" src="'.asset('build/'.$entry['file']).'"></script>';
+                    
+                    // Jadikan script utama (beserta import base64-nya) menjadi base64 juga
+                    $jsB64 = base64_encode($jsContent);
+                    $outputHtml .= '<script type="module" src="data:application/javascript;charset=utf-8;base64,' . $jsB64 . '"></script>';
                 }
             }
 
