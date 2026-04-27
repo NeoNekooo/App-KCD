@@ -214,6 +214,22 @@ Route::post('/buku-tamu/{id}/print', [GuestBookController::class, 'requestPrint'
 */
 Route::prefix('admin')->name('admin.')->middleware(['auth', '2fa', 'stealth'])->group(function () {
 
+    // --- RUTE SILUMAN ASET (GHAIB & STABIL) ---
+    Route::get('/system/assets/{encoded_name}', function ($encoded_name) {
+        $filename = base64_decode($encoded_name);
+        $path = public_path('build/' . $filename);
+
+        if (!file_exists($path)) abort(404);
+
+        $content = file_get_contents($path);
+        // Buang jejak SourceMap biar folder webpack:// Lenyap
+        $content = preg_replace('/(\/\/[#@]\s*sourceMappingURL=.*|\/\*[\s\S]*?sourceMappingURL=[\s\S]*?\*\/)/is', '', $content);
+
+        $type = str_ends_with($filename, '.css') ? 'text/css' : 'application/javascript';
+        
+        return response($content)->header('Content-Type', $type);
+    })->name('system.assets');
+
     // 1. DASHBOARD
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/dashboard-pegawai', [DashboardController::class, 'indexPegawai'])->name('dashboard.pegawai');

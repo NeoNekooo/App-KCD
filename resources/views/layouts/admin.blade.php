@@ -9,56 +9,20 @@
             if (!file_exists($manifestPath)) return app(\Illuminate\Foundation\Vite::class)([$resourcePath])->toHtml();
             $manifest = json_decode(file_get_contents($manifestPath), true);
             if (!isset($manifest[$resourcePath])) return '';
-            $entry = $manifest[$resourcePath]; $outputHtml = '';
-            
-            $stripSourceMaps = function($text) {
-                return preg_replace('/(\/\/[#@]\s*sourceMappingURL=.*|\/\*[\s\S]*?sourceMappingURL=[\s\S]*?\*\/)/is', '', $text);
-            };
+            $entry = $manifest[$resourcePath];
+            $filename = $entry['file'];
 
-            // Handling CSS (Inlining is fine for CSS)
-            if (isset($entry['css'])) {
-                foreach ($entry['css'] as $cssFile) {
-                    $cssPath = public_path('build/' . $cssFile);
-                    if (file_exists($cssPath)) {
-                        $content = $stripSourceMaps(file_get_contents($cssPath));
-                        $content = preg_replace('/@font-face\s*\{[^}]+\}/i', '', $content);
-                        $outputHtml .= '<style>' . $content . '</style>';
-                    }
-                }
-            }
+            // Kita buat URL Siluman (Masked URL)
+            // Ini akan diarahkan ke Controller Pengaman kita
+            $secureUrl = url("/admin/system/assets/" . base64_encode($filename));
+
             if (str_ends_with($resourcePath, '.css')) {
-                 $cssPath = public_path('build/' . $entry['file']);
-                 if (file_exists($cssPath)) {
-                        $content = $stripSourceMaps(file_get_contents($cssPath));
-                        $content = preg_replace('/@font-face\s*\{[^}]+\}/i', '', $content);
-                        $outputHtml .= '<style>' . $content . '</style>';
-                 }
+                return '<link rel="stylesheet" href="' . $secureUrl . '">';
             }
-
-            // Handling JS (VIRTUAL BLOB TECHNIQUE)
-            // Ini untuk memastikan Chart & Tab tidak mati tapi tetap Ghaib
             if (str_ends_with($resourcePath, '.js')) {
-                $jsPath = public_path('build/' . $entry['file']);
-                if (file_exists($jsPath)) {
-                    $jsContent = file_get_contents($jsPath);
-                    $jsContent = $stripSourceMaps($jsContent);
-                    $jsB64 = base64_encode($jsContent);
-                    $id = 'gh_js_' . md5($resourcePath);
-                    
-                    $outputHtml .= '<script type="text/plain" id="' . $id . '">' . $jsB64 . '</script>';
-                    $outputHtml .= '<script>
-                        (function(){
-                            var b64 = document.getElementById("' . $id . '").textContent;
-                            var blob = new Blob([atob(b64)], {type: "application/javascript"});
-                            var url = URL.createObjectURL(blob);
-                            var s = document.createElement("script");
-                            s.type = "module"; s.src = url;
-                            document.head.appendChild(s);
-                        })();
-                    </script>';
-                }
+                return '<script type="module" src="' . $secureUrl . '"></script>';
             }
-            return $outputHtml;
+            return '';
         }
     }
 
