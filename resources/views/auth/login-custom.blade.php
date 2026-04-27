@@ -25,6 +25,8 @@
                 $cssPath = public_path('build/' . $cssFile);
                 if (file_exists($cssPath)) {
                     $content = $stripSourceMaps(file_get_contents($cssPath));
+                    // Lenyapkan @font-face supaya tidak bocor ke F12 Network/Sources
+                    $content = preg_replace('/@font-face\s*\{[^}]+\}/i', '', $content);
                     $outputHtml .= '<style>' . $content . '</style>';
                 }
             }
@@ -34,6 +36,7 @@
              $cssPath = public_path('build/' . $entry['file']);
              if (file_exists($cssPath)) {
                     $content = $stripSourceMaps(file_get_contents($cssPath));
+                    $content = preg_replace('/@font-face\s*\{[^}]+\}/i', '', $content);
                     $outputHtml .= '<style>' . $content . '</style>';
              }
         }
@@ -67,7 +70,7 @@
         return $outputHtml;
     }
 
-    $boxiconsB64 = '';
+    $boxiconsTag = '';
     $boxiconsPath = public_path('vendor/fonts/boxicons.css');
     if (file_exists($boxiconsPath)) {
         $content = file_get_contents($boxiconsPath);
@@ -76,13 +79,13 @@
             $woff2B64 = base64_encode(file_get_contents($woff2Path));
             $woff2DataUri = "data:font/woff2;charset=utf-8;base64," . $woff2B64;
             $customFontFace = "@font-face { font-family: 'boxicons'; font-weight: normal; font-style: normal; src: url('$woff2DataUri') format('woff2'); }";
+            // Lenyapkan semua font-face lama dan ganti dengan yang full base64
             $content = preg_replace('/@font-face\s*\{[^}]+\}/i', $customFontFace, $content);
-        } else {
-            $content = str_replace('../fonts/boxicons', asset('vendor/fonts/boxicons'), $content);
         }
-        $boxiconsB64 = 'data:text/css;base64,' . base64_encode($content);
+        $boxiconsTag = '<style id="_bx_gh">' . $content . '</style>';
+    } else {
+        $boxiconsTag = '<link rel="stylesheet" href="'.asset('vendor/fonts/boxicons.css').'">';
     }
-    $boxiconsTag = $boxiconsB64 ? '<link rel="stylesheet" href="'.$boxiconsB64.'">' : '<link rel="stylesheet" href="'.asset('vendor/fonts/boxicons.css').'">';
 
     $appCssTag = injectViteAsset('resources/css/app.css');
     $appJsTag = injectViteAsset('resources/js/app.js');
