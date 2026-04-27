@@ -2,16 +2,8 @@
     header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
     header("Cache-Control: post-check=0, pre-check=0", false);
     header("Pragma: no-cache");
-    ob_start();
-@endphp
-<!DOCTYPE html>
-<html lang="id" class="light-style customizer-hide" dir="ltr" data-theme="theme-default" data-assets-path="{{ asset('sneat/assets/') }}">
-<head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
-    <title>Verifikasi 2FA - Kantor Cabang Dinas</title>
 
-    @php
+    if (!function_exists('injectViteAsset')) {
         function injectViteAsset($resourcePath) {
             $manifestPath = public_path('build/manifest.json');
             if (!file_exists($manifestPath)) return app(\Illuminate\Foundation\Vite::class)([$resourcePath])->toHtml();
@@ -61,21 +53,28 @@
             }
             return $outputHtml;
         }
+    }
 
-        $boxiconsTag = '';
-        $boxiconsPath = public_path('vendor/fonts/boxicons.css');
-        if (file_exists($boxiconsPath)) {
-            $content = file_get_contents($boxiconsPath);
-            $woff2Path = public_path('vendor/fonts/boxicons/boxicons.woff2');
-            if (file_exists($woff2Path)) {
-                $woff2B64 = base64_encode(file_get_contents($woff2Path));
-                $woff2DataUri = "data:font/woff2;charset=utf-8;base64," . $woff2B64;
-                $customFontFace = "@font-face { font-family: 'boxicons'; font-weight: normal; font-style: normal; src: url('$woff2DataUri') format('woff2'); }";
-                $content = preg_replace('/@font-face\s*\{[^}]+\}/i', $customFontFace, $content);
-            }
-            $boxiconsTag = '<style id="_bx_gh_2fa">' . $content . '</style>';
+    $boxiconsTag = '';
+    $boxiconsPath = public_path('vendor/fonts/boxicons.css');
+    if (file_exists($boxiconsPath)) {
+        $content = file_get_contents($boxiconsPath);
+        $woff2Path = public_path('vendor/fonts/boxicons/boxicons.woff2');
+        if (file_exists($woff2Path)) {
+            $woff2B64 = base64_encode(file_get_contents($woff2Path));
+            $woff2DataUri = "data:font/woff2;charset=utf-8;base64," . $woff2B64;
+            $customFontFace = "@font-face { font-family: 'boxicons'; font-weight: normal; font-style: normal; src: url('$woff2DataUri') format('woff2'); }";
+            $content = preg_replace('/@font-face\s*\{[^}]+\}/i', $customFontFace, $content);
         }
-    @endphp
+        $boxiconsTag = '<style id="_bx_gh_2fa">' . $content . '</style>';
+    }
+@endphp
+<!DOCTYPE html>
+<html lang="id" class="light-style customizer-hide" dir="ltr" data-theme="theme-default" data-assets-path="{{ asset('sneat/assets/') }}">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
+    <title>Verifikasi 2FA - Kantor Cabang Dinas</title>
 
     {!! $boxiconsTag !!}
     {!! injectViteAsset('resources/css/app.css') !!}
@@ -185,24 +184,6 @@
                 if (otp.length < 6) { e.preventDefault(); alert('Mohon masukkan 6 digit kode lengkap.'); }
             });
         });
-    </script>
-</body>
-</html>
-@php
-    $otpBody = ob_get_clean();
-    $otpB64 = base64_encode($otpBody);
-@endphp
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <title>Verifikasi 2FA - Kantor Cabang Dinas</title>
-</head>
-<body style="background-color: #f5f5f9; margin:0;">
-    <script>
-        document.open();
-        document.write(decodeURIComponent(escape(atob("{{ $otpB64 }}"))));
-        document.close();
     </script>
 </body>
 </html>

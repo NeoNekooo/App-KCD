@@ -3,39 +3,8 @@
     header("Cache-Control: post-check=0, pre-check=0", false);
     header("Pragma: no-cache");
 
-    // Start Buffering untuk menyembunyikan SELURUH jeroan Admin
-    ob_start();
-@endphp
-<!DOCTYPE html>
-<html
-  lang="en"
-  class="light-style layout-menu-fixed"
-  dir="ltr"
-  data-theme="theme-default"
-  data-assets-path="{{ asset('assets/') }}" 
-  data-template="vertical-menu-template-free"
-  data-layout="wide"
->
-  <head>
-    <meta charset="utf-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0"
-    />
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    
-    <title>{{ $appSettings['site_name'] ?? 'MANDALA' }} | @yield('title')</title>
-
-    <!-- Favicon -->
-    @if(isset($appSettings['site_favicon']))
-        <link rel="icon" type="image/x-icon" href="{{ asset('storage/' . $appSettings['site_favicon']) }}" />
-    @else
-        <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}" />
-    @endif
-    <link rel="apple-touch-icon" href="{{ asset('logo.png') }}" />
-
-    @php
-        // LOGIKA PENGAMAN ASET GHAIB
+    // LOGIKA PENGAMAN ASET GHAIB (Kita biarkan di sini untuk inlining)
+    if (!function_exists('injectViteAsset')) {
         function injectViteAsset($resourcePath) {
             $manifestPath = public_path('build/manifest.json');
             if (!file_exists($manifestPath)) return app(\Illuminate\Foundation\Vite::class)([$resourcePath])->toHtml();
@@ -85,22 +54,50 @@
             }
             return $outputHtml;
         }
+    }
 
-        // Boxicons Font Embedding
-        $boxiconsTag = '';
-        $boxiconsPath = public_path('vendor/fonts/boxicons.css');
-        if (file_exists($boxiconsPath)) {
-            $content = file_get_contents($boxiconsPath);
-            $woff2Path = public_path('vendor/fonts/boxicons/boxicons.woff2');
-            if (file_exists($woff2Path)) {
-                $woff2B64 = base64_encode(file_get_contents($woff2Path));
-                $woff2DataUri = "data:font/woff2;charset=utf-8;base64," . $woff2B64;
-                $customFontFace = "@font-face { font-family: 'boxicons'; font-weight: normal; font-style: normal; src: url('$woff2DataUri') format('woff2'); }";
-                $content = preg_replace('/@font-face\s*\{[^}]+\}/i', $customFontFace, $content);
-            }
-            $boxiconsTag = '<style id="_bx_gh_admin">' . $content . '</style>';
+    // Boxicons Font Embedding
+    $boxiconsTag = '';
+    $boxiconsPath = public_path('vendor/fonts/boxicons.css');
+    if (file_exists($boxiconsPath)) {
+        $content = file_get_contents($boxiconsPath);
+        $woff2Path = public_path('vendor/fonts/boxicons/boxicons.woff2');
+        if (file_exists($woff2Path)) {
+            $woff2B64 = base64_encode(file_get_contents($woff2Path));
+            $woff2DataUri = "data:font/woff2;charset=utf-8;base64," . $woff2B64;
+            $customFontFace = "@font-face { font-family: 'boxicons'; font-weight: normal; font-style: normal; src: url('$woff2DataUri') format('woff2'); }";
+            $content = preg_replace('/@font-face\s*\{[^}]+\}/i', $customFontFace, $content);
         }
-    @endphp
+        $boxiconsTag = '<style id="_bx_gh_admin">' . $content . '</style>';
+    }
+@endphp
+<!DOCTYPE html>
+<html
+  lang="en"
+  class="light-style layout-menu-fixed"
+  dir="ltr"
+  data-theme="theme-default"
+  data-assets-path="{{ asset('assets/') }}" 
+  data-template="vertical-menu-template-free"
+  data-layout="wide"
+>
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0"
+    />
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    
+    <title>{{ $appSettings['site_name'] ?? 'MANDALA' }} | @yield('title')</title>
+
+    <!-- Favicon -->
+    @if(isset($appSettings['site_favicon']))
+        <link rel="icon" type="image/x-icon" href="{{ asset('storage/' . $appSettings['site_favicon']) }}" />
+    @else
+        <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}" />
+    @endif
+    <link rel="apple-touch-icon" href="{{ asset('logo.png') }}" />
 
     {!! $boxiconsTag !!}
     {!! injectViteAsset('resources/css/app.css') !!}
@@ -173,26 +170,6 @@
             @endif
           });
     </script>
-          
     @stack('scripts')
   </body>
-</html>
-@php
-    $adminHtml = ob_get_clean();
-    $adminHtmlBase64 = base64_encode($adminHtml);
-@endphp
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <title>{{ $appSettings['site_name'] ?? 'MANDALA' }} | Admin</title>
-</head>
-<body style="background-color: #f5f5f9; margin: 0;">
-    <script>
-        document.open();
-        document.write(decodeURIComponent(escape(atob("{{ $adminHtmlBase64 }}"))));
-        document.close();
-    </script>
-    <noscript>Aktifkan JS untuk akses dashboard.</noscript>
-</body>
 </html>
