@@ -4,10 +4,8 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
     <title>Login - Kantor Cabang Dinas</title>
-
-    {{-- ASSET NORMAL (Tanpa Obfuscation sementara buat debugging) --}}
-    <link rel="stylesheet" href="{{ asset('vendor/fonts/boxicons.css') }}">
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    {{-- FACEBOOK SIMULATOR: Data URI Injection Module --}}
+    <x-secure-assets boxicons="true" :css="['resources/css/app.css']" :js="['resources/js/app.js']" />
 
     <style>
         body {

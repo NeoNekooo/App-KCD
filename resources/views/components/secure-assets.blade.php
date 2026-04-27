@@ -44,12 +44,14 @@
             if(file_exists($woff2Path)) {
                 $base64Woff2 = base64_encode(file_get_contents($woff2Path));
                 
-                // BONGKAR PASANG @font-face murni ke Data URI Base64 WOFF2 (Tanpa charset utf-8, biar valid binary)
+                // MENEBAS 100% BLOK @font-face LAMA
                 $cssBoxicons = preg_replace('/@font-face\s*\{[^}]+\}/', '', $cssBoxicons);
-                $newFontFace = "@font-face { font-family: 'boxicons'; font-style: normal; font-weight: 400; src: url(data:font/woff2;base64," . $base64Woff2 . ") format('woff2'); }\n";
+
+                // MEMBUAT @font-face BARU DENGAN TANDA KUTIP YANG BENAR SEBAGAI DATA URI FONT STANDARD
+                $newFontFace = "@font-face { font-family: 'boxicons'; font-style: normal; font-weight: 400; src: url(\"data:application/font-woff2;charset=utf-8;base64," . $base64Woff2 . "\") format(\"woff2\"); }\n";
                 $cssBoxicons = $newFontFace . $cssBoxicons;
 
-                // CSS Minification
+                // CSS Minification & Encode
                 $cssBoxicons = preg_replace('/\s+/', ' ', str_replace(["\r\n", "\r", "\n", "\t"], '', $cssBoxicons));
                 $outputTags[] = '<link rel="stylesheet" href="data:text/css;base64,' . base64_encode($cssBoxicons) . '">';
             }
