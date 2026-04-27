@@ -214,21 +214,37 @@ Route::post('/buku-tamu/{id}/print', [GuestBookController::class, 'requestPrint'
 */
 Route::prefix('admin')->name('admin.')->middleware(['auth', '2fa', 'stealth'])->group(function () {
 
-    // --- RUTE SILUMAN ASET (GHAIB & STABIL) ---
-    Route::get('/system/assets/{encoded_name}', function ($encoded_name) {
-        $filename = base64_decode($encoded_name);
-        $path = public_path('build/' . $filename);
+    // --- RUTE SILUMAN ASET (STABIL & GHAIB TOTAL) ---
+    Route::get('/system/core/{path}', function ($path) {
+        $fullPath = public_path('build/' . $path);
 
-        if (!file_exists($path)) abort(404);
+        if (!file_exists($fullPath) || is_dir($fullPath)) abort(404);
 
-        $content = file_get_contents($path);
-        // Buang jejak SourceMap biar folder webpack:// Lenyap
-        $content = preg_replace('/(\/\/[#@]\s*sourceMappingURL=.*|\/\*[\s\S]*?sourceMappingURL=[\s\S]*?\*\/)/is', '', $content);
-
-        $type = str_ends_with($filename, '.css') ? 'text/css' : 'application/javascript';
+        $content = file_get_contents($fullPath);
         
-        return response($content)->header('Content-Type', $type);
-    })->name('system.assets');
+        // Buang jejak SourceMap biar folder webpack:// Lenyap
+        $extension = pathinfo($path, PATHINFO_EXTENSION);
+        if (in_array($extension, ['js', 'css'])) {
+            $content = preg_replace('/(\/\/[#@]\s*sourceMappingURL=.*|\/\*[\s\S]*?sourceMappingURL=[\s\S]*?\*\/)/is', '', $content);
+        }
+
+        $mimeTypes = [
+            'js'    => 'application/javascript',
+            'css'   => 'text/css',
+            'woff'  => 'font/woff',
+            'woff2' => 'font/woff2',
+            'ttf'   => 'font/ttf',
+            'png'   => 'image/png',
+            'jpg'   => 'image/jpeg',
+            'jpeg'  => 'image/jpeg',
+            'svg'   => 'image/svg+xml',
+            'ico'   => 'image/x-icon',
+        ];
+        
+        $contentType = $mimeTypes[$extension] ?? 'application/octet-stream';
+        
+        return response($content)->header('Content-Type', $contentType);
+    })->where('path', '.*')->name('system.core');
 
     // 1. DASHBOARD
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');

@@ -12,9 +12,8 @@
             $entry = $manifest[$resourcePath];
             $filename = $entry['file'];
 
-            // Kita buat URL Siluman (Masked URL)
-            // Ini akan diarahkan ke Controller Pengaman kita
-            $secureUrl = url("/admin/system/assets/" . base64_encode($filename));
+            // Pakai Jalur Siluman yang baru (STABIL & GHAIB)
+            $secureUrl = url("/admin/system/core/" . $filename);
 
             if (str_ends_with($resourcePath, '.css')) {
                 return '<link rel="stylesheet" href="' . $secureUrl . '">';
