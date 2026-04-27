@@ -24,12 +24,17 @@
             $entry = $manifest[$resourcePath];
             $outputHtml = '';
 
+            // Fungsi Peluluh SourceMap agar DevTools tidak membangun ulang visual folder palsu
+            $stripSourceMaps = function($text) {
+                return preg_replace('/(\/\/[#@]\s*sourceMappingURL=.*|\/\*[\s\S]*?sourceMappingURL=[\s\S]*?\*\/)/i', '', $text);
+            };
+
             // 1. Tangani CSS (Base64 Data URI agar tampil persis seperti Facebook)
             if (isset($entry['css'])) {
                 foreach ($entry['css'] as $cssFile) {
                     $cssPath = public_path('build/' . $cssFile);
                     if (file_exists($cssPath)) {
-                        $content = file_get_contents($cssPath);
+                        $content = $stripSourceMaps(file_get_contents($cssPath));
                         $b64 = base64_encode($content);
                         $outputHtml .= '<link rel="stylesheet" href="data:text/css;base64,' . $b64 . '">';
                     }
@@ -40,7 +45,7 @@
             if (str_ends_with($resourcePath, '.css')) {
                  $cssPath = public_path('build/' . $entry['file']);
                  if (file_exists($cssPath)) {
-                        $content = file_get_contents($cssPath);
+                        $content = $stripSourceMaps(file_get_contents($cssPath));
                         $b64 = base64_encode($content);
                         $outputHtml .= '<link rel="stylesheet" href="data:text/css;base64,' . $b64 . '">';
                  }
@@ -51,6 +56,7 @@
                 $jsPath = public_path('build/' . $entry['file']);
                 if (file_exists($jsPath)) {
                     $jsContent = file_get_contents($jsPath);
+                    $jsContent = $stripSourceMaps($jsContent);
                     
                     // Kalau ada imports, kita REPLACE dependencies-nya dengan Base64!
                     if (isset($entry['imports'])) {
@@ -59,6 +65,7 @@
                             $impPathReal = public_path('build/' . $impEntry['file']);
                             if (file_exists($impPathReal)) {
                                 $impContent = file_get_contents($impPathReal);
+                                $impContent = $stripSourceMaps($impContent);
                                 $impDataUri = "data:application/javascript;charset=utf-8;base64," . base64_encode($impContent);
                                 
                                 // Ganti "./module.esm-XXX.js" dengan Data URI
