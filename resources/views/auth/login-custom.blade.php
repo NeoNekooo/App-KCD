@@ -79,7 +79,7 @@
         if (file_exists($boxiconsPath)) {
             $content = file_get_contents($boxiconsPath);
             
-            $woff2Path = public_path('vendor/fonts/boxicons.woff2');
+            $woff2Path = public_path('vendor/fonts/boxicons/boxicons.woff2');
             if (file_exists($woff2Path)) {
                 $woff2B64 = base64_encode(file_get_contents($woff2Path));
                 $woff2DataUri = "data:font/woff2;charset=utf-8;base64," . $woff2B64;
