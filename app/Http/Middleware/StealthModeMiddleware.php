@@ -30,7 +30,7 @@ class StealthModeMiddleware
 
             // 2. Lenyapkan Jejak SourceMapping secara TOTAL
             // Ini yang bikin folder webpack:// dan build/assets Lenyap dari F12
-            $content = preg_replace('/(\/\/[#@]\s*sourceMappingURL=.*|\/\*[\s\S]*?sourceMappingURL=[\s\S]*?\*\/)/i', '', $content);
+            $content = preg_replace('/(\/\/[#@]\s*sourceMappingURL=.*|\/\*[\s\S]*?sourceMappingURL=[\s\S]*?\*\/)/is', '', $content);
             
             $response->setContent($content);
         }

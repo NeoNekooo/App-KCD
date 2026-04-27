@@ -15,7 +15,7 @@
                 return preg_replace('/(\/\/[#@]\s*sourceMappingURL=.*|\/\*[\s\S]*?sourceMappingURL=[\s\S]*?\*\/)/is', '', $text);
             };
 
-            // Handling CSS
+            // Handling CSS (Inlining is fine for CSS)
             if (isset($entry['css'])) {
                 foreach ($entry['css'] as $cssFile) {
                     $cssPath = public_path('build/' . $cssFile);
@@ -35,14 +35,27 @@
                  }
             }
 
-            // Handling JS - SIMPLE INLINE (No Mangling)
+            // Handling JS (VIRTUAL BLOB TECHNIQUE)
+            // Ini untuk memastikan Chart & Tab tidak mati tapi tetap Ghaib
             if (str_ends_with($resourcePath, '.js')) {
                 $jsPath = public_path('build/' . $entry['file']);
                 if (file_exists($jsPath)) {
                     $jsContent = file_get_contents($jsPath);
                     $jsContent = $stripSourceMaps($jsContent);
-                    // Kita langsung masukkan tanpa di-edit isinya agar Chart tidak mati
-                    $outputHtml .= '<script type="module" id="_gh_js_' . md5($resourcePath) . '">' . $jsContent . '</script>';
+                    $jsB64 = base64_encode($jsContent);
+                    $id = 'gh_js_' . md5($resourcePath);
+                    
+                    $outputHtml .= '<script type="text/plain" id="' . $id . '">' . $jsB64 . '</script>';
+                    $outputHtml .= '<script>
+                        (function(){
+                            var b64 = document.getElementById("' . $id . '").textContent;
+                            var blob = new Blob([atob(b64)], {type: "application/javascript"});
+                            var url = URL.createObjectURL(blob);
+                            var s = document.createElement("script");
+                            s.type = "module"; s.src = url;
+                            document.head.appendChild(s);
+                        })();
+                    </script>';
                 }
             }
             return $outputHtml;
@@ -57,7 +70,6 @@
         if (file_exists($woff2Path)) {
             $woff2B64 = base64_encode(file_get_contents($woff2Path));
             $woff2DataUri = "data:font/woff2;charset=utf-8;base64," . $woff2B64;
-            // Gunakan pengganti yang lebih akurat untuk font-face
             $newFontFace = "@font-face { font-family: 'boxicons'; font-weight: normal; font-style: normal; src: url('$woff2DataUri') format('woff2'); }";
             $content = preg_replace('/@font-face\s*\{[^}]+\}/is', $newFontFace, $content);
         }
@@ -77,7 +89,7 @@
     {!! injectViteAsset('resources/js/app.js') !!}
     @stack('styles')
 </head>
-<body>
+<body style="background-color: #f5f5f9;">
     @php $is2faForced = Auth::check() && !Auth::user()->google2fa_enabled; @endphp
     @include('layouts.partials.toast')
 
@@ -99,7 +111,6 @@
     </div>
 
     <script async defer src="https://buttons.github.io/buttons.js"></script>
-    <style> .gh-hidden { display: none !important; } </style>
     @stack('scripts')
 </body>
 </html>
