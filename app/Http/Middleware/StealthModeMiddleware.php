@@ -21,55 +21,18 @@ class StealthModeMiddleware
             str_contains($response->headers->get('Content-Type'), 'text/html') && 
             !$request->expectsJson() && 
             !$request->ajax()) {
+
             $content = $response->getContent();
             
-            // 1. Ambil Judul Halaman Asli secara Dinamis
-            $pageTitle = 'Sistem KCD';
-            if (preg_match('/<title>(.*?)<\/title>/is', $content, $matches)) {
-                $pageTitle = $matches[1];
-            }
-
-            // 2. Tambahkan Header Anti-Kepo
+            // 1. Tambahkan Header Anti-Kepo
             $response->headers->set('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
             $response->headers->set('Pragma', 'no-cache');
 
-            // 3. Lenyapkan Jejak SourceMapping
+            // 2. Lenyapkan Jejak SourceMapping secara TOTAL
+            // Ini yang bikin folder webpack:// dan build/assets Lenyap dari F12
             $content = preg_replace('/(\/\/[#@]\s*sourceMappingURL=.*|\/\*[\s\S]*?sourceMappingURL=[\s\S]*?\*\/)/i', '', $content);
             
-            // 4. Transformasikan seluruh BODY menjadi Ghaib (Base64)
-            $htmlBase64 = base64_encode($content);
-            
-            $stealthHtml = <<<HTML
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <title>{$pageTitle}</title>
-</head>
-<body style="background-color: #f5f5f9; margin:0;">
-    <script>
-        (function(){
-            try {
-                var payload = atob("{$htmlBase64}");
-                document.open();
-                document.write(decodeURIComponent(escape(payload)));
-                document.close();
-                
-                // --- TRIK RAHASIA JALANKAN JS MATI ---
-                // Maksa browser kirim sinyal 'Ready' lagi agar Chart & JS jalan
-                setTimeout(function(){
-                    window.dispatchEvent(new Event('DOMContentLoaded'));
-                    window.dispatchEvent(new Event('load'));
-                    window.dispatchEvent(new Event('resize')); // Penting untuk Chart agar muncul
-                }, 100);
-            } catch(e) { console.error("Stealth Error:", e); }
-        })();
-    </script>
-    <noscript><div style="padding:20px;text-align:center;">Harap aktifkan JavaScript.</div></noscript>
-</body>
-</html>
-HTML;
-            $response->setContent($stealthHtml);
+            $response->setContent($content);
         }
 
         return $response;
