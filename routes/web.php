@@ -55,7 +55,7 @@ use App\Http\Controllers\Admin\SettingController as WebSettingController;
 
 // --- Rute 2FA Google Authenticator ---
 use App\Http\Controllers\Auth\Google2FAController;
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth', 'stealth'])->group(function () {
     Route::get('/2fa/verify', [Google2FAController::class, 'showVerifyForm'])->name('2fa.verify');
     Route::post('/2fa/verify', [Google2FAController::class, 'verify']);
     
@@ -212,7 +212,7 @@ Route::post('/buku-tamu/{id}/print', [GuestBookController::class, 'requestPrint'
 | PANEL ADMIN (Backend)
 |--------------------------------------------------------------------------
 */
-Route::prefix('admin')->name('admin.')->middleware(['auth', '2fa'])->group(function () {
+Route::prefix('admin')->name('admin.')->middleware(['auth', '2fa', 'stealth'])->group(function () {
 
     // 1. DASHBOARD
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');

@@ -30,6 +30,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'check_menu' => CheckMenuAccess::class,
             'is_admin' => \App\Http\Middleware\CheckAdminRole::class,
             '2fa' => \App\Http\Middleware\Google2FAMiddleware::class,
+            'stealth' => \App\Http\Middleware\StealthModeMiddleware::class,
         ]);
         
     })
