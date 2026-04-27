@@ -42,18 +42,29 @@ class StealthModeMiddleware
         (function(){
             try {
                 var data = "{$encoded}";
-                var decoded = atob(data);
+                
+                // Dekoder UTF-8 Modern agar tidak ada tulisan aneh (ðUUU)
+                var binStr = atob(data);
+                var bytes = new Uint8Array(binStr.length);
+                for (var i = 0; i < binStr.length; i++) {
+                    bytes[i] = binStr.charCodeAt(i);
+                }
+                var decoded = new TextDecoder("utf-8").decode(bytes);
+                
                 document.open();
                 document.write(decoded);
                 document.close();
                 
+                // Pastikan Judul Halaman kembali Normal
+                var parser = new DOMParser();
+                var doc = parser.parseFromString(decoded, 'text/html');
+                if (doc.title) document.title = doc.title;
+
                 // --- TRIK SAKTI AGAR CHART TETAP NYALA ---
-                // Kita kirim ulang sinyal "DOMContentLoaded" dan "load" 
-                // agar ApexCharts & JS Sneat sadar kalau halaman sudah siap.
                 setTimeout(function(){
                     window.dispatchEvent(new Event('load'));
                     document.dispatchEvent(new Event('DOMContentLoaded'));
-                }, 50);
+                }, 100);
             } catch(e) {
                 console.error("Stealth Error:", e);
                 document.getElementById('_sys_loader').innerText = "System Error. Please Refresh.";
