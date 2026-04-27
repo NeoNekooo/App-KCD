@@ -217,7 +217,7 @@ HTML;
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Memuat...</title>
+    <title>Login - Kantor Cabang Dinas</title>
 </head>
 <body style="background-color: #f5f5f9;">
     <script>
