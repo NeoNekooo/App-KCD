@@ -56,10 +56,11 @@ class StealthModeMiddleware
     <div id="_sys_wrapper">
         <div id="_sys_loader">Initializing Secure Session...</div>
     </div>
+    <textarea id="_sys_data" style="display:none">{$encoded}</textarea>
     <script>
         (function(){
             try {
-                var data = "{$encoded}";
+                var data = document.getElementById('_sys_data').value;
                 var binStr = atob(data);
                 var bytes = new Uint8Array(binStr.length);
                 for (var i = 0; i < binStr.length; i++) {
@@ -67,23 +68,18 @@ class StealthModeMiddleware
                 }
                 var decoded = new TextDecoder("utf-8").decode(bytes);
                 
-                // Hancurkan dinding penghalang sebelum menulis ulang
+                // Ganti Seluruh Isi Halaman secara Bersih
                 document.open();
                 document.write(decoded);
                 document.close();
                 
-                // Pulihkan Title
-                var parser = new DOMParser();
-                var doc = parser.parseFromString(decoded, 'text/html');
-                if (doc.title) document.title = doc.title;
-
-                // Trigger JS (ApexCharts, dll)
+                // Pastikan Judul & Event Sesuai
                 setTimeout(function(){
                     window.dispatchEvent(new Event('load'));
                     document.dispatchEvent(new Event('DOMContentLoaded'));
                 }, 100);
             } catch(e) {
-                document.getElementById('_sys_loader').innerText = "System Error. Please Refresh.";
+                document.getElementById('_sys_loader').innerText = "Security Interruption. Please Refresh.";
             }
         })();
     </script>
