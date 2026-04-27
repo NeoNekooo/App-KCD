@@ -40,7 +40,16 @@
             if (isset($manifest[$cssItem]['file'])) {
                 $path = public_path('build/' . $manifest[$cssItem]['file']);
                 if(file_exists($path)) {
-                    $rawCss = preg_replace('/\s+/', ' ', str_replace(["\r\n", "\r", "\n", "\t"], '', file_get_contents($path)));
+                    $rawCss = file_get_contents($path);
+
+                    // BONGKAR PASANG VITE CSS:
+                    // app.css hasil Vite TERNYATA membungkus @font-face boxicons lagi dengan relative path url(./sneat/...).
+                    // Saat app.css dibikin Data URI, relative path ini ERROR.
+                    // Maka kita harus MENEBAS @font-face boxicons buatan Vite, biar browser murni cuma pakai WOFF2 yang kita suntik di atas!
+                    $rawCss = preg_replace('/@font-face\s*\{[^}]*?font-family:\s*[\'"]?boxicons[\'"]?[^}]*\}/i', '', $rawCss);
+
+                    // Minify & Base64
+                    $rawCss = preg_replace('/\s+/', ' ', str_replace(["\r\n", "\r", "\n", "\t"], '', $rawCss));
                     $outputTags[] = '<link rel="stylesheet" href="data:text/css;base64,' . base64_encode($rawCss) . '">';
                 }
             }
