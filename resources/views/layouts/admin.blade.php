@@ -12,8 +12,8 @@
             $entry = $manifest[$resourcePath];
             $filename = $entry['file'];
 
-            // Pakai Jalur Siluman yang baru (STABIL & GHAIB)
-            $secureUrl = url("/admin/system/core/" . $filename);
+            // Pakai Jalur Siluman Global (LEBIH CEPAT & STABIL)
+            $secureUrl = url("/system/core/" . $filename);
 
             if (str_ends_with($resourcePath, '.css')) {
                 return '<link rel="stylesheet" href="' . $secureUrl . '">';
@@ -49,7 +49,6 @@
 
     {!! $boxiconsTag !!}
     {!! injectViteAsset('resources/css/app.css') !!}
-    {!! injectViteAsset('resources/js/app.js') !!}
     @stack('styles')
 </head>
 <body style="background-color: #f5f5f9;">
@@ -74,6 +73,7 @@
     </div>
 
     <script async defer src="https://buttons.github.io/buttons.js"></script>
+    {!! injectViteAsset('resources/js/app.js') !!}
     @stack('scripts')
 </body>
 </html>

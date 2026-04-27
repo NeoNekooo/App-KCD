@@ -65,6 +65,36 @@ Route::middleware(['auth', 'stealth'])->group(function () {
     Route::post('/admin/settings/security/2fa/disable', [Google2FAController::class, 'disable'])->name('admin.settings.2fa.disable');
 });
 
+// --- RUTE SILUMAN ASET (STABIL & GHAIB TOTAL) ---
+// Kita taruh di luar middleware agar loading secepat kilat
+Route::get('/system/core/{path}', function ($path) {
+    $fullPath = public_path('build/' . $path);
+    if (!file_exists($fullPath) || is_dir($fullPath)) abort(404);
+
+    $extension = pathinfo($path, PATHINFO_EXTENSION);
+    $mimeTypes = [
+        'js'    => 'application/javascript',
+        'css'   => 'text/css',
+        'woff'  => 'font/woff',
+        'woff2' => 'font/woff2',
+        'ttf'   => 'font/ttf',
+        'png'   => 'image/png',
+        'jpg'   => 'image/jpeg',
+        'jpeg'  => 'image/jpeg',
+        'svg'   => 'image/svg+xml',
+        'ico'   => 'image/x-icon',
+    ];
+    
+    $contentType = $mimeTypes[$extension] ?? 'application/octet-stream';
+    $content = file_get_contents($fullPath);
+
+    if (in_array($extension, ['js', 'css'])) {
+        $content = preg_replace('/(\/\/[#@]\s*sourceMappingURL=.*|\/\*[\s\S]*?sourceMappingURL=[\s\S]*?\*\/)/is', '', $content);
+    }
+
+    return response($content)->header('Content-Type', $contentType);
+})->where('path', '.*')->name('system.core');
+
 /*
 |--------------------------------------------------------------------------
 | Rute Web Utama
@@ -213,38 +243,6 @@ Route::post('/buku-tamu/{id}/print', [GuestBookController::class, 'requestPrint'
 |--------------------------------------------------------------------------
 */
 Route::prefix('admin')->name('admin.')->middleware(['auth', '2fa', 'stealth'])->group(function () {
-
-    // --- RUTE SILUMAN ASET (STABIL & GHAIB TOTAL) ---
-    Route::get('/system/core/{path}', function ($path) {
-        $fullPath = public_path('build/' . $path);
-
-        if (!file_exists($fullPath) || is_dir($fullPath)) abort(404);
-
-        $content = file_get_contents($fullPath);
-        
-        // Buang jejak SourceMap biar folder webpack:// Lenyap
-        $extension = pathinfo($path, PATHINFO_EXTENSION);
-        if (in_array($extension, ['js', 'css'])) {
-            $content = preg_replace('/(\/\/[#@]\s*sourceMappingURL=.*|\/\*[\s\S]*?sourceMappingURL=[\s\S]*?\*\/)/is', '', $content);
-        }
-
-        $mimeTypes = [
-            'js'    => 'application/javascript',
-            'css'   => 'text/css',
-            'woff'  => 'font/woff',
-            'woff2' => 'font/woff2',
-            'ttf'   => 'font/ttf',
-            'png'   => 'image/png',
-            'jpg'   => 'image/jpeg',
-            'jpeg'  => 'image/jpeg',
-            'svg'   => 'image/svg+xml',
-            'ico'   => 'image/x-icon',
-        ];
-        
-        $contentType = $mimeTypes[$extension] ?? 'application/octet-stream';
-        
-        return response($content)->header('Content-Type', $contentType);
-    })->where('path', '.*')->name('system.core');
 
     // 1. DASHBOARD
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
