@@ -17,12 +17,10 @@ class StealthModeMiddleware
     {
         $response = $next($request);
 
-        // Hanya proses jika response adalah HTML dan bukan AJAX
         if ($response instanceof Response && 
             str_contains($response->headers->get('Content-Type'), 'text/html') && 
             !$request->expectsJson() && 
             !$request->ajax()) {
-
             $content = $response->getContent();
             
             // 1. Ambil Judul Halaman Asli secara Dinamis
