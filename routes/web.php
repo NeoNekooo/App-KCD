@@ -200,8 +200,10 @@ Route::get('/home', function () {
 Route::get('/cetak-sk/{uuid}', [CetakSkController::class, 'cetakSk'])->name('cetak.sk');
 
 // --- BUKU TAMU & TIKET ANTRIAN (PUBLIC) ---
-Route::get('/buku-tamu/wilayah-{cadisdik_id}', [GuestBookController::class, 'index'])->name('guest.buku-tamu');
-Route::post('/buku-tamu/wilayah-{cadisdik_id}', [GuestBookController::class, 'store'])->name('guest.buku-tamu.store');
+Route::get('/buku-tamu/wilayah-{wilayah}', [GuestBookController::class, 'index'])->name('guest.buku-tamu');
+Route::post('/buku-tamu/wilayah-{wilayah}', [GuestBookController::class, 'store'])
+    ->name('guest.buku-tamu.store')
+    ->middleware('throttle:5,1'); // Maksimal 5x submit per menit per IP
 Route::post('/buku-tamu/{id}/print', [GuestBookController::class, 'requestPrint'])->name('guest.buku-tamu.print');
 
 
@@ -259,8 +261,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', '2fa'])->group(funct
         });
 
     // --- MONITOR ANTRIAN TV (PUBLIC/OFFICE) ---
-    Route::get('/display-antrian/wilayah-{cadisdik_id}', [AntrianDisplayController::class, 'index'])->name('display.antrian');
-    Route::get('/display-antrian/wilayah-{cadisdik_id}/updates', [AntrianDisplayController::class, 'getUpdates'])->name('display.antrian.updates');
+    Route::get('/display-antrian/wilayah-{wilayah}', [AntrianDisplayController::class, 'index'])->name('display.antrian');
+    Route::get('/display-antrian/wilayah-{wilayah}/updates', [AntrianDisplayController::class, 'getUpdates'])->name('display.antrian.updates');
     Route::get('/display-antrian/ticket/{id}', [AntrianDisplayController::class, 'ticketThermal'])->name('display.antrian.ticket');
     Route::put('/display-antrian/mark-printed/{id}', [AntrianDisplayController::class, 'markAsPrinted'])->name('display.antrian.mark-printed');
 

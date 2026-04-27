@@ -49,10 +49,15 @@
             ]) }}" class="btn btn-sm btn-success shadow-sm rounded-pill fw-bold py-2">
                 <i class='bx bx-spreadsheet me-2'></i>Export Excel
             </a>
-            <a href="{{ route('admin.display.antrian') }}" target="_blank" class="btn btn-sm btn-dark shadow-sm rounded-pill fw-bold py-2">
+            @php
+                $userInstansi = Auth::user()->instansi ?? (Auth::user()->pegawaiKcd->instansi ?? null);
+                $cadisdik = $userInstansi ? $userInstansi->cadisdik : null;
+                $wilayahParam = $cadisdik->short_slug ?? ($userInstansi->cadisdik_id ?? 0);
+            @endphp
+            <a href="{{ route('admin.display.antrian', ['wilayah' => $wilayahParam]) }}" target="_blank" class="btn btn-sm btn-dark shadow-sm rounded-pill fw-bold py-2">
                 <i class='bx bx-tv me-2'></i>Buka Layar TV
             </a>
-            <a href="{{ route('guest.buku-tamu') }}" target="_blank" class="btn btn-sm btn-primary shadow-sm rounded-pill fw-bold py-2">
+            <a href="{{ route('guest.buku-tamu', ['wilayah' => $wilayahParam]) }}" target="_blank" class="btn btn-sm btn-primary shadow-sm rounded-pill fw-bold py-2">
                 <i class='bx bx-qr-scan me-2'></i>Lihat QR Form
             </a>
         </div>

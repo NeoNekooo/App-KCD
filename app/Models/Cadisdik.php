@@ -37,4 +37,14 @@ class Cadisdik extends Model
     {
         return $this->hasMany(PegawaiKcd::class);
     }
+
+    /**
+     * ID Cantik buat URL (Contoh: VI-a1b2)
+     * a1b2 diambil dari hash UUID biar gak gampang ditebak.
+     */
+    public function getShortSlugAttribute()
+    {
+        $hash = substr(md5($this->id), 0, 4);
+        return ($this->kode ?? 'KCD') . '-' . $hash;
+    }
 }

@@ -490,7 +490,7 @@
         // 1. QR Code (DI-GEDE-IN & DINAMIS WILAYAH)
         try {
             new QRCode(document.getElementById("qrcode"), {
-                text: window.location.origin + "/buku-tamu/wilayah-{{ $instansi->cadisdik_id }}",
+                text: window.location.origin + "/buku-tamu/wilayah-{{ $instansi->cadisdik->short_slug ?? $instansi->cadisdik_id }}",
                 width: 200,
                 height: 200
             });
@@ -690,7 +690,7 @@
 
         function fetchUpdates() {
             $.ajax({
-                url: "{{ route('admin.display.antrian.updates', $instansi->cadisdik_id) }}",
+                url: "{{ route('admin.display.antrian.updates', ['wilayah' => $instansi->cadisdik->short_slug ?? $instansi->cadisdik_id]) }}",
                 type: "GET",
                 success: function(res) {
                     // --- A. Handling Panggilan Suara & Visual ---

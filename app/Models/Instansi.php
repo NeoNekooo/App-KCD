@@ -27,7 +27,7 @@ class Instansi extends Model
         'bujur',
         'social_media',
         'logo',
-        'tanda_tangan', // <-- Tambahkan Kolom Baru Ini Bre!
+        'tanda_tangan',
         'visi',
         'misi',
         'sejarah_singkat',
@@ -40,4 +40,12 @@ class Instansi extends Model
         'social_media' => 'array',
         'foto_sejarah' => 'array',
     ];
+
+    /**
+     * Relasi ke Wilayah Cadisdik
+     */
+    public function cadisdik()
+    {
+        return $this->belongsTo(Cadisdik::class, 'cadisdik_id');
+    }
 }

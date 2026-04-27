@@ -15,13 +15,18 @@ class GuestBookController extends Controller
     /**
      * Menampilkan Form Buku Tamu (Public Landing Page) per wilayah
      */
-    public function index($cadisdik_id)
+    public function index($wilayah)
     {
-        // Cari instansi/wilayah berdasarkan cadisdik_id
-        $instansi = \App\Models\Instansi::where('cadisdik_id', $cadisdik_id)->firstOrFail();
+        // Cari instansi/wilayah berdasarkan UUID atau Short Slug (misal: VI-a1b2)
+        $instansi = \App\Models\Instansi::all()->first(function($ins) use ($wilayah) {
+            return $ins->cadisdik_id === $wilayah || 
+                   ($ins->cadisdik && $ins->cadisdik->short_slug === $wilayah);
+        });
+
+        if (!$instansi) abort(404);
         
         // Ambil data Pejabat/Pegawai KCD yang hanya ada di wilayah tersebut
-        $pegawais = PegawaiKcd::withoutGlobalScopes() // Lepas filter regional bawaan biar guest bisa liat
+        $pegawais = PegawaiKcd::withoutGlobalScopes() 
             ->where('instansi_id', $instansi->id)
             ->with('jabatanKcd')
             ->orderBy('nama', 'asc')
@@ -39,7 +44,7 @@ class GuestBookController extends Controller
     /**
      * Menyimpan data form tamu dan membuat Nomor Antrian per wilayah
      */
-    public function store(Request $request, $cadisdik_id)
+    public function store(Request $request, $wilayah)
     {
         $request->validate([
             'nama'              => 'required|string|max:255',
@@ -51,7 +56,12 @@ class GuestBookController extends Controller
         ]);
 
         // Cari instansi/wilayah
-        $instansi = \App\Models\Instansi::where('cadisdik_id', $cadisdik_id)->firstOrFail();
+        $instansi = \App\Models\Instansi::all()->first(function($ins) use ($wilayah) {
+            return $ins->cadisdik_id === $wilayah || 
+                   ($ins->cadisdik && $ins->cadisdik->short_slug === $wilayah);
+        });
+
+        if (!$instansi) abort(404);
 
         // Logic Auto Generate Nomer Antrian (per wilayah & per hari)
         $today = Carbon::today();

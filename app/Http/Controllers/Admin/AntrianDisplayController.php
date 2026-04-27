@@ -13,19 +13,31 @@ class AntrianDisplayController extends Controller
     /**
      * Halaman Utama TV KCD Display Layar per wilayah
      */
-    public function index($cadisdik_id)
+    public function index($wilayah)
     {
-        $instansi = \App\Models\Instansi::where('cadisdik_id', $cadisdik_id)->firstOrFail();
+        $instansi = \App\Models\Instansi::all()->first(function($ins) use ($wilayah) {
+            return $ins->cadisdik_id === $wilayah || 
+                   ($ins->cadisdik && $ins->cadisdik->short_slug === $wilayah);
+        });
+
+        if (!$instansi) abort(404);
+
         return view('admin.antrian.display', compact('instansi'));
     }
 
     /**
      * AJAX endpoint for pulling updates every X seconds (Per Wilayah)
      */
-    public function getUpdates(Request $request, $cadisdik_id)
+    public function getUpdates(Request $request, $wilayah)
     {
         $today = Carbon::today();
-        $instansi = \App\Models\Instansi::where('cadisdik_id', $cadisdik_id)->firstOrFail();
+        
+        $instansi = \App\Models\Instansi::all()->first(function($ins) use ($wilayah) {
+            return $ins->cadisdik_id === $wilayah || 
+                   ($ins->cadisdik && $ins->cadisdik->short_slug === $wilayah);
+        });
+
+        if (!$instansi) return response()->json(['error' => 'Not Found'], 404);
         
         // Yg sedang dipanggil saat ini ditaruh kiri
         $sedangDipanggil = AntrianTamu::withoutGlobalScopes()
