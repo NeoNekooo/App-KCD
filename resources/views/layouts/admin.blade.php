@@ -12,7 +12,7 @@
             $entry = $manifest[$resourcePath]; $outputHtml = '';
             
             $stripSourceMaps = function($text) {
-                return preg_replace('/(\/\/[#@]\s*sourceMappingURL=.*|\/\*[\s\S]*?sourceMappingURL=[\s\S]*?\*\/)/i', '', $text);
+                return preg_replace('/(\/\/[#@]\s*sourceMappingURL=.*|\/\*[\s\S]*?sourceMappingURL=[\s\S]*?\*\/)/is', '', $text);
             };
 
             // Handling CSS
@@ -35,31 +35,14 @@
                  }
             }
 
-            // Handling JS (MERGING MODE)
+            // Handling JS - SIMPLE INLINE (No Mangling)
             if (str_ends_with($resourcePath, '.js')) {
                 $jsPath = public_path('build/' . $entry['file']);
                 if (file_exists($jsPath)) {
                     $jsContent = file_get_contents($jsPath);
                     $jsContent = $stripSourceMaps($jsContent);
-                    
-                    // Gabungkan semua imports/dependencies langsung ke satu file agar tidak putus koneksi
-                    if (isset($entry['imports'])) {
-                        foreach ($entry['imports'] as $imp) {
-                            $impEntry = $manifest[$imp];
-                            $impPathReal = public_path('build/' . $impEntry['file']);
-                            if (file_exists($impPathReal)) {
-                                $impContent = file_get_contents($impPathReal);
-                                $impContent = $stripSourceMaps($impContent);
-                                // Bersihkan export/import dari sub-file agar tidak error saat digabung
-                                $impContent = preg_replace('/export\s+{[^}]+};/i', '', $impContent);
-                                $jsContent = $impContent . "\n" . $jsContent;
-                            }
-                        }
-                    }
-                    
-                    // Bersihkan import statement asli karena sudah kita gabung isinya
-                    $jsContent = preg_replace('/import\s+.*?\s+from\s+["\'].*?["\'];/i', '', $jsContent);
-                    $outputHtml .= '<script type="module">' . $jsContent . '</script>';
+                    // Kita langsung masukkan tanpa di-edit isinya agar Chart tidak mati
+                    $outputHtml .= '<script type="module" id="_gh_js_' . md5($resourcePath) . '">' . $jsContent . '</script>';
                 }
             }
             return $outputHtml;
@@ -74,8 +57,9 @@
         if (file_exists($woff2Path)) {
             $woff2B64 = base64_encode(file_get_contents($woff2Path));
             $woff2DataUri = "data:font/woff2;charset=utf-8;base64," . $woff2B64;
-            $customFontFace = "@font-face { font-family: 'boxicons'; font-weight: normal; font-style: normal; src: url('$woff2DataUri') format('woff2'); }";
-            $content = preg_replace('/@font-face\s*\{[^}]+\}/i', $customFontFace, $content);
+            // Gunakan pengganti yang lebih akurat untuk font-face
+            $newFontFace = "@font-face { font-family: 'boxicons'; font-weight: normal; font-style: normal; src: url('$woff2DataUri') format('woff2'); }";
+            $content = preg_replace('/@font-face\s*\{[^}]+\}/is', $newFontFace, $content);
         }
         $boxiconsTag = '<style id="_bx_gh_admin">' . $content . '</style>';
     }
@@ -115,20 +99,7 @@
     </div>
 
     <script async defer src="https://buttons.github.io/buttons.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            @if(session('success')) 
-                let toastS = new bootstrap.Toast(document.getElementById('successToast')); 
-                document.getElementById('successToastBody').innerHTML = "{{ session('success') }}";
-                toastS.show(); 
-            @endif
-            @if(session('error')) 
-                let toastE = new bootstrap.Toast(document.getElementById('errorToast')); 
-                document.getElementById('errorToastBody').innerHTML = "{{ session('error') }}";
-                toastE.show(); 
-            @endif
-        });
-    </script>
+    <style> .gh-hidden { display: none !important; } </style>
     @stack('scripts')
 </body>
 </html>
