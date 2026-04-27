@@ -28,9 +28,8 @@ class StealthModeMiddleware
             $response->headers->set('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
             $response->headers->set('Pragma', 'no-cache');
 
-            // 2. Lenyapkan Jejak SourceMapping secara TOTAL
-            // Ini yang bikin folder webpack:// dan build/assets Lenyap dari F12
-            $content = preg_replace('/(\/\/[#@]\s*sourceMappingURL=.*|\/\*[\s\S]*?sourceMappingURL=[\s\S]*?\*\/)/is', '', $content);
+            // Kita tidak perlu preg_replace di sini lagi karena file JS/CSS
+            // sudah dibersihkan secara otomatis di rute siluman (Proxy).
             
             $response->setContent($content);
         }
