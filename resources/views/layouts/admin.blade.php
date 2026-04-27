@@ -10,7 +10,6 @@
 
 >
   <head>
-    {{-- ... (Isi <head> tidak ada perubahan) ... --}}
     <meta charset="utf-8" />
     <meta
       name="viewport"
@@ -36,19 +35,30 @@
     @stack('styles')
   </head>
   <body>
+    @php
+        // Mode Paksa 2FA: Jika login tapi belum mengaktifkan 2FA
+        $is2faForced = Auth::check() && !Auth::user()->google2fa_enabled;
+    @endphp
 
     <!-- Toast -->
-        
-     @include('layouts.partials.toast')
+    @include('layouts.partials.toast')
 
-    <div class="layout-wrapper layout-content-navbar">
-        <div class="layout-container ">
-            @include('layouts.partials.sidebar')
-            <div class="layout-page ">
-                @include('layouts.partials.topbar')
+    <div class="layout-wrapper layout-content-navbar {{ $is2faForced ? 'layout-without-menu' : '' }}">
+        <div class="layout-container">
+            @if(!$is2faForced)
+                @include('layouts.partials.sidebar')
+            @endif
+            
+            <div class="layout-page">
+                @if(!$is2faForced)
+                    @include('layouts.partials.topbar')
+                @endif
+
                 <div class="content-wrapper">
-                    <div class="container flex-grow-1 container-p-y">
-                        @yield('content')
+                    <div class="container flex-grow-1 container-p-y {{ $is2faForced ? 'd-flex justify-content-center align-items-center' : '' }}">
+                        <div class="{{ $is2faForced ? 'w-100' : '' }}" style="{{ $is2faForced ? 'max-width: 1000px;' : '' }}">
+                            @yield('content')
+                        </div>
                     </div>
                     @include('layouts.partials.footer')
                     <div class="content-backdrop fade"></div>
@@ -57,6 +67,7 @@
         </div>
         <div class="layout-overlay layout-menu-toggle"></div>
     </div>
+
     <script async defer src="https://buttons.github.io/buttons.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -76,7 +87,6 @@
                 toast.show();
             @endif
 
-            {{-- Logika untuk Toast Info - BARU --}}
             @if(session('info'))
                 const infoToast = document.getElementById('infoToast');
                 const infoToastBody = document.getElementById('infoToastBody');
@@ -84,11 +94,18 @@
                 const toast = new bootstrap.Toast(infoToast);
                 toast.show();
             @endif
+
+            @if(session('warning'))
+                const infoToast = document.getElementById('infoToast'); // Gunakan infoToast atau buat warningToast jika ada
+                const infoToastBody = document.getElementById('infoToastBody');
+                infoToastBody.innerHTML = "{{ session('warning') }}";
+                const toast = new bootstrap.Toast(infoToast);
+                toast.show();
+            @endif
           });
-          </script>
+    </script>
           
     @stack('scripts')
     @vite(['resources/js/app.js'])
   </body>
 </html>
-

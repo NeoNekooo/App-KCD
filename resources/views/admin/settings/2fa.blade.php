@@ -113,11 +113,20 @@
                         @if(!$user->google2fa_enabled)
                         {{-- SISI KIRI: QR CODE --}}
                         <div class="col-lg-5 text-center">
-                            {{-- Tombol Kembali --}}
+                            {{-- Tombol Kembali atau Keluar --}}
                             <div class="text-start mb-4">
-                                <a href="{{ route('admin.profil-saya.show') }}" class="btn btn-sm btn-outline-secondary rounded-pill">
-                                    <i class='bx bx-left-arrow-alt me-1'></i> Kembali ke Profil
-                                </a>
+                                @if($user->google2fa_enabled)
+                                    <a href="{{ route('admin.profil-saya.show') }}" class="btn btn-sm btn-outline-secondary rounded-pill">
+                                        <i class='bx bx-left-arrow-alt me-1'></i> Kembali ke Profil
+                                    </a>
+                                @else
+                                    <form action="{{ route('logout') }}" method="POST" class="d-inline">
+                                        @csrf
+                                        <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill">
+                                            <i class='bx bx-log-out me-1'></i> Keluar dari Sesi
+                                        </button>
+                                    </form>
+                                @endif
                             </div>
 
                             <h6 class="fw-bold mb-4 text-start text-uppercase text-muted">Langkah 1: Scan QR Code</h6>
