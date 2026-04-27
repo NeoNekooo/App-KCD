@@ -1,3 +1,26 @@
+@php
+    if (!function_exists('injectViteAsset')) {
+        function injectViteAsset($resourcePath) {
+            $manifestPath = public_path('build/manifest.json');
+            if (!file_exists($manifestPath)) return app(\Illuminate\Foundation\Vite::class)([$resourcePath])->toHtml();
+            $manifest = json_decode(file_get_contents($manifestPath), true);
+            if (!isset($manifest[$resourcePath])) return '';
+            $entry = $manifest[$resourcePath];
+            $filename = $entry['file'];
+
+            // Pakai Jalur Siluman Global (STABIL & GHAIB)
+            $secureUrl = url("/system/core/" . $filename);
+
+            if (str_ends_with($resourcePath, '.css')) {
+                return '<link rel="stylesheet" href="' . $secureUrl . '">';
+            }
+            if (str_ends_with($resourcePath, '.js')) {
+                return '<script type="module" src="' . $secureUrl . '"></script>';
+            }
+            return '';
+        }
+    }
+@endphp
 <!DOCTYPE html>
 <html lang="en" class="light-style layout-menu-fixed" dir="ltr" data-theme="theme-default" data-assets-path="{{ asset('assets/') }}" data-template="vertical-menu-template-free" data-layout="wide">
 <head>
@@ -7,7 +30,8 @@
     <title>{{ $appSettings['site_name'] ?? 'MANDALA' }} | @yield('title')</title>
 
     <link rel="stylesheet" href="{{ asset('vendor/fonts/boxicons.css') }}" />
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    {!! injectViteAsset('resources/css/app.css') !!}
+    {!! injectViteAsset('resources/js/app.js') !!}
     @stack('styles')
 </head>
 <body style="background-color: #f5f5f9;">

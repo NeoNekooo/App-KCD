@@ -24,13 +24,11 @@ class StealthModeMiddleware
 
             $content = $response->getContent();
             
-            // 1. Tambahkan Header Anti-Kepo
-            $response->headers->set('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
+            // 1. Tambahkan Header Keamanan yang lebih ramah DevTools
+            $response->headers->set('Cache-Control', 'no-cache, must-revalidate, max-age=0');
             $response->headers->set('Pragma', 'no-cache');
 
-            // Kita tidak perlu preg_replace di sini lagi karena file JS/CSS
-            // sudah dibersihkan secara otomatis di rute siluman (Proxy).
-            
+            // Tetap biarkan content utuh agar tidak error
             $response->setContent($content);
         }
 
