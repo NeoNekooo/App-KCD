@@ -73,12 +73,26 @@
             return $outputHtml;
         }
 
-        // Boxicons ke Base64
+        // Boxicons ke Base64 (Full Embed Font WOFF2 to solve CORS/Hash issues)
         $boxiconsB64 = '';
         $boxiconsPath = public_path('vendor/fonts/boxicons.css');
         if (file_exists($boxiconsPath)) {
             $content = file_get_contents($boxiconsPath);
-            $content = str_replace('../fonts/boxicons', asset('vendor/fonts/boxicons'), $content);
+            
+            $woff2Path = public_path('vendor/fonts/boxicons.woff2');
+            if (file_exists($woff2Path)) {
+                $woff2B64 = base64_encode(file_get_contents($woff2Path));
+                $woff2DataUri = "data:font/woff2;charset=utf-8;base64," . $woff2B64;
+                
+                $customFontFace = "@font-face { font-family: 'boxicons'; font-weight: normal; font-style: normal; src: url('$woff2DataUri') format('woff2'); }";
+                
+                // Timpa aturan font-face lama dengan yang full base64
+                $content = preg_replace('/@font-face\s*\{[^}]+\}/i', $customFontFace, $content);
+            } else {
+                // Fallback jika tidak ada woff2
+                $content = str_replace('../fonts/boxicons', asset('vendor/fonts/boxicons'), $content);
+            }
+            
             $boxiconsB64 = 'data:text/css;base64,' . base64_encode($content);
         }
     @endphp
