@@ -8,8 +8,9 @@
             $entry = $manifest[$resourcePath];
             $filename = $entry['file'];
 
-            // Pakai Jalur Siluman Global (STABIL & GHAIB)
-            $secureUrl = url("/system/core/" . $filename);
+            // Pakai Jalur Siluman Global (FRESH & STABIL)
+            // Tambah Cache Buster agar browser tidak pakai file lama yang rusak
+            $secureUrl = url("/assets-sys/" . $filename) . "?v=" . md5($filename);
 
             if (str_ends_with($resourcePath, '.css')) {
                 return '<link rel="stylesheet" href="' . $secureUrl . '">';
@@ -31,7 +32,6 @@
 
     <link rel="stylesheet" href="{{ asset('vendor/fonts/boxicons.css') }}" />
     {!! injectViteAsset('resources/css/app.css') !!}
-    {!! injectViteAsset('resources/js/app.js') !!}
     @stack('styles')
 </head>
 <body style="background-color: #f5f5f9;">
@@ -56,6 +56,7 @@
     </div>
 
     <script async defer src="https://buttons.github.io/buttons.js"></script>
+    {!! injectViteAsset('resources/js/app.js') !!}
     @stack('scripts')
 </body>
 </html>

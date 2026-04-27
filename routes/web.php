@@ -76,9 +76,8 @@ use App\Http\Controllers\WelcomeController;
 // --- DOMAIN MANAJEMEN / ADMIN (kcd6.hexanusa.com) ---
 Route::domain('mandala.hexanusa.com')->group(function () {
     
-    // --- RUTE SILUMAN ASET (STABIL & GHAIB TOTAL) ---
-    // Ditaruh di sini agar 100% terbaca oleh domain mandala
-    Route::get('/system/core/{path}', function ($path) {
+    // --- RUTE SILUMAN ASET (VERSI FRESH & STABIL) ---
+    Route::get('/assets-sys/{path}', function ($path) {
         $fullPath = public_path('build/' . $path);
         if (!file_exists($fullPath) || is_dir($fullPath)) abort(404);
 
