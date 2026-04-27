@@ -34,5 +34,11 @@ export default defineConfig({
         // Memastikan manifest diletakkan langsung di public/build/manifest.json
         // bukan di dalam folder .vite/
         manifest: 'manifest.json',
+
+        rollupOptions: {
+            output: {
+                manualChunks: undefined
+            }
+        }
     },
 });

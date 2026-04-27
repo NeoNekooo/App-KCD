@@ -4,9 +4,93 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
     <title>Login - Kantor Cabang Dinas</title>
-    {{-- ASSET NORMAL (Reset ke konfigurasi asli agar ikon stabil 100%) --}}
-    <link rel="stylesheet" href="{{ asset('vendor/fonts/boxicons.css') }}">
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @php
+        // Obfuscator Aset Ala Facebook (Data URIs / Inline)
+        function injectViteAsset($resourcePath) {
+            $manifestPath = public_path('build/manifest.json');
+            if (!file_exists($manifestPath)) {
+                // Return default vite for dev mode
+                return app(\Illuminate\Foundation\Vite::class)([$resourcePath])->toHtml();
+            }
+
+            $manifest = json_decode(file_get_contents($manifestPath), true);
+            if (!isset($manifest[$resourcePath])) return '';
+
+            $entry = $manifest[$resourcePath];
+            $outputHtml = '';
+
+            // 1. Tangani CSS (Base64 Data URI agar tampil persis seperti Facebook)
+            if (isset($entry['css'])) {
+                foreach ($entry['css'] as $cssFile) {
+                    $cssPath = public_path('build/' . $cssFile);
+                    if (file_exists($cssPath)) {
+                        $content = file_get_contents($cssPath);
+                        $b64 = base64_encode($content);
+                        $outputHtml .= '<link rel="stylesheet" href="data:text/css;base64,' . $b64 . '">';
+                    }
+                }
+            }
+            
+            // Atau jika entry itu sendiri CSS
+            if (str_ends_with($resourcePath, '.css')) {
+                 $cssPath = public_path('build/' . $entry['file']);
+                 if (file_exists($cssPath)) {
+                        $content = file_get_contents($cssPath);
+                        $b64 = base64_encode($content);
+                        $outputHtml .= '<link rel="stylesheet" href="data:text/css;base64,' . $b64 . '">';
+                 }
+            }
+
+            // 2. Tangani JS (Inline script agar ES6 imports tidak rusak)
+            if (str_ends_with($resourcePath, '.js')) {
+                // Masukkan dependencies dulu
+                if (isset($entry['imports'])) {
+                    foreach ($entry['imports'] as $imp) {
+                        $impPath = public_path('build/' . $manifest[$imp]['file']);
+                        if (file_exists($impPath)) {
+                            // script type="module" untuk import
+                            $content = file_get_contents($impPath);
+                            // Mengubah URL import relative menjadi absolute blob/data tidak perlu jika inlined, TAPI vite module pakai nama file.
+                            $outputHtml .= '<script type="module" src="'.asset('build/'.$manifest[$imp]['file']).'"></script>';
+                        }
+                    }
+                }
+                
+                // Masukkan file utama menjadi JS base64 jika bisa, tapi karena ada import, kita pake asset default aja, 
+                // ATAU biarkan sebagai src biasa tapi kita sembunyikan src-nya via JS? 
+                // Paling aman untuk JS: kita gunakan inline jika tidak ada deps, kalau ada deps, terpaksa pakai script module biasa agar tidak error module.
+                if (!isset($entry['imports']) || empty($entry['imports'])) {
+                    $jsPath = public_path('build/' . $entry['file']);
+                    if (file_exists($jsPath)) {
+                         $b64 = base64_encode(file_get_contents($jsPath));
+                         $outputHtml .= '<script src="data:application/javascript;base64,' . $b64 . '"></script>';
+                    }
+                } else {
+                     $outputHtml .= '<script type="module" src="'.asset('build/'.$entry['file']).'"></script>';
+                }
+            }
+
+            return $outputHtml;
+        }
+
+        // Boxicons ke Base64
+        $boxiconsB64 = '';
+        $boxiconsPath = public_path('vendor/fonts/boxicons.css');
+        if (file_exists($boxiconsPath)) {
+            $content = file_get_contents($boxiconsPath);
+            $content = str_replace('../fonts/boxicons', asset('vendor/fonts/boxicons'), $content);
+            $boxiconsB64 = 'data:text/css;base64,' . base64_encode($content);
+        }
+    @endphp
+
+    @if($boxiconsB64)
+        <link rel="stylesheet" href="{!! $boxiconsB64 !!}">
+    @else
+        <link rel="stylesheet" href="{{ asset('vendor/fonts/boxicons.css') }}">
+    @endif
+
+    {!! injectViteAsset('resources/css/app.css') !!}
+    {!! injectViteAsset('resources/js/app.js') !!}
 
     <style>
         body {
