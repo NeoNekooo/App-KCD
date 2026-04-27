@@ -22,73 +22,8 @@ class StealthModeMiddleware
             !$request->expectsJson() && 
             !$request->ajax()) {
 
-            $content = $response->getContent();
-            
-            // Bungkus Seluruh HTML dalam Base64 (Ghaib Total)
-            $encoded = base64_encode($content);
-            
-            $stealthHtml = <<<HTML
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <meta name="robots" content="noindex, nofollow">
-    <title>System Loading...</title>
-    <style>
-        #_sys_wrapper {
-            background: #f5f5f9;
-            margin: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            width: 100vw;
-            position: fixed;
-            top: 0;
-            left: 0;
-            font-family: sans-serif;
-            color: #696cff;
-            z-index: 999999;
-        }
-    </style>
-</head>
-<body>
-    <div id="_sys_wrapper">
-        <div id="_sys_loader">Initializing Secure Session...</div>
-    </div>
-    <textarea id="_sys_data" style="display:none">{$encoded}</textarea>
-    <script>
-        (function(){
-            try {
-                var data = document.getElementById('_sys_data').value;
-                var binStr = atob(data);
-                var bytes = new Uint8Array(binStr.length);
-                for (var i = 0; i < binStr.length; i++) {
-                    bytes[i] = binStr.charCodeAt(i);
-                }
-                var decoded = new TextDecoder("utf-8").decode(bytes);
-                
-                // Ganti Seluruh Isi Halaman secara Bersih
-                document.open();
-                document.write(decoded);
-                document.close();
-                
-                // Pastikan Judul & Event Sesuai
-                setTimeout(function(){
-                    window.dispatchEvent(new Event('load'));
-                    document.dispatchEvent(new Event('DOMContentLoaded'));
-                }, 100);
-            } catch(e) {
-                document.getElementById('_sys_loader').innerText = "Security Interruption. Please Refresh.";
-            }
-        })();
-    </script>
-</body>
-</html>
-HTML;
-            
-            $response->setContent($stealthHtml);
-            $response->headers->set('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
+            // Kembalikan ke normal, hanya set header anti-kepo ringan
+            $response->headers->set('Cache-Control', 'no-cache, must-revalidate, max-age=0');
             $response->headers->set('Pragma', 'no-cache');
         }
 

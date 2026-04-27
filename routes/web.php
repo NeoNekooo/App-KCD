@@ -55,7 +55,7 @@ use App\Http\Controllers\Admin\SettingController as WebSettingController;
 
 // --- Rute 2FA Google Authenticator ---
 use App\Http\Controllers\Auth\Google2FAController;
-Route::middleware(['auth', 'stealth'])->group(function () {
+Route::middleware(['auth'])->group(function () {
     Route::get('/2fa/verify', [Google2FAController::class, 'showVerifyForm'])->name('2fa.verify');
     Route::post('/2fa/verify', [Google2FAController::class, 'verify']);
     
@@ -75,33 +75,6 @@ use App\Http\Controllers\WelcomeController;
 
 // --- DOMAIN MANAJEMEN / ADMIN (kcd6.hexanusa.com) ---
 Route::domain('mandala.hexanusa.com')->group(function () {
-    
-    // --- RUTE SILUMAN ASET (VERSI FRESH & STABIL) ---
-    Route::get('/assets-sys/{path}', function ($path) {
-        $fullPath = public_path('build/' . $path);
-        if (!file_exists($fullPath) || is_dir($fullPath)) abort(404);
-
-        $extension = pathinfo($path, PATHINFO_EXTENSION);
-        $mimeTypes = [
-            'js'    => 'application/javascript',
-            'css'   => 'text/css',
-            'woff'  => 'font/woff',
-            'woff2' => 'font/woff2',
-            'ttf'   => 'font/ttf',
-            'png'   => 'image/png',
-            'jpg'   => 'image/jpeg',
-            'jpeg'  => 'image/jpeg',
-            'svg'   => 'image/svg+xml',
-            'ico'   => 'image/x-icon',
-        ];
-        
-        $contentType = $mimeTypes[$extension] ?? 'application/octet-stream';
-        
-        return response(file_get_contents($fullPath))
-            ->header('Content-Type', $contentType)
-            ->header('Access-Control-Allow-Origin', '*');
-    })->where('path', '.*')->name('system.core');
-
     Route::get('/', function () {
         return redirect()->route('login');
     });
@@ -239,7 +212,7 @@ Route::post('/buku-tamu/{id}/print', [GuestBookController::class, 'requestPrint'
 | PANEL ADMIN (Backend)
 |--------------------------------------------------------------------------
 */
-Route::prefix('admin')->name('admin.')->middleware(['auth', '2fa', 'stealth'])->group(function () {
+Route::prefix('admin')->name('admin.')->middleware(['auth', '2fa'])->group(function () {
 
     // 1. DASHBOARD
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
