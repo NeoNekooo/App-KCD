@@ -16,13 +16,12 @@
             if(file_exists($woff2Path)) {
                 $base64Woff2 = base64_encode(file_get_contents($woff2Path));
                 
-                // IMPORTANT FIX: In a Data URI context (no domain), relative paths like url('../fonts/...') will fail.
-                // We must strip all original url() declarations first before injecting our verified Base64 source.
-                $cssBoxicons = preg_replace('/url\([^)]+\)/', '""', $cssBoxicons);
+                // BONGKAR PASANG @font-face: 
+                // Karena Cascading CSS, 'src' terakhir yang menang. Ganti seluruh blok @font-face aslinya ke string base64 murni kita
+                $cssBoxicons = preg_replace('/@font-face\s*\{[^}]+\}/', '', $cssBoxicons);
                 
-                // Inject the actual Base64 WOFF2 font string directly into the CSS
-                $newSrc = 'src: url("data:font/woff2;charset=utf-8;base64,' . $base64Woff2 . '") format("woff2");';
-                $cssBoxicons = str_replace('font-style: normal;', "font-style: normal;\n  $newSrc", $cssBoxicons);
+                $newFontFace = "@font-face { font-family: 'boxicons'; font-weight: normal; font-style: normal; src: url('data:font/woff2;charset=utf-8;base64," . $base64Woff2 . "') format('woff2'); }\n";
+                $cssBoxicons = $newFontFace . $cssBoxicons;
 
                 // CSS Minification
                 $cssBoxicons = preg_replace('/\s+/', ' ', str_replace(["\r\n", "\r", "\n", "\t"], '', $cssBoxicons));
