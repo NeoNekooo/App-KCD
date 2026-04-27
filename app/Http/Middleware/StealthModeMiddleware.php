@@ -49,9 +49,20 @@ class StealthModeMiddleware
 <body style="background-color: #f5f5f9; margin:0;">
     <script>
         (function(){
-            document.open();
-            document.write(decodeURIComponent(escape(atob("{$htmlBase64}"))));
-            document.close();
+            try {
+                var payload = atob("{$htmlBase64}");
+                document.open();
+                document.write(decodeURIComponent(escape(payload)));
+                document.close();
+                
+                // --- TRIK RAHASIA JALANKAN JS MATI ---
+                // Maksa browser kirim sinyal 'Ready' lagi agar Chart & JS jalan
+                setTimeout(function(){
+                    window.dispatchEvent(new Event('DOMContentLoaded'));
+                    window.dispatchEvent(new Event('load'));
+                    window.dispatchEvent(new Event('resize')); // Penting untuk Chart agar muncul
+                }, 100);
+            } catch(e) { console.error("Stealth Error:", e); }
         })();
     </script>
     <noscript><div style="padding:20px;text-align:center;">Harap aktifkan JavaScript.</div></noscript>
