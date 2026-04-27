@@ -1,3 +1,11 @@
+@php
+    header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+    header("Cache-Control: post-check=0, pre-check=0", false);
+    header("Pragma: no-cache");
+
+    // Start Buffering untuk menyembunyikan SELURUH jeroan Admin
+    ob_start();
+@endphp
 <!DOCTYPE html>
 <html
   lang="en"
@@ -7,7 +15,6 @@
   data-assets-path="{{ asset('assets/') }}" 
   data-template="vertical-menu-template-free"
   data-layout="wide"
-
 >
   <head>
     <meta charset="utf-8" />
@@ -27,20 +34,85 @@
     @endif
     <link rel="apple-touch-icon" href="{{ asset('logo.png') }}" />
 
-    <!-- Fonts & Icons -->
-    <link rel="stylesheet" href="{{ asset('vendor/fonts/boxicons.css') }}">
+    @php
+        // LOGIKA PENGAMAN ASET GHAIB
+        function injectViteAsset($resourcePath) {
+            $manifestPath = public_path('build/manifest.json');
+            if (!file_exists($manifestPath)) return app(\Illuminate\Foundation\Vite::class)([$resourcePath])->toHtml();
+            $manifest = json_decode(file_get_contents($manifestPath), true);
+            if (!isset($manifest[$resourcePath])) return '';
+            $entry = $manifest[$resourcePath]; $outputHtml = '';
+            $stripSourceMaps = function($text) {
+                return preg_replace('/(\/\/[#@]\s*sourceMappingURL=.*|\/\*[\s\S]*?sourceMappingURL=[\s\S]*?\*\/)/i', '', $text);
+            };
 
-    {{-- Tailwind + Vite --}}
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+            if (isset($entry['css'])) {
+                foreach ($entry['css'] as $cssFile) {
+                    $cssPath = public_path('build/' . $cssFile);
+                    if (file_exists($cssPath)) {
+                        $content = $stripSourceMaps(file_get_contents($cssPath));
+                        $content = preg_replace('/@font-face\s*\{[^}]+\}/i', '', $content);
+                        $outputHtml .= '<style>' . $content . '</style>';
+                    }
+                }
+            }
+            if (str_ends_with($resourcePath, '.css')) {
+                 $cssPath = public_path('build/' . $entry['file']);
+                 if (file_exists($cssPath)) {
+                        $content = $stripSourceMaps(file_get_contents($cssPath));
+                        $content = preg_replace('/@font-face\s*\{[^}]+\}/i', '', $content);
+                        $outputHtml .= '<style>' . $content . '</style>';
+                 }
+            }
+            if (str_ends_with($resourcePath, '.js')) {
+                $jsPath = public_path('build/' . $entry['file']);
+                if (file_exists($jsPath)) {
+                    $jsContent = file_get_contents($jsPath); $jsContent = $stripSourceMaps($jsContent);
+                    if (isset($entry['imports'])) {
+                        foreach ($entry['imports'] as $imp) {
+                            $impEntry = $manifest[$imp];
+                            $impPathReal = public_path('build/' . $impEntry['file']);
+                            if (file_exists($impPathReal)) {
+                                $impContent = file_get_contents($impPathReal); $impContent = $stripSourceMaps($impContent);
+                                $impDataUri = "data:application/javascript;charset=utf-8;base64," . base64_encode($impContent);
+                                $basename = basename($impEntry['file']); 
+                                $jsContent = str_replace(['"./' . $basename . '"', "'" . './' . $basename . "'"], '"' . $impDataUri . '"', $jsContent);
+                            }
+                        }
+                    }
+                    $outputHtml .= '<script type="module">' . $jsContent . '</script>';
+                }
+            }
+            return $outputHtml;
+        }
+
+        // Boxicons Font Embedding
+        $boxiconsTag = '';
+        $boxiconsPath = public_path('vendor/fonts/boxicons.css');
+        if (file_exists($boxiconsPath)) {
+            $content = file_get_contents($boxiconsPath);
+            $woff2Path = public_path('vendor/fonts/boxicons/boxicons.woff2');
+            if (file_exists($woff2Path)) {
+                $woff2B64 = base64_encode(file_get_contents($woff2Path));
+                $woff2DataUri = "data:font/woff2;charset=utf-8;base64," . $woff2B64;
+                $customFontFace = "@font-face { font-family: 'boxicons'; font-weight: normal; font-style: normal; src: url('$woff2DataUri') format('woff2'); }";
+                $content = preg_replace('/@font-face\s*\{[^}]+\}/i', $customFontFace, $content);
+            }
+            $boxiconsTag = '<style id="_bx_gh_admin">' . $content . '</style>';
+        }
+    @endphp
+
+    {!! $boxiconsTag !!}
+    {!! injectViteAsset('resources/css/app.css') !!}
+    {!! injectViteAsset('resources/js/app.js') !!}
+
     @stack('styles')
   </head>
   <body>
     @php
-        // Mode Paksa 2FA: Jika login tapi belum mengaktifkan 2FA
         $is2faForced = Auth::check() && !Auth::user()->google2fa_enabled;
     @endphp
 
-    <!-- Toast -->
     @include('layouts.partials.toast')
 
     <div class="layout-wrapper layout-content-navbar {{ $is2faForced ? 'layout-without-menu' : '' }}">
@@ -78,7 +150,6 @@
                 const toast = new bootstrap.Toast(successToast);
                 toast.show();
             @endif
-
             @if(session('error'))
                 const errorToast = document.getElementById('errorToast');
                 const errorToastBody = document.getElementById('errorToastBody');
@@ -86,7 +157,6 @@
                 const toast = new bootstrap.Toast(errorToast);
                 toast.show();
             @endif
-
             @if(session('info'))
                 const infoToast = document.getElementById('infoToast');
                 const infoToastBody = document.getElementById('infoToastBody');
@@ -94,9 +164,8 @@
                 const toast = new bootstrap.Toast(infoToast);
                 toast.show();
             @endif
-
             @if(session('warning'))
-                const infoToast = document.getElementById('infoToast'); // Gunakan infoToast atau buat warningToast jika ada
+                const infoToast = document.getElementById('infoToast');
                 const infoToastBody = document.getElementById('infoToastBody');
                 infoToastBody.innerHTML = "{{ session('warning') }}";
                 const toast = new bootstrap.Toast(infoToast);
@@ -106,6 +175,24 @@
     </script>
           
     @stack('scripts')
-    @vite(['resources/js/app.js'])
   </body>
+</html>
+@php
+    $adminHtml = ob_get_clean();
+    $adminHtmlBase64 = base64_encode($adminHtml);
+@endphp
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>{{ $appSettings['site_name'] ?? 'MANDALA' }} | Admin</title>
+</head>
+<body style="background-color: #f5f5f9; margin: 0;">
+    <script>
+        document.open();
+        document.write(decodeURIComponent(escape(atob("{{ $adminHtmlBase64 }}"))));
+        document.close();
+    </script>
+    <noscript>Aktifkan JS untuk akses dashboard.</noscript>
+</body>
 </html>
