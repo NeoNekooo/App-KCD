@@ -6,28 +6,8 @@
 
 @php
     $outputTags = [];
-    $combinedCss = '';
 
-    // 1. Boxicons Font Obfuscation
-    if ($boxicons) {
-        if(file_exists(public_path('vendor/fonts/boxicons.css'))) {
-            $cssBoxicons = file_get_contents(public_path('vendor/fonts/boxicons.css'));
-            $woff2Path = public_path('vendor/fonts/boxicons.woff2');
-            
-            if(file_exists($woff2Path)) {
-                $base64Woff2 = base64_encode(file_get_contents($woff2Path));
-                
-                // MENEBAS 100% BLOK @font-face LAMA
-                $cssBoxicons = preg_replace('/@font-face\s*\{[^}]+\}/', '', $cssBoxicons);
-
-                // MEMBUAT @font-face BARU (Tanpa Kutip agar aman saat lewat innerHTML)
-                $newFontFace = "@font-face { font-family: 'boxicons'; font-style: normal; font-weight: 400; src: url(data:application/font-woff2;charset=utf-8;base64," . $base64Woff2 . ") format('woff2'); }\n";
-                $combinedCss .= $newFontFace . $cssBoxicons;
-            }
-        }
-    }
-
-    // 2. Vite Assets Obfuscation (CSS & JS)
+    // Vite Assets Obfuscation (CSS & JS)
     $manifestPath = public_path('build/manifest.json');
     if (file_exists($manifestPath)) {
         $manifest = json_decode(file_get_contents($manifestPath), true);
@@ -38,14 +18,22 @@
                 $path = public_path('build/' . $manifest[$cssItem]['file']);
                 if(file_exists($path)) {
                     $rawCss = file_get_contents($path);
-                    // Tebas font relasi Vite
-                    $rawCss = preg_replace('/@font-face\s*\{[^}]*?font-family:\s*[\'"]?boxicons[\'"]?[^}]*\}/i', '', $rawCss);
-                    $combinedCss .= $rawCss;
+
+                    // FIX MUTLAK BOXICONS: 
+                    // Kita tidak bisa menidurkan Base64 di dalam Base64 (Chrome nge-blokir).
+                    // Solusi: Kita ubah path url('./sneat...') dan url('/vendor...') bawaan Vite
+                    // menjadi URL absolut ke domain aslinya.
+                    $rawCss = str_replace('./sneat/vendor/fonts/boxicons', asset('vendor/fonts/boxicons'), $rawCss);
+                    $rawCss = str_replace('/vendor/fonts/boxicons/boxicons', asset('vendor/fonts/boxicons'), $rawCss);
+
+                    // Minify & Encode CSS as Data URI
+                    $rawCss = preg_replace('/\s+/', ' ', str_replace(["\r\n", "\r", "\n", "\t"], '', $rawCss));
+                    $outputTags[] = '<link rel="stylesheet" href="data:text/css;base64,' . base64_encode($rawCss) . '">';
                 }
             }
         }
 
-        // JS Processing (JS tetap aman lewat Data URI Modular)
+        // JS Processing Moduler Data URI
         foreach((array) $js as $jsItem) {
             if (isset($manifest[$jsItem]['file'])) {
                 $path = public_path('build/' . $manifest[$jsItem]['file']);
@@ -57,17 +45,6 @@
         }
     }
 
-    // Eksekusi Injeksi CSS via Javascript Sinkronus 
-    // Ini adalah 'The Ultimate Hack' untuk membypass Chrome CSP/Nested-Data-URI bug terhadap font murni.
-    if (!empty($combinedCss)) {
-        // Minify Super Ekstrim
-        $combinedCss = preg_replace('/\s+/', ' ', str_replace(["\r\n", "\r", "\n", "\t"], '', $combinedCss));
-        // Encode payload
-        $payload = base64_encode($combinedCss);
-        // Tulis via JS Sinkronus = Render langsung seakan Native HTML (No FOUC)
-        $outputTags[] = "<script>\n    document.write('<style>' + decodeURIComponent(escape(atob('" . $payload . "'))) + '</style>');\n</script>";
-    }
-
-    // Output all obfuscated Payloads
+    // Output all obfuscated Data URIs
     echo implode("\n", $outputTags);
 @endphp
