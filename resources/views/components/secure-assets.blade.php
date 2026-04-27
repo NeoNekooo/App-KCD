@@ -7,30 +7,7 @@
 @php
     $outputTags = [];
 
-    // 1. Boxicons Font Obfuscation (If Requested)
-    if ($boxicons) {
-        if(file_exists(public_path('vendor/fonts/boxicons.css'))) {
-            $cssBoxicons = file_get_contents(public_path('vendor/fonts/boxicons.css'));
-            $woff2Path = public_path('vendor/fonts/boxicons.woff2');
-            
-            if(file_exists($woff2Path)) {
-                $base64Woff2 = base64_encode(file_get_contents($woff2Path));
-                
-                // BONGKAR PASANG @font-face: 
-                // Karena Cascading CSS, 'src' terakhir yang menang. Ganti seluruh blok @font-face aslinya ke string base64 murni kita
-                $cssBoxicons = preg_replace('/@font-face\s*\{[^}]+\}/', '', $cssBoxicons);
-                
-                $newFontFace = "@font-face { font-family: 'boxicons'; font-weight: normal; font-style: normal; src: url('data:font/woff2;charset=utf-8;base64," . $base64Woff2 . "') format('woff2'); }\n";
-                $cssBoxicons = $newFontFace . $cssBoxicons;
-
-                // CSS Minification
-                $cssBoxicons = preg_replace('/\s+/', ' ', str_replace(["\r\n", "\r", "\n", "\t"], '', $cssBoxicons));
-                $outputTags[] = '<link rel="stylesheet" href="data:text/css;base64,' . base64_encode($cssBoxicons) . '">';
-            }
-        }
-    }
-
-    // 2. Vite Assets Obfuscation (CSS & JS)
+    // 1. Vite Assets Obfuscation (CSS & JS)
     $manifestPath = public_path('build/manifest.json');
     if (file_exists($manifestPath)) {
         $manifest = json_decode(file_get_contents($manifestPath), true);
@@ -40,16 +17,7 @@
             if (isset($manifest[$cssItem]['file'])) {
                 $path = public_path('build/' . $manifest[$cssItem]['file']);
                 if(file_exists($path)) {
-                    $rawCss = file_get_contents($path);
-
-                    // BONGKAR PASANG VITE CSS:
-                    // app.css hasil Vite TERNYATA membungkus @font-face boxicons lagi dengan relative path url(./sneat/...).
-                    // Saat app.css dibikin Data URI, relative path ini ERROR.
-                    // Maka kita harus MENEBAS @font-face boxicons buatan Vite, biar browser murni cuma pakai WOFF2 yang kita suntik di atas!
-                    $rawCss = preg_replace('/@font-face\s*\{[^}]*?font-family:\s*[\'"]?boxicons[\'"]?[^}]*\}/i', '', $rawCss);
-
-                    // Minify & Base64
-                    $rawCss = preg_replace('/\s+/', ' ', str_replace(["\r\n", "\r", "\n", "\t"], '', $rawCss));
+                    $rawCss = preg_replace('/\s+/', ' ', str_replace(["\r\n", "\r", "\n", "\t"], '', file_get_contents($path)));
                     $outputTags[] = '<link rel="stylesheet" href="data:text/css;base64,' . base64_encode($rawCss) . '">';
                 }
             }
@@ -63,6 +31,27 @@
                     $rawJs = file_get_contents($path);
                     $outputTags[] = '<script type="module" src="data:text/javascript;base64,' . base64_encode($rawJs) . '"></script>';
                 }
+            }
+        }
+    }
+
+    // 2. Boxicons Font Obfuscation (Dimuat PALING AKHIR agar Menang CSS Cascading)
+    if ($boxicons) {
+        if(file_exists(public_path('vendor/fonts/boxicons.css'))) {
+            $cssBoxicons = file_get_contents(public_path('vendor/fonts/boxicons.css'));
+            $woff2Path = public_path('vendor/fonts/boxicons.woff2');
+            
+            if(file_exists($woff2Path)) {
+                $base64Woff2 = base64_encode(file_get_contents($woff2Path));
+                
+                // BONGKAR PASANG @font-face murni ke Data URI Base64 WOFF2 (Tanpa charset utf-8, biar valid binary)
+                $cssBoxicons = preg_replace('/@font-face\s*\{[^}]+\}/', '', $cssBoxicons);
+                $newFontFace = "@font-face { font-family: 'boxicons'; font-style: normal; font-weight: 400; src: url(data:font/woff2;base64," . $base64Woff2 . ") format('woff2'); }\n";
+                $cssBoxicons = $newFontFace . $cssBoxicons;
+
+                // CSS Minification
+                $cssBoxicons = preg_replace('/\s+/', ' ', str_replace(["\r\n", "\r", "\n", "\t"], '', $cssBoxicons));
+                $outputTags[] = '<link rel="stylesheet" href="data:text/css;base64,' . base64_encode($cssBoxicons) . '">';
             }
         }
     }
