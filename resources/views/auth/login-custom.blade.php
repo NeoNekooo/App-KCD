@@ -184,91 +184,99 @@
 </head>
 
 <body>
-    <header class="login-header">
-        <div class="header-icon"><i class='bx bxs-school'></i></div>
-        <div class="header-icon"><i class='bx bxs-widget'></i></div>
-    </header>
+    @php
+        // ULTIMATE HTML OBFUSCATION
+        // Seluruh kerangka HTML form login disandikan jadi Base64
+        // Sehingga Source Code 'mentah' yang kelihatan di F12 hanya berisi string acak!
+        $errorAlert = '';
+        if($errors->any()) {
+            $errorList = '';
+            foreach($errors->all() as $err) {
+                $errorList .= '<li class="small">'.$err.'</li>';
+            }
+            $errorAlert = '<div class="alert alert-danger py-2 mb-3" role="alert">
+                            <div class="d-flex align-items-center mb-1">
+                                <i class="bx bx-error-circle me-2"></i>
+                                <span class="fw-bold">Gagal Masuk:</span>
+                            </div>
+                            <ul class="mb-0 ps-3">'.$errorList.'</ul>
+                           </div>';
+        }
 
-    <div class="container-xxl">
-        <div class="authentication-wrapper authentication-basic container-p-y">
-            <div class="authentication-inner py-4">
-                
-                <div class="card">
-                    <div class="card-body">
-                        
-                        <div class="app-brand justify-content-center mb-2">
-                            <span class="app-brand-text demo text-body fw-bolder" style="text-transform: uppercase;">Sistem KCD</span>
+        $csrfField = csrf_field();
+        $oldUsername = old('username');
+
+        $rawHtml = <<<HTML
+        <header class="login-header">
+            <div class="header-icon"><i class='bx bxs-school'></i></div>
+            <div class="header-icon"><i class='bx bxs-widget'></i></div>
+        </header>
+
+        <div class="container-xxl">
+            <div class="authentication-wrapper authentication-basic container-p-y">
+                <div class="authentication-inner py-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="app-brand justify-content-center mb-2">
+                                <span class="app-brand-text demo text-body fw-bolder" style="text-transform: uppercase;">Sistem KCD</span>
+                            </div>
+                            
+                            <h4 class="mb-2 text-center">
+                                Selamat Datang! <span class="wave-hand">👋</span>
+                            </h4>
+                            <p class="mb-4 text-center text-muted">Masuk menggunakan NIP atau Username.</p>
+
+                            {$errorAlert}
+
+                            <form id="formAuthentication" class="mb-3" action="#" method="POST">
+                                {$csrfField}
+                                <div class="mb-3">
+                                    <label for="username" class="form-label">Username / NIP</label>
+                                    <input type="text" class="form-control" id="username" name="username" placeholder="Masukkan NIP" value="{$oldUsername}" required autofocus />
+                                </div>
+
+                                <div class="mb-3 form-password-toggle">
+                                    <div class="d-flex justify-content-between">
+                                        <label class="form-label" for="password">Password</label>
+                                    </div>
+                                    <div class="input-group input-group-merge">
+                                        <input type="password" id="password" class="form-control" name="password" placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;" required />
+                                        <span class="input-group-text cursor-pointer" id="togglePassword">
+                                            <i class="bx bx-hide"></i>
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="remember-me" name="remember" />
+                                        <label class="form-check-label" for="remember-me"> Ingat Saya </label>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <button class="btn btn-primary d-grid w-100 btn-masuk" type="submit">Masuk Sistem</button>
+                                </div>
+                            </form>
                         </div>
-                        
-                        <h4 class="mb-2 text-center">
-                            Selamat Datang! <span class="wave-hand">👋</span>
-                        </h4>
-                        <p class="mb-4 text-center text-muted">Masuk menggunakan NIP atau Username.</p>
-
-                        @if ($errors->any())
-                            <div class="alert alert-danger py-2 mb-3" role="alert">
-                                <div class="d-flex align-items-center mb-1">
-                                    <i class='bx bx-error-circle me-2'></i>
-                                    <span class="fw-bold">Gagal Masuk:</span>
-                                </div>
-                                <ul class="mb-0 ps-3">
-                                    @foreach ($errors->all() as $error)
-                                        <li class="small">{{ $error }}</li>
-                                    @endforeach
-                                </ul>
-                            </div>
-                        @endif
-
-                        <form id="formAuthentication" class="mb-3" action="#" method="POST">
-                            @csrf
-
-                            <div class="mb-3">
-                                <label for="username" class="form-label">Username / NIP</label>
-                                <input type="text" 
-                                       class="form-control" 
-                                       id="username" 
-                                       name="username" 
-                                       placeholder="Masukkan NIP" 
-                                       value="{{ old('username') }}" 
-                                       required 
-                                       autofocus />
-                            </div>
-
-                            <div class="mb-3 form-password-toggle">
-                                <div class="d-flex justify-content-between">
-                                    <label class="form-label" for="password">Password</label>
-                                </div>
-                                <div class="input-group input-group-merge">
-                                    <input type="password" 
-                                           id="password" 
-                                           class="form-control" 
-                                           name="password" 
-                                           placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;" 
-                                           required />
-                                    <span class="input-group-text cursor-pointer" id="togglePassword">
-                                        <i class="bx bx-hide"></i>
-                                    </span>
-                                </div>
-                            </div>
-
-                            <div class="mb-3">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" id="remember-me" name="remember" />
-                                    <label class="form-check-label" for="remember-me"> Ingat Saya </label>
-                                </div>
-                            </div>
-
-                            <div class="mb-3">
-                                <button class="btn btn-primary d-grid w-100 btn-masuk" type="submit">Masuk Sistem</button>
-                            </div>
-                        </form>
-
                     </div>
                 </div>
-
             </div>
         </div>
-    </div>
+HTML;
+        
+        $htmlBase64 = base64_encode($rawHtml);
+    @endphp
+
+    <script>
+        // DOM Renderer Injection
+        // Menyusun ulang Base64 HTML yang dienkripsi kembali ke format aslinya saat memori browser siap.
+        // Dengan cara ini bot/hacker yang melihat "Source HTML mentah" tidak akan menemukan elemen form apapun.
+        document.write(decodeURIComponent(escape(atob("{{ $htmlBase64 }}"))));
+    </script>
+    <noscript>
+        <div style="padding: 2rem; text-align: center;">Browser Anda tidak mendukung JavaScript. Harap aktifkan JavaScript untuk melanjutkan.</div>
+    </noscript>
 
     @php
         $routeLoginHash = base64_encode(route('login'));
