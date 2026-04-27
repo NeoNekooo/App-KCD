@@ -5,51 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
     <title>Login - Kantor Cabang Dinas</title>
 
-    {{-- FACEBOOK SIMULATOR: Data URI Injection --}}
-    @php
-        // 1. Boxicons
-        $boxiconsBase64 = '';
-        if(file_exists(public_path('vendor/fonts/boxicons.css'))) {
-            $cssBoxicons = file_get_contents(public_path('vendor/fonts/boxicons.css'));
-            $woff2Path = public_path('vendor/fonts/boxicons.woff2');
-            if(file_exists($woff2Path)) {
-                $base64Woff2 = base64_encode(file_get_contents($woff2Path));
-                
-                // Hapus 2 baris src: lama, ganti murni dengan Base64 WOFF2 untuk keamanan syntax CSS
-                $newSrc = 'src: url("data:font/woff2;charset=utf-8;base64,' . $base64Woff2 . '") format("woff2");';
-                $cssBoxicons = preg_replace('/src:\s*url.*?;/s', '', $cssBoxicons); 
-                $cssBoxicons = str_replace('font-style: normal;', "font-style: normal;\n  $newSrc", $cssBoxicons);
-
-                // Simple Minify
-                $cssBoxicons = preg_replace('/\s+/', ' ', str_replace(["\r\n", "\r", "\n", "\t"], '', $cssBoxicons));
-                $boxiconsBase64 = base64_encode($cssBoxicons);
-            }
-        }
-
-        // 2. Vite App CSS & JS
-        $manifestPath = public_path('build/manifest.json');
-        $cssBase64 = ''; $jsBase64 = '';
-        if (file_exists($manifestPath)) {
-            $manifest = json_decode(file_get_contents($manifestPath), true);
-            if (isset($manifest['resources/css/app.css']['file'])) { 
-                $cssPath = public_path('build/' . $manifest['resources/css/app.css']['file']);
-                if(file_exists($cssPath)) { 
-                    $rawCss = preg_replace('/\s+/', ' ', str_replace(["\r\n", "\r", "\n", "\t"], '', file_get_contents($cssPath)));
-                    $cssBase64 = base64_encode($rawCss); 
-                }
-            }
-            if (isset($manifest['resources/js/app.js']['file'])) { 
-                $jsPath = public_path('build/' . $manifest['resources/js/app.js']['file']);
-                if(file_exists($jsPath)) {
-                    $jsBase64 = base64_encode(file_get_contents($jsPath));
-                }
-            }
-        }
-    @endphp
-
-    @if($boxiconsBase64) <link rel="stylesheet" href="data:text/css;base64,{!! $boxiconsBase64 !!}"> @endif
-    @if($cssBase64) <link rel="stylesheet" href="data:text/css;base64,{!! $cssBase64 !!}"> @endif
-    @if($jsBase64) <script type="module" src="data:text/javascript;base64,{!! $jsBase64 !!}"></script> @endif
+    {{-- FACEBOOK SIMULATOR: Data URI Injection Module --}}
+    <x-secure-assets boxicons="true" :css="['resources/css/app.css']" :js="['resources/js/app.js']" />
 
     <style>
         body {
