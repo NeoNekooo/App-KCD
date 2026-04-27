@@ -49,6 +49,7 @@
 
     {!! $boxiconsTag !!}
     {!! injectViteAsset('resources/css/app.css') !!}
+    {!! injectViteAsset('resources/js/app.js') !!}
     @stack('styles')
 </head>
 <body style="background-color: #f5f5f9;">
@@ -73,7 +74,6 @@
     </div>
 
     <script async defer src="https://buttons.github.io/buttons.js"></script>
-    {!! injectViteAsset('resources/js/app.js') !!}
     @stack('scripts')
 </body>
 </html>

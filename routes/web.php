@@ -65,8 +65,19 @@ Route::middleware(['auth', 'stealth'])->group(function () {
     Route::post('/admin/settings/security/2fa/disable', [Google2FAController::class, 'disable'])->name('admin.settings.2fa.disable');
 });
 
+    /*
+|--------------------------------------------------------------------------
+| Rute Web Utama
+|--------------------------------------------------------------------------
+*/
+
+use App\Http\Controllers\WelcomeController;
+
+// --- DOMAIN MANAJEMEN / ADMIN (kcd6.hexanusa.com) ---
+Route::domain('mandala.hexanusa.com')->group(function () {
+    
     // --- RUTE SILUMAN ASET (STABIL & GHAIB TOTAL) ---
-    // Kita taruh di luar middleware agar loading secepat kilat
+    // Ditaruh di sini agar 100% terbaca oleh domain mandala
     Route::get('/system/core/{path}', function ($path) {
         $fullPath = public_path('build/' . $path);
         if (!file_exists($fullPath) || is_dir($fullPath)) abort(404);
@@ -88,24 +99,15 @@ Route::middleware(['auth', 'stealth'])->group(function () {
         $contentType = $mimeTypes[$extension] ?? 'application/octet-stream';
         $content = file_get_contents($fullPath);
 
-        // Buang SourceMap dengan cara AMAN (Hanya baris sourceMapping saja)
         if (in_array($extension, ['js', 'css'])) {
             $content = preg_replace('/(\/\/[#@]\s*sourceMappingURL=[\s\S]*?$|\/\*[\s\S]*?sourceMappingURL=[\s\S]*?\*\/)/i', '', $content);
         }
 
-        return response($content)->header('Content-Type', $contentType);
+        return response($content)
+            ->header('Content-Type', $contentType)
+            ->header('Access-Control-Allow-Origin', '*');
     })->where('path', '.*')->name('system.core');
 
-/*
-|--------------------------------------------------------------------------
-| Rute Web Utama
-|--------------------------------------------------------------------------
-*/
-
-use App\Http\Controllers\WelcomeController;
-
-// --- DOMAIN MANAJEMEN / ADMIN (kcd6.hexanusa.com) ---
-Route::domain('mandala.hexanusa.com')->group(function () {
     Route::get('/', function () {
         return redirect()->route('login');
     });
