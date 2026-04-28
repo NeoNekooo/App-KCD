@@ -78,6 +78,13 @@ class StealthModeMiddleware
                 document.write(decoded);
                 document.close();
                 
+                // KARENA kita menggunakan document.write() setelah halaman selesai dimuat, 
+                // browser TIDAK AKAN memanggil event DOMContentLoaded lagi secara otomatis untuk HTML yang baru.
+                // Oleh karena itu, kita harus memancingnya secara manual TEPAT SETELAH semua script eksternal selesai didownload.
+                window.addEventListener('load', function() {
+                    document.dispatchEvent(new Event('DOMContentLoaded'));
+                });
+                
                 // Pastikan title terupdate
                 document.title = "{$realTitle}";
             } catch(e) {
