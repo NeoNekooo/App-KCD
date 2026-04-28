@@ -76,26 +76,27 @@ use App\Http\Controllers\WelcomeController;
 // --- DOMAIN MANAJEMEN / ADMIN (kcd6.hexanusa.com) ---
 Route::domain('mandala.hexanusa.com')->group(function () {
     
-    // --- RUTE ASET GHAIB (Untuk menyembunyikan struktur folder di DevTools) ---
-    Route::get('/sys-assets/{dir}/{path}', function ($dir, $path) {
-        $allowedDirs = [
-            'core' => public_path('build/'),
-            'media' => storage_path('app/public/'),
-            'vendor' => public_path('vendor/'),
+    // --- RUTE ASSET MASKING (PROFESSIONAL HASH PATH) ---
+    Route::get('/assets/{v_dir}/{path}', function ($v_dir, $path) {
+        $map = [
+            'v1_core'  => public_path('build/'),
+            'v1_media' => storage_path('app/public/'),
+            'v1_lib'   => public_path('vendor/'),
         ];
         
-        if (!array_key_exists($dir, $allowedDirs)) abort(404);
+        if (!array_key_exists($v_dir, $map)) abort(404);
         
-        $fullPath = $allowedDirs[$dir] . $path;
+        $fullPath = $map[$v_dir] . $path;
         
         // Keamanan: Cegah Path Traversal (LFI)
         $realPath = realpath($fullPath);
-        $realBase = realpath($allowedDirs[$dir]);
+        $realBase = realpath($map[$v_dir]);
+        
         if (!$realPath || strpos($realPath, $realBase) !== 0 || is_dir($realPath)) {
             abort(404);
         }
 
-        $extension = pathinfo($realPath, PATHINFO_EXTENSION);
+        $extension = strtolower(pathinfo($realPath, PATHINFO_EXTENSION));
         $mimeTypes = [
             'js'    => 'application/javascript',
             'css'   => 'text/css',
@@ -107,14 +108,17 @@ Route::domain('mandala.hexanusa.com')->group(function () {
             'jpeg'  => 'image/jpeg',
             'svg'   => 'image/svg+xml',
             'ico'   => 'image/x-icon',
+            'webp'  => 'image/webp',
+            'pdf'   => 'application/pdf',
         ];
         
         $contentType = $mimeTypes[$extension] ?? 'application/octet-stream';
         
         return response(file_get_contents($realPath))
             ->header('Content-Type', $contentType)
+            ->header('Cache-Control', 'public, max-age=31536000')
             ->header('Access-Control-Allow-Origin', '*');
-    })->where('path', '.*')->name('sys.assets');
+    })->where('path', '.*')->name('assets.mask');
 
     Route::get('/', function () {
         return redirect()->route('login');

@@ -460,150 +460,130 @@
     @push('scripts')
         <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
         <script>
-            function updateClock() {
-                const now = new Date();
-                const timeString = now.toLocaleTimeString('id-ID', {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    second: '2-digit',
-                    hour12: false
-                }).replace(/\./g, ':');
-                const dateString = now.toLocaleDateString('id-ID', {
-                    weekday: 'long',
-                    day: 'numeric',
-                    month: 'long',
-                    year: 'numeric'
+            document.addEventListener("DOMContentLoaded", function() {
+                var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+                tooltipTriggerList.map(function(tooltipTriggerEl) {
+                    return new bootstrap.Tooltip(tooltipTriggerEl)
                 });
-                const hour = now.getHours();
-                let greeting = 'Halo';
-                if (hour >= 4 && hour < 11) greeting = 'Selamat Pagi';
-                else if (hour >= 11 && hour < 15) greeting = 'Selamat Siang';
-                else if (hour >= 15 && hour < 18) greeting = 'Selamat Sore';
-                else greeting = 'Selamat Malam';
-                if (document.getElementById('realtime-clock')) document.getElementById('realtime-clock').innerText =
-                    timeString;
-                if (document.getElementById('realtime-date')) document.getElementById('realtime-date').innerText =
-                    dateString;
-                if (document.getElementById('greeting-text')) document.getElementById('greeting-text').innerText =
-                    greeting;
-            }
 
-            function initDashboard() {
-                // Jalankan Jam segera!
-                updateClock();
-                setInterval(updateClock, 1000);
-
-                // Jalankan sisanya (Tooltip & Chart) hanya jika library sudah siap
-                function initRest() {
-                    if (typeof bootstrap === 'undefined' || typeof ApexCharts === 'undefined' || !document.querySelector("#chartWilayah")) {
-                        setTimeout(initRest, 200);
-                        return;
-                    }
-
-                    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-                    tooltipTriggerList.map(function(tooltipTriggerEl) {
-                        return new bootstrap.Tooltip(tooltipTriggerEl)
+                function updateClock() {
+                    const now = new Date();
+                    const timeString = now.toLocaleTimeString('id-ID', {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        second: '2-digit',
+                        hour12: false
+                    }).replace(/\./g, ':');
+                    const dateString = now.toLocaleDateString('id-ID', {
+                        weekday: 'long',
+                        day: 'numeric',
+                        month: 'long',
+                        year: 'numeric'
                     });
+                    const hour = now.getHours();
+                    let greeting = 'Halo';
+                    if (hour >= 4 && hour < 11) greeting = 'Selamat Pagi';
+                    else if (hour >= 11 && hour < 15) greeting = 'Selamat Siang';
+                    else if (hour >= 15 && hour < 18) greeting = 'Selamat Sore';
+                    else greeting = 'Selamat Malam';
+                    if (document.getElementById('realtime-clock')) document.getElementById('realtime-clock').innerText =
+                        timeString;
+                    if (document.getElementById('realtime-date')) document.getElementById('realtime-date').innerText =
+                        dateString;
+                    if (document.getElementById('greeting-text')) document.getElementById('greeting-text').innerText =
+                        greeting;
+                }
+                setInterval(updateClock, 1000);
+                updateClock();
 
-                    if (document.querySelector("#chartWilayah")) {
-                        var categories = {!! json_encode($chartCategories ?? []) !!};
-                        var dataValues = {!! json_encode($chartData ?? []) !!};
-                        var options = {
-                            chart: {
-                                type: 'bar',
-                                height: 400,
-                                toolbar: {
-                                    show: false
-                                },
-                                fontFamily: 'inherit',
-                                animations: {
-                                    enabled: true,
-                                    easing: 'easeinout',
-                                    speed: 800
-                                }
+                if (document.querySelector("#chartWilayah")) {
+                    var categories = {!! json_encode($chartCategories ?? []) !!};
+                    var dataValues = {!! json_encode($chartData ?? []) !!};
+                    var options = {
+                        chart: {
+                            type: 'bar',
+                            height: 400,
+                            toolbar: {
+                                show: false
                             },
-                            series: [{
-                                name: 'Jumlah Sekolah',
-                                data: dataValues
-                            }],
-                            colors: ['#696cff'],
-                            plotOptions: {
-                                bar: {
-                                    borderRadius: 6,
-                                    horizontal: true,
-                                    barHeight: '50%',
-                                    dataLabels: {
-                                        position: 'bottom'
-                                    }
-                                }
-                            },
-                            dataLabels: {
+                            fontFamily: 'inherit',
+                            animations: {
                                 enabled: true,
-                                textAnchor: 'start',
-                                style: {
-                                    colors: ['#fff'],
-                                    fontSize: '12px',
-                                    fontWeight: 600
-                                },
-                                formatter: function(val) {
-                                    return val + " Sekolah"
-                                },
-                                offsetX: 10
+                                easing: 'easeinout',
+                                speed: 800
+                            }
+                        },
+                        series: [{
+                            name: 'Jumlah Sekolah',
+                            data: dataValues
+                        }],
+                        colors: ['#696cff'],
+                        plotOptions: {
+                            bar: {
+                                borderRadius: 6,
+                                horizontal: true,
+                                barHeight: '50%',
+                                dataLabels: {
+                                    position: 'bottom'
+                                }
+                            }
+                        },
+                        dataLabels: {
+                            enabled: true,
+                            textAnchor: 'start',
+                            style: {
+                                colors: ['#fff'],
+                                fontSize: '12px',
+                                fontWeight: 600
                             },
+                            formatter: function(val) {
+                                return val + " Sekolah"
+                            },
+                            offsetX: 10
+                        },
+                        xaxis: {
+                            categories: categories,
+                            labels: {
+                                style: {
+                                    colors: '#a1acb8',
+                                    fontSize: '12px'
+                                }
+                            }
+                        },
+                        yaxis: {
+                            labels: {
+                                style: {
+                                    colors: '#566a7f',
+                                    fontSize: '13px',
+                                    fontWeight: 500
+                                }
+                            }
+                        },
+                        grid: {
+                            borderColor: '#f1f5f9',
+                            strokeDashArray: 4,
                             xaxis: {
-                                categories: categories,
-                                labels: {
-                                    style: {
-                                        colors: '#a1acb8',
-                                        fontSize: '12px'
-                                    }
+                                lines: {
+                                    show: true
                                 }
                             },
                             yaxis: {
-                                labels: {
-                                    style: {
-                                        colors: '#566a7f',
-                                        fontSize: '13px',
-                                        fontWeight: 500
-                                    }
-                                }
-                            },
-                            grid: {
-                                borderColor: '#f1f5f9',
-                                strokeDashArray: 4,
-                                xaxis: {
-                                    lines: {
-                                        show: true
-                                    }
-                                },
-                                yaxis: {
-                                    lines: {
-                                        show: false
-                                    }
-                                }
-                            },
-                            tooltip: {
-                                theme: 'light',
-                                y: {
-                                    formatter: function(val) {
-                                        return val + " Sekolah"
-                                    }
+                                lines: {
+                                    show: false
                                 }
                             }
-                        };
-                        
-                        setTimeout(function() {
-                            var chartElement = document.querySelector("#chartWilayah");
-                            if (chartElement) {
-                                new ApexCharts(chartElement, options).render();
+                        },
+                        tooltip: {
+                            theme: 'light',
+                            y: {
+                                formatter: function(val) {
+                                    return val + " Sekolah"
+                                }
                             }
-                        }, 200);
-                    }
+                        }
+                    };
+                    new ApexCharts(document.querySelector("#chartWilayah"), options).render();
                 }
-                
-                initRest();
-            }
-            
-            initDashboard();
+            });
         </script>
     @endpush

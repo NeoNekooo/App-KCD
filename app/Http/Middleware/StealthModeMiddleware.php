@@ -17,80 +17,42 @@ class StealthModeMiddleware
     {
         $response = $next($request);
 
-        if ($response instanceof Response && 
-            str_contains($response->headers->get('Content-Type'), 'text/html') && 
-            !$request->expectsJson() && 
-            !$request->ajax()) {
+        // Hanya proses response berupa HTML biasa
+        if ($response instanceof Response && !$request->expectsJson() && !$request->ajax()) {
+            
+            // Abaikan rute proxy agar tidak infinite loop
+            if ($request->is('assets/v1_*')) {
+                return $response;
+            }
+
+            $contentType = $response->headers->get('Content-Type');
+            if ($contentType && strpos($contentType, 'text/html') === false) {
+                return $response;
+            }
 
             $content = $response->getContent();
-            
             $baseUrl = url('/');
             
-            // 1. Sembunyikan folder build (Vite)
-            $content = str_replace($baseUrl . '/build/', $baseUrl . '/sys-assets/core/', $content);
-            $content = str_replace('"/build/', '"/sys-assets/core/', $content);
-            $content = str_replace("'build/", "'sys-assets/core/", $content);
+            // --- HASH OBFUSCATION (PROFESSIONAL PATH MASKING) ---
+            // Kita ganti folder sensitif dengan path yang terlihat seperti sistem CDN profesional
             
-            // 2. Sembunyikan folder storage (Foto dll)
-            $content = str_replace($baseUrl . '/storage/', $baseUrl . '/sys-assets/media/', $content);
-            $content = str_replace('"/storage/', '"/sys-assets/media/', $content);
-            $content = str_replace("'storage/", "'sys-assets/media/", $content);
+            // 1. Masking Vite / Build
+            $content = str_replace($baseUrl . '/build/', $baseUrl . '/assets/v1_core/', $content);
+            $content = str_replace('"/build/', '"/assets/v1_core/', $content);
+            $content = str_replace("'build/", "'assets/v1_core/", $content);
             
-            // 3. Sembunyikan folder vendor
-            $content = str_replace($baseUrl . '/vendor/', $baseUrl . '/sys-assets/vendor/', $content);
-            $content = str_replace('"/vendor/', '"/sys-assets/vendor/', $content);
-            $content = str_replace("'vendor/", "'sys-assets/vendor/", $content);
+            // 2. Masking Storage (Foto/File) - SANGAT PENTING
+            $content = str_replace($baseUrl . '/storage/', $baseUrl . '/assets/v1_media/', $content);
+            $content = str_replace('"/storage/', '"/assets/v1_media/', $content);
+            $content = str_replace("'storage/", "'assets/v1_media/", $content);
             
-            // Ekstrak title asli agar tab browser tidak stuck di "System Loading..."
-            preg_match('/<title>(.*?)<\/title>/is', $content, $matches);
-            $realTitle = $matches[1] ?? 'System Secure Loading';
+            // 3. Masking Vendor (CSS/JS Library)
+            $content = str_replace($baseUrl . '/vendor/', $baseUrl . '/assets/v1_lib/', $content);
+            $content = str_replace('"/vendor/', '"/assets/v1_lib/', $content);
+            $content = str_replace("'vendor/", "'assets/v1_lib/", $content);
             
-            // --- GHAIB TOTAL (BASE64) ---
-            // Bungkus HTML yang sudah disamarkan ini ke dalam Base64
-            $encoded = base64_encode($content);
-            
-            $stealthHtml = <<<HTML
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <meta name="robots" content="noindex, nofollow">
-    <title>{$realTitle}</title>
-</head>
-<body style="margin: 0; background-color: #f5f5f9;">
-    <div id="_sys_loader" style="display:flex; height:100vh; width:100vw; align-items:center; justify-content:center; font-family:sans-serif; color:#696cff; font-weight:bold;">
-        Initializing Secure Session...
-    </div>
-    <textarea id="_sys_data" style="display:none">{$encoded}</textarea>
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            try {
-                var data = document.getElementById('_sys_data').value;
-                var binStr = atob(data);
-                var bytes = new Uint8Array(binStr.length);
-                for (var i = 0; i < binStr.length; i++) {
-                    bytes[i] = binStr.charCodeAt(i);
-                }
-                var decoded = new TextDecoder("utf-8").decode(bytes);
-                
-                // Dokumen sudah selesai diload, document.open akan MERESET seluruh isi DOM (menghapus loader).
-                document.open("text/html", "replace");
-                document.write(decoded);
-                document.close();
-                
-                // Pastikan title terupdate
-                document.title = "{$realTitle}";
-            } catch(e) {
-                var loader = document.getElementById('_sys_loader');
-                if(loader) loader.innerText = "Security Error. Please Refresh.";
-            }
-        });
-    </script>
-</body>
-</html>
-HTML;
-            
-            $response->setContent($stealthHtml);
+            // Kembalikan konten yang sudah disamarkan
+            $response->setContent($content);
 
             // Header anti-kepo ringan
             $response->headers->set('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
