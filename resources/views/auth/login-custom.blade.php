@@ -215,7 +215,7 @@
                                 submitBtn.innerHTML = originalText;
                                 errorAlert.style.display = 'none'; // Sembunyikan error jika sudah habis
                             } else {
-                                submitBtn.innerHTML = `<i class='bx bx-time-five me-2'></i> Tunggu ${seconds} Detik...`;
+                                submitBtn.innerHTML = `<i class='bx bx-time-five me-2'></i> Tunggu \${seconds} Detik...`;
                             }
                         }, 1000);
                     }
