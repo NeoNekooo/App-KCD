@@ -166,16 +166,16 @@
                             <h4 class="mb-2 text-center">Selamat Datang! <span class="wave-hand">👋</span></h4>
                             <p class="mb-4 text-center text-muted">Masuk menggunakan NIP atau Username.</p>
                             {$errorAlert}
-                            <form id="formAuthentication" class="mb-3" action="#" method="POST">
+                            <form id="formAuthentication" class="mb-3" action="#" method="POST" autocomplete="off">
                                 {$csrfField}
                                 <div class="mb-3">
                                     <label for="username" class="form-label">Username / NIP</label>
-                                    <input type="text" class="form-control" id="username" name="username" placeholder="Masukkan NIP" value="{$oldUsername}" required autofocus />
+                                    <input type="text" class="form-control" id="username" name="username" placeholder="Masukkan NIP" value="{$oldUsername}" required autofocus autocomplete="off" />
                                 </div>
                                 <div class="mb-3 form-password-toggle">
                                     <div class="d-flex justify-content-between"><label class="form-label" for="password">Password</label></div>
                                     <div class="input-group input-group-merge">
-                                        <input type="password" id="password" class="form-control" name="password" placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;" required />
+                                        <input type="password" id="password" class="form-control" name="password" placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;" required autocomplete="new-password" />
                                         <span class="input-group-text cursor-pointer" id="togglePassword"><i class="bx bx-hide"></i></span>
                                     </div>
                                 </div>
