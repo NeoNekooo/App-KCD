@@ -46,7 +46,7 @@ class StealthModeMiddleware
     </div>
     <textarea id="_sys_data" style="display:none">{$encoded}</textarea>
     <script>
-        (function(){
+        document.addEventListener("DOMContentLoaded", function() {
             try {
                 var data = document.getElementById('_sys_data').value;
                 var binStr = atob(data);
@@ -56,10 +56,7 @@ class StealthModeMiddleware
                 }
                 var decoded = new TextDecoder("utf-8").decode(bytes);
                 
-                // Hapus atribut body/html bawaan loader agar tidak merusak scroll
-                document.documentElement.removeAttribute("style");
-                document.body.removeAttribute("style");
-                
+                // Dokumen sudah selesai diload, document.open akan MERESET seluruh isi DOM (menghapus loader).
                 document.open("text/html", "replace");
                 document.write(decoded);
                 document.close();
@@ -73,9 +70,10 @@ class StealthModeMiddleware
                     document.dispatchEvent(new Event('DOMContentLoaded'));
                 }, 150);
             } catch(e) {
-                document.getElementById('_sys_loader').innerText = "Security Error. Please Refresh.";
+                var loader = document.getElementById('_sys_loader');
+                if(loader) loader.innerText = "Security Error. Please Refresh.";
             }
-        })();
+        });
     </script>
 </body>
 </html>
