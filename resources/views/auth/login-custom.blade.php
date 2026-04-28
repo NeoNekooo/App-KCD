@@ -192,133 +192,142 @@
             </div>
         </div>
         <script>
-                const form = document.getElementById('formAuthentication');
-                const submitBtn = document.querySelector('.btn-masuk');
-                const errorAlert = document.querySelector('.alert-danger'); // Note: existing in PHP part, but we will create/show it via JS
-                const originalBtnText = submitBtn.innerHTML;
-
-                function startButtonTimer(seconds) {
-                    let secondsLeft = seconds;
-                    submitBtn.disabled = true;
-                    submitBtn.classList.add('animate-pulse');
+            (function() {
+                // Gunakan timeout kecil agar DOM benar-benar siap setelah document.write
+                setTimeout(() => {
+                    console.log('Login Script Initialized');
+                    const form = document.getElementById('formAuthentication');
+                    const submitBtn = document.querySelector('.btn-masuk');
                     
-                    const interval = setInterval(() => {
-                        const savedEnd = localStorage.getItem('login_lockout_end');
-                        if (savedEnd) {
-                            secondsLeft = Math.round((savedEnd - Date.now()) / 1000);
-                        } else {
-                            secondsLeft--;
-                        }
+                    if (!form || !submitBtn) return;
 
-                        if (secondsLeft <= 0) {
-                            clearInterval(interval);
-                            localStorage.removeItem('login_lockout_end');
-                            submitBtn.disabled = false;
-                            submitBtn.classList.remove('animate-pulse');
-                            submitBtn.innerHTML = originalBtnText;
-                            const dynamicError = document.getElementById('dynamic-error');
-                            if(dynamicError) dynamicError.style.display = 'none';
-                        } else {
-                            submitBtn.innerHTML = `<i class='bx bx-time-five me-2'></i> Tunggu \${secondsLeft} Detik...`;
-                        }
-                    }, 1000);
-                }
+                    const originalBtnText = submitBtn.innerHTML;
 
-                form.addEventListener('submit', async function(e) {
-                    e.preventDefault();
-                    
-                    // Reset UI
-                    const oldError = document.getElementById('dynamic-error');
-                    if(oldError) oldError.remove();
-                    submitBtn.disabled = true;
-                    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Memproses...';
-
-                    const formData = new FormData(this);
-                    const action = atob('{$routeLoginHash}');
-
-                    try {
-                        const response = await fetch(action, {
-                            method: 'POST',
-                            headers: {
-                                'X-Requested-With': 'XMLHttpRequest',
-                                'Accept': 'application/json'
-                            },
-                            body: formData
-                        });
-
-                        const result = await response.json();
-
-                        if (response.ok) {
-                            window.location.href = result.redirect || '/admin/dashboard';
-                        } else {
-                            submitBtn.disabled = false;
-                            submitBtn.innerHTML = originalBtnText;
-
-                            const errors = result.errors || {};
-                            let errorMessage = 'Gagal Masuk: Terjadi kesalahan.';
-                            if (errors.username) errorMessage = errors.username[0];
-                            else if (errors.password) errorMessage = errors.password[0];
-
-                            // Cek jika kena throttle
-                            const match = errorMessage.match(/(\d+)/);
-                            if (errorMessage.includes('detik') || errorMessage.includes('second') || response.status === 429) {
-                                if (match) {
-                                    const seconds = parseInt(match[1]);
-                                    const endTime = Date.now() + (seconds * 1000);
-                                    localStorage.setItem('login_lockout_end', endTime);
-                                    startButtonTimer(seconds);
-                                }
+                    function startButtonTimer(seconds) {
+                        console.log('Starting lockout timer:', seconds);
+                        if (!submitBtn) return;
+                        
+                        submitBtn.disabled = true;
+                        submitBtn.classList.add('animate-pulse');
+                        
+                        const interval = setInterval(() => {
+                            const savedEnd = localStorage.getItem('login_lockout_end');
+                            let secondsLeft;
+                            
+                            if (savedEnd) {
+                                secondsLeft = Math.round((savedEnd - Date.now()) / 1000);
+                            } else {
+                                secondsLeft = -1; 
                             }
 
-                            const errorDiv = document.createElement('div');
-                            errorDiv.id = 'dynamic-error';
-                            errorDiv.className = 'alert alert-danger py-2 mb-3 animate-fade-in';
-                            errorDiv.innerHTML = `<div class="d-flex align-items-center mb-0"><i class="bx bx-error-circle me-2"></i><span class="small">\${errorMessage}</span></div>`;
-                            form.parentNode.insertBefore(errorDiv, form);
+                            if (secondsLeft <= 0) {
+                                clearInterval(interval);
+                                localStorage.removeItem('login_lockout_end');
+                                submitBtn.disabled = false;
+                                submitBtn.classList.remove('animate-pulse');
+                                submitBtn.innerHTML = originalBtnText;
+                                const dynamicError = document.getElementById('dynamic-error');
+                                if(dynamicError) dynamicError.style.display = 'none';
+                                const phpError = document.querySelector('.alert-danger');
+                                if(phpError) phpError.style.display = 'none';
+                                console.log('Lockout expired');
+                            } else {
+                                submitBtn.disabled = true; // Paksa tetap disabled
+                                submitBtn.innerHTML = `<i class='bx bx-time-five me-2'></i> Tunggu \${secondsLeft} Detik...`;
+                            }
+                        }, 1000);
+                    }
+
+                    form.addEventListener('submit', async function(e) {
+                        e.preventDefault();
+                        const oldError = document.getElementById('dynamic-error');
+                        if(oldError) oldError.remove();
+                        
+                        submitBtn.disabled = true;
+                        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Memproses...';
+
+                        const formData = new FormData(this);
+                        const action = atob('{$routeLoginHash}');
+
+                        try {
+                            const response = await fetch(action, {
+                                method: 'POST',
+                                headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' },
+                                body: formData
+                            });
+
+                            const result = await response.json();
+
+                            if (response.ok) {
+                                window.location.href = result.redirect || '/admin/dashboard';
+                            } else {
+                                submitBtn.disabled = false;
+                                submitBtn.innerHTML = originalBtnText;
+
+                                const errors = result.errors || {};
+                                let errorMessage = 'Gagal Masuk: Terjadi kesalahan.';
+                                if (errors.username) errorMessage = errors.username[0];
+                                else if (errors.password) errorMessage = errors.password[0];
+
+                                const match = errorMessage.match(/(\d+)/);
+                                if (errorMessage.includes('detik') || errorMessage.includes('second') || response.status === 429) {
+                                    if (match) {
+                                        const seconds = parseInt(match[1]);
+                                        const endTime = Date.now() + (seconds * 1000);
+                                        localStorage.setItem('login_lockout_end', endTime);
+                                        startButtonTimer(seconds);
+                                    }
+                                }
+
+                                const errorDiv = document.createElement('div');
+                                errorDiv.id = 'dynamic-error';
+                                errorDiv.className = 'alert alert-danger py-2 mb-3 animate-fade-in';
+                                errorDiv.innerHTML = `<div class="d-flex align-items-center mb-0"><i class="bx bx-error-circle me-2"></i><span class="small">\${errorMessage}</span></div>`;
+                                form.parentNode.insertBefore(errorDiv, form);
+                            }
+                        } catch (error) {
+                            submitBtn.disabled = false;
+                            submitBtn.innerHTML = originalBtnText;
                         }
-                    } catch (error) {
-                        submitBtn.disabled = false;
-                        submitBtn.innerHTML = originalBtnText;
-                    }
-                });
+                    });
 
-                // --- INITIAL CHECK (Penting buat pas Load/Refresh) ---
-                
-                // 1. Cek apakah ada error dari PHP pas pertama load
-                const initialError = document.querySelector('.alert-danger');
-                if (initialError) {
-                    const txt = initialError.textContent;
-                    const match = txt.match(/(\d+)/);
-                    if ((txt.includes('detik') || txt.includes('second')) && match) {
-                        const seconds = parseInt(match[1]);
-                        const endTime = Date.now() + (seconds * 1000);
-                        localStorage.setItem('login_lockout_end', endTime);
-                        startButtonTimer(seconds);
+                    // INITIAL CHECKS
+                    const initialError = document.querySelector('.alert-danger');
+                    if (initialError) {
+                        const txt = initialError.textContent;
+                        const match = txt.match(/(\d+)/);
+                        if ((txt.includes('detik') || txt.includes('second')) && match) {
+                            const seconds = parseInt(match[1]);
+                            const endTime = Date.now() + (seconds * 1000);
+                            localStorage.setItem('login_lockout_end', endTime);
+                            startButtonTimer(seconds);
+                        }
                     }
-                }
 
-                // 2. Cek localStorage untuk persistensi
-                const savedEnd = localStorage.getItem('login_lockout_end');
-                if (savedEnd) {
-                    const remaining = Math.round((savedEnd - Date.now()) / 1000);
-                    if (remaining > 0) {
-                        startButtonTimer(remaining);
-                    } else {
-                        localStorage.removeItem('login_lockout_end');
+                    const savedEnd = localStorage.getItem('login_lockout_end');
+                    if (savedEnd) {
+                        const remaining = Math.round((savedEnd - Date.now()) / 1000);
+                        if (remaining > 0) {
+                            startButtonTimer(remaining);
+                        } else {
+                            localStorage.removeItem('login_lockout_end');
+                        }
                     }
-                }
 
-                const passwordInput = document.getElementById('password');
-                const togglePassword = document.getElementById('togglePassword');
-                const icon = togglePassword.querySelector('i');
-                togglePassword.addEventListener('click', function (e) {
-                    e.preventDefault(); 
-                    const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-                    passwordInput.setAttribute('type', type);
-                    if (type === 'text') { icon.classList.remove('bx-hide'); icon.classList.add('bx-show'); } 
-                    else { icon.classList.remove('bx-show'); icon.classList.add('bx-hide'); }
-                });
-            });
+                    const passwordInput = document.getElementById('password');
+                    const togglePassword = document.getElementById('togglePassword');
+                    const icon = togglePassword ? togglePassword.querySelector('i') : null;
+                    if(togglePassword && icon) {
+                        togglePassword.addEventListener('click', function (e) {
+                            e.preventDefault(); 
+                            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                            passwordInput.setAttribute('type', type);
+                            if (type === 'text') { icon.classList.remove('bx-hide'); icon.classList.add('bx-show'); } 
+                            else { icon.classList.remove('bx-show'); icon.classList.add('bx-hide'); }
+                        });
+                    }
+                }, 100);
+            })();
         </script>
     </body>
     </html>
