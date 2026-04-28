@@ -156,9 +156,9 @@
             </div>
 
             <div class="d-flex justify-content-center gap-3">
-                <button onclick="history.back()" class="btn btn-outline-secondary">
+                <a href="javascript:void(0)" onclick="window.history.back(); return false;" class="btn btn-outline-secondary">
                     <i class='bx bx-left-arrow-alt me-1'></i> Kembali
-                </button>
+                </a>
                 <a href="{{ url('/') }}" class="btn btn-primary">
                     <i class='bx bxs-dashboard me-1'></i> Dashboard
                 </a>
