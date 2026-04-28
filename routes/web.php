@@ -86,6 +86,11 @@ Route::domain('mandala.hexanusa.com')->group(function () {
         
         if (!array_key_exists($v_dir, $map)) abort(404);
         
+        // Reverse mapping untuk subfolder yang disamarkan
+        $path = str_replace('m_px/', 'foto_pegawai/', $path);
+        $path = str_replace('m_st/', 'settings/', $path);
+        $path = str_replace('f_nt/', 'fonts/', $path);
+        
         $fullPath = $map[$v_dir] . $path;
         
         // Keamanan: Cegah Path Traversal (LFI)
