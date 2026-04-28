@@ -156,7 +156,7 @@
             </div>
 
             <div class="d-flex justify-content-center gap-3">
-                <a href="javascript:void(0)" onclick="window.history.back(); return false;" class="btn btn-outline-secondary">
+                <a href="{{ url()->previous() }}" class="btn btn-outline-secondary">
                     <i class='bx bx-left-arrow-alt me-1'></i> Kembali
                 </a>
                 <a href="{{ url('/') }}" class="btn btn-primary">
