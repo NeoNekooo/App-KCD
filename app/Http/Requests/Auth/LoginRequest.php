@@ -37,43 +37,40 @@ class LoginRequest extends FormRequest
      */
     public function authenticate(): void
     {
-        // 1. Cek Rate Limiter (Mencegah Brute Force Attack)
+        // 1. Cek Rate Limiter
         $this->ensureIsNotRateLimited();
 
-        // 2. Ambil kredensial (username & password)
         $credentials = $this->only('username', 'password');
 
-        // 3. PROSES LOGIN (Menggunakan Tabel 'users')
-        // Auth::attempt otomatis mengecek ke tabel users, mencocokkan username,
-        // dan memverifikasi password yang di-hash.
         if (! Auth::attempt($credentials, $this->boolean('remember'))) {
             
             // Jika gagal, catat percobaan login
             RateLimiter::hit($this->throttleKey());
 
-            // Lempar error validasi ke view
+            // Jika sudah mencapai batas (3x), langsung lempar error throttle
+            if (RateLimiter::tooManyAttempts($this->throttleKey(), 3)) {
+                $this->ensureIsNotRateLimited();
+            }
+
+            // Jika belum limit, lempar error kustom bahasa Indonesia
             throw ValidationException::withMessages([
-                'username' => trans('auth.failed'),
+                'username' => 'Username atau Password yang Anda masukkan salah.',
             ]);
         }
 
-        // 4. Jika login berhasil, ambil data user
+        // Jika login berhasil
         $user = Auth::user();
-
-        // 5. Bersihkan counter Rate Limiter
         RateLimiter::clear($this->throttleKey());
 
-        // 6. SETUP SESSION (Penting untuk hak akses di aplikasi)
-        // Kita set session berdasarkan data dari tabel users
+        // SETUP SESSION
         session([
-            'role'             => $user->role, // Role: 'Admin', 'Kepala', 'Staff', dll.
+            'role'             => $user->role,
             'user_id'          => $user->id,
             'nama'             => $user->name,
-            // Nilai default untuk kompatibilitas sistem lama (bisa disesuaikan nanti)
             'sub_role'         => null,
             'ptk_id'           => null,
             'peserta_didik_id' => null,
-            'tahun_pelajaran'  => '2025/2026 Ganjil', // Default Tapel
+            'tahun_pelajaran'  => '2025/2026 Ganjil',
         ]);
     }
 
@@ -91,10 +88,7 @@ class LoginRequest extends FormRequest
         $seconds = RateLimiter::availableIn($this->throttleKey());
 
         throw ValidationException::withMessages([
-            'username' => trans('auth.throttle', [
-                'seconds' => $seconds,
-                'minutes' => ceil($seconds / 60),
-            ]),
+            'username' => "Terlalu banyak percobaan login. Silakan coba lagi dalam $seconds detik.",
         ]);
     }
 
