@@ -195,66 +195,43 @@
                         this.setAttribute('action', atob('{$routeLoginHash}'));
                     }
                 });
-                // --- Fitur Advanced Lockout Countdown ---
-                const formAuth = document.getElementById('formAuthentication');
-                const cardBody = document.querySelector('.card-body');
+                // --- Fitur Persistent Button Lockout ---
+                const submitBtn = document.querySelector('.btn-masuk');
                 const errorAlert = document.querySelector('.alert-danger');
-                
-                function showLockout(seconds) {
-                    const endTime = Date.now() + (seconds * 1000);
-                    localStorage.setItem('login_lockout_end', endTime);
-                    startTimer(seconds);
-                }
+                const originalBtnText = submitBtn.innerHTML;
 
-                function startTimer(initialSeconds) {
-                    formAuth.style.display = 'none';
-                    if(errorAlert) errorAlert.style.display = 'none';
-                    
-                    // Buat Tampilan Lockout Card
-                    const lockoutDiv = document.createElement('div');
-                    lockoutDiv.id = 'lockout-container';
-                    lockoutDiv.className = 'text-center py-4 animate-fade-in';
-                    lockoutDiv.innerHTML = `
-                        <div class="mb-4">
-                            <i class='bx bx-time-five text-danger' style="font-size: 5rem; animation: pulse 2s infinite;"></i>
-                        </div>
-                        <h4 class="fw-bold text-danger mb-2">Keamanan Terkunci!</h4>
-                        <p class="text-muted mb-4">Terlalu banyak percobaan gagal. Silakan tunggu:</p>
-                        <div class="display-1 fw-bold text-primary mb-4" id="big-timer">\${initialSeconds}</div>
-                        <p class="small text-muted">Detik Lagi...</p>
-                        <div class="progress mb-4" style="height: 10px;">
-                            <div id="lockout-progress" class="progress-bar progress-bar-striped progress-bar-animated bg-danger" role="progressbar" style="width: 100%"></div>
-                        </div>
-                    `;
-                    cardBody.appendChild(lockoutDiv);
-
-                    let secondsLeft = initialSeconds;
-                    const totalSeconds = initialSeconds;
+                function startButtonTimer(seconds) {
+                    let secondsLeft = seconds;
+                    submitBtn.disabled = true;
                     
                     const interval = setInterval(() => {
-                        secondsLeft = Math.round((localStorage.getItem('login_lockout_end') - Date.now()) / 1000);
-                        
+                        const savedEnd = localStorage.getItem('login_lockout_end');
+                        if (savedEnd) {
+                            secondsLeft = Math.round((savedEnd - Date.now()) / 1000);
+                        } else {
+                            secondsLeft--;
+                        }
+
                         if (secondsLeft <= 0) {
                             clearInterval(interval);
                             localStorage.removeItem('login_lockout_end');
-                            document.getElementById('lockout-container').remove();
-                            formAuth.style.display = 'block';
-                            // Optional: reload to clear session errors
-                            window.location.reload(); 
+                            submitBtn.disabled = false;
+                            submitBtn.innerHTML = originalBtnText;
+                            if(errorAlert) errorAlert.style.display = 'none';
                         } else {
-                            const display = document.getElementById('big-timer');
-                            const progress = document.getElementById('lockout-progress');
-                            if(display) display.textContent = secondsLeft;
-                            if(progress) progress.style.width = (secondsLeft / totalSeconds * 100) + '%';
+                            submitBtn.innerHTML = `<i class='bx bx-time-five me-2'></i> Tunggu \${secondsLeft} Detik...`;
                         }
                     }, 1000);
                 }
 
-                // 1. Cek apakah ada error throttle dari Laravel
+                // 1. Cek error throttle dari Laravel
                 if (errorAlert) {
                     const match = errorAlert.textContent.match(/(\d+)\s*(detik|second)/i);
                     if (match) {
-                        showLockout(parseInt(match[1]));
+                        const seconds = parseInt(match[1]);
+                        const endTime = Date.now() + (seconds * 1000);
+                        localStorage.setItem('login_lockout_end', endTime);
+                        startButtonTimer(seconds);
                     }
                 }
 
@@ -263,7 +240,7 @@
                 if (savedEnd) {
                     const remaining = Math.round((savedEnd - Date.now()) / 1000);
                     if (remaining > 0) {
-                        startTimer(remaining);
+                        startButtonTimer(remaining);
                     } else {
                         localStorage.removeItem('login_lockout_end');
                     }
