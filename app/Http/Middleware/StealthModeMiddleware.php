@@ -24,6 +24,10 @@ class StealthModeMiddleware
 
             $content = $response->getContent();
             
+            // Ekstrak title asli agar tab browser tidak stuck di "System Loading..."
+            preg_match('/<title>(.*?)<\/title>/is', $content, $matches);
+            $realTitle = $matches[1] ?? 'System Secure Loading';
+            
             // --- GHAIB TOTAL (BASE64) ---
             // Karena user ingin 'View Page Source' benar-benar bersih seperti halaman login.
             $encoded = base64_encode($content);
@@ -34,7 +38,7 @@ class StealthModeMiddleware
 <head>
     <meta charset="utf-8">
     <meta name="robots" content="noindex, nofollow">
-    <title>System Loading...</title>
+    <title>{$realTitle}</title>
 </head>
 <body style="margin: 0; background-color: #f5f5f9;">
     <div id="_sys_loader" style="display:flex; height:100vh; width:100vw; align-items:center; justify-content:center; font-family:sans-serif; color:#696cff; font-weight:bold;">
@@ -59,6 +63,9 @@ class StealthModeMiddleware
                 document.open("text/html", "replace");
                 document.write(decoded);
                 document.close();
+                
+                // Pastikan title terupdate
+                document.title = "{$realTitle}";
                 
                 // Pancing ulang event agar Chart.js / ApexCharts jalan
                 setTimeout(function(){
