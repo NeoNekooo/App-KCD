@@ -141,6 +141,8 @@
             #togglePassword i { pointer-events: none; }
             .btn-masuk { background-color: #008493 !important; border-color: #008493 !important; color: #fff; transition: all 0.2s; height: 45px; display: flex; align-items: center; justify-content: center; }
             .btn-masuk:hover { background-color: #006f7b !important; border-color: #006f7b !important; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0, 132, 147, 0.4); }
+            .form-control:focus, .input-group-text:focus { box-shadow: none !important; border-color: #d9dee3 !important; outline: none !important; }
+            .input-group-merge .form-control:focus + .input-group-text, .input-group-merge .form-control:focus { border-color: #d9dee3 !important; }
             .animate-fade-in { animation: fadeIn 0.5s ease-in-out; }
             @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
             @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }

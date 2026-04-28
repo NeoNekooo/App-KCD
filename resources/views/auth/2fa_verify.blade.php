@@ -98,8 +98,9 @@
             width: 45px; height: 55px; background-color: #f5f5f9;
             border: 2px solid #d9dee3; line-height: 50px; text-align: center;
             font-size: 24px; font-weight: bold; color: #566a7f; margin: 0 4px; border-radius: 8px;
+            caret-color: transparent; /* Hilangkan garis kedip-kedip */
         }
-        .digit-group input:focus { border-color: #008493; box-shadow: 0 0 0 0.25rem rgba(0, 132, 147, 0.25); outline: none; }
+        .digit-group input:focus { border-color: #008493; box-shadow: none !important; outline: none; }
     </style>
 </head>
 
