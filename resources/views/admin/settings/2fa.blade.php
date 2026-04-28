@@ -172,7 +172,7 @@
                                         <label class="form-label fw-bold small">KODE KONFIRMASI 6-DIGIT</label>
                                         <div class="input-group input-group-merge">
                                             <span class="input-group-text bg-light border-2 border-end-0"><i class="bx bx-mobile-vibration text-primary"></i></span>
-                                            <input type="text" name="one_time_password" class="form-control form-control-lg border-2 border-start-0 bg-light" placeholder="Contoh: 123456" required maxlength="6" autofocus autocomplete="off">
+                                            <input type="text" name="one_time_password" class="form-control form-control-lg border-2 border-start-0 bg-light" placeholder="Contoh: 123456" required maxlength="6" autofocus autocomplete="off" inputmode="numeric" pattern="[0-9]*" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
                                         </div>
                                     </div>
                                     <button type="submit" class="btn btn-2fa w-100 py-3">

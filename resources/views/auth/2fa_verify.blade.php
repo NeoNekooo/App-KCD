@@ -129,12 +129,12 @@
                             @csrf
                             <input type="hidden" name="one_time_password" id="fullOtp">
                             <div class="digit-group d-flex justify-content-center mb-4" autocomplete="off">
-                                <input type="text" id="digit-1" name="digit-1" data-next="digit-2" maxlength="1" />
-                                <input type="text" id="digit-2" name="digit-2" data-next="digit-3" data-previous="digit-1" maxlength="1" />
-                                <input type="text" id="digit-3" name="digit-3" data-next="digit-4" data-previous="digit-2" maxlength="1" />
-                                <input type="text" id="digit-4" name="digit-4" data-next="digit-5" data-previous="digit-3" maxlength="1" />
-                                <input type="text" id="digit-5" name="digit-5" data-next="digit-6" data-previous="digit-4" maxlength="1" />
-                                <input type="text" id="digit-6" name="digit-6" data-previous="digit-5" maxlength="1" />
+                                <input type="text" id="digit-1" name="digit-1" data-next="digit-2" maxlength="1" inputmode="numeric" pattern="[0-9]*" />
+                                <input type="text" id="digit-2" name="digit-2" data-next="digit-3" data-previous="digit-1" maxlength="1" inputmode="numeric" pattern="[0-9]*" />
+                                <input type="text" id="digit-3" name="digit-3" data-next="digit-4" data-previous="digit-2" maxlength="1" inputmode="numeric" pattern="[0-9]*" />
+                                <input type="text" id="digit-4" name="digit-4" data-next="digit-5" data-previous="digit-3" maxlength="1" inputmode="numeric" pattern="[0-9]*" />
+                                <input type="text" id="digit-5" name="digit-5" data-next="digit-6" data-previous="digit-4" maxlength="1" inputmode="numeric" pattern="[0-9]*" />
+                                <input type="text" id="digit-6" name="digit-6" data-previous="digit-5" maxlength="1" inputmode="numeric" pattern="[0-9]*" />
                             </div>
                             <button type="submit" class="btn btn-primary d-grid w-100 btn-verifikasi">Verifikasi Sekarang</button>
                             <p class="text-center mt-3">
@@ -155,22 +155,30 @@
             const form = document.getElementById('otpForm');
             const fullOtpHidden = document.getElementById('fullOtp');
             inputs.forEach((input, index) => {
+                input.addEventListener('input', function(e) {
+                    this.value = this.value.replace(/[^0-9]/g, '');
+                    if (this.value.length === 1) {
+                        const next = document.getElementById(this.dataset.next);
+                        if (next) next.focus();
+                    }
+                    checkAllFilled();
+                });
                 input.addEventListener('keyup', function(e) {
                     if (e.keyCode === 8 || e.keyCode === 37) {
                         const prev = document.getElementById(this.dataset.previous);
                         if (prev) prev.focus();
-                    } else if ((e.keyCode >= 48 && e.keyCode <= 57) || (e.keyCode >= 96 && e.keyCode <= 105)) {
-                        const next = document.getElementById(this.dataset.next);
-                        if (next) next.focus();
-                        checkAllFilled();
                     }
                 });
                 input.addEventListener('paste', function(e) {
-                    const data = (e.clipboardData || window.clipboardData).getData('text').split('');
-                    if (data.length === 6) {
-                        inputs.forEach((inp, i) => inp.value = data[i]);
+                    e.preventDefault();
+                    const data = (e.clipboardData || window.clipboardData).getData('text').replace(/[^0-9]/g, '').split('');
+                    if (data.length > 0) {
+                        inputs.forEach((inp, i) => {
+                            if (data[i]) inp.value = data[i];
+                        });
                         checkAllFilled();
-                        inputs[5].focus();
+                        const nextIndex = Math.min(data.length, 5);
+                        inputs[nextIndex].focus();
                     }
                 });
             });
