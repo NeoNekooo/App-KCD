@@ -193,32 +193,28 @@
         </div>
         <script>
             (function() {
-                // Gunakan timeout kecil agar DOM benar-benar siap setelah document.write
+                // --- LOCKOUT CHECK LANGSUNG (No Delay) ---
+                const savedEnd = localStorage.getItem('login_lockout_end');
+                let initialRemaining = 0;
+                if (savedEnd) {
+                    initialRemaining = Math.round((savedEnd - Date.now()) / 1000);
+                }
+
+                // Jalankan inisialisasi DOM
                 setTimeout(() => {
-                    console.log('Login Script Initialized');
                     const form = document.getElementById('formAuthentication');
                     const submitBtn = document.querySelector('.btn-masuk');
-                    
                     if (!form || !submitBtn) return;
 
                     const originalBtnText = submitBtn.innerHTML;
 
                     function startButtonTimer(seconds) {
-                        console.log('Starting lockout timer:', seconds);
-                        if (!submitBtn) return;
-                        
                         submitBtn.disabled = true;
                         submitBtn.classList.add('animate-pulse');
                         
                         const interval = setInterval(() => {
-                            const savedEnd = localStorage.getItem('login_lockout_end');
-                            let secondsLeft;
-                            
-                            if (savedEnd) {
-                                secondsLeft = Math.round((savedEnd - Date.now()) / 1000);
-                            } else {
-                                secondsLeft = -1; 
-                            }
+                            const currentEnd = localStorage.getItem('login_lockout_end');
+                            let secondsLeft = currentEnd ? Math.round((currentEnd - Date.now()) / 1000) : -1;
 
                             if (secondsLeft <= 0) {
                                 clearInterval(interval);
@@ -230,12 +226,16 @@
                                 if(dynamicError) dynamicError.style.display = 'none';
                                 const phpError = document.querySelector('.alert-danger');
                                 if(phpError) phpError.style.display = 'none';
-                                console.log('Lockout expired');
                             } else {
-                                submitBtn.disabled = true; // Paksa tetap disabled
+                                submitBtn.disabled = true;
                                 submitBtn.innerHTML = `<i class='bx bx-time-five me-2'></i> Tunggu \${secondsLeft} Detik...`;
                             }
                         }, 1000);
+                    }
+
+                    // Jika dari awal sudah harus lockout (Persistensi)
+                    if (initialRemaining > 0) {
+                        startButtonTimer(initialRemaining);
                     }
 
                     form.addEventListener('submit', async function(e) {
@@ -291,7 +291,7 @@
                         }
                     });
 
-                    // INITIAL CHECKS
+                    // Cek error PHP (pas pertama load)
                     const initialError = document.querySelector('.alert-danger');
                     if (initialError) {
                         const txt = initialError.textContent;
@@ -301,16 +301,6 @@
                             const endTime = Date.now() + (seconds * 1000);
                             localStorage.setItem('login_lockout_end', endTime);
                             startButtonTimer(seconds);
-                        }
-                    }
-
-                    const savedEnd = localStorage.getItem('login_lockout_end');
-                    if (savedEnd) {
-                        const remaining = Math.round((savedEnd - Date.now()) / 1000);
-                        if (remaining > 0) {
-                            startButtonTimer(remaining);
-                        } else {
-                            localStorage.removeItem('login_lockout_end');
                         }
                     }
 
@@ -326,7 +316,7 @@
                             else { icon.classList.remove('bx-show'); icon.classList.add('bx-hide'); }
                         });
                     }
-                }, 100);
+                }, 10); // Perkecil delay ke 10ms
             })();
         </script>
     </body>
