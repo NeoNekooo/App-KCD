@@ -34,7 +34,6 @@ class StealthModeMiddleware
             $baseUrl = url('/');
             
             // --- HASH OBFUSCATION (PROFESSIONAL PATH MASKING) ---
-            // Kita ganti folder sensitif dengan path yang terlihat seperti sistem CDN profesional
             
             // 1. Masking Vite / Build
             $content = str_replace($baseUrl . '/build/', $baseUrl . '/assets/v1_core/', $content);
@@ -42,9 +41,9 @@ class StealthModeMiddleware
             $content = str_replace("'build/", "'assets/v1_core/", $content);
             
             // 2. Masking Storage (Foto/File) + Subfolders
-            // Kita samarkan juga nama folder di dalamnya agar lebih misterius
-            $content = str_replace('foto_pegawai/', 'm_px/', $content);
-            $content = str_replace('settings/', 'm_st/', $content);
+            // Gunakan prefix / agar tidak merusak kata 'settings' di rute admin
+            $content = str_replace('/storage/foto_pegawai/', '/storage/m_px/', $content);
+            $content = str_replace('/storage/settings/', '/storage/m_st/', $content);
             
             $content = str_replace($baseUrl . '/storage/', $baseUrl . '/assets/v1_media/', $content);
             $content = str_replace('"/storage/', '"/assets/v1_media/', $content);
@@ -54,7 +53,7 @@ class StealthModeMiddleware
             $content = str_replace($baseUrl . '/vendor/', $baseUrl . '/assets/v1_lib/', $content);
             $content = str_replace('"/vendor/', '"/assets/v1_lib/', $content);
             $content = str_replace("'vendor/", "'assets/v1_lib/", $content);
-            $content = str_replace('vendor/fonts/', 'assets/v1_lib/f_nt/', $content);
+            $content = str_replace('/vendor/fonts/', '/assets/v1_lib/f_nt/', $content);
             
             // Kembalikan konten yang sudah disamarkan
             $response->setContent($content);
