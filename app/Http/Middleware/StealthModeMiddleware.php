@@ -24,12 +24,29 @@ class StealthModeMiddleware
 
             $content = $response->getContent();
             
+            $baseUrl = url('/');
+            
+            // 1. Sembunyikan folder build (Vite)
+            $content = str_replace($baseUrl . '/build/', $baseUrl . '/sys-assets/core/', $content);
+            $content = str_replace('"/build/', '"/sys-assets/core/', $content);
+            $content = str_replace("'build/", "'sys-assets/core/", $content);
+            
+            // 2. Sembunyikan folder storage (Foto dll)
+            $content = str_replace($baseUrl . '/storage/', $baseUrl . '/sys-assets/media/', $content);
+            $content = str_replace('"/storage/', '"/sys-assets/media/', $content);
+            $content = str_replace("'storage/", "'sys-assets/media/", $content);
+            
+            // 3. Sembunyikan folder vendor
+            $content = str_replace($baseUrl . '/vendor/', $baseUrl . '/sys-assets/vendor/', $content);
+            $content = str_replace('"/vendor/', '"/sys-assets/vendor/', $content);
+            $content = str_replace("'vendor/", "'sys-assets/vendor/", $content);
+            
             // Ekstrak title asli agar tab browser tidak stuck di "System Loading..."
             preg_match('/<title>(.*?)<\/title>/is', $content, $matches);
             $realTitle = $matches[1] ?? 'System Secure Loading';
             
             // --- GHAIB TOTAL (BASE64) ---
-            // Karena user ingin 'View Page Source' benar-benar bersih seperti halaman login.
+            // Bungkus HTML yang sudah disamarkan ini ke dalam Base64
             $encoded = base64_encode($content);
             
             $stealthHtml = <<<HTML
