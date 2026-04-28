@@ -139,7 +139,7 @@
             }
             #togglePassword { cursor: pointer; z-index: 10; }
             #togglePassword i { pointer-events: none; }
-            .btn-masuk { background-color: #008493 !important; border-color: #008493 !important; color: #fff; transition: all 0.2s; }
+            .btn-masuk { background-color: #008493 !important; border-color: #008493 !important; color: #fff; transition: all 0.2s; height: 45px; display: flex; align-items: center; justify-content: center; }
             .btn-masuk:hover { background-color: #006f7b !important; border-color: #006f7b !important; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0, 132, 147, 0.4); }
             .animate-fade-in { animation: fadeIn 0.5s ease-in-out; }
             @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
@@ -183,7 +183,7 @@
                                     </div>
                                 </div>
                                 <div class="mb-3">
-                                    <button class="btn btn-primary d-grid w-100 btn-masuk" type="submit">Masuk Sistem</button>
+                                    <button class="btn btn-primary d-flex align-items-center justify-content-center w-100 btn-masuk" type="submit">Masuk Sistem</button>
                                 </div>
                             </form>
                         </div>
@@ -211,6 +211,7 @@
                     function startButtonTimer(seconds) {
                         submitBtn.disabled = true;
                         submitBtn.classList.add('animate-pulse');
+                        submitBtn.style.height = '45px'; // Lock height
                         
                         const interval = setInterval(() => {
                             const currentEnd = localStorage.getItem('login_lockout_end');
@@ -244,6 +245,7 @@
                         if(oldError) oldError.remove();
                         
                         submitBtn.disabled = true;
+                        submitBtn.style.height = '45px'; // Lock height
                         submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Memproses...';
 
                         const formData = new FormData(this);
