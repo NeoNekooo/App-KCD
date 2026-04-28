@@ -249,49 +249,55 @@
                         const result = await response.json();
 
                         if (response.ok) {
-                            // Berhasil - Redirect
                             window.location.href = result.redirect || '/admin/dashboard';
                         } else {
-                            // Gagal - Handle Error
                             submitBtn.disabled = false;
                             submitBtn.innerHTML = originalBtnText;
 
                             const errors = result.errors || {};
                             let errorMessage = 'Gagal Masuk: Terjadi kesalahan.';
-                            
-                            // Ambil pesan error pertama
                             if (errors.username) errorMessage = errors.username[0];
                             else if (errors.password) errorMessage = errors.password[0];
 
-                            // Cek jika ada angka detik (lockout)
-                            const match = errorMessage.match(/(\d+)\s*(detik|second)/i);
-                            if (match) {
-                                const seconds = parseInt(match[1]);
-                                const endTime = Date.now() + (seconds * 1000);
-                                localStorage.setItem('login_lockout_end', endTime);
-                                startButtonTimer(seconds);
+                            // Cek jika kena throttle
+                            const match = errorMessage.match(/(\d+)/);
+                            if (errorMessage.includes('detik') || errorMessage.includes('second') || response.status === 429) {
+                                if (match) {
+                                    const seconds = parseInt(match[1]);
+                                    const endTime = Date.now() + (seconds * 1000);
+                                    localStorage.setItem('login_lockout_end', endTime);
+                                    startButtonTimer(seconds);
+                                }
                             }
 
-                            // Tampilkan error secara smooth
                             const errorDiv = document.createElement('div');
                             errorDiv.id = 'dynamic-error';
                             errorDiv.className = 'alert alert-danger py-2 mb-3 animate-fade-in';
-                            errorDiv.innerHTML = `
-                                <div class="d-flex align-items-center mb-0">
-                                    <i class="bx bx-error-circle me-2"></i>
-                                    <span class="small">\${errorMessage}</span>
-                                </div>
-                            `;
+                            errorDiv.innerHTML = `<div class="d-flex align-items-center mb-0"><i class="bx bx-error-circle me-2"></i><span class="small">\${errorMessage}</span></div>`;
                             form.parentNode.insertBefore(errorDiv, form);
                         }
                     } catch (error) {
-                        console.error('Error:', error);
                         submitBtn.disabled = false;
                         submitBtn.innerHTML = originalBtnText;
                     }
                 });
 
-                // Cek localStorage untuk persistensi (Reload Safe)
+                // --- INITIAL CHECK (Penting buat pas Load/Refresh) ---
+                
+                // 1. Cek apakah ada error dari PHP pas pertama load
+                const initialError = document.querySelector('.alert-danger');
+                if (initialError) {
+                    const txt = initialError.textContent;
+                    const match = txt.match(/(\d+)/);
+                    if ((txt.includes('detik') || txt.includes('second')) && match) {
+                        const seconds = parseInt(match[1]);
+                        const endTime = Date.now() + (seconds * 1000);
+                        localStorage.setItem('login_lockout_end', endTime);
+                        startButtonTimer(seconds);
+                    }
+                }
+
+                // 2. Cek localStorage untuk persistensi
                 const savedEnd = localStorage.getItem('login_lockout_end');
                 if (savedEnd) {
                     const remaining = Math.round((savedEnd - Date.now()) / 1000);
