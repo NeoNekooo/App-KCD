@@ -32,11 +32,22 @@ export default defineConfig({
         assetsDir: 'assets',
         
         // Memastikan manifest diletakkan langsung di public/build/manifest.json
-        // bukan di dalam folder .vite/
         manifest: 'manifest.json',
         
         // --- MATIKAN SOURCEMAP AGAR GHAIB TOTAL ---
         sourcemap: false,
+
+        // --- DEEP CLEANING (Hapus Jejak Webpack) ---
+        minify: 'terser',
+        terserOptions: {
+            compress: {
+                drop_console: false, // Biar console log kita tetep ada buat debug ringan
+                drop_debugger: true,
+            },
+            format: {
+                comments: false, // HAPUS SEMUA KOMENTAR (Termasuk jejak webpack)
+            },
+        },
 
         rollupOptions: {
             output: {
