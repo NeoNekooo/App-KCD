@@ -75,6 +75,47 @@ use App\Http\Controllers\WelcomeController;
 
 // --- DOMAIN MANAJEMEN / ADMIN (kcd6.hexanusa.com) ---
 Route::domain('mandala.hexanusa.com')->group(function () {
+    
+    // --- RUTE ASET GHAIB (Untuk menyembunyikan struktur folder di DevTools) ---
+    Route::get('/sys-assets/{dir}/{path}', function ($dir, $path) {
+        $allowedDirs = [
+            'core' => public_path('build/'),
+            'media' => storage_path('app/public/'),
+            'vendor' => public_path('vendor/'),
+        ];
+        
+        if (!array_key_exists($dir, $allowedDirs)) abort(404);
+        
+        $fullPath = $allowedDirs[$dir] . $path;
+        
+        // Keamanan: Cegah Path Traversal (LFI)
+        $realPath = realpath($fullPath);
+        $realBase = realpath($allowedDirs[$dir]);
+        if (!$realPath || strpos($realPath, $realBase) !== 0 || is_dir($realPath)) {
+            abort(404);
+        }
+
+        $extension = pathinfo($realPath, PATHINFO_EXTENSION);
+        $mimeTypes = [
+            'js'    => 'application/javascript',
+            'css'   => 'text/css',
+            'woff'  => 'font/woff',
+            'woff2' => 'font/woff2',
+            'ttf'   => 'font/ttf',
+            'png'   => 'image/png',
+            'jpg'   => 'image/jpeg',
+            'jpeg'  => 'image/jpeg',
+            'svg'   => 'image/svg+xml',
+            'ico'   => 'image/x-icon',
+        ];
+        
+        $contentType = $mimeTypes[$extension] ?? 'application/octet-stream';
+        
+        return response(file_get_contents($realPath))
+            ->header('Content-Type', $contentType)
+            ->header('Access-Control-Allow-Origin', '*');
+    })->where('path', '.*')->name('sys.assets');
+
     Route::get('/', function () {
         return redirect()->route('login');
     });
@@ -212,7 +253,7 @@ Route::post('/buku-tamu/{id}/print', [GuestBookController::class, 'requestPrint'
 | PANEL ADMIN (Backend)
 |--------------------------------------------------------------------------
 */
-Route::prefix('admin')->name('admin.')->middleware(['auth', '2fa'])->group(function () {
+Route::prefix('admin')->name('admin.')->middleware(['auth', '2fa', 'stealth'])->group(function () {
 
     // 1. DASHBOARD
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
