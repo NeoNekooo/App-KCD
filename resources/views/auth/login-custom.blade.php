@@ -195,6 +195,32 @@
                         this.setAttribute('action', atob('{$routeLoginHash}'));
                     }
                 });
+                // Fitur Countdown Lockout (Anti Brute Force)
+                const errorAlert = document.querySelector('.alert-danger');
+                const submitBtn = document.querySelector('.btn-masuk');
+                if (errorAlert && submitBtn) {
+                    const errorText = errorAlert.textContent;
+                    // Cari angka detik di dalam pesan error (Laravel default: "try again in X seconds")
+                    const match = errorText.match(/(\d+)\s*(detik|second)/i);
+                    if (match) {
+                        let seconds = parseInt(match[1]);
+                        submitBtn.disabled = true;
+                        const originalText = submitBtn.innerHTML;
+                        
+                        const timer = setInterval(() => {
+                            seconds--;
+                            if (seconds <= 0) {
+                                clearInterval(timer);
+                                submitBtn.disabled = false;
+                                submitBtn.innerHTML = originalText;
+                                errorAlert.style.display = 'none'; // Sembunyikan error jika sudah habis
+                            } else {
+                                submitBtn.innerHTML = `<i class='bx bx-time-five me-2'></i> Tunggu ${seconds} Detik...`;
+                            }
+                        }, 1000);
+                    }
+                }
+
                 const passwordInput = document.getElementById('password');
                 const togglePassword = document.getElementById('togglePassword');
                 const icon = togglePassword.querySelector('i');
