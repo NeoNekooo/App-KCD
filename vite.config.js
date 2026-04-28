@@ -51,6 +51,9 @@ export default defineConfig({
             },
         },
 
+        // Matikan preload agar tidak membocorkan list file
+        modulePreload: false,
+
         rollupOptions: {
             output: {
                 manualChunks: undefined,
