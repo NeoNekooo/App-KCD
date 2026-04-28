@@ -458,7 +458,7 @@
     @endsection
     
     @push('scripts')
-        <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+        <script src="{{ asset('vendor/apexcharts.js') }}"></script>
         <script>
             document.addEventListener("DOMContentLoaded", function() {
                 var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))

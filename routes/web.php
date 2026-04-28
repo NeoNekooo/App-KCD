@@ -90,6 +90,7 @@ Route::domain('mandala.hexanusa.com')->group(function () {
         $path = str_replace('m_px/', 'foto_pegawai/', $path);
         $path = str_replace('m_st/', 'settings/', $path);
         $path = str_replace('f_nt/', 'fonts/', $path);
+        $path = str_replace('axc_v1.js', 'apexcharts.js', $path);
         
         $fullPath = $map[$v_dir] . $path;
         

@@ -49,11 +49,13 @@ class StealthModeMiddleware
             $content = str_replace('"/storage/', '"/assets/v1_media/', $content);
             $content = str_replace("'storage/", "'assets/v1_media/", $content);
             
-            // 3. Masking Vendor (CSS/JS Library)
+            // 3. Masking Vendor (CSS/JS Library) + Subfolders
+            $content = str_replace('vendor/fonts/', 'vendor/f_nt/', $content);
+            $content = str_replace('vendor/apexcharts.js', 'vendor/axc_v1.js', $content); // Sekalian samarkan file ApexCharts
+            
             $content = str_replace($baseUrl . '/vendor/', $baseUrl . '/assets/v1_lib/', $content);
             $content = str_replace('"/vendor/', '"/assets/v1_lib/', $content);
             $content = str_replace("'vendor/", "'assets/v1_lib/", $content);
-            $content = str_replace('/vendor/fonts/', '/assets/v1_lib/f_nt/', $content);
             
             // Kembalikan konten yang sudah disamarkan
             $response->setContent($content);
