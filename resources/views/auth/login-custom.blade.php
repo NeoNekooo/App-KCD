@@ -141,6 +141,10 @@
             #togglePassword i { pointer-events: none; }
             .btn-masuk { background-color: #008493 !important; border-color: #008493 !important; color: #fff; transition: all 0.2s; }
             .btn-masuk:hover { background-color: #006f7b !important; border-color: #006f7b !important; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0, 132, 147, 0.4); }
+            .animate-fade-in { animation: fadeIn 0.5s ease-in-out; }
+            @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+            @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+            .animate-pulse { animation: pulse 2s infinite; }
         </style>
     </head>
     <body>
@@ -188,21 +192,15 @@
             </div>
         </div>
         <script>
-            document.addEventListener('DOMContentLoaded', function () {
                 const form = document.getElementById('formAuthentication');
-                form.addEventListener('submit', function(e) {
-                    if(this.getAttribute('action') === '#' || this.getAttribute('action') === '') {
-                        this.setAttribute('action', atob('{$routeLoginHash}'));
-                    }
-                });
-                // --- Fitur Persistent Button Lockout ---
                 const submitBtn = document.querySelector('.btn-masuk');
-                const errorAlert = document.querySelector('.alert-danger');
+                const errorAlert = document.querySelector('.alert-danger'); // Note: existing in PHP part, but we will create/show it via JS
                 const originalBtnText = submitBtn.innerHTML;
 
                 function startButtonTimer(seconds) {
                     let secondsLeft = seconds;
                     submitBtn.disabled = true;
+                    submitBtn.classList.add('animate-pulse');
                     
                     const interval = setInterval(() => {
                         const savedEnd = localStorage.getItem('login_lockout_end');
@@ -216,26 +214,84 @@
                             clearInterval(interval);
                             localStorage.removeItem('login_lockout_end');
                             submitBtn.disabled = false;
+                            submitBtn.classList.remove('animate-pulse');
                             submitBtn.innerHTML = originalBtnText;
-                            if(errorAlert) errorAlert.style.display = 'none';
+                            const dynamicError = document.getElementById('dynamic-error');
+                            if(dynamicError) dynamicError.style.display = 'none';
                         } else {
                             submitBtn.innerHTML = `<i class='bx bx-time-five me-2'></i> Tunggu \${secondsLeft} Detik...`;
                         }
                     }, 1000);
                 }
 
-                // 1. Cek error throttle dari Laravel
-                if (errorAlert) {
-                    const match = errorAlert.textContent.match(/(\d+)\s*(detik|second)/i);
-                    if (match) {
-                        const seconds = parseInt(match[1]);
-                        const endTime = Date.now() + (seconds * 1000);
-                        localStorage.setItem('login_lockout_end', endTime);
-                        startButtonTimer(seconds);
-                    }
-                }
+                form.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    
+                    // Reset UI
+                    const oldError = document.getElementById('dynamic-error');
+                    if(oldError) oldError.remove();
+                    submitBtn.disabled = true;
+                    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Memproses...';
 
-                // 2. Cek localStorage untuk persistensi (Reload Safe)
+                    const formData = new FormData(this);
+                    const action = atob('{$routeLoginHash}');
+
+                    try {
+                        const response = await fetch(action, {
+                            method: 'POST',
+                            headers: {
+                                'X-Requested-With': 'XMLHttpRequest',
+                                'Accept': 'application/json'
+                            },
+                            body: formData
+                        });
+
+                        const result = await response.json();
+
+                        if (response.ok) {
+                            // Berhasil - Redirect
+                            window.location.href = result.redirect || '/admin/dashboard';
+                        } else {
+                            // Gagal - Handle Error
+                            submitBtn.disabled = false;
+                            submitBtn.innerHTML = originalBtnText;
+
+                            const errors = result.errors || {};
+                            let errorMessage = 'Gagal Masuk: Terjadi kesalahan.';
+                            
+                            // Ambil pesan error pertama
+                            if (errors.username) errorMessage = errors.username[0];
+                            else if (errors.password) errorMessage = errors.password[0];
+
+                            // Cek jika ada angka detik (lockout)
+                            const match = errorMessage.match(/(\d+)\s*(detik|second)/i);
+                            if (match) {
+                                const seconds = parseInt(match[1]);
+                                const endTime = Date.now() + (seconds * 1000);
+                                localStorage.setItem('login_lockout_end', endTime);
+                                startButtonTimer(seconds);
+                            }
+
+                            // Tampilkan error secara smooth
+                            const errorDiv = document.createElement('div');
+                            errorDiv.id = 'dynamic-error';
+                            errorDiv.className = 'alert alert-danger py-2 mb-3 animate-fade-in';
+                            errorDiv.innerHTML = `
+                                <div class="d-flex align-items-center mb-0">
+                                    <i class="bx bx-error-circle me-2"></i>
+                                    <span class="small">\${errorMessage}</span>
+                                </div>
+                            `;
+                            form.parentNode.insertBefore(errorDiv, form);
+                        }
+                    } catch (error) {
+                        console.error('Error:', error);
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = originalBtnText;
+                    }
+                });
+
+                // Cek localStorage untuk persistensi (Reload Safe)
                 const savedEnd = localStorage.getItem('login_lockout_end');
                 if (savedEnd) {
                     const remaining = Math.round((savedEnd - Date.now()) / 1000);
@@ -245,7 +301,6 @@
                         localStorage.removeItem('login_lockout_end');
                     }
                 }
-                // --- End Lockout Feature ---
 
                 const passwordInput = document.getElementById('password');
                 const togglePassword = document.getElementById('togglePassword');
