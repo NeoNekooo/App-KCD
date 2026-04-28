@@ -156,20 +156,32 @@
             const form = document.getElementById('otpForm');
             const fullOtpHidden = document.getElementById('fullOtp');
             inputs.forEach((input, index) => {
+                input.addEventListener('focus', function(e) {
+                    // Cek apakah ada input sebelumnya yang kosong
+                    for (let i = 0; i < index; i++) {
+                        if (inputs[i].value === '') {
+                            inputs[i].focus();
+                            return;
+                        }
+                    }
+                });
+
                 input.addEventListener('input', function(e) {
                     this.value = this.value.replace(/[^0-9]/g, '');
                     if (this.value.length === 1) {
-                        const next = document.getElementById(this.dataset.next);
+                        const next = inputs[index + 1];
                         if (next) next.focus();
                     }
                     checkAllFilled();
                 });
-                input.addEventListener('keyup', function(e) {
-                    if (e.keyCode === 8 || e.keyCode === 37) {
-                        const prev = document.getElementById(this.dataset.previous);
+                
+                input.addEventListener('keydown', function(e) {
+                    if (e.key === 'Backspace' && this.value === '') {
+                        const prev = inputs[index - 1];
                         if (prev) prev.focus();
                     }
                 });
+
                 input.addEventListener('paste', function(e) {
                     e.preventDefault();
                     const data = (e.clipboardData || window.clipboardData).getData('text').replace(/[^0-9]/g, '').split('');
@@ -183,6 +195,9 @@
                     }
                 });
             });
+            
+            // Fokus otomatis ke input pertama
+            inputs[0].focus();
             function checkAllFilled() {
                 let otp = ''; inputs.forEach(input => otp += input.value);
                 fullOtpHidden.value = otp;
