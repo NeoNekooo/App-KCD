@@ -24,20 +24,24 @@ class AuthenticatedSessionController extends Controller
     /**
      * Menangani permintaan otentikasi yang masuk.
      */
-    public function store(LoginRequest $request): RedirectResponse
+    public function store(LoginRequest $request)
     {
         $request->authenticate();
-    
         $request->session()->regenerate();
     
         $user = Auth::user();
         $isAdmin = in_array(strtolower($user->role ?? ''), ['admin', 'administrator', 'operator kcd']);
         
-        if ($isAdmin) {
-            return redirect()->intended(route('admin.dashboard'));
-        } else {
-            return redirect()->intended(route('admin.dashboard.pegawai'));
+        $redirectUrl = $isAdmin ? route('admin.dashboard') : route('admin.dashboard.pegawai');
+
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json([
+                'status' => 'success',
+                'redirect' => $redirectUrl
+            ]);
         }
+        
+        return redirect()->intended($redirectUrl);
     }
 
 

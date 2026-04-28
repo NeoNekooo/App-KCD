@@ -261,7 +261,11 @@
                             const result = await response.json();
 
                             if (response.ok) {
-                                window.location.href = result.redirect || '/admin/dashboard';
+                                const url = result.redirect || '/admin/dashboard';
+                                // Beri jeda sangat singkat agar session tersimpan sempurna
+                                setTimeout(() => {
+                                    window.location.replace(url);
+                                }, 100);
                             } else {
                                 submitBtn.disabled = false;
                                 submitBtn.innerHTML = originalBtnText;
