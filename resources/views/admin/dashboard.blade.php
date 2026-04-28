@@ -456,7 +456,9 @@
             </div>
         </div>
     @endsection
-
+    
+    @push('scripts')
+        <script src="https://cdn.jsdelivr.net/npm/apexcharts" defer></script>
         <script>
             function initDashboard() {
                 // Tunggu sampai Bootstrap dan ApexCharts selesai di-load oleh browser
