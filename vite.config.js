@@ -34,6 +34,9 @@ export default defineConfig({
         // Memastikan manifest diletakkan langsung di public/build/manifest.json
         // bukan di dalam folder .vite/
         manifest: 'manifest.json',
+        
+        // --- MATIKAN SOURCEMAP AGAR GHAIB TOTAL ---
+        sourcemap: false,
 
         rollupOptions: {
             output: {
