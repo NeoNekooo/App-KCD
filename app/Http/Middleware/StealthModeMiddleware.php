@@ -24,30 +24,60 @@ class StealthModeMiddleware
 
             $content = $response->getContent();
             
-            // --- Trik Ghaib Versi Aman (Manipulasi Path di HTML) ---
-            // Kita ganti path aslinya dengan path bayangan di HTML
-            // agar di DevTools tidak terlihat folder build/assets, storage, dll.
-            $baseUrl = url('/');
+            // --- GHAIB TOTAL (BASE64) ---
+            // Karena user ingin 'View Page Source' benar-benar bersih seperti halaman login.
+            $encoded = base64_encode($content);
             
-            // 1. Sembunyikan folder build (Vite)
-            $content = str_replace($baseUrl . '/build/', $baseUrl . '/sys-assets/core/', $content);
-            $content = str_replace('"/build/', '"/sys-assets/core/', $content);
-            $content = str_replace("'build/", "'sys-assets/core/", $content);
+            $stealthHtml = <<<HTML
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="robots" content="noindex, nofollow">
+    <title>System Loading...</title>
+</head>
+<body style="margin: 0; background-color: #f5f5f9;">
+    <div id="_sys_loader" style="display:flex; height:100vh; width:100vw; align-items:center; justify-content:center; font-family:sans-serif; color:#696cff; font-weight:bold;">
+        Initializing Secure Session...
+    </div>
+    <textarea id="_sys_data" style="display:none">{$encoded}</textarea>
+    <script>
+        (function(){
+            try {
+                var data = document.getElementById('_sys_data').value;
+                var binStr = atob(data);
+                var bytes = new Uint8Array(binStr.length);
+                for (var i = 0; i < binStr.length; i++) {
+                    bytes[i] = binStr.charCodeAt(i);
+                }
+                var decoded = new TextDecoder("utf-8").decode(bytes);
+                
+                // Hapus atribut body/html bawaan loader agar tidak merusak scroll
+                document.documentElement.removeAttribute("style");
+                document.body.removeAttribute("style");
+                
+                document.open("text/html", "replace");
+                document.write(decoded);
+                document.close();
+                
+                // Pancing ulang event agar Chart.js / ApexCharts jalan
+                setTimeout(function(){
+                    window.dispatchEvent(new Event('load'));
+                    document.dispatchEvent(new Event('DOMContentLoaded'));
+                }, 150);
+            } catch(e) {
+                document.getElementById('_sys_loader').innerText = "Security Error. Please Refresh.";
+            }
+        })();
+    </script>
+</body>
+</html>
+HTML;
             
-            // 2. Sembunyikan folder storage
-            $content = str_replace($baseUrl . '/storage/', $baseUrl . '/sys-assets/media/', $content);
-            $content = str_replace('"/storage/', '"/sys-assets/media/', $content);
-            $content = str_replace("'storage/", "'sys-assets/media/", $content);
-            
-            // 3. Sembunyikan folder vendor
-            $content = str_replace($baseUrl . '/vendor/', $baseUrl . '/sys-assets/vendor/', $content);
-            $content = str_replace('"/vendor/', '"/sys-assets/vendor/', $content);
-            $content = str_replace("'vendor/", "'sys-assets/vendor/", $content);
-
-            $response->setContent($content);
+            $response->setContent($stealthHtml);
 
             // Header anti-kepo ringan
-            $response->headers->set('Cache-Control', 'no-cache, must-revalidate, max-age=0');
+            $response->headers->set('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
             $response->headers->set('Pragma', 'no-cache');
         }
 
