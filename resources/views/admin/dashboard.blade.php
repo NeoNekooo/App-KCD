@@ -458,12 +458,11 @@
     @endsection
     
     @push('scripts')
-        <script src="https://cdn.jsdelivr.net/npm/apexcharts" defer></script>
         <script>
             function initDashboard() {
-                // Tunggu sampai Bootstrap dan ApexCharts selesai di-load oleh browser
-                if (typeof bootstrap === 'undefined' || typeof ApexCharts === 'undefined') {
-                    setTimeout(initDashboard, 50);
+                // Tunggu sampai Bootstrap, ApexCharts, dan Element Chart-nya benar-benar ada di DOM
+                if (typeof bootstrap === 'undefined' || typeof ApexCharts === 'undefined' || !document.querySelector("#chartWilayah")) {
+                    setTimeout(initDashboard, 100);
                     return;
                 }
 
@@ -588,7 +587,13 @@
                             }
                         }
                     };
-                    new ApexCharts(document.querySelector("#chartWilayah"), options).render();
+                    // Beri jeda sedikit agar container selesai render sempurna
+                    setTimeout(function() {
+                        var chartElement = document.querySelector("#chartWilayah");
+                        if (chartElement) {
+                            new ApexCharts(chartElement, options).render();
+                        }
+                    }, 150);
                 }
             }
             

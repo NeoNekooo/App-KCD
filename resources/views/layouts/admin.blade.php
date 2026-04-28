@@ -7,6 +7,7 @@
     <title>{{ $appSettings['site_name'] ?? 'MANDALA' }} | @yield('title')</title>
 
     <link rel="stylesheet" href="{{ asset('vendor/fonts/boxicons.css') }}" />
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts" defer></script>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @stack('styles')
 </head>
