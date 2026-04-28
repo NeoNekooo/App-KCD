@@ -41,17 +41,21 @@ export default defineConfig({
         minify: 'terser',
         terserOptions: {
             compress: {
-                drop_console: false, // Biar console log kita tetep ada buat debug ringan
+                drop_console: false,
                 drop_debugger: true,
+                pure_funcs: ['console.info', 'console.debug', 'console.warn'] // Hapus log sampah
             },
+            mangle: true, // Acak nama variabel & fungsi agar tidak terbaca
             format: {
-                comments: false, // HAPUS SEMUA KOMENTAR (Termasuk jejak webpack)
+                comments: false, // Hapus komentar
             },
         },
 
         rollupOptions: {
             output: {
-                manualChunks: undefined
+                manualChunks: undefined,
+                compact: true, // Bikin kode jadi satu baris rapet
+                sourcemapExcludeSources: true, // JANGAN masukkan source asli ke map (kalau kepancing bikin map)
             }
         }
     },
