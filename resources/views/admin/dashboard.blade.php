@@ -457,10 +457,14 @@
         </div>
     @endsection
 
-    @push('scripts')
-        <script src="https://cdn.jsdelivr.net/npm/apexcharts" defer></script>
         <script>
-            document.addEventListener("DOMContentLoaded", function() {
+            function initDashboard() {
+                // Tunggu sampai Bootstrap dan ApexCharts selesai di-load oleh browser
+                if (typeof bootstrap === 'undefined' || typeof ApexCharts === 'undefined') {
+                    setTimeout(initDashboard, 50);
+                    return;
+                }
+
                 var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
                 tooltipTriggerList.map(function(tooltipTriggerEl) {
                     return new bootstrap.Tooltip(tooltipTriggerEl)
@@ -584,6 +588,9 @@
                     };
                     new ApexCharts(document.querySelector("#chartWilayah"), options).render();
                 }
-            });
+            }
+            
+            // Jalankan fungsi
+            initDashboard();
         </script>
     @endpush
