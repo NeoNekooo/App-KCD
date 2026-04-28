@@ -73,10 +73,6 @@ class StealthModeMiddleware
                 }
                 var decoded = new TextDecoder("utf-8").decode(bytes);
                 
-                // Tambahkan pancingan event dengan tipe module agar dieksekusi TEPAT SETELAH app.js (Vite) selesai dimuat!
-                // Ini menyembuhkan error JS karena race-condition.
-                decoded += '<script type="module">window.dispatchEvent(new Event("load")); document.dispatchEvent(new Event("DOMContentLoaded"));<\\/script>';
-                
                 // Dokumen sudah selesai diload, document.open akan MERESET seluruh isi DOM (menghapus loader).
                 document.open("text/html", "replace");
                 document.write(decoded);
