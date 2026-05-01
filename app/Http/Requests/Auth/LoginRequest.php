@@ -37,41 +37,75 @@ class LoginRequest extends FormRequest
      */
     public function authenticate(): void
     {
-        // 1. Cek Rate Limiter
         $this->ensureIsNotRateLimited();
 
         $credentials = $this->only('username', 'password');
+        $remember = $this->boolean('remember');
 
-        if (! Auth::attempt($credentials, $this->boolean('remember'))) {
-            
-            // Jika gagal, catat percobaan login
-            RateLimiter::hit($this->throttleKey());
-
-            // Jika sudah mencapai batas (3x), langsung lempar error throttle
-            if (RateLimiter::tooManyAttempts($this->throttleKey(), 3)) {
-                $this->ensureIsNotRateLimited();
-            }
-
-            // Jika belum limit, lempar error kustom bahasa Indonesia
-            throw ValidationException::withMessages([
-                'username' => 'Username atau Password yang Anda masukkan salah.',
-            ]);
+        // 1. Coba Login sebagai User KCD (Tabel users)
+        if (Auth::guard('web')->attempt($credentials, $remember)) {
+            $user = Auth::guard('web')->user();
+            Auth::shouldUse('web'); // Set default guard ke web
+            $this->setupSession($user, 'web');
+            RateLimiter::clear($this->throttleKey());
+            return;
         }
 
-        // Jika login berhasil
-        $user = Auth::user();
-        RateLimiter::clear($this->throttleKey());
+        // 2. Coba Login sebagai Pengguna (Tabel penggunas - Guru/Siswa)
+        if (Auth::guard('pengguna')->attempt($credentials, $remember)) {
+            $user = Auth::guard('pengguna')->user();
+            Auth::shouldUse('pengguna'); // Set default guard ke pengguna
+            $this->setupSession($user, 'pengguna');
+            RateLimiter::clear($this->throttleKey());
+            return;
+        }
 
-        // SETUP SESSION
-        session([
-            'role'             => $user->role,
-            'user_id'          => $user->id,
-            'nama'             => $user->name,
-            'sub_role'         => null,
-            'ptk_id'           => null,
-            'peserta_didik_id' => null,
-            'tahun_pelajaran'  => '2025/2026 Ganjil',
+        // Jika dua-duanya gagal
+        RateLimiter::hit($this->throttleKey());
+        if (RateLimiter::tooManyAttempts($this->throttleKey(), 3)) {
+            $this->ensureIsNotRateLimited();
+        }
+
+        throw ValidationException::withMessages([
+            'username' => 'Username atau Password yang Anda masukkan salah.',
         ]);
+    }
+
+    /**
+     * Setup session data setelah login berhasil.
+     */
+    protected function setupSession($user, $guard): void
+    {
+        if ($guard === 'web') {
+            session([
+                'role'             => $user->role,
+                'user_id'          => $user->id,
+                'nama'             => $user->name,
+                'sub_role'         => null,
+                'ptk_id'           => null,
+                'peserta_didik_id' => null,
+                'tahun_pelajaran'  => '2025/2026 Ganjil',
+                'guard'            => 'web',
+            ]);
+        } else {
+            // Tentukan role berdasarkan peran_id_str
+            // Contoh: peran_id_str 2 biasanya Guru, 0 biasanya Siswa (tergantung sistem sinkron)
+            $role = 'tamu';
+            if ($user->peran_id_str == '2') $role = 'guru';
+            elseif ($user->peran_id_str == '0') $role = 'siswa';
+
+            session([
+                'role'             => $role,
+                'user_id'          => $user->pengguna_id,
+                'nama'             => $user->username, // Atau kolom nama jika ada di tabel penggunas
+                'sub_role'         => $user->peran_id_str,
+                'ptk_id'           => $user->ptk_id ?? null,
+                'peserta_didik_id' => $user->peserta_didik_id ?? null,
+                'tahun_pelajaran'  => '2025/2026 Ganjil',
+                'sekolah_id'       => $user->sekolah_id,
+                'guard'            => 'pengguna',
+            ]);
+        }
     }
 
     /**

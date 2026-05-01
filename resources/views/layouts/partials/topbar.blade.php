@@ -4,12 +4,12 @@
 
     $profile = null;
 
-    if (auth()->check()) {
+    if (auth()->check() && session('guard') === 'web') {
         $profile = PegawaiKcd::where('user_id', auth()->id())->first();
     }
 
     $foto = $profile?->foto;
-    $nama = $profile?->nama ?? (Auth::user()->name ?? 'User');
+    $nama = $profile?->nama ?? (Auth::user()->name ?? Auth::user()->username ?? 'User');
 @endphp
 
 <nav class="container layout-navbar navbar navbar-expand-xl navbar-detached align-items-center bg-navbar-theme"

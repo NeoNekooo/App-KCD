@@ -57,7 +57,7 @@ class AppServiceProvider extends ServiceProvider
             // Default nilai agar tidak error di blade jika tidak login
             $view->with('sidebarCount', '')->with('notif_data', [])->with('badges', []);
 
-            if (Auth::check() && Schema::hasTable('pengajuan_sekolahs')) {
+            if (Auth::check() && session('guard') === 'web' && Schema::hasTable('pengajuan_sekolahs')) {
                 $user = Auth::user();
                 $userRole = strtolower($user->role ?? '');
                 

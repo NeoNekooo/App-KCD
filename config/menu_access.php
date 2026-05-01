@@ -56,6 +56,16 @@ return [
             'web-profile', 'pengaturan-sistem-header', 'pengaturan-sistem',
         ],
 
+        'Guru' => [
+            'dashboard', 
+            'profil-saya',
+        ],
+
+        'Siswa' => [
+            'dashboard', 
+            'profil-saya',
+        ],
+
         'Pegawai' => [
             'dashboard', 
             'profil-saya',

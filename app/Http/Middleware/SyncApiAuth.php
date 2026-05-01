@@ -11,16 +11,24 @@ class SyncApiAuth
     public function handle(Request $request, Closure $next): Response
     {
         $tokenHeader = $request->header('X-Sync-Token');
-
-            $tokenDb = env('API_SECRET_KEY');
+        
+        // 1. Cek di Database (Priority)
+        $tokenDb = \App\Models\Setting::where('key', 'api_sync_token')->value('value');
+        
+        // 2. Fallback ke Config (.env)
+        if (empty($tokenDb)) {
+            $tokenDb = config('app.api_secret_key');
+        }
         
 
         // Validasi
         if (!$tokenDb || $tokenHeader !== $tokenDb) {
-             // Debugging message: beri tahu apa yang diharapkan server (Hanya di mode debug/local)
              $msg = 'Unauthorized action. Token mismatch.';
-             if (env('APP_DEBUG')) {
-                 $msg .= " (Server expects: " . substr($tokenDb, 0, 5) . "...)";
+             
+             if (config('app.debug')) {
+                 $received = $tokenHeader ? substr($tokenHeader, 0, 3) . '...' : 'NULL';
+                 $expected = $tokenDb ? substr((string)$tokenDb, 0, 3) . '...' : 'NOT_SET';
+                 $msg .= " (Sent: $received, Expected: $expected)";
              }
              abort(403, $msg);
         }

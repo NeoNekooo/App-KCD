@@ -29,10 +29,15 @@ class AuthenticatedSessionController extends Controller
         $request->authenticate();
         $request->session()->regenerate();
     
-        $user = Auth::user();
-        $isAdmin = in_array(strtolower($user->role ?? ''), ['admin', 'administrator', 'operator kcd']);
-        
-        $redirectUrl = $isAdmin ? route('admin.dashboard') : route('admin.dashboard.pegawai');
+        // Cek login dari guard mana
+        if (Auth::guard('web')->check()) {
+            $user = Auth::guard('web')->user();
+            $isAdmin = in_array(strtolower($user->role ?? ''), ['admin', 'administrator', 'operator kcd']);
+            $redirectUrl = $isAdmin ? route('admin.dashboard') : route('admin.dashboard.pegawai');
+        } else {
+            // Login via guard 'pengguna' (Siswa/Guru)
+            $redirectUrl = route('admin.dashboard.sekolah');
+        }
 
         if ($request->wantsJson() || $request->ajax()) {
             return response()->json([
@@ -52,9 +57,9 @@ class AuthenticatedSessionController extends Controller
     public function destroy(Request $request): RedirectResponse
     {
         Auth::guard('web')->logout();
+        Auth::guard('pengguna')->logout();
 
         $request->session()->invalidate();
-
         $request->session()->regenerateToken();
 
         return redirect('/login');

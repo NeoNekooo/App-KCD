@@ -24,6 +24,10 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
+        'pengguna' => [
+            'driver' => 'session',
+            'provider' => 'penggunas',
+        ],
     ],
 
     /*
@@ -40,6 +44,10 @@ return [
             'driver' => 'eloquent',
             // GANTI DARI Pengguna KE User
             'model' => App\Models\User::class, 
+        ],
+        'penggunas' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\Pengguna::class,
         ],
     ],
 

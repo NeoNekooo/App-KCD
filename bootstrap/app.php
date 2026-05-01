@@ -23,6 +23,7 @@ return Application::configure(basePath: dirname(__DIR__))
             \Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets::class,
             
             // 🔥 INI WAJIB ADA! (Jangan dihapus lagi) 🔥
+            \App\Http\Middleware\SetAuthGuard::class, 
             \App\Http\Middleware\SetupMenuPegawai::class, 
         ]);
 

@@ -268,6 +268,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', '2fa', 'stealth'])->
     // 1. DASHBOARD
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/dashboard-pegawai', [DashboardController::class, 'indexPegawai'])->name('dashboard.pegawai');
+    Route::get('/dashboard-sekolah', [DashboardController::class, 'indexSekolah'])->name('dashboard.sekolah');
 
     /*
     |--------------------------------------------------------------------------

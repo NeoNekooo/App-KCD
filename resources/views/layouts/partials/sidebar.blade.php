@@ -2,8 +2,15 @@
 
     {{-- ================= BRAND ================= --}}
     <div class="app-brand demo">
-        <a href="{{ in_array(strtolower(Auth::user()->role ?? ''), ['admin', 'administrator', 'operator kcd']) ? route('admin.dashboard') : route('admin.dashboard.pegawai') }}"
-            class="app-brand-link">
+        @php
+            $dashboardRoute = route('admin.dashboard.pegawai');
+            if (session('guard') === 'pengguna') {
+                $dashboardRoute = route('admin.dashboard.sekolah');
+            } elseif (in_array(strtolower(Auth::user()->role ?? ''), ['admin', 'administrator', 'operator kcd'])) {
+                $dashboardRoute = route('admin.dashboard');
+            }
+        @endphp
+        <a href="{{ $dashboardRoute }}" class="app-brand-link">
             <span class="app-brand-text demo menu-text fw-bolder ms-2 text-uppercase">
                 {{ $appSettings['site_name'] ?? config('app.name') }}
             </span>

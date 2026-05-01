@@ -17,6 +17,10 @@ class DashboardController extends Controller
 {
     public function index(Request $request)
     {
+        if (session('guard') === 'pengguna') {
+            return redirect()->route('admin.dashboard.sekolah');
+        }
+
         $user = Auth::user();
         
         // Cek Role (Sama seperti logic di View)
@@ -188,5 +192,27 @@ class DashboardController extends Controller
         }
 
         return view('admin.dashboard_pegawai', $data);
+    }
+
+    public function indexSekolah(Request $request)
+    {
+        $user = Auth::guard('pengguna')->user();
+        
+        // Jika ternyata dia login via web (Admin), arahkan ke dashboard admin
+        if (!$user) {
+            return redirect()->route('admin.dashboard');
+        }
+
+        $instansi = Instansi::first(); 
+        $sekolah = Sekolah::where('sekolah_id', $user->sekolah_id)->first();
+
+        $data = [
+            'instansi' => $instansi,
+            'sekolah'  => $sekolah,
+            'user'     => $user,
+            'role'     => session('role'),
+        ];
+
+        return view('admin.dashboard_sekolah', $data);
     }
 }
