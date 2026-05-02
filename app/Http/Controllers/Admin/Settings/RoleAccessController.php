@@ -11,12 +11,15 @@ class RoleAccessController extends Controller
 {
     public function index()
     {
-        // 1. Ambil Role secara dinamis dari Jabatan yang ada
-        $dbRoles = DB::table('jabatan_kcd')->select('role')->distinct()->pluck('role')->toArray();
+        // 1. Ambil Role secara dinamis dari Jabatan KCD (Admin/Pegawai)
+        $dbRoles = DB::table('jabatan_kcd')->select('role')->distinct()->whereNotNull('role')->pluck('role')->toArray();
         
-        // 2. Gabungkan dengan role default (Administrator wajib ada)
-        $defaultRoles = ['Administrator'];
-        $allRoles = array_unique(array_merge($defaultRoles, $dbRoles));
+        // 2. Ambil Role secara dinamis dari tabel Pengguna (Siswa/Guru)
+        $penggunaRoles = DB::table('penggunas')->select('peran_id_str as role')->distinct()->whereNotNull('peran_id_str')->pluck('role')->toArray();
+
+        // 3. Gabungkan dengan role default (Administrator wajib ada)
+        $defaultRoles = ['Administrator', 'Admin'];
+        $allRoles = array_unique(array_merge($defaultRoles, $dbRoles, $penggunaRoles));
         
         // Filter & Sort, tapi paksa Administrator di depan
         $otherRoles = array_filter($allRoles, fn($r) => $r !== 'Administrator');
