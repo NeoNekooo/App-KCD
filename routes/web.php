@@ -263,7 +263,7 @@ Route::post('/buku-tamu/{id}/print', [GuestBookController::class, 'requestPrint'
 | PANEL ADMIN (Backend)
 |--------------------------------------------------------------------------
 */
-Route::prefix('admin')->name('admin.')->middleware(['auth', '2fa', 'stealth'])->group(function () {
+Route::prefix('admin')->name('admin.')->middleware(['auth:web,pengguna', '2fa', 'stealth'])->group(function () {
 
     // 1. DASHBOARD
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
