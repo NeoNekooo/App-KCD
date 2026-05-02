@@ -76,7 +76,9 @@ class SidebarServiceProvider extends ServiceProvider
                 $notifData['total_layanan_pd'] = $totalPd > 0 ? $totalPd : '';
             }
 
-            $allowedMenuIds = $role ? DB::table('menu_accesses')->where('role_name', $role)->pluck('menu_id') : collect([]);
+            $allowedMenuIds = $role 
+                ? DB::table('menu_accesses')->where(DB::raw('LOWER(role_name)'), strtolower($role))->pluck('menu_id') 
+                : collect([]);
             
             // Eager load childrenRecursive untuk meliput sub-submenu kedalaman berapapun
             $menus = Menu::whereIn('id', $allowedMenuIds)->whereNull('parent_id')->where('is_active', true)
