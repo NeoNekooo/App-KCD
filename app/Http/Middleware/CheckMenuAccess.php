@@ -18,8 +18,9 @@ class CheckMenuAccess
             return redirect('/');
         }
 
-        // Normalisasi Role
-        $role = strtolower(trim($user->role));
+        // Ambil role secara fleksibel (role untuk Admin/Pegawai, peran_id_str untuk Siswa/Guru)
+        $roleRaw = ($user instanceof \App\Models\Pengguna) ? $user->peran_id_str : $user->role;
+        $role = strtolower(trim($roleRaw ?? ''));
         
         // PRIORITAS 1: ADMIN/ADMINISTRATOR SELALU PUNYA AKSES
         if (in_array($role, ['admin', 'administrator'])) {

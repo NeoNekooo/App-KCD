@@ -17,7 +17,10 @@ class SidebarServiceProvider extends ServiceProvider
     {
         View::composer('layouts.partials.sidebar', function ($view) {
             $user = Auth::user();
-            $role = session('role') ?? $user?->role;
+            
+            // 🔥 Ambil role dari session, atau dari kolom 'role' (Admin/Pegawai), 
+            // atau dari 'peran_id_str' (Siswa/Guru/Pengguna)
+            $role = session('role') ?? ($user instanceof \App\Models\Pengguna ? $user->peran_id_str : $user?->role);
 
             $notifData = [];
             if ($user && Schema::hasTable('pengajuan_sekolahs')) {
