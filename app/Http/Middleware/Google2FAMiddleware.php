@@ -23,15 +23,27 @@ class Google2FAMiddleware
             return $next($request);
         }
 
-        // 2. Jika user BELUM mengaktifkan 2FA
-        if (!$user->google2fa_enabled) {
+        // 2. Tentukan apakah 2FA aktif (Admin pake google2fa_enabled, Pengguna pake google2fa_secret)
+        $is2faEnabled = false;
+        if ($user instanceof \App\Models\User) {
+            $is2faEnabled = (bool) $user->google2fa_enabled;
+        } elseif ($user instanceof \App\Models\Pengguna) {
+            $is2faEnabled = !empty($user->google2fa_secret);
+        }
+
+        if (!$is2faEnabled) {
             // Biarkan lewat jika sedang di halaman setup, proses aktifasi, atau logout
             if ($request->is('admin/settings/security/2fa*') || $request->is('logout')) {
                 return $next($request);
             }
 
-            // Paksa ke halaman setup 2FA
-            return redirect()->route('admin.settings.2fa')->with('warning', 'Demi keamanan, Anda wajib mengaktifkan Google 2FA sebelum melanjutkan.');
+            // Untuk Admin: Paksa ke halaman setup 2FA
+            if ($user instanceof \App\Models\User) {
+                return redirect()->route('admin.settings.2fa')->with('warning', 'Demi keamanan, Anda wajib mengaktifkan Google 2FA sebelum melanjutkan.');
+            }
+
+            // Untuk Siswa/Guru: Jika mereka gak punya secret, biarin lewat aja (tidak wajib)
+            return $next($request);
         }
 
         // 3. Jika user SUDAH mengaktifkan 2FA
@@ -50,6 +62,6 @@ class Google2FAMiddleware
         }
 
         // Lempar ke halaman verifikasi
-        return response()->view('auth.2fa_verify');
+        return redirect()->route('2fa.verify');
     }
 }

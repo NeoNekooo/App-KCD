@@ -24,7 +24,22 @@ class Pengguna extends Authenticatable
 
     protected $hidden = [
         'password',
+        'remember_token',
+        'google2fa_secret',
     ];
+
+    /**
+     * Decrypt the 2FA secret when retrieved.
+     */
+    public function getGoogle2faSecretAttribute($value)
+    {
+        if (empty($value)) return null;
+        try {
+            return decrypt($value);
+        } catch (\Exception $e) {
+            return $value; // Return as-is if not encrypted
+        }
+    }
 
     public function gtk()
     {

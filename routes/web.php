@@ -55,7 +55,7 @@ use App\Http\Controllers\Admin\SettingController as WebSettingController;
 
 // --- Rute 2FA Google Authenticator ---
 use App\Http\Controllers\Auth\Google2FAController;
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth:web,pengguna'])->group(function () {
     Route::get('/2fa/verify', [Google2FAController::class, 'showVerifyForm'])->name('2fa.verify');
     Route::post('/2fa/verify', [Google2FAController::class, 'verify']);
     
