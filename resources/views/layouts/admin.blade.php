@@ -12,7 +12,7 @@
 </head>
 <body style="background-color: #f5f5f9;">
     @php 
-        $user = Auth::user();
+        $user = Auth::guard('web')->user() ?? Auth::guard('pengguna')->user();
         // Hanya paksa 2FA untuk Admin/Pegawai KCD, jangan paksa Siswa/Guru
         $is2faForced = ($user instanceof \App\Models\User) && !$user->google2fa_enabled; 
     @endphp

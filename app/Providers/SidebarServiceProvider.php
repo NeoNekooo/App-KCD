@@ -16,7 +16,8 @@ class SidebarServiceProvider extends ServiceProvider
     public function boot(): void
     {
         View::composer('layouts.partials.sidebar', function ($view) {
-            $user = Auth::user();
+            // 🔥 FIX: Cari user di guard Admin, kalau gak ada cari di guard Siswa
+            $user = Auth::guard('web')->user() ?? Auth::guard('pengguna')->user();
             
             // 🔥 Ambil role dari session, atau dari kolom 'role' (Admin/Pegawai), 
             // atau dari 'peran_id_str' (Siswa/Guru/Pengguna)
