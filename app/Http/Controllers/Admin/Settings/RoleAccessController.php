@@ -14,8 +14,10 @@ class RoleAccessController extends Controller
         // 1. Ambil Role secara dinamis dari Jabatan KCD (Admin/Pegawai)
         $dbRoles = DB::table('jabatan_kcd')->select('role')->distinct()->whereNotNull('role')->pluck('role')->toArray();
         
-        // 2. Ambil Role secara dinamis dari tabel Pengguna (Siswa/Guru)
-        $penggunaRoles = DB::table('penggunas')->select('peran_id_str as role')->distinct()->whereNotNull('peran_id_str')->pluck('role')->toArray();
+        // 2. Ambil Role dari tabel Pengguna (Siswa/Guru) - KITA FILTER BIAR GAK KEBANYAKAN
+        $penggunaRolesRaw = DB::table('penggunas')->select('peran_id_str as role')->distinct()->whereNotNull('peran_id_str')->pluck('role')->toArray();
+        $allowedPenggunaRoles = ['Peserta Didik', 'PTK', 'Guru']; // Hanya yang kamu mau
+        $penggunaRoles = array_intersect($penggunaRolesRaw, $allowedPenggunaRoles);
 
         // 3. Gabungkan dengan role default (Administrator wajib ada)
         $defaultRoles = ['Administrator', 'Admin'];
