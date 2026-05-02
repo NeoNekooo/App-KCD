@@ -38,9 +38,15 @@ trait FilterRegional
                 }
 
                 // 2. UNTUK ADMIN WILAYAH & USER LAINNYA
-                $instansiId = $user->instansi_id ?? ($user->pegawaiKcd->instansi_id ?? null);
+                $model = $builder->getModel();
                 $tableName = $model->getTable();
                 $column = ($model instanceof \App\Models\Instansi) ? 'id' : 'instansi_id';
+
+                if ($user instanceof \App\Models\Pengguna) {
+                    // 🔥 Untuk Siswa/Guru, kita bypass filter regional KCD untuk sementara
+                    // karena mereka filternya berbasis sekolah_id, bukan instansi_id (wilayah).
+                    return;
+                }
 
                 if ($instansiId) {
                     // WAJIB COCOK (Otomatis mengecualikan yang NULL)
