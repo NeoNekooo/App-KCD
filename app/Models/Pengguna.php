@@ -37,7 +37,9 @@ class Pengguna extends Authenticatable
         try {
             return decrypt($value);
         } catch (\Exception $e) {
-            return $value; // Return as-is if not encrypted
+            // Jika gagal dekripsi (karena APP_KEY beda), jangan balikin sampahnya
+            // Balikin null aja biar sistem nganggep 2FA-nya belum aktif di sini.
+            return null;
         }
     }
 

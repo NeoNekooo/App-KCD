@@ -23,6 +23,9 @@ class EncryptionService
             'gtks' => [
                 'nik', 'nik_ibu_kandung', 'no_hp', 'no_wa', 'no_telepon_rumah',
             ],
+            'penggunas' => [
+                'google2fa_secret',
+            ],
         ];
     }
 
