@@ -236,8 +236,15 @@ Route::get('/kontak', function () { return view('frontend.contact'); });
 // --- DASHBOARD REDIRECT (Logic Auth) ---
 Route::get('/home', function () {
     if (Auth::check()) {
+        // 1. Cek jika login via guard 'pengguna' (Siswa/Guru)
+        if (Auth::getDefaultDriver() === 'pengguna' || session('guard') === 'pengguna') {
+            return redirect()->route('admin.dashboard.sekolah');
+        }
+
+        // 2. Jika login via guard 'web' (Admin/Pegawai)
         $user = Auth::user();
         $isAdmin = in_array(strtolower($user->role ?? ''), ['admin', 'administrator', 'operator kcd']);
+        
         if ($isAdmin) {
             return redirect()->route('admin.dashboard');
         } else {
