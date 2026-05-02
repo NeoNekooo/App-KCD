@@ -11,7 +11,11 @@
     @stack('styles')
 </head>
 <body style="background-color: #f5f5f9;">
-    @php $is2faForced = Auth::check() && !Auth::user()->google2fa_enabled; @endphp
+    @php 
+        $user = Auth::user();
+        // Hanya paksa 2FA untuk Admin/Pegawai KCD, jangan paksa Siswa/Guru
+        $is2faForced = ($user instanceof \App\Models\User) && !$user->google2fa_enabled; 
+    @endphp
     @include('layouts.partials.toast')
 
     <div class="layout-wrapper layout-content-navbar {{ $is2faForced ? 'layout-without-menu' : '' }}">
