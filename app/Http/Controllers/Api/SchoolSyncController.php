@@ -68,12 +68,21 @@ class SchoolSyncController extends Controller
                 }
             }
 
-            // 2. PRIMARY KEY DETECTION - Cari ID Unik (Dapodik) agar data antar sekolah tidak tabrakan
+            // 2. PRIMARY KEY DETECTION - Cari ID Unik agar data tidak tabrakan
             $primaryKey = 'id';
-            if (isset($firstRow['ptk_id'])) $primaryKey = 'ptk_id';
-            elseif (isset($firstRow['peserta_didik_id'])) $primaryKey = 'peserta_didik_id';
-            elseif (isset($firstRow['sekolah_id']) && $tableName === 'sekolahs') $primaryKey = 'sekolah_id';
-            elseif (isset($firstRow[$table . '_id'])) $primaryKey = $table . '_id';
+            
+            // Urutan prioritas pencarian ID unik
+            if ($tableName === 'penggunas' && isset($firstRow['pengguna_id'])) {
+                $primaryKey = 'pengguna_id';
+            } elseif (isset($firstRow['ptk_id'])) {
+                $primaryKey = 'ptk_id';
+            } elseif (isset($firstRow['peserta_didik_id'])) {
+                $primaryKey = 'peserta_didik_id';
+            } elseif (isset($firstRow['sekolah_id']) && $tableName === 'sekolahs') {
+                $primaryKey = 'sekolah_id';
+            } elseif (isset($firstRow[$table . '_id'])) {
+                $primaryKey = $table . '_id';
+            }
 
             $processed = 0;
             $errors = [];
@@ -120,8 +129,9 @@ class SchoolSyncController extends Controller
 
                     $conditions = [];
                     // Gunakan Kombinasi Primary Key + sekolah_id untuk keamanan data
-                    if ($primaryKey !== 'id' && isset($row[$primaryKey])) {
+                    if ($primaryKey !== 'id' && !empty($row[$primaryKey])) {
                          $conditions[$primaryKey] = $row[$primaryKey];
+                         if (isset($row['sekolah_id'])) $conditions['sekolah_id'] = $row['sekolah_id'];
                     } else {
                          // Jika tidak ada ID unik Dapodik, gunakan ID lokal + sekolah_id
                          if (isset($row['id'])) $conditions['id_lokal_sekolah'] = $row['id']; // Simpan ID asli sekolah
