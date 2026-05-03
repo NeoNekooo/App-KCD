@@ -65,7 +65,7 @@
                         <div class="col-12">
                             <div class="row" id="container-sekolah">
                                 @foreach($sekolahs as $s)
-                                <div class="col-md-6 item-sekolah" data-search="{{ strtolower($s->nama . ' ' . $s->npsn) }}">
+                                <div class="col-md-6 item-sekolah" data-sid="{{ $s->sekolah_id }}" data-search="{{ strtolower($s->nama . ' ' . $s->npsn) }}">
                                     <div class="form-check custom-option custom-option-basic">
                                         <label class="form-check-label custom-option-content" for="sekolah-{{ $s->sekolah_id }}">
                                             <input class="form-check-input check-sekolah" type="checkbox" value="{{ $s->sekolah_id }}" id="sekolah-{{ $s->sekolah_id }}">
@@ -106,7 +106,7 @@
         let currentPengawasId = null;
 
         // 1. Klik Pengawas
-        $('.btn-pengawas').on('click', function() {
+        $(document).on('click', '.btn-pengawas', function() {
             $('.btn-pengawas').removeClass('active bg-label-primary');
             $(this).addClass('active bg-label-primary');
             
@@ -117,13 +117,22 @@
             $('#placeholder-mapping').addClass('d-none');
             $('#card-sekolah').removeClass('d-none');
 
-            // Reset checkboxes
+            // Reset checkboxes dan tampilkan semua dulu
             $('.check-sekolah').prop('checked', false);
+            $('.item-sekolah').show();
 
             // Load Mapping via AJAX
-            $.get(`/admin/pkks/mapping-pengawas/get/${currentPengawasId}`, function(data) {
-                data.forEach(function(sekolahId) {
-                    $(`#sekolah-${sekolahId}`).prop('checked', true);
+            $.get(`/admin/pkks/mapping-pengawas/get/${currentPengawasId}`, function(response) {
+                // Sembunyikan sekolah yang dipegang pengawas LAIN
+                response.other_schools.forEach(function(sekolahId) {
+                    $(`.item-sekolah[data-sid="${sekolahId}"]`).hide();
+                });
+
+                // Centang sekolah yang dipegang pengawas INI
+                response.my_schools.forEach(function(sekolahId) {
+                    const item = $(`.item-sekolah[data-sid="${sekolahId}"]`);
+                    item.show(); // Pastikan tampil kalau punya sendiri
+                    item.find('.check-sekolah').prop('checked', true);
                 });
             });
         });
@@ -131,7 +140,7 @@
         // 2. Search Sekolah
         $('#search-sekolah').on('keyup', function() {
             const val = $(this).val().toLowerCase();
-            $('.item-sekolah').each(function() {
+            $('.item-sekolah:visible').each(function() { // Hanya cari di yang tidak di-hide pengawas lain
                 const text = $(this).data('search');
                 $(this).toggle(text.includes(val));
             });
@@ -139,7 +148,10 @@
 
         // 3. Simpan Pemetaan
         $('#btn-save').on('click', function() {
-            if (!currentPengawasId) return;
+            if (!currentPengawasId) {
+                Swal.fire('Peringatan', 'Pilih pengawas terlebih dahulu!', 'warning');
+                return;
+            }
 
             const selectedSchools = [];
             $('.check-sekolah:checked').each(function() {

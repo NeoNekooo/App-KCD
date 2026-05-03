@@ -21,22 +21,34 @@ class PengawasMappingController extends Controller
             ->orderBy('name', 'asc')
             ->get();
 
-        // Ambil daftar sekolah (Bisa difilter per regional kalau mau)
+        // Ambil SEMUA sekolah (nanti kita sortir di View pake JS agar lebih dinamis)
         $sekolahs = Sekolah::orderBy('nama', 'asc')->get();
+        
+        // Ambil ID sekolah-sekolah yang sudah di-mapping (Global)
+        $mappedSchoolIds = PengawasPembina::pluck('sekolah_id')->toArray();
 
-        return view('admin.pkks.mapping_pengawas.index', compact('pengawas', 'sekolahs'));
+        return view('admin.pkks.mapping_pengawas.index', compact('pengawas', 'sekolahs', 'mappedSchoolIds'));
     }
 
     /**
-     * Ambil daftar sekolah yang dipetakan ke pengawas tertentu (AJAX)
+     * Ambil mapping dan list sekolah yang tersedia (AJAX)
      */
     public function getMapping($pengawasId)
     {
-        $selectedSchools = PengawasPembina::where('pengawas_id', $pengawasId)
+        // 1. Sekolah yang dipegang pengawas ini
+        $mySchools = PengawasPembina::where('pengawas_id', $pengawasId)
             ->pluck('sekolah_id')
             ->toArray();
 
-        return response()->json($selectedSchools);
+        // 2. Sekolah yang dipegang pengawas LAIN
+        $otherSchools = PengawasPembina::where('pengawas_id', '!=', $pengawasId)
+            ->pluck('sekolah_id')
+            ->toArray();
+
+        return response()->json([
+            'my_schools' => $mySchools,
+            'other_schools' => $otherSchools
+        ]);
     }
 
     /**
