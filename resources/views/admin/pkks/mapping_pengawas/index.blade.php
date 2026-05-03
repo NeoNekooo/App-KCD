@@ -224,13 +224,9 @@
                 .then(res => {
                     console.log('Save result:', res);
                     if (res.success) {
-                        // Tampilkan Toast jika Swal ada, jika tidak pake alert
-                        if (typeof Swal !== 'undefined') {
-                            const T = Swal.mixin({ toast: true, position: 'top-end', showConfirmButton: false, timer: 3000, timerProgressBar: true });
-                            T.fire({ icon: 'success', title: res.message });
-                        } else {
-                            alert('Berhasil: ' + res.message);
-                        }
+                        // Manggil Toast ala Sneat
+                        showSneatToast('success', res.message);
+
                         const b = document.querySelector('.btn-pengawas.active .count-badge');
                         if(b) b.innerText = ids.length;
                     } else {
@@ -239,16 +235,50 @@
                 })
                 .catch(err => {
                     console.error('Save Error:', err);
-                    if (typeof Swal !== 'undefined') {
-                        Swal.fire('Error!', err.message || 'Gagal simpan.', 'error');
-                    } else {
-                        alert('Error: ' + err.message);
-                    }
+                    showSneatToast('danger', err.message || 'Gagal simpan.');
                 })
                 .finally(() => {
                     btnSave.disabled = false;
                     btnSave.innerHTML = originalHtml;
                 });
+            });
+        }
+
+        // Fungsi Spesial buat manggil Toast ala Sneat
+        function showSneatToast(type, message) {
+            const config = {
+                'success': { class: 'bg-success', title: 'Sukses', icon: 'bx bx-check-circle' },
+                'danger':  { class: 'bg-danger',  title: 'Error',  icon: 'bx bx-error-circle' }
+            };
+            const c = config[type] || config.success;
+
+            const toastHtml = `
+                <div class="bs-toast toast show fade align-items-center ${c.class} border-0 position-fixed top-0 end-0 m-3" 
+                    role="alert" aria-live="assertive" aria-atomic="true" style="z-index: 9999;">
+                    <div class="toast-header">
+                        <i class="${c.icon} me-2 text-white"></i>
+                        <div class="me-auto fw-medium text-white">${c.title}</div>
+                        <small class="text-white">Sekarang</small>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+                    </div>
+                    <div class="toast-body text-white">
+                        ${message}
+                    </div>
+                </div>
+            `;
+            
+            const toastContainer = document.createElement('div');
+            toastContainer.innerHTML = toastHtml;
+            const toastEl = toastContainer.querySelector('.toast');
+            document.body.appendChild(toastEl);
+
+            // Inisialisasi Toast BS5
+            const bsToast = new bootstrap.Toast(toastEl, { delay: 3000 });
+            bsToast.show();
+
+            // Hapus elemen setelah selesai biar gak menuhin DOM
+            toastEl.addEventListener('hidden.bs.toast', () => {
+                toastEl.remove();
             });
         }
     });
