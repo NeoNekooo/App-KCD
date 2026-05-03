@@ -8,7 +8,7 @@
         <h4 class="fw-bold m-0"><span class="text-muted fw-light">PKKS /</span> Mapping Pengawas Pembina</h4>
         <div id="action-buttons" class="d-none">
             <button type="button" class="btn btn-outline-primary btn-sm me-2" id="btn-select-all">Pilih Semua</button>
-            <button type="button" class="btn btn-primary" id="btn-save">
+            <button type="button" class="btn btn-primary shadow-sm" id="btn-save">
                 <i class="bx bx-save me-1"></i> Simpan Pemetaan
             </button>
         </div>
@@ -18,13 +18,13 @@
         <!-- Kolom Kiri: Daftar Pengawas -->
         <div class="col-md-4">
             <div class="card mb-4 shadow-none border">
-                <div class="card-header border-bottom">
+                <div class="card-header border-bottom py-3">
                     <div class="input-group input-group-merge border rounded-pill px-2">
                         <span class="input-group-text bg-transparent border-0"><i class="bx bx-search"></i></span>
                         <input type="text" class="form-control bg-transparent border-0" id="search-pengawas" placeholder="Cari pengawas...">
                     </div>
                 </div>
-                <div class="card-body p-0">
+                <div class="card-body p-0" style="max-height: 65vh; overflow-y: auto;">
                     <div class="list-group list-group-flush" id="list-pengawas">
                         @forelse($pengawas as $p)
                         <a href="javascript:void(0);" 
@@ -33,7 +33,7 @@
                            data-name="{{ $p->name }}"
                            data-search="{{ strtolower($p->name) }}">
                             <div class="avatar avatar-sm me-3">
-                                <span class="avatar-initial rounded-circle bg-label-primary">{{ substr($p->name, 0, 1) }}</span>
+                                <span class="avatar-initial rounded-circle bg-label-primary shadow-sm">{{ substr($p->name, 0, 1) }}</span>
                             </div>
                             <div class="w-100 overflow-hidden">
                                 <div class="d-flex justify-content-between align-items-center">
@@ -44,9 +44,7 @@
                             </div>
                         </a>
                         @empty
-                        <div class="p-4 text-center">
-                            <p class="text-muted mb-0 small">Belum ada data pengawas.</p>
-                        </div>
+                        <div class="p-4 text-center text-muted small">Belum ada data pengawas.</div>
                         @endforelse
                     </div>
                 </div>
@@ -55,21 +53,19 @@
 
         <!-- Kolom Kanan: Daftar Sekolah -->
         <div class="col-md-8">
-            <!-- Placeholder -->
             <div class="card shadow-none border text-center py-5" id="placeholder-mapping">
                 <div class="card-body">
                     <div class="mb-3">
-                        <i class="bx bx-pointer text-primary" style="font-size: 5rem; opacity: 0.1;"></i>
+                        <i class="bx bx-pointer text-primary" style="font-size: 5rem; opacity: 0.2;"></i>
                     </div>
                     <h5>Pilih pengawas di kolom kiri</h5>
                     <p class="text-muted">Kelola pemetaan sekolah binaan untuk pengawas yang dipilih.</p>
                 </div>
             </div>
 
-            <!-- Card Sekolah -->
             <div class="card shadow-none border d-none" id="card-sekolah">
-                <div class="card-header border-bottom py-3 d-flex align-items-center">
-                    <div class="avatar avatar-sm bg-label-primary me-3">
+                <div class="card-header border-bottom py-3 d-flex align-items-center bg-light bg-opacity-10">
+                    <div class="avatar avatar-sm bg-label-primary me-3 shadow-sm">
                         <span class="avatar-initial rounded" id="initial-name">?</span>
                     </div>
                     <h5 class="mb-0 fw-bold" id="selected-pengawas-name">Nama Pengawas</h5>
@@ -83,12 +79,12 @@
                     <div class="row g-3" id="container-sekolah">
                         @foreach($sekolahs as $s)
                         <div class="col-md-6 item-sekolah" data-sid="{{ $s->sekolah_id }}" data-search="{{ strtolower($s->nama . ' ' . $s->npsn) }}">
-                            <div class="form-check custom-option custom-option-basic">
-                                <label class="form-check-label custom-option-content" for="sekolah-{{ $s->sekolah_id }}">
+                            <div class="form-check custom-option custom-option-basic shadow-none">
+                                <label class="form-check-label custom-option-content border-2" for="sekolah-{{ $s->sekolah_id }}">
                                     <input class="form-check-input check-sekolah" type="checkbox" value="{{ $s->sekolah_id }}" id="sekolah-{{ $s->sekolah_id }}">
                                     <span class="custom-option-header pb-0">
-                                        <span class="h6 mb-1 text-truncate" style="max-width: 220px;">{{ $s->nama }}</span>
-                                        <small class="text-muted">{{ $s->npsn }}</small>
+                                        <span class="h6 mb-1 text-truncate" style="max-width: 200px;">{{ $s->nama }}</span>
+                                        <small class="text-muted badge bg-label-secondary" style="font-size: 10px;">{{ $s->npsn }}</small>
                                     </span>
                                     <span class="custom-option-body">
                                         <small class="text-muted d-block text-truncate">
@@ -107,28 +103,13 @@
 </div>
 
 <style>
-    .btn-pengawas.active {
-        background-color: #696cff !important;
-        color: #fff !important;
-    }
-    .btn-pengawas.active .text-muted, .btn-pengawas.active h6, .btn-pengawas.active .count-badge {
-        color: #fff !important;
-    }
-    .btn-pengawas.active .count-badge {
-        background-color: rgba(255,255,255,0.2) !important;
-    }
-    .custom-option-content {
-        padding: 0.75rem !important;
-    }
-    .custom-option-header {
-        margin-bottom: 0 !important;
-    }
-    .item-sekolah {
-        transition: all 0.2s ease;
-    }
-    .btn-pengawas {
-        cursor: pointer !important;
-    }
+    .btn-pengawas { cursor: pointer !important; transition: all 0.2s; }
+    .btn-pengawas:hover { background-color: rgba(105, 108, 255, 0.05); }
+    .btn-pengawas.active { background-color: #696cff !important; color: #fff !important; box-shadow: 0 2px 10px rgba(105, 108, 255, 0.3); }
+    .btn-pengawas.active .text-muted, .btn-pengawas.active h6, .btn-pengawas.active .count-badge { color: #fff !important; }
+    .btn-pengawas.active .count-badge { background-color: rgba(255,255,255,0.2) !important; }
+    .custom-option-content { padding: 0.75rem !important; border-radius: 10px !important; }
+    .custom-option-header { margin-bottom: 0 !important; }
 </style>
 
 @push('scripts')
@@ -137,21 +118,19 @@
         let currentPengawasId = null;
 
         // 1. Search Pengawas
-        const searchPengawas = document.getElementById('search-pengawas');
-        if(searchPengawas) {
-            searchPengawas.addEventListener('keyup', function() {
+        const searchInput = document.getElementById('search-pengawas');
+        if(searchInput) {
+            searchInput.addEventListener('keyup', function() {
                 const val = this.value.toLowerCase();
                 document.querySelectorAll('.btn-pengawas').forEach(item => {
-                    const text = item.getAttribute('data-search');
-                    item.style.display = text.includes(val) ? 'flex' : 'none';
+                    item.style.display = item.getAttribute('data-search').includes(val) ? 'flex' : 'none';
                 });
             });
         }
 
-        // 2. Klik Pengawas
+        // 2. Klik Pengawas (Toggle)
         document.querySelectorAll('.btn-pengawas').forEach(button => {
             button.addEventListener('click', function() {
-                // TOGGLE LOGIC: Kalau diklik lagi yang sudah aktif, batalkan pilihan
                 if (this.classList.contains('active')) {
                     this.classList.remove('active');
                     currentPengawasId = null;
@@ -166,6 +145,7 @@
                 
                 currentPengawasId = this.getAttribute('data-id');
                 const name = this.getAttribute('data-name');
+                console.log('Selected Pengawas:', currentPengawasId, name);
 
                 document.getElementById('selected-pengawas-name').innerText = name;
                 document.getElementById('initial-name').innerText = name.substring(0, 1);
@@ -173,42 +153,34 @@
                 document.getElementById('card-sekolah').classList.remove('d-none');
                 document.getElementById('action-buttons').classList.remove('d-none');
 
-                // Reset dan Load
                 document.querySelectorAll('.check-sekolah').forEach(cb => cb.checked = false);
                 document.querySelectorAll('.item-sekolah').forEach(item => item.style.display = 'block');
 
                 fetch(`/admin/pkks/mapping-pengawas/get/${currentPengawasId}`)
-                    .then(response => response.json())
+                    .then(r => r.json())
                     .then(data => {
-                        data.other_schools.forEach(sekolahId => {
-                            const item = document.querySelector(`.item-sekolah[data-sid="${sekolahId}"]`);
-                            if(item) item.style.display = 'none';
+                        data.other_schools.forEach(id => {
+                            const el = document.querySelector(`.item-sekolah[data-sid="${id}"]`);
+                            if(el) el.style.display = 'none';
                         });
-
-                        data.my_schools.forEach(sekolahId => {
-                            const item = document.querySelector(`.item-sekolah[data-sid="${sekolahId}"]`);
-                            if(item) {
-                                item.style.display = 'block';
-                                item.querySelector('.check-sekolah').checked = true;
-                            }
+                        data.my_schools.forEach(id => {
+                            const el = document.querySelector(`.item-sekolah[data-sid="${id}"]`);
+                            if(el) { el.style.display = 'block'; el.querySelector('.check-sekolah').checked = true; }
                         });
-                        
-                        const badge = this.querySelector('.count-badge');
-                        if(badge) badge.innerText = data.my_schools.length;
+                        const b = this.querySelector('.count-badge');
+                        if(b) b.innerText = data.my_schools.length;
                     });
             });
         });
 
         // 3. Search Sekolah
-        const searchSekolahInput = document.getElementById('search-sekolah');
-        if(searchSekolahInput) {
-            searchSekolahInput.addEventListener('keyup', function() {
+        const searchSekolah = document.getElementById('search-sekolah');
+        if(searchSekolah) {
+            searchSekolah.addEventListener('keyup', function() {
                 const val = this.value.toLowerCase();
                 document.querySelectorAll('.item-sekolah').forEach(item => {
-                    const text = item.getAttribute('data-search');
-                    // Hanya filter yang aslinya memang terlihat
                     if (item.style.display !== 'none' || val === '') {
-                        item.style.display = text.includes(val) ? 'block' : 'none';
+                        item.style.display = item.getAttribute('data-search').includes(val) ? 'block' : 'none';
                     }
                 });
             });
@@ -218,82 +190,62 @@
         const btnSelectAll = document.getElementById('btn-select-all');
         if(btnSelectAll) {
             btnSelectAll.addEventListener('click', function() {
-                const visibleCheckboxes = document.querySelectorAll('.item-sekolah[style*="display: block"] .check-sekolah');
-                const allChecked = Array.from(visibleCheckboxes).every(cb => cb.checked);
-                visibleCheckboxes.forEach(cb => cb.checked = !allChecked);
-                this.innerText = allChecked ? 'Pilih Semua' : 'Batal Pilih Semua';
+                const boxes = document.querySelectorAll('.item-sekolah[style*="display: block"] .check-sekolah');
+                const all = Array.from(boxes).every(cb => cb.checked);
+                boxes.forEach(cb => cb.checked = !all);
+                this.innerText = all ? 'Pilih Semua' : 'Batal Pilih Semua';
             });
         }
 
-        // 5. Simpan Pemetaan (Pake Fetch API biar modern dan gak gampang nyangkut)
+        // 5. Simpan (Fetch API)
         const btnSave = document.getElementById('btn-save');
         if(btnSave) {
             btnSave.addEventListener('click', function() {
-                if (!currentPengawasId) {
-                    Swal.fire('Peringatan', 'Pilih pengawas terlebih dahulu!', 'warning');
-                    return;
-                }
+                if (!currentPengawasId) return alert('Pilih pengawas dulu!');
 
-                const selectedSchools = [];
-                document.querySelectorAll('.check-sekolah:checked').forEach(cb => {
-                    selectedSchools.push(cb.value);
-                });
-
-                // Set Loading
+                const ids = Array.from(document.querySelectorAll('.check-sekolah:checked')).map(cb => cb.value);
                 const originalHtml = btnSave.innerHTML;
+                
                 btnSave.disabled = true;
                 btnSave.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Menyimpan...';
 
+                console.log('Saving mapping...', { pengawas_id: currentPengawasId, sekolah_ids: ids });
+
                 fetch('{{ route("admin.pkks.mapping-pengawas.update") }}', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        pengawas_id: currentPengawasId,
-                        sekolah_ids: selectedSchools
-                    })
+                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' },
+                    body: JSON.stringify({ pengawas_id: currentPengawasId, sekolah_ids: ids })
                 })
-                .then(async response => {
-                    const data = await response.json();
-                    if (!response.ok) throw new Error(data.message || 'Server Error');
+                .then(async res => {
+                    const data = await res.json();
+                    if (!res.ok) throw new Error(data.message || 'Server Error');
                     return data;
                 })
                 .then(res => {
+                    console.log('Save result:', res);
                     if (res.success) {
-                        // Toast Gaya "Sneat" Minimalis
-                        const Toast = Swal.mixin({
-                            toast: true,
-                            position: 'top-end',
-                            showConfirmButton: false,
-                            timer: 2000,
-                            timerProgressBar: true,
-                            didOpen: (toast) => {
-                                toast.addEventListener('mouseenter', Swal.stopTimer)
-                                toast.addEventListener('mouseleave', Swal.resumeTimer)
-                            }
-                        });
-
-                        Toast.fire({
-                            icon: 'success',
-                            title: res.message
-                        });
-
-                        // Update angka di list kiri
-                        const activeBadge = document.querySelector('.btn-pengawas.active .count-badge');
-                        if(activeBadge) activeBadge.innerText = selectedSchools.length;
+                        // Tampilkan Toast jika Swal ada, jika tidak pake alert
+                        if (typeof Swal !== 'undefined') {
+                            const T = Swal.mixin({ toast: true, position: 'top-end', showConfirmButton: false, timer: 3000, timerProgressBar: true });
+                            T.fire({ icon: 'success', title: res.message });
+                        } else {
+                            alert('Berhasil: ' + res.message);
+                        }
+                        const b = document.querySelector('.btn-pengawas.active .count-badge');
+                        if(b) b.innerText = ids.length;
                     } else {
                         throw new Error(res.message);
                     }
                 })
-                .catch(error => {
-                    console.error('Save Error:', error);
-                    Swal.fire('Error!', error.message || 'Terjadi kesalahan pada server.', 'error');
+                .catch(err => {
+                    console.error('Save Error:', err);
+                    if (typeof Swal !== 'undefined') {
+                        Swal.fire('Error!', err.message || 'Gagal simpan.', 'error');
+                    } else {
+                        alert('Error: ' + err.message);
+                    }
                 })
                 .finally(() => {
-                    // Berhentiin Spinner
                     btnSave.disabled = false;
                     btnSave.innerHTML = originalHtml;
                 });
