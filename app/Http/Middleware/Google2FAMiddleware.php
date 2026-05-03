@@ -6,6 +6,7 @@ use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 use PragmaRX\Google2FALaravel\Support\Authenticator;
+use Illuminate\Support\Facades\Auth;
 
 class Google2FAMiddleware
 {
