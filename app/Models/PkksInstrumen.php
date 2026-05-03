@@ -6,7 +6,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class PkksInstrumen extends Model
 {
-    protected $fillable = ['nama', 'jenjang', 'tahun', 'start_at', 'end_at', 'skor_min', 'skor_maks', 'is_active'];
+    use \App\Traits\FilterRegional;
+
+    protected $fillable = ['nama', 'instansi_id', 'jenjang', 'tahun', 'start_at', 'end_at', 'skor_min', 'skor_maks', 'is_active'];
 
     protected $casts = [
         'start_at' => 'datetime',
