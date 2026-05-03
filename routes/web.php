@@ -551,6 +551,14 @@ Route::prefix('admin')->name('admin.')->middleware(['auth:web,pengguna', '2fa', 
     Route::get('/underConstructions', function () {
         return view('admin.underConstruction');
     })->name('underConstructions');
+    // --- PKKS - MAPPING PENGAWAS PEMBINA ---
+    Route::prefix('pkks/mapping-pengawas')->name('pkks.mapping-pengawas.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Admin\Pkks\PengawasMappingController::class, 'index'])->name('index');
+        Route::get('/get/{pengawasId}', [\App\Http\Controllers\Admin\Pkks\PengawasMappingController::class, 'getMapping'])->name('get');
+        Route::post('/update', [\App\Http\Controllers\Admin\Pkks\PengawasMappingController::class, 'update'])->name('update');
+    });
+
 });
 
-require __DIR__ . '/auth.php';
+// Auth Routes (Breeze/Default)
+require __DIR__.'/auth.php';
