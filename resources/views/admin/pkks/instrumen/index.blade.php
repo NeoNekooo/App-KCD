@@ -25,7 +25,7 @@
                             <i class="bx bx-dots-vertical-rounded fs-4"></i>
                         </button>
                         <div class="dropdown-menu dropdown-menu-end">
-                            <button class="dropdown-item text-danger" onclick="confirmDelete('{{ route('admin.pkks.instrumen.destroy', $item->id) }}', 'Paket instrumen dan semua soal di dalamnya akan dihapus permanen!')">
+                            <button class="dropdown-item text-danger" onclick="tampilKonfirmasiHapus('{{ route('admin.pkks.instrumen.destroy', $item->id) }}', 'Paket instrumen dan semua soal di dalamnya akan dihapus permanen!')">
                                 <i class="bx bx-trash me-2"></i> Hapus Paket
                             </button>
                         </div>
@@ -61,57 +61,72 @@
             </div>
         </div>
         @empty
-        <div class="col-12">
-            <div class="card shadow-none border-dashed text-center py-5 bg-transparent" style="border: 2px dashed #d9dee3 !important;">
-                <div class="card-body">
-                    <div class="avatar avatar-xl bg-label-secondary mx-auto mb-3">
-                        <span class="avatar-initial rounded-circle"><i class="bx bx-file" style="font-size: 3rem;"></i></span>
-                    </div>
-                    <h5>Belum Ada Instrumen</h5>
-                    <p class="text-muted mb-4">Mulai dengan membuat paket instrumen penilaian pertama kamu.</p>
-                    <a href="{{ route('admin.pkks.instrumen.create') }}" class="btn btn-primary">
-                        <i class="bx bx-plus me-1"></i> Buat Sekarang
-                    </a>
-                </div>
-            </div>
+        <div class="col-12 text-center py-5">
+            <p class="text-muted fst-italic">Belum ada paket instrumen.</p>
         </div>
         @endforelse
     </div>
+
+    <!-- Modal Konfirmasi Hapus -->
+    <div class="modal fade" id="modalKonfirmasiHapus" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-sm modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header bg-danger py-3">
+                    <h5 class="modal-title text-white fw-bold"><i class="bx bx-trash me-2"></i>Konfirmasi</h5>
+                    <button type="button" class="btn-close-custom" data-bs-dismiss="modal" aria-label="Close">×</button>
+                </div>
+                <div class="modal-body p-4 text-center">
+                    <div class="avatar avatar-xl bg-label-danger mx-auto mb-3">
+                        <span class="avatar-initial rounded-circle"><i class="bx bx-error fs-1"></i></span>
+                    </div>
+                    <h5 class="fw-bold mb-2">Hapus Paket?</h5>
+                    <p class="text-muted small" id="teks-konfirmasi">Data akan dihapus permanen.</p>
+                </div>
+                <div class="modal-footer border-top p-3 d-flex justify-content-center">
+                    <button type="button" class="btn btn-label-secondary me-2" data-bs-dismiss="modal">Batal</button>
+                    <form id="form-hapus-fix" action="" method="POST">
+                        @csrf @method('DELETE')
+                        <button type="submit" class="btn btn-danger px-4 shadow">Ya, Hapus!</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
-{{-- Hidden Delete Form --}}
-<form id="form-delete" action="" method="POST" class="d-none">
-    @csrf @method('DELETE')
-</form>
-
 <style>
-    .instrument-card { transition: all 0.3s ease; }
+    .instrument-card { transition: all 0.3s ease; border-radius: 12px !important; }
     .instrument-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(105, 108, 255, 0.1) !important; }
-    .btn-label-primary { background-color: #f0f1ff; color: #696cff; border: none; }
-    .btn-label-primary:hover { background-color: #696cff; color: #fff; }
+    .btn-close-custom {
+        background-color: #ffffff;
+        border: none;
+        color: #333333;
+        font-size: 1.5rem;
+        font-weight: bold;
+        line-height: 1;
+        padding: 0 8px;
+        border-radius: 50%;
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .btn-close-custom:hover { background-color: #f8f9fa; color: #ff3e1d; transform: scale(1.1); }
 </style>
 @endsection
 
 @push('scripts')
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-    function confirmDelete(url, text = 'Data yang dihapus tidak bisa dikembalikan!') {
-        Swal.fire({
-            title: 'Hapus Paket Ini?',
-            text: text,
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#696cff',
-            cancelButtonColor: '#ff3e1d',
-            confirmButtonText: 'Ya, Hapus!',
-            cancelButtonText: 'Batal'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                const form = document.getElementById('form-delete');
-                form.action = url;
-                form.submit();
-            }
-        })
+    function tampilKonfirmasiHapus(url, text = 'Data ini akan dihapus secara permanen.') {
+        const modal = new bootstrap.Modal(document.getElementById('modalKonfirmasiHapus'));
+        const form = document.getElementById('form-hapus-fix');
+        const teks = document.getElementById('teks-konfirmasi');
+        form.action = url;
+        teks.innerText = text;
+        modal.show();
     }
 </script>
 @endpush

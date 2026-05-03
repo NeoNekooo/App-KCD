@@ -55,7 +55,7 @@
                 </div>
                 <div class="ms-3 border-start ps-3">
                     <button class="btn btn-icon btn-xs btn-label-warning border-0" data-bs-toggle="modal" data-bs-target="#modalEditKompetensi-{{ $komp->id }}"><i class="bx bx-edit-alt"></i></button>
-                    <button class="btn btn-icon btn-xs btn-label-danger border-0 ms-1" onclick="confirmDelete('{{ route('admin.pkks.instrumen.kompetensi.destroy', $komp->id) }}', 'Kategori ini dan semua soal di dalamnya akan dihapus!')"><i class="bx bx-trash"></i></button>
+                    <button class="btn btn-icon btn-xs btn-label-danger border-0 ms-1" onclick="tampilKonfirmasiHapus('{{ route('admin.pkks.instrumen.kompetensi.destroy', $komp->id) }}', 'Kategori ini dan semua soal di dalamnya akan dihapus!')"><i class="bx bx-trash"></i></button>
                 </div>
             </div>
             <button class="btn btn-sm btn-primary px-3 shadow-sm" data-bs-toggle="modal" data-bs-target="#modalTambahIndikator-{{ $komp->id }}">
@@ -91,7 +91,7 @@
                             <td class="text-center pe-4">
                                 <div class="btn-group">
                                     <button class="btn btn-icon btn-sm btn-label-warning" data-bs-toggle="modal" data-bs-target="#modalEditIndikator-{{ $ind->id }}"><i class="bx bx-edit-alt"></i></button>
-                                    <button class="btn btn-icon btn-sm btn-label-danger" onclick="confirmDelete('{{ route('admin.pkks.instrumen.indikator.destroy', $ind->id) }}')"><i class="bx bx-trash"></i></button>
+                                    <button class="btn btn-icon btn-sm btn-label-danger" onclick="tampilKonfirmasiHapus('{{ route('admin.pkks.instrumen.indikator.destroy', $ind->id) }}')"><i class="bx bx-trash"></i></button>
                                 </div>
                             </td>
                         </tr>
@@ -103,7 +103,7 @@
                                     @csrf @method('PUT')
                                     <div class="modal-header bg-warning py-3">
                                         <h5 class="modal-title text-white fw-bold"><i class="bx bx-edit me-2"></i>Edit Soal</h5>
-                                        <button type="button" class="btn-close btn-close-white shadow-none" data-bs-dismiss="modal" aria-label="Close" style="filter: brightness(0) invert(1);"></button>
+                                        <button type="button" class="btn-close-custom" data-bs-dismiss="modal" aria-label="Close">×</button>
                                     </div>
                                     <div class="modal-body p-4">
                                         <div class="mb-3">
@@ -147,7 +147,7 @@
                 @csrf @method('PUT')
                 <div class="modal-header bg-warning py-3">
                     <h5 class="modal-title text-white fw-bold"><i class="bx bx-folder me-2"></i>Edit Kompetensi</h5>
-                    <button type="button" class="btn-close btn-close-white shadow-none" data-bs-dismiss="modal" aria-label="Close" style="filter: brightness(0) invert(1);"></button>
+                    <button type="button" class="btn-close-custom" data-bs-dismiss="modal" aria-label="Close">×</button>
                 </div>
                 <div class="modal-body p-4">
                     <div class="mb-3">
@@ -170,7 +170,7 @@
                 @csrf
                 <div class="modal-header bg-primary py-3">
                     <h5 class="modal-title text-white fw-bold"><i class="bx bx-plus-circle me-2"></i>Tambah Soal Baru</h5>
-                    <button type="button" class="btn-close btn-close-white shadow-none" data-bs-dismiss="modal" aria-label="Close" style="filter: brightness(0) invert(1);"></button>
+                    <button type="button" class="btn-close-custom" data-bs-dismiss="modal" aria-label="Close">×</button>
                 </div>
                 <div class="modal-body p-4">
                     <div class="mb-3">
@@ -210,7 +210,7 @@
                 @csrf
                 <div class="modal-header bg-primary py-3">
                     <h5 class="modal-title text-white fw-bold"><i class="bx bx-folder-plus me-2"></i>Tambah Kompetensi Baru</h5>
-                    <button type="button" class="btn-close btn-close-white shadow-none" data-bs-dismiss="modal" aria-label="Close" style="filter: brightness(0) invert(1);"></button>
+                    <button type="button" class="btn-close-custom" data-bs-dismiss="modal" aria-label="Close">×</button>
                 </div>
                 <div class="modal-body p-4">
                     <div class="mb-3">
@@ -233,7 +233,7 @@
                 @csrf
                 <div class="modal-header bg-success py-3">
                     <h5 class="modal-title text-white fw-bold"><i class="bx bx-upload me-2"></i>Import Massal via Excel</h5>
-                    <button type="button" class="btn-close btn-close-white shadow-none" data-bs-dismiss="modal" aria-label="Close" style="filter: brightness(0) invert(1);"></button>
+                    <button type="button" class="btn-close-custom" data-bs-dismiss="modal" aria-label="Close">×</button>
                 </div>
                 <div class="modal-body p-4">
                     <div class="alert alert-label-success border-0 d-flex align-items-start mb-4">
@@ -259,39 +259,71 @@
             </form>
         </div>
     </div>
+
+    <!-- Modal Konfirmasi Hapus (Ganti SweetAlert) -->
+    <div class="modal fade" id="modalKonfirmasiHapus" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-sm modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header bg-danger py-3">
+                    <h5 class="modal-title text-white fw-bold"><i class="bx bx-trash me-2"></i>Konfirmasi</h5>
+                    <button type="button" class="btn-close-custom" data-bs-dismiss="modal" aria-label="Close">×</button>
+                </div>
+                <div class="modal-body p-4 text-center">
+                    <div class="avatar avatar-xl bg-label-danger mx-auto mb-3">
+                        <span class="avatar-initial rounded-circle"><i class="bx bx-error fs-1"></i></span>
+                    </div>
+                    <h5 class="fw-bold mb-2">Apakah kamu yakin?</h5>
+                    <p class="text-muted small" id="teks-konfirmasi">Data ini akan dihapus secara permanen.</p>
+                </div>
+                <div class="modal-footer border-top p-3 d-flex justify-content-center">
+                    <button type="button" class="btn btn-label-secondary me-2" data-bs-dismiss="modal">Batal</button>
+                    <form id="form-hapus-fix" action="" method="POST">
+                        @csrf @method('DELETE')
+                        <button type="submit" class="btn btn-danger px-4 shadow">Ya, Hapus!</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
-{{-- Hidden Delete Form --}}
-<form id="form-delete" action="" method="POST" class="d-none">
-    @csrf @method('DELETE')
-</form>
+<style>
+    /* Style Tombol Close Custom: Background Putih, Silang Item */
+    .btn-close-custom {
+        background-color: #ffffff;
+        border: none;
+        color: #333333;
+        font-size: 1.5rem;
+        font-weight: bold;
+        line-height: 1;
+        padding: 0 8px;
+        border-radius: 50%;
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .btn-close-custom:hover {
+        background-color: #f8f9fa;
+        color: #ff3e1d;
+        transform: scale(1.1);
+    }
+</style>
 @endsection
 
 @push('scripts')
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-    function confirmDelete(url, text = 'Data yang dihapus tidak bisa dikembalikan!') {
-        Swal.fire({
-            title: 'Apakah kamu yakin?',
-            text: text,
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#696cff',
-            cancelButtonColor: '#ff3e1d',
-            confirmButtonText: 'Ya, Hapus!',
-            cancelButtonText: 'Batal',
-            customClass: {
-                confirmButton: 'btn btn-primary me-3',
-                cancelButton: 'btn btn-label-secondary'
-            },
-            buttonsStyling: false
-        }).then((result) => {
-            if (result.isConfirmed) {
-                const form = document.getElementById('form-delete');
-                form.action = url;
-                form.submit();
-            }
-        })
+    function tampilKonfirmasiHapus(url, text = 'Data ini akan dihapus secara permanen.') {
+        const modal = new bootstrap.Modal(document.getElementById('modalKonfirmasiHapus'));
+        const form = document.getElementById('form-hapus-fix');
+        const teks = document.getElementById('teks-konfirmasi');
+        
+        form.action = url;
+        teks.innerText = text;
+        modal.show();
     }
 </script>
 @endpush

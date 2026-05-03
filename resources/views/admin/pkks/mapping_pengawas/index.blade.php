@@ -114,13 +114,31 @@
     .btn-pengawas.active .count-badge { background-color: rgba(255,255,255,0.2) !important; }
     .custom-option-content { padding: 0.75rem !important; border-radius: 10px !important; }
     .custom-option-header { margin-bottom: 0 !important; }
+    
+    /* Tombol Close Putih-Item */
+    .btn-close-custom {
+        background-color: #ffffff;
+        border: none;
+        color: #333333;
+        font-size: 1.2rem;
+        font-weight: bold;
+        line-height: 1;
+        border-radius: 50%;
+        width: 28px;
+        height: 28px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
 </style>
 
 @push('scripts')
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         let currentPengawasId = null;
-        let draftMappings = {}; // Memory sementara buat simpen centangan yang belum di-save
+        let draftMappings = {}; 
 
         // 1. Search Pengawas
         const searchInput = document.getElementById('search-pengawas');
@@ -157,19 +175,15 @@
                 document.getElementById('card-sekolah').classList.remove('d-none');
                 document.getElementById('action-buttons').classList.remove('d-none');
 
-                // Reset UI
                 document.querySelectorAll('.check-sekolah').forEach(cb => cb.checked = false);
                 document.querySelectorAll('.item-sekolah').forEach(item => item.style.display = 'block');
 
-                // CEK DRAFT: Kalau di memori ada, pake yang di memori
                 if (draftMappings[currentPengawasId]) {
                     applyDraft(currentPengawasId);
                 } else {
-                    // Kalau gak ada di memori, baru tanya server
                     fetch(`/admin/pkks/mapping-pengawas/get/${currentPengawasId}`)
                         .then(r => r.json())
                         .then(data => {
-                            // Simpan ke draft
                             draftMappings[currentPengawasId] = {
                                 my_schools: data.my_schools,
                                 other_schools: data.other_schools
@@ -182,12 +196,10 @@
 
         function applyDraft(pid) {
             const draft = draftMappings[pid];
-            // Sembunyikan sekolah pengawas lain
             draft.other_schools.forEach(id => {
                 const el = document.querySelector(`.item-sekolah[data-sid="${id}"]`);
                 if(el) el.style.display = 'none';
             });
-            // Centang sekolah sendiri
             draft.my_schools.forEach(id => {
                 const el = document.querySelector(`.item-sekolah[data-sid="${id}"]`);
                 if(el) { el.style.display = 'block'; el.querySelector('.check-sekolah').checked = true; }
@@ -200,15 +212,10 @@
             if(b) b.innerText = count;
         }
 
-        // --- FITUR: Update Memory pas centang-centang ---
         document.querySelectorAll('.check-sekolah').forEach(cb => {
             cb.addEventListener('change', function() {
                 if (!currentPengawasId) return;
-                
-                // Ambil semua yang dicentang saat ini
                 const selected = Array.from(document.querySelectorAll('.check-sekolah:checked')).map(c => c.value);
-                
-                // Update ke memory draft
                 if (draftMappings[currentPengawasId]) {
                     draftMappings[currentPengawasId].my_schools = selected;
                     updateBadge(currentPengawasId, selected.length);
@@ -224,7 +231,6 @@
                 document.querySelectorAll('.item-sekolah').forEach(item => {
                     const draft = draftMappings[currentPengawasId];
                     const isOtherSchool = draft && draft.other_schools.includes(item.getAttribute('data-sid'));
-                    
                     if (!isOtherSchool) {
                         item.style.display = item.getAttribute('data-search').includes(val) ? 'block' : 'none';
                     }
@@ -240,8 +246,6 @@
                 const all = Array.from(boxes).every(cb => cb.checked);
                 boxes.forEach(cb => cb.checked = !all);
                 this.innerText = all ? 'Pilih Semua' : 'Batal Pilih Semua';
-                
-                // Update Memory
                 if (currentPengawasId && draftMappings[currentPengawasId]) {
                     const selected = Array.from(document.querySelectorAll('.check-sekolah:checked')).map(c => c.value);
                     draftMappings[currentPengawasId].my_schools = selected;
@@ -255,10 +259,8 @@
         if(btnSave) {
             btnSave.addEventListener('click', function() {
                 if (!currentPengawasId) return;
-
                 const ids = draftMappings[currentPengawasId].my_schools;
                 const originalHtml = btnSave.innerHTML;
-                
                 btnSave.disabled = true;
                 btnSave.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Menyimpan...';
 
@@ -280,7 +282,6 @@
                     }
                 })
                 .catch(err => {
-                    console.error('Save Error:', err);
                     showSneatToast('danger', err.message || 'Gagal simpan.');
                 })
                 .finally(() => {
@@ -296,7 +297,8 @@
                 'danger':  { class: 'bg-danger',  title: 'Error',  icon: 'bx bx-error-circle' }
             };
             const c = config[type] || config.success;
-            const toastHtml = `<div class="bs-toast toast show fade align-items-center ${c.class} border-0 position-fixed top-0 end-0 m-3" role="alert" aria-live="assertive" aria-atomic="true" style="z-index: 9999;"><div class="toast-header"><i class="${c.icon} me-2 text-white"></i><div class="me-auto fw-medium text-white">${c.title}</div><small class="text-white">Sekarang</small><button type="button" class="btn-close btn-close-white shadow-none" data-bs-dismiss="toast" aria-label="Close" style="filter: brightness(0) invert(1);"></button></div><div class="toast-body text-white">${message}</div></div>`;
+            // Gunakan Tombol Close Putih-Item
+            const toastHtml = `<div class="bs-toast toast show fade align-items-center ${c.class} border-0 position-fixed top-0 end-0 m-3" role="alert" aria-live="assertive" aria-atomic="true" style="z-index: 9999;"><div class="toast-header"><i class="${c.icon} me-2 text-white"></i><div class="me-auto fw-medium text-white">${c.title}</div><small class="text-white">Sekarang</small><button type="button" class="btn-close-custom ms-2" data-bs-dismiss="toast" aria-label="Close">×</button></div><div class="toast-body text-white">${message}</div></div>`;
             const toastContainer = document.createElement('div');
             toastContainer.innerHTML = toastHtml;
             const toastEl = toastContainer.querySelector('.toast');
