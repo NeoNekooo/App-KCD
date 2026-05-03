@@ -225,42 +225,62 @@
             });
         }
 
-        // 5. Simpan Pemetaan
+        // 5. Simpan Pemetaan (Pake Fetch API biar modern dan gak gampang nyangkut)
         const btnSave = document.getElementById('btn-save');
         if(btnSave) {
             btnSave.addEventListener('click', function() {
+                if (!currentPengawasId) {
+                    Swal.fire('Peringatan', 'Pilih pengawas terlebih dahulu!', 'warning');
+                    return;
+                }
+
                 const selectedSchools = [];
                 document.querySelectorAll('.check-sekolah:checked').forEach(cb => {
                     selectedSchools.push(cb.value);
                 });
 
-                const btn = $(this);
-                btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-1"></span>');
+                // Set Loading
+                const originalHtml = btnSave.innerHTML;
+                btnSave.disabled = true;
+                btnSave.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Menyimpan...';
 
-                $.ajax({
-                    url: '{{ route("admin.pkks.mapping-pengawas.update") }}',
+                fetch('{{ route("admin.pkks.mapping-pengawas.update") }}', {
                     method: 'POST',
-                    data: {
-                        _token: '{{ csrf_token() }}',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
                         pengawas_id: currentPengawasId,
                         sekolah_ids: selectedSchools
-                    },
-                    success: function(response) {
-                        if (response.success) {
-                            Swal.fire({
-                                icon: 'success',
-                                title: 'Disimpan!',
-                                text: response.message,
-                                timer: 1000,
-                                showConfirmButton: false
-                            });
-                            const activeBadge = document.querySelector('.btn-pengawas.active .count-badge');
-                            if(activeBadge) activeBadge.innerText = selectedSchools.length;
-                        }
-                    },
-                    complete: function() {
-                        btn.prop('disabled', false).html('<i class="bx bx-save me-1"></i> Simpan Pemetaan');
+                    })
+                })
+                .then(response => response.json().then(data => ({ status: response.status, body: data })))
+                .then(res => {
+                    if (res.status === 200 && res.body.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Berhasil!',
+                            text: res.body.message,
+                            timer: 1500,
+                            showConfirmButton: false
+                        });
+                        // Update badge di list kiri
+                        const activeBadge = document.querySelector('.btn-pengawas.active .count-badge');
+                        if(activeBadge) activeBadge.innerText = selectedSchools.length;
+                    } else {
+                        throw new Error(res.body.message || 'Gagal menyimpan data.');
                     }
+                })
+                .catch(error => {
+                    console.error('Save Error:', error);
+                    Swal.fire('Error!', error.message || 'Terjadi kesalahan pada server.', 'error');
+                })
+                .finally(() => {
+                    // Berhentiin Spinner
+                    btnSave.disabled = false;
+                    btnSave.innerHTML = originalHtml;
                 });
             });
         }

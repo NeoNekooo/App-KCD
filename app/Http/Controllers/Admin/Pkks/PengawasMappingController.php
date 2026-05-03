@@ -70,12 +70,15 @@ class PengawasMappingController extends Controller
      */
     public function update(Request $request)
     {
-        $request->validate([
-            'pengawas_id' => 'required|exists:users,id',
-            'sekolah_ids' => 'nullable|array',
-        ]);
+        // 🔥 LOG MATA-MATA
+        \Log::info("PKKS_MAPPING_UPDATE_START", $request->all());
 
         try {
+            $request->validate([
+                'pengawas_id' => 'required|exists:users,id',
+                'sekolah_ids' => 'nullable|array',
+            ]);
+
             DB::beginTransaction();
 
             // Hapus mapping lama
@@ -92,10 +95,13 @@ class PengawasMappingController extends Controller
                         'updated_at'  => now(),
                     ];
                 }
-                PengawasPembina::insert($data);
+                // Pake DB::table langsung biar lebih cepet dan pasti
+                DB::table('pengawas_pembinas')->insert($data);
             }
 
             DB::commit();
+
+            \Log::info("PKKS_MAPPING_UPDATE_SUCCESS", ['pengawas_id' => $request->pengawas_id]);
 
             return response()->json([
                 'success' => true,
@@ -104,9 +110,11 @@ class PengawasMappingController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
+            \Log::error("PKKS_MAPPING_UPDATE_ERROR: " . $e->getMessage());
+            
             return response()->json([
                 'success' => false,
-                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+                'message' => 'Gagal menyimpan: ' . $e->getMessage()
             ], 500);
         }
     }
