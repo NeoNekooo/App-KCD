@@ -89,7 +89,9 @@
             <!-- Placeholder -->
             <div class="card mb-4" id="placeholder-mapping">
                 <div class="card-body text-center py-5">
-                    <img src="{{ asset('assets/img/illustrations/man-with-laptop-light.png') }}" alt="Pilih Pengawas" width="150" class="mb-3">
+                    <div class="mb-3">
+                        <i class="bx bx-user-pin text-primary" style="font-size: 100px; opacity: 0.2;"></i>
+                    </div>
                     <h5>Pilih Pengawas Terlebih Dahulu</h5>
                     <p class="text-muted">Silakan klik salah satu nama pengawas di kolom kiri untuk mulai memetakan sekolah binaan.</p>
                 </div>
