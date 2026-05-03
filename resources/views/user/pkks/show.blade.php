@@ -7,7 +7,7 @@
     <div class="row justify-content-center">
         <div class="col-lg-10">
             <div class="d-flex justify-content-between align-items-center mb-4">
-                <a href="{{ route('pkks.penilaian.index') }}" class="btn btn-outline-secondary">
+                <a href="{{ route('admin.pkks.penilaian.index') }}" class="btn btn-outline-secondary">
                     <i class="bx bx-arrow-back me-1"></i> Kembali
                 </a>
                 <div class="text-end">
@@ -16,7 +16,7 @@
                 </div>
             </div>
 
-            <form action="{{ route('pkks.penilaian.store', $instrumen->id) }}" method="POST">
+            <form action="{{ route('admin.pkks.penilaian.store', $instrumen->id) }}" method="POST">
                 @csrf
                 
                 @foreach($instrumen->kompetensis as $komp)

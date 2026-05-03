@@ -75,7 +75,7 @@
                     @if($isOpen)
                         @if($kepsek)
                             <div class="d-grid">
-                                <a href="{{ route('pkks.penilaian.show', $item->id) }}" class="btn btn-primary btn-lg shadow-sm">
+                                <a href="{{ route('admin.pkks.penilaian.show', $item->id) }}" class="btn btn-primary btn-lg shadow-sm">
                                     <i class="bx bx-edit-alt me-2"></i> Mulai Penilaian Sekarang
                                 </a>
                             </div>

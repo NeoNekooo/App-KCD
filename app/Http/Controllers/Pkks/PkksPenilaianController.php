@@ -60,10 +60,10 @@ class PkksPenilaianController extends Controller
         // Validasi Waktu (Auto-Lock)
         $now = Carbon::now();
         if ($instrumen->start_at && $now->lt($instrumen->start_at)) {
-            return redirect()->route('user.pkks.index')->with('error', 'Penilaian belum dibuka. Silakan tunggu jadwal dimulai.');
+            return redirect()->route('admin.pkks.penilaian.index')->with('error', 'Penilaian belum dibuka. Silakan tunggu jadwal dimulai.');
         }
         if ($instrumen->end_at && $now->gt($instrumen->end_at)) {
-            return redirect()->route('user.pkks.index')->with('error', 'Maaf, waktu penilaian sudah ditutup.');
+            return redirect()->route('admin.pkks.penilaian.index')->with('error', 'Maaf, waktu penilaian sudah ditutup.');
         }
 
         $kepsek = Gtk::where('sekolah_id', $user->sekolah_id)
@@ -115,7 +115,7 @@ class PkksPenilaianController extends Controller
             }
 
             \DB::commit();
-            return redirect()->route('pkks.penilaian.index')->with('success', 'Terima kasih! Penilaian Anda telah berhasil dikirim.');
+            return redirect()->route('admin.pkks.penilaian.index')->with('success', 'Terima kasih! Penilaian Anda telah berhasil dikirim.');
             
         } catch (\Exception $e) {
             \DB::rollback();
