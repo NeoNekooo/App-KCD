@@ -27,10 +27,16 @@
     </div>
 
     @forelse($instrumen->kompetensis as $komp)
-    <div class="card mb-4 shadow-none border">
+    <div class="card mb-4 shadow-none border overflow-hidden">
         <div class="card-header bg-light d-flex justify-content-between align-items-center py-3 border-bottom">
-            <h6 class="mb-0 fw-bold text-dark"><i class="bx bx-folder me-2"></i>{{ $komp->nama }}</h6>
-            <button class="btn btn-sm btn-label-primary" data-bs-toggle="modal" data-bs-target="#modalTambahIndikator-{{ $komp->id }}">
+            <div class="d-flex align-items-center">
+                <h6 class="mb-0 fw-bold text-dark"><i class="bx bx-folder me-2 text-primary"></i>{{ $komp->nama }}</h6>
+                <div class="ms-3">
+                    <button class="btn btn-xs btn-outline-warning border-0" data-bs-toggle="modal" data-bs-target="#modalEditKompetensi-{{ $komp->id }}"><i class="bx bx-edit-alt"></i></button>
+                    <button class="btn btn-xs btn-outline-danger border-0" onclick="confirmDelete('{{ route('admin.pkks.instrumen.kompetensi.destroy', $komp->id) }}', 'Kategori ini dan semua soal di dalamnya akan dihapus!')"><i class="bx bx-trash"></i></button>
+                </div>
+            </div>
+            <button class="btn btn-sm btn-primary shadow-sm" data-bs-toggle="modal" data-bs-target="#modalTambahIndikator-{{ $komp->id }}">
                 <i class="bx bx-plus me-1"></i> Tambah Soal
             </button>
         </div>
@@ -42,6 +48,7 @@
                             <th width="50">No</th>
                             <th>Kriteria / Indikator</th>
                             <th>Bukti Identifikasi</th>
+                            <th width="100" class="text-center">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -50,15 +57,75 @@
                             <td class="fw-bold text-primary">{{ $ind->nomor }}</td>
                             <td>{{ $ind->kriteria }}</td>
                             <td class="small text-muted">{{ $ind->bukti_identifikasi ?? '-' }}</td>
+                            <td class="text-center">
+                                <div class="d-flex justify-content-center gap-1">
+                                    <button class="btn btn-icon btn-xs btn-label-warning" data-bs-toggle="modal" data-bs-target="#modalEditIndikator-{{ $ind->id }}"><i class="bx bx-edit-alt"></i></button>
+                                    <button class="btn btn-icon btn-xs btn-label-danger" onclick="confirmDelete('{{ route('admin.pkks.instrumen.indikator.destroy', $ind->id) }}')"><i class="bx bx-trash"></i></button>
+                                </div>
+                            </td>
                         </tr>
+
+                        <!-- Modal Edit Indikator -->
+                        <div class="modal fade" id="modalEditIndikator-{{ $ind->id }}" tabindex="-1" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <form action="{{ route('admin.pkks.instrumen.indikator.update', $ind->id) }}" method="POST" class="modal-content">
+                                    @csrf @method('PUT')
+                                    <div class="modal-header border-bottom py-3">
+                                        <h5 class="modal-title">Edit Soal</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body pt-4">
+                                        <div class="mb-3">
+                                            <label class="form-label">Nomor Urut</label>
+                                            <input type="text" name="nomor" class="form-control" value="{{ $ind->nomor }}" required>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Kriteria / Soal</label>
+                                            <textarea name="kriteria" class="form-control" rows="3" required>{{ $ind->kriteria }}</textarea>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Bukti Identifikasi</label>
+                                            <textarea name="bukti_identifikasi" class="form-control" rows="2">{{ $ind->bukti_identifikasi }}</textarea>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer border-top py-3">
+                                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
+                                        <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
                         @empty
                         <tr>
-                            <td colspan="3" class="text-center py-4 text-muted">Belum ada indikator di kompetensi ini.</td>
+                            <td colspan="4" class="text-center py-4 text-muted">Belum ada indikator.</td>
                         </tr>
                         @endforelse
                     </tbody>
                 </table>
             </div>
+        </div>
+    </div>
+
+    <!-- Modal Edit Kompetensi -->
+    <div class="modal fade" id="modalEditKompetensi-{{ $komp->id }}" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <form action="{{ route('admin.pkks.instrumen.kompetensi.update', $komp->id) }}" method="POST" class="modal-content">
+                @csrf @method('PUT')
+                <div class="modal-header border-bottom py-3">
+                    <h5 class="modal-title">Edit Nama Kompetensi</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body pt-4">
+                    <div class="mb-3">
+                        <label class="form-label">Nama Kompetensi</label>
+                        <input type="text" name="nama" class="form-control" value="{{ $komp->nama }}" required>
+                    </div>
+                </div>
+                <div class="modal-footer border-top py-3">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
+                </div>
+            </form>
         </div>
     </div>
 
@@ -153,4 +220,33 @@
         </div>
     </div>
 </div>
+
+{{-- Hidden Delete Form --}}
+<form id="form-delete" action="" method="POST" class="d-none">
+    @csrf @method('DELETE')
+</form>
 @endsection
+
+@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    function confirmDelete(url, text = 'Data yang dihapus tidak bisa dikembalikan!') {
+        Swal.fire({
+            title: 'Apakah kamu yakin?',
+            text: text,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#696cff',
+            cancelButtonColor: '#ff3e1d',
+            confirmButtonText: 'Ya, Hapus!',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const form = document.getElementById('form-delete');
+                form.action = url;
+                form.submit();
+            }
+        })
+    }
+</script>
+@endpush

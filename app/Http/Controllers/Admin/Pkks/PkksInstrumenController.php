@@ -57,6 +57,21 @@ class PkksInstrumenController extends Controller
         return back()->with('success', 'Kompetensi berhasil ditambah!');
     }
 
+    // Update Kompetensi
+    public function updateKompetensi(Request $request, $id)
+    {
+        $request->validate(['nama' => 'required|string|max:255']);
+        PkksKompetensi::findOrFail($id)->update($request->all());
+        return back()->with('success', 'Kompetensi berhasil diperbarui!');
+    }
+
+    // Hapus Kompetensi
+    public function destroyKompetensi($id)
+    {
+        PkksKompetensi::findOrFail($id)->delete();
+        return back()->with('success', 'Kompetensi berhasil dihapus!');
+    }
+
     // Tambah Indikator Manual
     public function storeIndikator(Request $request, $kompetensiId)
     {
@@ -73,6 +88,24 @@ class PkksInstrumenController extends Controller
         ]);
 
         return back()->with('success', 'Indikator berhasil ditambah!');
+    }
+
+    // Update Indikator
+    public function updateIndikator(Request $request, $id)
+    {
+        $request->validate([
+            'nomor' => 'required',
+            'kriteria' => 'required',
+        ]);
+        PkksIndikator::findOrFail($id)->update($request->all());
+        return back()->with('success', 'Indikator berhasil diperbarui!');
+    }
+
+    // Hapus Indikator
+    public function destroyIndikator($id)
+    {
+        PkksIndikator::findOrFail($id)->delete();
+        return back()->with('success', 'Indikator berhasil dihapus!');
     }
 
     // Import Excel

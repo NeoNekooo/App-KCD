@@ -566,8 +566,12 @@ Route::prefix('admin')->name('admin.')->middleware(['auth:web,pengguna', '2fa', 
         Route::post('/', [\App\Http\Controllers\Admin\Pkks\PkksInstrumenController::class, 'store'])->name('store');
         Route::get('/{id}/manage', [\App\Http\Controllers\Admin\Pkks\PkksInstrumenController::class, 'manage'])->name('manage');
         Route::post('/{id}/kompetensi', [\App\Http\Controllers\Admin\Pkks\PkksInstrumenController::class, 'storeKompetensi'])->name('kompetensi.store');
+        Route::put('/kompetensi/{id}', [\App\Http\Controllers\Admin\Pkks\PkksInstrumenController::class, 'updateKompetensi'])->name('kompetensi.update');
+        Route::delete('/kompetensi/{id}', [\App\Http\Controllers\Admin\Pkks\PkksInstrumenController::class, 'destroyKompetensi'])->name('kompetensi.destroy');
         Route::post('/{id}/import', [\App\Http\Controllers\Admin\Pkks\PkksInstrumenController::class, 'import'])->name('import');
         Route::post('/kompetensi/{kompetensiId}/indikator', [\App\Http\Controllers\Admin\Pkks\PkksInstrumenController::class, 'storeIndikator'])->name('indikator.store');
+        Route::put('/indikator/{id}', [\App\Http\Controllers\Admin\Pkks\PkksInstrumenController::class, 'updateIndikator'])->name('indikator.update');
+        Route::delete('/indikator/{id}', [\App\Http\Controllers\Admin\Pkks\PkksInstrumenController::class, 'destroyIndikator'])->name('indikator.destroy');
         Route::delete('/{id}', [\App\Http\Controllers\Admin\Pkks\PkksInstrumenController::class, 'destroy'])->name('destroy');
     });
 
