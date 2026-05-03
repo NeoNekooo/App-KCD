@@ -35,19 +35,6 @@
             @endforeach
         @endif
 
-        {{-- Menu Khusus Guru & Siswa: Penilaian PKKS --}}
-        @if(session('guard') === 'pengguna' || auth('pengguna')->check())
-        <li class="menu-header small text-uppercase">
-            <span class="menu-header-text">Penilaian</span>
-        </li>
-        <li class="menu-item {{ request()->routeIs('admin.pkks.penilaian.*') ? 'active' : '' }}">
-            <a href="{{ route('admin.pkks.penilaian.index') }}" class="menu-link">
-                <i class="menu-icon tf-icons bx bx-spreadsheet"></i>
-                <div data-i18n="Penilaian PKKS">Penilaian PKKS</div>
-            </a>
-        </li>
-        @endif
-
         {{-- ================= TOMBOL LOGOUT ================= --}}
         <li class="menu-item mt-3">
             <form id="form-logout-sidebar" action="{{ route('logout') }}" method="POST" style="display: none;">
