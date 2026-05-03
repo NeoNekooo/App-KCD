@@ -16,7 +16,8 @@ class Google2FAMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $user = $request->user();
+        // 🔥 FIX: Cari user di guard Admin, kalau gak ada cari di guard Siswa
+        $user = Auth::guard('web')->user() ?? Auth::guard('pengguna')->user();
 
         // 1. Jika belum login, biarin aja (middleware Auth yang urus)
         if (!$user) {

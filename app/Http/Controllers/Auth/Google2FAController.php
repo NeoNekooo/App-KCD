@@ -37,7 +37,7 @@ class Google2FAController extends Controller
      */
     public function showSettings()
     {
-        $user = Auth::user();
+        $user = Auth::guard('web')->user() ?? Auth::guard('pengguna')->user();
         $google2fa = app('pragmarx.google2fa');
         
         $qrCodeUrl = null;
@@ -64,7 +64,7 @@ class Google2FAController extends Controller
      */
     public function enable(Request $request)
     {
-        $user = Auth::user();
+        $user = Auth::guard('web')->user() ?? Auth::guard('pengguna')->user();
         $google2fa = app('pragmarx.google2fa');
 
         $secret = $user->google2fa_secret;
@@ -84,7 +84,7 @@ class Google2FAController extends Controller
      */
     public function disable(Request $request)
     {
-        $user = Auth::user();
+        $user = Auth::guard('web')->user() ?? Auth::guard('pengguna')->user();
         $user->google2fa_enabled = false;
         $user->save();
 
