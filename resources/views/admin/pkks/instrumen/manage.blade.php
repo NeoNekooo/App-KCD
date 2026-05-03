@@ -102,8 +102,8 @@
                                 <form action="{{ route('admin.pkks.instrumen.indikator.update', $ind->id) }}" method="POST" class="modal-content border-0 shadow-lg">
                                     @csrf @method('PUT')
                                     <div class="modal-header bg-warning py-3">
-                                        <h5 class="modal-title text-white fw-bold"><i class="bx bx-edit me-2"></i>Edit Butir Soal</h5>
-                                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        <h5 class="modal-title text-white fw-bold"><i class="bx bx-edit me-2"></i>Edit Soal</h5>
+                                        <button type="button" class="btn-close btn-close-white shadow-none" data-bs-dismiss="modal" aria-label="Close" style="filter: brightness(0) invert(1);"></button>
                                     </div>
                                     <div class="modal-body p-4">
                                         <div class="mb-3">
@@ -147,7 +147,7 @@
                 @csrf @method('PUT')
                 <div class="modal-header bg-warning py-3">
                     <h5 class="modal-title text-white fw-bold"><i class="bx bx-folder me-2"></i>Edit Kompetensi</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close btn-close-white shadow-none" data-bs-dismiss="modal" aria-label="Close" style="filter: brightness(0) invert(1);"></button>
                 </div>
                 <div class="modal-body p-4">
                     <div class="mb-3">
@@ -170,7 +170,7 @@
                 @csrf
                 <div class="modal-header bg-primary py-3">
                     <h5 class="modal-title text-white fw-bold"><i class="bx bx-plus-circle me-2"></i>Tambah Soal Baru</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close btn-close-white shadow-none" data-bs-dismiss="modal" aria-label="Close" style="filter: brightness(0) invert(1);"></button>
                 </div>
                 <div class="modal-body p-4">
                     <div class="mb-3">
@@ -210,7 +210,7 @@
                 @csrf
                 <div class="modal-header bg-primary py-3">
                     <h5 class="modal-title text-white fw-bold"><i class="bx bx-folder-plus me-2"></i>Tambah Kompetensi Baru</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close btn-close-white shadow-none" data-bs-dismiss="modal" aria-label="Close" style="filter: brightness(0) invert(1);"></button>
                 </div>
                 <div class="modal-body p-4">
                     <div class="mb-3">
@@ -233,7 +233,7 @@
                 @csrf
                 <div class="modal-header bg-success py-3">
                     <h5 class="modal-title text-white fw-bold"><i class="bx bx-upload me-2"></i>Import Massal via Excel</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close btn-close-white shadow-none" data-bs-dismiss="modal" aria-label="Close" style="filter: brightness(0) invert(1);"></button>
                 </div>
                 <div class="modal-body p-4">
                     <div class="alert alert-label-success border-0 d-flex align-items-start mb-4">

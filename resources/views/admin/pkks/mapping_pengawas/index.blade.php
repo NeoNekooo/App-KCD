@@ -296,7 +296,7 @@
                 'danger':  { class: 'bg-danger',  title: 'Error',  icon: 'bx bx-error-circle' }
             };
             const c = config[type] || config.success;
-            const toastHtml = `<div class="bs-toast toast show fade align-items-center ${c.class} border-0 position-fixed top-0 end-0 m-3" role="alert" aria-live="assertive" aria-atomic="true" style="z-index: 9999;"><div class="toast-header"><i class="${c.icon} me-2 text-white"></i><div class="me-auto fw-medium text-white">${c.title}</div><small class="text-white">Sekarang</small><button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button></div><div class="toast-body text-white">${message}</div></div>`;
+            const toastHtml = `<div class="bs-toast toast show fade align-items-center ${c.class} border-0 position-fixed top-0 end-0 m-3" role="alert" aria-live="assertive" aria-atomic="true" style="z-index: 9999;"><div class="toast-header"><i class="${c.icon} me-2 text-white"></i><div class="me-auto fw-medium text-white">${c.title}</div><small class="text-white">Sekarang</small><button type="button" class="btn-close btn-close-white shadow-none" data-bs-dismiss="toast" aria-label="Close" style="filter: brightness(0) invert(1);"></button></div><div class="toast-body text-white">${message}</div></div>`;
             const toastContainer = document.createElement('div');
             toastContainer.innerHTML = toastHtml;
             const toastEl = toastContainer.querySelector('.toast');
