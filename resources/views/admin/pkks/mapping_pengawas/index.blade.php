@@ -38,7 +38,11 @@
                             <div class="w-100 overflow-hidden">
                                 <div class="d-flex justify-content-between align-items-center">
                                     <h6 class="mb-0 text-truncate" style="max-width: 150px;">{{ $p->name }}</h6>
-                                    <span class="badge bg-primary count-badge rounded-pill shadow-sm" data-pid="{{ $p->id }}" style="font-size: 10px;">{{ $p->pengawas_pembinas_count }}</span>
+                                    <span class="badge count-badge rounded-pill shadow-sm" 
+                                          data-pid="{{ $p->id }}" 
+                                          style="font-size: 10px; background-color: #696cff !important; color: #ffffff !important; min-width: 20px;">
+                                        {{ $p->pengawas_pembinas_count ?? 0 }}
+                                    </span>
                                 </div>
                                 <small class="text-muted text-truncate d-block">{{ $p->role }}</small>
                             </div>
