@@ -74,6 +74,8 @@ class User extends Authenticatable
             return strtolower($this->role) === 'administrator';
         }
         return strtolower($this->role) === strtolower($role);
+    }
+
     /**
      * Relasi ke Mapping Pengawas Pembina
      */
