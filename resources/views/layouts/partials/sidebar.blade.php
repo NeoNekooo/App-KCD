@@ -40,8 +40,8 @@
         <li class="menu-header small text-uppercase">
             <span class="menu-header-text">Penilaian</span>
         </li>
-        <li class="menu-item {{ request()->routeIs('pkks.penilaian.*') ? 'active' : '' }}">
-            <a href="{{ route('pkks.penilaian.index') }}" class="menu-link">
+        <li class="menu-item {{ request()->routeIs('admin.pkks.penilaian.*') ? 'active' : '' }}">
+            <a href="{{ route('admin.pkks.penilaian.index') }}" class="menu-link">
                 <i class="menu-icon tf-icons bx bx-spreadsheet"></i>
                 <div data-i18n="Penilaian PKKS">Penilaian PKKS</div>
             </a>
