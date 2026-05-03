@@ -43,6 +43,17 @@
 
                         <div class="row g-4 mb-4">
                             <div class="col-md-6">
+                                <label class="form-label fw-bold text-dark"><i class="bx bx-play-circle me-1"></i>Waktu Buka (Mulai)</label>
+                                <input type="datetime-local" name="start_at" class="form-control form-control-lg border-2" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold text-dark"><i class="bx bx-stop-circle me-1"></i>Waktu Tutup (Selesai)</label>
+                                <input type="datetime-local" name="end_at" class="form-control form-control-lg border-2" required>
+                            </div>
+                        </div>
+
+                        <div class="row g-4 mb-4">
+                            <div class="col-md-6">
                                 <label class="form-label fw-bold text-dark"><i class="bx bx-list-check me-1"></i>Skala Nilai (Maks)</label>
                                 <select name="skor_maks" class="form-select form-select-lg border-2" required>
                                     <option value="4" selected>Skala 1 - 4 (Default)</option>

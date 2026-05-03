@@ -57,6 +57,18 @@
                         </div>
                     </div>
                     
+                    <div class="row g-2 mb-4">
+                        <div class="col-12">
+                            <div class="bg-light rounded p-2 border small">
+                                <div class="text-muted mb-1" style="font-size: 10px;"><i class="bx bx-time me-1"></i> JADWAL PENGISIAN:</div>
+                                <div class="fw-bold text-dark">
+                                    {{ $item->start_at ? $item->start_at->format('d/m/Y H:i') : '-' }} s/d 
+                                    {{ $item->end_at ? $item->end_at->format('d/m/Y H:i') : '-' }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="d-flex gap-2">
                         <a href="{{ route('admin.pkks.instrumen.manage', $item->id) }}" class="btn btn-label-primary flex-grow-1 border-2 fw-bold">
                             <i class="bx bx-cog me-2"></i> Kelola

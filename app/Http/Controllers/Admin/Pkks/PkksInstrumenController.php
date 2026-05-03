@@ -33,13 +33,17 @@ class PkksInstrumenController extends Controller
     {
         $request->validate([
             'nama' => 'required|string|max:255',
-            'tahun' => 'required|digits:4',
-            'skor_maks' => 'required|integer|min:2',
+            'jenjang' => 'required',
+            'tahun' => 'required|integer',
+            'start_at' => 'required|date',
+            'end_at' => 'required|date|after:start_at',
+            'skor_maks' => 'required|integer'
         ]);
 
-        PkksInstrumen::create($request->all());
+        $instrumen = PkksInstrumen::create($request->all());
 
-        return redirect()->route('admin.pkks.instrumen.index')->with('success', 'Paket Instrumen berhasil dibuat!');
+        return redirect()->route('admin.pkks.instrumen.manage', $instrumen->id)
+            ->with('success', 'Paket instrumen berhasil dibuat! Silakan tambah kompetensi.');
     }
 
     public function manage($id)
