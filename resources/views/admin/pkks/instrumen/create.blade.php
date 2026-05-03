@@ -32,6 +32,17 @@
                                 </div>
                             </div>
                             <div class="col-md-6">
+                                <label class="form-label fw-bold text-dark"><i class="bx bx-buildings me-1"></i>Jenjang Sekolah</label>
+                                <select name="jenjang" class="form-select form-select-lg border-2" required>
+                                    @foreach($jenjangs as $j)
+                                        <option value="{{ $j }}">{{ $j }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row g-4 mb-4">
+                            <div class="col-md-6">
                                 <label class="form-label fw-bold text-dark"><i class="bx bx-list-check me-1"></i>Skala Nilai (Maks)</label>
                                 <select name="skor_maks" class="form-select form-select-lg border-2" required>
                                     <option value="4" selected>Skala 1 - 4 (Default)</option>

@@ -19,14 +19,19 @@
         <div class="col-md-6 col-lg-4 mb-4">
             <div class="card h-100 shadow-sm border-0 instrument-card overflow-hidden">
                 <div class="bg-primary bg-opacity-10 py-3 px-4 d-flex justify-content-between align-items-center border-bottom border-primary border-opacity-10">
-                    <span class="badge bg-white text-primary shadow-sm px-3 py-2"><i class="bx bx-calendar me-1"></i> Tahun {{ $item->tahun }}</span>
+                    <div class="d-flex gap-2">
+                        <span class="badge bg-white text-primary shadow-sm px-3 py-2"><i class="bx bx-calendar me-1"></i> Tahun {{ $item->tahun }}</span>
+                        <span class="badge bg-primary shadow-sm px-3 py-2 text-white"><i class="bx bx-buildings me-1"></i> {{ $item->jenjang }}</span>
+                    </div>
                     <div class="dropdown">
-                        <button class="btn p-0 text-primary opacity-50 hover-opacity-100" type="button" data-bs-toggle="dropdown">
+                        <button class="btn btn-icon btn-sm text-primary dropdown-toggle hide-arrow p-0" type="button" data-bs-toggle="dropdown">
                             <i class="bx bx-dots-vertical-rounded fs-4"></i>
                         </button>
-                        <div class="dropdown-menu dropdown-menu-end">
+                        <div class="dropdown-menu dropdown-menu-end shadow">
+                            <a class="dropdown-item" href="{{ route('admin.pkks.instrumen.manage', $item->id) }}"><i class="bx bx-cog me-2"></i>Kelola Soal</a>
+                            <div class="dropdown-divider"></div>
                             <button class="dropdown-item text-danger" onclick="tampilKonfirmasiHapus('{{ route('admin.pkks.instrumen.destroy', $item->id) }}', 'Paket instrumen dan semua soal di dalamnya akan dihapus permanen!')">
-                                <i class="bx bx-trash me-2"></i> Hapus Paket
+                                <i class="bx bx-trash me-2"></i>Hapus Paket
                             </button>
                         </div>
                     </div>
@@ -52,10 +57,13 @@
                         </div>
                     </div>
                     
-                    <div class="d-grid">
-                        <a href="{{ route('admin.pkks.instrumen.manage', $item->id) }}" class="btn btn-label-primary border-2 fw-bold">
-                            <i class="bx bx-cog me-2"></i> Kelola Butir Soal
+                    <div class="d-flex gap-2">
+                        <a href="{{ route('admin.pkks.instrumen.manage', $item->id) }}" class="btn btn-label-primary flex-grow-1 border-2 fw-bold">
+                            <i class="bx bx-cog me-2"></i> Kelola
                         </a>
+                        <button class="btn btn-label-danger border-2 fw-bold" onclick="tampilKonfirmasiHapus('{{ route('admin.pkks.instrumen.destroy', $item->id) }}', 'Hapus paket ini?')">
+                            <i class="bx bx-trash"></i>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -80,7 +88,7 @@
                         <span class="avatar-initial rounded-circle"><i class="bx bx-error fs-1"></i></span>
                     </div>
                     <h5 class="fw-bold mb-2">Hapus Paket?</h5>
-                    <p class="text-muted small" id="teks-konfirmasi">Data akan dihapus permanen.</p>
+                    <p class="text-muted small" id="teks-konfirmasi">Semua soal di dalamnya akan hilang permanen.</p>
                 </div>
                 <div class="modal-footer border-top p-3 d-flex justify-content-center">
                     <button type="button" class="btn btn-label-secondary me-2" data-bs-dismiss="modal">Batal</button>
@@ -97,6 +105,11 @@
 <style>
     .instrument-card { transition: all 0.3s ease; border-radius: 12px !important; }
     .instrument-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(105, 108, 255, 0.1) !important; }
+    .btn-label-primary { background-color: #f0f1ff; color: #696cff; border: none; }
+    .btn-label-primary:hover { background-color: #696cff; color: #fff; }
+    .btn-label-danger { background-color: #fff1f0; color: #ff3e1d; border: none; }
+    .btn-label-danger:hover { background-color: #ff3e1d; color: #fff; }
+
     .btn-close-custom {
         background-color: #ffffff;
         border: none;

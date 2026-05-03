@@ -15,13 +15,18 @@ class PkksInstrumenController extends Controller
 {
     public function index()
     {
-        $instrumens = PkksInstrumen::withCount(['kompetensis', 'penilaians'])->orderBy('tahun', 'desc')->get();
+        $instrumens = PkksInstrumen::withCount(['kompetensis', 'penilaians'])
+            ->orderBy('tahun', 'desc')
+            ->orderBy('jenjang', 'asc')
+            ->get();
         return view('admin.pkks.instrumen.index', compact('instrumens'));
     }
 
     public function create()
     {
-        return view('admin.pkks.instrumen.create');
+        // Ambil Jenjang yang ada di tabel sekolah (Dinamis Bre!)
+        $jenjangs = \App\Models\Sekolah::distinct()->pluck('bentuk_pendidikan_id_str')->filter()->sort();
+        return view('admin.pkks.instrumen.create', compact('jenjangs'));
     }
 
     public function store(Request $request)
