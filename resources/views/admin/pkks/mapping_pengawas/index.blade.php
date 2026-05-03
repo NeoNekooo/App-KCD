@@ -19,7 +19,7 @@
         <div class="col-md-4">
             <div class="card mb-4 shadow-none border">
                 <div class="card-header border-bottom">
-                    <div class="input-group input-group-merge border-0">
+                    <div class="input-group input-group-merge border rounded-pill px-2">
                         <span class="input-group-text bg-transparent border-0"><i class="bx bx-search"></i></span>
                         <input type="text" class="form-control bg-transparent border-0" id="search-pengawas" placeholder="Cari pengawas...">
                     </div>
@@ -75,9 +75,9 @@
                     <h5 class="mb-0 fw-bold" id="selected-pengawas-name">Nama Pengawas</h5>
                 </div>
                 <div class="card-body pt-4">
-                    <div class="input-group input-group-merge mb-4">
-                        <span class="input-group-text border-0 bg-light"><i class="bx bx-search"></i></span>
-                        <input type="text" class="form-control border-0 bg-light" id="search-sekolah" placeholder="Cari nama sekolah atau NPSN...">
+                    <div class="input-group input-group-merge mb-4 rounded-pill border px-2">
+                        <span class="input-group-text bg-transparent border-0"><i class="bx bx-search"></i></span>
+                        <input type="text" class="form-control bg-transparent border-0" id="search-sekolah" placeholder="Cari nama sekolah atau NPSN...">
                     </div>
 
                     <div class="row g-3" id="container-sekolah">
@@ -126,6 +126,9 @@
     .item-sekolah {
         transition: all 0.2s ease;
     }
+    .btn-pengawas {
+        cursor: pointer !important;
+    }
 </style>
 
 @push('scripts')
@@ -148,6 +151,16 @@
         // 2. Klik Pengawas
         document.querySelectorAll('.btn-pengawas').forEach(button => {
             button.addEventListener('click', function() {
+                // TOGGLE LOGIC: Kalau diklik lagi yang sudah aktif, batalkan pilihan
+                if (this.classList.contains('active')) {
+                    this.classList.remove('active');
+                    currentPengawasId = null;
+                    document.getElementById('placeholder-mapping').classList.remove('d-none');
+                    document.getElementById('card-sekolah').classList.add('d-none');
+                    document.getElementById('action-buttons').classList.add('d-none');
+                    return;
+                }
+
                 document.querySelectorAll('.btn-pengawas').forEach(btn => btn.classList.remove('active'));
                 this.classList.add('active');
                 
@@ -193,7 +206,8 @@
                 const val = this.value.toLowerCase();
                 document.querySelectorAll('.item-sekolah').forEach(item => {
                     const text = item.getAttribute('data-search');
-                    if (item.getAttribute('data-hidden') !== 'true') {
+                    // Hanya filter yang aslinya memang terlihat
+                    if (item.style.display !== 'none' || val === '') {
                         item.style.display = text.includes(val) ? 'block' : 'none';
                     }
                 });
