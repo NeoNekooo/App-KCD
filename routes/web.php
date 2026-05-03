@@ -554,6 +554,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth:web,pengguna', '2fa', 
     // --- PKKS - MAPPING PENGAWAS PEMBINA ---
     Route::prefix('pkks/mapping-pengawas')->name('pkks.mapping-pengawas.')->group(function () {
         Route::get('/', [\App\Http\Controllers\Admin\Pkks\PengawasMappingController::class, 'index'])->name('index');
+        Route::get('/list', [\App\Http\Controllers\Admin\Pkks\PengawasMappingController::class, 'list'])->name('list');
         Route::get('/get/{pengawasId}', [\App\Http\Controllers\Admin\Pkks\PengawasMappingController::class, 'getMapping'])->name('get');
         Route::post('/update', [\App\Http\Controllers\Admin\Pkks\PengawasMappingController::class, 'update'])->name('update');
     });

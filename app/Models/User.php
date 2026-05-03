@@ -74,5 +74,11 @@ class User extends Authenticatable
             return strtolower($this->role) === 'administrator';
         }
         return strtolower($this->role) === strtolower($role);
+    /**
+     * Relasi ke Mapping Pengawas Pembina
+     */
+    public function pengawasPembinas()
+    {
+        return $this->hasMany(PengawasPembina::class, 'pengawas_id');
     }
 }

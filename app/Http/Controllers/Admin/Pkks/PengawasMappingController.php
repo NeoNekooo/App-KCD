@@ -52,6 +52,20 @@ class PengawasMappingController extends Controller
     }
 
     /**
+     * Tampilkan daftar pengawas yang sudah dimapping (Rekapitulasi)
+     */
+    public function list()
+    {
+        // Ambil pengawas yang punya minimal 1 sekolah binaan
+        $pembina = User::whereHas('pengawasPembinas')
+            ->with(['pengawasPembinas.sekolah'])
+            ->orderBy('name', 'asc')
+            ->get();
+
+        return view('admin.pkks.mapping_pengawas.list', compact('pembina'));
+    }
+
+    /**
      * Simpan pemetaan pengawas ke sekolah
      */
     public function update(Request $request)
