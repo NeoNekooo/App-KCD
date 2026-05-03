@@ -190,6 +190,22 @@
             });
         }
 
+        // --- FITUR BARU: Update Angka LIVE pas centang-centang ---
+        document.querySelectorAll('.check-sekolah').forEach(cb => {
+            cb.addEventListener('change', function() {
+                updateLiveCount();
+            });
+        });
+
+        function updateLiveCount() {
+            if (!currentPengawasId) return;
+            const checkedCount = document.querySelectorAll('.check-sekolah:checked').length;
+            const activeBadge = document.querySelector(`.btn-pengawas[data-id="${currentPengawasId}"] .count-badge`);
+            if (activeBadge) {
+                activeBadge.innerText = checkedCount;
+            }
+        }
+
         // 4. Select All
         const btnSelectAll = document.getElementById('btn-select-all');
         if(btnSelectAll) {
@@ -198,6 +214,7 @@
                 const all = Array.from(boxes).every(cb => cb.checked);
                 boxes.forEach(cb => cb.checked = !all);
                 this.innerText = all ? 'Pilih Semua' : 'Batal Pilih Semua';
+                updateLiveCount(); // Update juga pas klik Select All
             });
         }
 
