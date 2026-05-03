@@ -120,6 +120,7 @@
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         let currentPengawasId = null;
+        let draftMappings = {}; // Memory sementara buat simpen centangan yang belum di-save
 
         // 1. Search Pengawas
         const searchInput = document.getElementById('search-pengawas');
@@ -149,7 +150,6 @@
                 
                 currentPengawasId = this.getAttribute('data-id');
                 const name = this.getAttribute('data-name');
-                console.log('Selected Pengawas:', currentPengawasId, name);
 
                 document.getElementById('selected-pengawas-name').innerText = name;
                 document.getElementById('initial-name').innerText = name.substring(0, 1);
@@ -157,23 +157,62 @@
                 document.getElementById('card-sekolah').classList.remove('d-none');
                 document.getElementById('action-buttons').classList.remove('d-none');
 
+                // Reset UI
                 document.querySelectorAll('.check-sekolah').forEach(cb => cb.checked = false);
                 document.querySelectorAll('.item-sekolah').forEach(item => item.style.display = 'block');
 
-                fetch(`/admin/pkks/mapping-pengawas/get/${currentPengawasId}`)
-                    .then(r => r.json())
-                    .then(data => {
-                        data.other_schools.forEach(id => {
-                            const el = document.querySelector(`.item-sekolah[data-sid="${id}"]`);
-                            if(el) el.style.display = 'none';
+                // CEK DRAFT: Kalau di memori ada, pake yang di memori
+                if (draftMappings[currentPengawasId]) {
+                    applyDraft(currentPengawasId);
+                } else {
+                    // Kalau gak ada di memori, baru tanya server
+                    fetch(`/admin/pkks/mapping-pengawas/get/${currentPengawasId}`)
+                        .then(r => r.json())
+                        .then(data => {
+                            // Simpan ke draft
+                            draftMappings[currentPengawasId] = {
+                                my_schools: data.my_schools,
+                                other_schools: data.other_schools
+                            };
+                            applyDraft(currentPengawasId);
                         });
-                        data.my_schools.forEach(id => {
-                            const el = document.querySelector(`.item-sekolah[data-sid="${id}"]`);
-                            if(el) { el.style.display = 'block'; el.querySelector('.check-sekolah').checked = true; }
-                        });
-                        const b = this.querySelector('.count-badge');
-                        if(b) b.innerText = data.my_schools.length;
-                    });
+                }
+            });
+        });
+
+        function applyDraft(pid) {
+            const draft = draftMappings[pid];
+            // Sembunyikan sekolah pengawas lain
+            draft.other_schools.forEach(id => {
+                const el = document.querySelector(`.item-sekolah[data-sid="${id}"]`);
+                if(el) el.style.display = 'none';
+            });
+            // Centang sekolah sendiri
+            draft.my_schools.forEach(id => {
+                const el = document.querySelector(`.item-sekolah[data-sid="${id}"]`);
+                if(el) { el.style.display = 'block'; el.querySelector('.check-sekolah').checked = true; }
+            });
+            updateBadge(pid, draft.my_schools.length);
+        }
+
+        function updateBadge(pid, count) {
+            const b = document.querySelector(`.btn-pengawas[data-id="${pid}"] .count-badge`);
+            if(b) b.innerText = count;
+        }
+
+        // --- FITUR: Update Memory pas centang-centang ---
+        document.querySelectorAll('.check-sekolah').forEach(cb => {
+            cb.addEventListener('change', function() {
+                if (!currentPengawasId) return;
+                
+                // Ambil semua yang dicentang saat ini
+                const selected = Array.from(document.querySelectorAll('.check-sekolah:checked')).map(c => c.value);
+                
+                // Update ke memory draft
+                if (draftMappings[currentPengawasId]) {
+                    draftMappings[currentPengawasId].my_schools = selected;
+                    updateBadge(currentPengawasId, selected.length);
+                }
             });
         });
 
@@ -183,27 +222,14 @@
             searchSekolah.addEventListener('keyup', function() {
                 const val = this.value.toLowerCase();
                 document.querySelectorAll('.item-sekolah').forEach(item => {
-                    if (item.style.display !== 'none' || val === '') {
+                    const draft = draftMappings[currentPengawasId];
+                    const isOtherSchool = draft && draft.other_schools.includes(item.getAttribute('data-sid'));
+                    
+                    if (!isOtherSchool) {
                         item.style.display = item.getAttribute('data-search').includes(val) ? 'block' : 'none';
                     }
                 });
             });
-        }
-
-        // --- FITUR BARU: Update Angka LIVE pas centang-centang ---
-        document.querySelectorAll('.check-sekolah').forEach(cb => {
-            cb.addEventListener('change', function() {
-                updateLiveCount();
-            });
-        });
-
-        function updateLiveCount() {
-            if (!currentPengawasId) return;
-            const checkedCount = document.querySelectorAll('.check-sekolah:checked').length;
-            const activeBadge = document.querySelector(`.btn-pengawas[data-id="${currentPengawasId}"] .count-badge`);
-            if (activeBadge) {
-                activeBadge.innerText = checkedCount;
-            }
         }
 
         // 4. Select All
@@ -214,7 +240,13 @@
                 const all = Array.from(boxes).every(cb => cb.checked);
                 boxes.forEach(cb => cb.checked = !all);
                 this.innerText = all ? 'Pilih Semua' : 'Batal Pilih Semua';
-                updateLiveCount(); // Update juga pas klik Select All
+                
+                // Update Memory
+                if (currentPengawasId && draftMappings[currentPengawasId]) {
+                    const selected = Array.from(document.querySelectorAll('.check-sekolah:checked')).map(c => c.value);
+                    draftMappings[currentPengawasId].my_schools = selected;
+                    updateBadge(currentPengawasId, selected.length);
+                }
             });
         }
 
@@ -222,15 +254,13 @@
         const btnSave = document.getElementById('btn-save');
         if(btnSave) {
             btnSave.addEventListener('click', function() {
-                if (!currentPengawasId) return alert('Pilih pengawas dulu!');
+                if (!currentPengawasId) return;
 
-                const ids = Array.from(document.querySelectorAll('.check-sekolah:checked')).map(cb => cb.value);
+                const ids = draftMappings[currentPengawasId].my_schools;
                 const originalHtml = btnSave.innerHTML;
                 
                 btnSave.disabled = true;
                 btnSave.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Menyimpan...';
-
-                console.log('Saving mapping...', { pengawas_id: currentPengawasId, sekolah_ids: ids });
 
                 fetch('{{ route("admin.pkks.mapping-pengawas.update") }}', {
                     method: 'POST',
@@ -243,13 +273,8 @@
                     return data;
                 })
                 .then(res => {
-                    console.log('Save result:', res);
                     if (res.success) {
-                        // Manggil Toast ala Sneat
                         showSneatToast('success', res.message);
-
-                        const b = document.querySelector('.btn-pengawas.active .count-badge');
-                        if(b) b.innerText = ids.length;
                     } else {
                         throw new Error(res.message);
                     }
@@ -265,42 +290,20 @@
             });
         }
 
-        // Fungsi Spesial buat manggil Toast ala Sneat
         function showSneatToast(type, message) {
             const config = {
                 'success': { class: 'bg-success', title: 'Sukses', icon: 'bx bx-check-circle' },
                 'danger':  { class: 'bg-danger',  title: 'Error',  icon: 'bx bx-error-circle' }
             };
             const c = config[type] || config.success;
-
-            const toastHtml = `
-                <div class="bs-toast toast show fade align-items-center ${c.class} border-0 position-fixed top-0 end-0 m-3" 
-                    role="alert" aria-live="assertive" aria-atomic="true" style="z-index: 9999;">
-                    <div class="toast-header">
-                        <i class="${c.icon} me-2 text-white"></i>
-                        <div class="me-auto fw-medium text-white">${c.title}</div>
-                        <small class="text-white">Sekarang</small>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
-                    </div>
-                    <div class="toast-body text-white">
-                        ${message}
-                    </div>
-                </div>
-            `;
-            
+            const toastHtml = `<div class="bs-toast toast show fade align-items-center ${c.class} border-0 position-fixed top-0 end-0 m-3" role="alert" aria-live="assertive" aria-atomic="true" style="z-index: 9999;"><div class="toast-header"><i class="${c.icon} me-2 text-white"></i><div class="me-auto fw-medium text-white">${c.title}</div><small class="text-white">Sekarang</small><button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button></div><div class="toast-body text-white">${message}</div></div>`;
             const toastContainer = document.createElement('div');
             toastContainer.innerHTML = toastHtml;
             const toastEl = toastContainer.querySelector('.toast');
             document.body.appendChild(toastEl);
-
-            // Inisialisasi Toast BS5
             const bsToast = new bootstrap.Toast(toastEl, { delay: 3000 });
             bsToast.show();
-
-            // Hapus elemen setelah selesai biar gak menuhin DOM
-            toastEl.addEventListener('hidden.bs.toast', () => {
-                toastEl.remove();
-            });
+            toastEl.addEventListener('hidden.bs.toast', () => { toastEl.remove(); });
         }
     });
 </script>
