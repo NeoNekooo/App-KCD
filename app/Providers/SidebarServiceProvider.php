@@ -16,12 +16,19 @@ class SidebarServiceProvider extends ServiceProvider
     public function boot(): void
     {
         View::composer('layouts.partials.sidebar', function ($view) {
-            // 🔥 FIX: Cari user di guard Admin, kalau gak ada cari di guard Siswa
+            // 🔥 CARI USER DARI DUA GUARD
             $user = Auth::guard('web')->user() ?? Auth::guard('pengguna')->user();
+
+            // 🔥 AMBIL ROLE LANGSUNG DARI USER
+            $role = null;
+            if ($user instanceof \App\Models\Pengguna) {
+                $role = $user->peran_id_str;
+            } elseif ($user instanceof \App\Models\User) {
+                $role = $user->role;
+            }
             
-            // 🔥 Ambil role dari session, atau dari kolom 'role' (Admin/Pegawai), 
-            // atau dari 'peran_id_str' (Siswa/Guru/Pengguna)
-            $role = session('role') ?? ($user instanceof \App\Models\Pengguna ? $user->peran_id_str : $user?->role);
+            // Fallback ke session kalau di atas gak dapet
+            $role = $role ?? session('role');
 
             $notifData = [];
             if ($user && Schema::hasTable('pengajuan_sekolahs')) {
