@@ -559,6 +559,18 @@ Route::prefix('admin')->name('admin.')->middleware(['auth:web,pengguna', '2fa', 
         Route::post('/update', [\App\Http\Controllers\Admin\Pkks\PengawasMappingController::class, 'update'])->name('update');
     });
 
+    // --- PKKS - MANAJEMEN INSTRUMEN ---
+    Route::prefix('pkks/instrumen')->name('pkks.instrumen.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Admin\Pkks\PkksInstrumenController::class, 'index'])->name('index');
+        Route::get('/create', [\App\Http\Controllers\Admin\Pkks\PkksInstrumenController::class, 'create'])->name('create');
+        Route::post('/', [\App\Http\Controllers\Admin\Pkks\PkksInstrumenController::class, 'store'])->name('store');
+        Route::get('/{id}/manage', [\App\Http\Controllers\Admin\Pkks\PkksInstrumenController::class, 'manage'])->name('manage');
+        Route::post('/{id}/kompetensi', [\App\Http\Controllers\Admin\Pkks\PkksInstrumenController::class, 'storeKompetensi'])->name('kompetensi.store');
+        Route::post('/{id}/import', [\App\Http\Controllers\Admin\Pkks\PkksInstrumenController::class, 'import'])->name('import');
+        Route::post('/kompetensi/{kompetensiId}/indikator', [\App\Http\Controllers\Admin\Pkks\PkksInstrumenController::class, 'storeIndikator'])->name('indikator.store');
+        Route::delete('/{id}', [\App\Http\Controllers\Admin\Pkks\PkksInstrumenController::class, 'destroy'])->name('destroy');
+    });
+
 });
 
 // Auth Routes (Breeze/Default)
