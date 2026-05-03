@@ -31,6 +31,12 @@ class Google2FAMiddleware
             $is2faEnabled = (bool) $user->google2fa_enabled;
         } elseif ($user instanceof \App\Models\Pengguna) {
             $is2faEnabled = !empty($user->google2fa_secret);
+            
+            // 🔥 CCTV: Catat di log biar ketauan kenapa gak jalan
+            \Log::info("2FA Debug Siswa: " . $user->username, [
+                'has_secret_in_db' => !empty($user->getAttributes()['google2fa_secret']),
+                'can_decrypt_secret' => $is2faEnabled ? 'YES' : 'NO',
+            ]);
         }
 
         if (!$is2faEnabled) {
