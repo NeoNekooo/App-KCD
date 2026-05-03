@@ -5,99 +5,133 @@
 @section('content')
 <div class="container-xxl flex-grow-1 container-p-y">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h4 class="fw-bold m-0">
-            <span class="text-muted fw-light">PKKS / Instrumen /</span> Kelola Soal
-        </h4>
         <div>
-            <a href="{{ route('admin.pkks.instrumen.index') }}" class="btn btn-outline-secondary btn-sm me-2">Kembali</a>
-            <button class="btn btn-success btn-sm me-2 shadow-sm" data-bs-toggle="modal" data-bs-target="#modalImportExcel">
+            <h4 class="fw-bold m-0"><span class="text-muted fw-light">PKKS / Instrumen /</span> Kelola Soal</h4>
+            <p class="text-muted mb-0 small">Susun kompetensi dan butir indikator penilaian</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{{ route('admin.pkks.instrumen.index') }}" class="btn btn-outline-secondary shadow-sm">
+                <i class="bx bx-arrow-back me-1"></i> Kembali
+            </a>
+            <button class="btn btn-success shadow-sm" data-bs-toggle="modal" data-bs-target="#modalImportExcel">
                 <i class="bx bx-upload me-1"></i> Import Excel
             </button>
-            <button class="btn btn-primary btn-sm shadow-sm" data-bs-toggle="modal" data-bs-target="#modalTambahKompetensi">
-                <i class="bx bx-plus me-1"></i> Tambah Kompetensi
+            <button class="btn btn-primary shadow-sm" data-bs-toggle="modal" data-bs-target="#modalTambahKompetensi">
+                <i class="bx bx-plus-circle me-1"></i> Tambah Kompetensi
             </button>
         </div>
     </div>
 
-    <div class="card mb-4 shadow-none border bg-primary bg-opacity-10 border-primary">
-        <div class="card-body py-3 d-flex align-items-center justify-content-between">
-            <h5 class="mb-0 fw-bold text-primary">{{ $instrumen->nama }} (Tahun {{ $instrumen->tahun }})</h5>
-            <span class="badge bg-primary">Skala Penilaian: 1 - {{ $instrumen->skor_maks }}</span>
+    {{-- Info Card --}}
+    <div class="card mb-4 shadow-sm border-0 bg-primary bg-opacity-10 overflow-hidden">
+        <div class="card-body p-4 position-relative">
+            <i class="bx bx-cog position-absolute text-primary opacity-10" style="font-size: 8rem; right: -20px; top: -20px;"></i>
+            <div class="d-flex align-items-center">
+                <div class="avatar avatar-lg bg-primary rounded me-3 shadow-sm">
+                    <span class="avatar-initial"><i class="bx bx-file"></i></span>
+                </div>
+                <div>
+                    <h5 class="mb-1 fw-bold text-primary">{{ $instrumen->nama }}</h5>
+                    <div class="d-flex align-items-center gap-3">
+                        <span class="badge bg-white text-primary shadow-sm rounded-pill"><i class="bx bx-calendar me-1"></i> Tahun {{ $instrumen->tahun }}</span>
+                        <span class="badge bg-white text-success shadow-sm rounded-pill"><i class="bx bx-star me-1"></i> Skala 1 - {{ $instrumen->skor_maks }}</span>
+                        <span class="text-muted small"><i class="bx bx-list-ul me-1"></i> {{ $instrumen->kompetensis->count() }} Kategori Utama</span>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
-    @forelse($instrumen->kompetensis as $komp)
-    <div class="card mb-4 shadow-none border overflow-hidden">
-        <div class="card-header bg-light d-flex justify-content-between align-items-center py-3 border-bottom">
+    @forelse($instrumen->kompetensis as $index => $komp)
+    <div class="card mb-5 shadow-sm border-0 rounded-3 overflow-hidden">
+        <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
             <div class="d-flex align-items-center">
-                <h6 class="mb-0 fw-bold text-dark"><i class="bx bx-folder me-2 text-primary"></i>{{ $komp->nama }}</h6>
-                <div class="ms-3">
-                    <button class="btn btn-xs btn-outline-warning border-0" data-bs-toggle="modal" data-bs-target="#modalEditKompetensi-{{ $komp->id }}"><i class="bx bx-edit-alt"></i></button>
-                    <button class="btn btn-xs btn-outline-danger border-0" onclick="confirmDelete('{{ route('admin.pkks.instrumen.kompetensi.destroy', $komp->id) }}', 'Kategori ini dan semua soal di dalamnya akan dihapus!')"><i class="bx bx-trash"></i></button>
+                <div class="avatar avatar-sm bg-label-primary rounded me-3">
+                    <span class="avatar-initial fw-bold">{{ $index + 1 }}</span>
+                </div>
+                <div>
+                    <h6 class="mb-0 fw-bold text-dark fs-5">{{ $komp->nama }}</h6>
+                    <small class="text-muted">{{ $komp->indikators->count() }} Butir Indikator</small>
+                </div>
+                <div class="ms-3 border-start ps-3">
+                    <button class="btn btn-icon btn-xs btn-label-warning border-0" data-bs-toggle="modal" data-bs-target="#modalEditKompetensi-{{ $komp->id }}"><i class="bx bx-edit-alt"></i></button>
+                    <button class="btn btn-icon btn-xs btn-label-danger border-0 ms-1" onclick="confirmDelete('{{ route('admin.pkks.instrumen.kompetensi.destroy', $komp->id) }}', 'Kategori ini dan semua soal di dalamnya akan dihapus!')"><i class="bx bx-trash"></i></button>
                 </div>
             </div>
-            <button class="btn btn-sm btn-primary shadow-sm" data-bs-toggle="modal" data-bs-target="#modalTambahIndikator-{{ $komp->id }}">
+            <button class="btn btn-sm btn-primary px-3 shadow-sm" data-bs-toggle="modal" data-bs-target="#modalTambahIndikator-{{ $komp->id }}">
                 <i class="bx bx-plus me-1"></i> Tambah Soal
             </button>
         </div>
         <div class="card-body p-0">
             <div class="table-responsive">
-                <table class="table table-hover mb-0">
-                    <thead class="table-light">
+                <table class="table table-hover table-striped mb-0 align-middle">
+                    <thead class="bg-light">
                         <tr>
-                            <th width="50">No</th>
-                            <th>Kriteria / Indikator</th>
-                            <th>Bukti Identifikasi</th>
-                            <th width="100" class="text-center">Aksi</th>
+                            <th width="70" class="ps-4">No</th>
+                            <th width="450">Kriteria / Indikator Penilaian</th>
+                            <th>Bukti Yang Teridentifikasi</th>
+                            <th width="120" class="text-center pe-4">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
                         @forelse($komp->indikators as $ind)
                         <tr>
-                            <td class="fw-bold text-primary">{{ $ind->nomor }}</td>
-                            <td>{{ $ind->kriteria }}</td>
-                            <td class="small text-muted">{{ $ind->bukti_identifikasi ?? '-' }}</td>
-                            <td class="text-center">
-                                <div class="d-flex justify-content-center gap-1">
-                                    <button class="btn btn-icon btn-xs btn-label-warning" data-bs-toggle="modal" data-bs-target="#modalEditIndikator-{{ $ind->id }}"><i class="bx bx-edit-alt"></i></button>
-                                    <button class="btn btn-icon btn-xs btn-label-danger" onclick="confirmDelete('{{ route('admin.pkks.instrumen.indikator.destroy', $ind->id) }}')"><i class="bx bx-trash"></i></button>
+                            <td class="ps-4 fw-bold text-primary">{{ $ind->nomor }}</td>
+                            <td class="py-3" style="line-height: 1.6;">{{ $ind->kriteria }}</td>
+                            <td class="small text-muted py-3">
+                                @if($ind->bukti_identifikasi)
+                                    <div class="d-flex">
+                                        <i class="bx bx-info-circle me-2 text-info mt-1"></i>
+                                        <span>{{ $ind->bukti_identifikasi }}</span>
+                                    </div>
+                                @else
+                                    <span class="fst-italic opacity-50">- Tidak ada bukti spesifik -</span>
+                                @endif
+                            </td>
+                            <td class="text-center pe-4">
+                                <div class="btn-group">
+                                    <button class="btn btn-icon btn-sm btn-label-warning" data-bs-toggle="modal" data-bs-target="#modalEditIndikator-{{ $ind->id }}"><i class="bx bx-edit-alt"></i></button>
+                                    <button class="btn btn-icon btn-sm btn-label-danger" onclick="confirmDelete('{{ route('admin.pkks.instrumen.indikator.destroy', $ind->id) }}')"><i class="bx bx-trash"></i></button>
                                 </div>
                             </td>
                         </tr>
 
                         <!-- Modal Edit Indikator -->
                         <div class="modal fade" id="modalEditIndikator-{{ $ind->id }}" tabindex="-1" aria-hidden="true">
-                            <div class="modal-dialog">
-                                <form action="{{ route('admin.pkks.instrumen.indikator.update', $ind->id) }}" method="POST" class="modal-content">
+                            <div class="modal-dialog modal-dialog-centered">
+                                <form action="{{ route('admin.pkks.instrumen.indikator.update', $ind->id) }}" method="POST" class="modal-content border-0 shadow-lg">
                                     @csrf @method('PUT')
-                                    <div class="modal-header border-bottom py-3">
-                                        <h5 class="modal-title">Edit Soal</h5>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    <div class="modal-header bg-warning py-3">
+                                        <h5 class="modal-title text-white fw-bold"><i class="bx bx-edit me-2"></i>Edit Butir Soal</h5>
+                                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                                     </div>
-                                    <div class="modal-body pt-4">
+                                    <div class="modal-body p-4">
                                         <div class="mb-3">
-                                            <label class="form-label">Nomor Urut</label>
+                                            <label class="form-label fw-bold">Nomor Urut</label>
                                             <input type="text" name="nomor" class="form-control" value="{{ $ind->nomor }}" required>
                                         </div>
                                         <div class="mb-3">
-                                            <label class="form-label">Kriteria / Soal</label>
-                                            <textarea name="kriteria" class="form-control" rows="3" required>{{ $ind->kriteria }}</textarea>
+                                            <label class="form-label fw-bold">Kriteria / Soal</label>
+                                            <textarea name="kriteria" class="form-control" rows="4" required>{{ $ind->kriteria }}</textarea>
                                         </div>
                                         <div class="mb-3">
-                                            <label class="form-label">Bukti Identifikasi</label>
-                                            <textarea name="bukti_identifikasi" class="form-control" rows="2">{{ $ind->bukti_identifikasi }}</textarea>
+                                            <label class="form-label fw-bold">Bukti Identifikasi</label>
+                                            <textarea name="bukti_identifikasi" class="form-control" rows="3">{{ $ind->bukti_identifikasi }}</textarea>
                                         </div>
                                     </div>
-                                    <div class="modal-footer border-top py-3">
-                                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
-                                        <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
+                                    <div class="modal-footer border-top p-3">
+                                        <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">Batal</button>
+                                        <button type="submit" class="btn btn-warning px-4 text-white shadow">Simpan Perubahan</button>
                                     </div>
                                 </form>
                             </div>
                         </div>
                         @empty
                         <tr>
-                            <td colspan="4" class="text-center py-4 text-muted">Belum ada indikator.</td>
+                            <td colspan="4" class="text-center py-5 text-muted fst-italic">
+                                <i class="bx bx-info-circle mb-2 d-block fs-2"></i>
+                                Belum ada indikator untuk kategori ini.
+                            </td>
                         </tr>
                         @endforelse
                     </tbody>
@@ -108,22 +142,22 @@
 
     <!-- Modal Edit Kompetensi -->
     <div class="modal fade" id="modalEditKompetensi-{{ $komp->id }}" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <form action="{{ route('admin.pkks.instrumen.kompetensi.update', $komp->id) }}" method="POST" class="modal-content">
+        <div class="modal-dialog modal-dialog-centered">
+            <form action="{{ route('admin.pkks.instrumen.kompetensi.update', $komp->id) }}" method="POST" class="modal-content border-0 shadow-lg">
                 @csrf @method('PUT')
-                <div class="modal-header border-bottom py-3">
-                    <h5 class="modal-title">Edit Nama Kompetensi</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <div class="modal-header bg-warning py-3">
+                    <h5 class="modal-title text-white fw-bold"><i class="bx bx-folder me-2"></i>Edit Kompetensi</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body pt-4">
+                <div class="modal-body p-4">
                     <div class="mb-3">
-                        <label class="form-label">Nama Kompetensi</label>
-                        <input type="text" name="nama" class="form-control" value="{{ $komp->nama }}" required>
+                        <label class="form-label fw-bold">Nama Kompetensi</label>
+                        <input type="text" name="nama" class="form-control form-control-lg" value="{{ $komp->nama }}" required>
                     </div>
                 </div>
-                <div class="modal-footer border-top py-3">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
+                <div class="modal-footer border-top p-3">
+                    <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-warning px-4 text-white shadow">Update Nama</button>
                 </div>
             </form>
         </div>
@@ -131,60 +165,62 @@
 
     <!-- Modal Tambah Indikator -->
     <div class="modal fade" id="modalTambahIndikator-{{ $komp->id }}" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <form action="{{ route('admin.pkks.instrumen.indikator.store', $komp->id) }}" method="POST" class="modal-content">
+        <div class="modal-dialog modal-dialog-centered">
+            <form action="{{ route('admin.pkks.instrumen.indikator.store', $komp->id) }}" method="POST" class="modal-content border-0 shadow-lg">
                 @csrf
-                <div class="modal-header border-bottom py-3">
-                    <h5 class="modal-title">Tambah Soal ke {{ $komp->nama }}</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <div class="modal-header bg-primary py-3">
+                    <h5 class="modal-title text-white fw-bold"><i class="bx bx-plus-circle me-2"></i>Tambah Soal Baru</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body pt-4">
+                <div class="modal-body p-4">
                     <div class="mb-3">
-                        <label class="form-label">Nomor Urut</label>
+                        <label class="form-label fw-bold">Nomor Urut</label>
                         <input type="text" name="nomor" class="form-control" placeholder="Contoh: 1" required>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Kriteria / Soal</label>
-                        <textarea name="kriteria" class="form-control" rows="3" placeholder="Masukkan butir kriteria penilaian..." required></textarea>
+                        <label class="form-label fw-bold">Kriteria / Soal</label>
+                        <textarea name="kriteria" class="form-control" rows="4" placeholder="Masukkan butir kriteria penilaian..." required></textarea>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Bukti Identifikasi (Opsional)</label>
-                        <textarea name="bukti_identifikasi" class="form-control" rows="2" placeholder="Dokumen atau bukti yang dibutuhkan..."></textarea>
+                        <label class="form-label fw-bold">Bukti Identifikasi (Opsional)</label>
+                        <textarea name="bukti_identifikasi" class="form-control" rows="3" placeholder="Dokumen atau bukti yang dibutuhkan..."></textarea>
                     </div>
                 </div>
-                <div class="modal-footer border-top py-3">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Tutup</button>
-                    <button type="submit" class="btn btn-primary">Simpan Soal</button>
+                <div class="modal-footer border-top p-3">
+                    <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">Tutup</button>
+                    <button type="submit" class="btn btn-primary px-4 shadow">Simpan Soal</button>
                 </div>
             </form>
         </div>
     </div>
     @empty
-    <div class="text-center py-5">
-        <i class="bx bx-error-circle text-muted mb-3" style="font-size: 3rem; opacity: 0.3;"></i>
-        <h5>Belum ada Kompetensi</h5>
-        <p class="text-muted">Klik tombol "Tambah Kompetensi" untuk mulai menyusun soal.</p>
+    <div class="card shadow-none border-dashed text-center py-5 bg-transparent" style="border: 2px dashed #d9dee3 !important;">
+        <div class="card-body">
+            <i class="bx bx-error-circle text-muted mb-3" style="font-size: 3rem; opacity: 0.3;"></i>
+            <h5>Belum ada Kompetensi</h5>
+            <p class="text-muted mb-4">Klik tombol "Tambah Kompetensi" di atas untuk mulai menyusun soal.</p>
+        </div>
     </div>
     @endforelse
 
     <!-- Modal Tambah Kompetensi -->
     <div class="modal fade" id="modalTambahKompetensi" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <form action="{{ route('admin.pkks.instrumen.kompetensi.store', $instrumen->id) }}" method="POST" class="modal-content">
+        <div class="modal-dialog modal-dialog-centered">
+            <form action="{{ route('admin.pkks.instrumen.kompetensi.store', $instrumen->id) }}" method="POST" class="modal-content border-0 shadow-lg">
                 @csrf
-                <div class="modal-header border-bottom py-3">
-                    <h5 class="modal-title">Tambah Kompetensi Baru</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <div class="modal-header bg-primary py-3">
+                    <h5 class="modal-title text-white fw-bold"><i class="bx bx-folder-plus me-2"></i>Tambah Kompetensi Baru</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body pt-4">
+                <div class="modal-body p-4">
                     <div class="mb-3">
-                        <label class="form-label">Nama Kompetensi</label>
-                        <input type="text" name="nama" class="form-control" placeholder="Contoh: Kompetensi 1: Manajemen" required>
+                        <label class="form-label fw-bold">Nama Kompetensi</label>
+                        <input type="text" name="nama" class="form-control form-control-lg border-2" placeholder="Contoh: Kompetensi 1: Manajemen" required>
                     </div>
                 </div>
-                <div class="modal-footer border-top py-3">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Tutup</button>
-                    <button type="submit" class="btn btn-primary">Simpan</button>
+                <div class="modal-footer border-top p-3">
+                    <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">Tutup</button>
+                    <button type="submit" class="btn btn-primary px-4 shadow">Simpan Kategori</button>
                 </div>
             </form>
         </div>
@@ -192,29 +228,33 @@
 
     <!-- Modal Import Excel -->
     <div class="modal fade" id="modalImportExcel" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <form action="{{ route('admin.pkks.instrumen.import', $instrumen->id) }}" method="POST" enctype="multipart/form-data" class="modal-content">
+        <div class="modal-dialog modal-dialog-centered">
+            <form action="{{ route('admin.pkks.instrumen.import', $instrumen->id) }}" method="POST" enctype="multipart/form-data" class="modal-content border-0 shadow-lg">
                 @csrf
-                <div class="modal-header border-bottom py-3">
-                    <h5 class="modal-title">Import Soal dari Excel</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <div class="modal-header bg-success py-3">
+                    <h5 class="modal-title text-white fw-bold"><i class="bx bx-upload me-2"></i>Import Massal via Excel</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body pt-4">
-                    <div class="alert alert-info d-flex align-items-start mb-3">
-                        <i class="bx bx-info-circle me-2 mt-1"></i>
+                <div class="modal-body p-4">
+                    <div class="alert alert-label-success border-0 d-flex align-items-start mb-4">
+                        <i class="bx bx-spreadsheet me-3 fs-3"></i>
                         <div class="small">
-                            Pastikan format file Excel memiliki header: <br>
-                            <strong>kompetensi | no | kriteria | bukti</strong>
+                            Pastikan format file Excel memiliki header kolom berikut agar terbaca sistem: <br>
+                            <span class="badge bg-success mt-2">kompetensi</span> 
+                            <span class="badge bg-success mt-2">no</span> 
+                            <span class="badge bg-success mt-2">kriteria</span> 
+                            <span class="badge bg-success mt-2">bukti</span>
                         </div>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label">Pilih File Excel</label>
-                        <input type="file" name="file" class="form-control" accept=".xlsx,.xls,.csv" required>
+                    <div class="mb-2">
+                        <label class="form-label fw-bold">Pilih File Excel</label>
+                        <input type="file" name="file" class="form-control form-control-lg border-2" accept=".xlsx,.xls,.csv" required>
+                        <div class="form-text mt-2 small">Format yang didukung: .xlsx, .xls, .csv (Maks 2MB)</div>
                     </div>
                 </div>
-                <div class="modal-footer border-top py-3">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Tutup</button>
-                    <button type="submit" class="btn btn-success">Mulai Import</button>
+                <div class="modal-footer border-top p-3">
+                    <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">Tutup</button>
+                    <button type="submit" class="btn btn-success px-4 shadow">Mulai Upload</button>
                 </div>
             </form>
         </div>
@@ -239,7 +279,12 @@
             confirmButtonColor: '#696cff',
             cancelButtonColor: '#ff3e1d',
             confirmButtonText: 'Ya, Hapus!',
-            cancelButtonText: 'Batal'
+            cancelButtonText: 'Batal',
+            customClass: {
+                confirmButton: 'btn btn-primary me-3',
+                cancelButton: 'btn btn-label-secondary'
+            },
+            buttonsStyling: false
         }).then((result) => {
             if (result.isConfirmed) {
                 const form = document.getElementById('form-delete');
