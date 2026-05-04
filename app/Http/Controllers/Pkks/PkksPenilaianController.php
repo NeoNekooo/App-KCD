@@ -67,7 +67,14 @@ class PkksPenilaianController extends Controller
             ->where('jenis_ptk_id_str', 'LIKE', '%Kepala Sekolah%')
             ->first();
 
-        return view('user.pkks.show', compact('instrumen', 'kepsek'));
+        // Ambil Hirarki Soal (Hanya yang Parent)
+        $kompetensis = \App\Models\PkksKompetensi::with(['children.indikators', 'indikators'])
+            ->where('pkks_instrumen_id', $id)
+            ->whereNull('parent_id')
+            ->orderBy('urutan')
+            ->get();
+
+        return view('user.pkks.show', compact('instrumen', 'kepsek', 'kompetensis'));
     }
 
     /**
