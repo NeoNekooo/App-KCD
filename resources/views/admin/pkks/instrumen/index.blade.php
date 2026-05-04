@@ -96,7 +96,7 @@
                     <button type="button" class="btn-close-custom" data-bs-dismiss="modal" aria-label="Close">×</button>
                 </div>
                 <div class="modal-body p-4 text-center">
-                    <div class="avatar avatar-xl bg-label-danger mx-auto mb-3">
+                    <div class="avatar avatar-xl bg-label-danger mx-auto mb-3 rounded-circle">
                         <span class="avatar-initial rounded-circle"><i class="bx bx-error fs-1"></i></span>
                     </div>
                     <h5 class="fw-bold mb-2">Hapus Paket?</h5>

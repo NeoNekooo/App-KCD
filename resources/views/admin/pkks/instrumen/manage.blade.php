@@ -311,8 +311,8 @@
                     <h5 class="modal-title text-white fw-bold">Konfirmasi</h5>
                     <button type="button" class="btn-close-custom" data-bs-dismiss="modal">×</button>
                 </div>
-                <div class="modal-body p-4">
-                    <div class="avatar avatar-xl bg-label-danger mx-auto mb-3">
+                <div class="modal-body p-4 text-center">
+                    <div class="avatar avatar-xl bg-label-danger mx-auto mb-3 rounded-circle">
                         <span class="avatar-initial rounded-circle"><i class="bx bx-error fs-1"></i></span>
                     </div>
                     <h5 class="fw-bold mb-2">Yakin Hapus?</h5>
