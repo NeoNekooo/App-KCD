@@ -18,14 +18,14 @@
                     ],
                     'not_started' => [
                         'title' => 'Belum Waktunya',
-                        'desc' => "Sabar ya! Penilaian PKKS baru akan dibuka pada tanggal <br><strong>" . ($instrumen->start_at ? $instrumen->start_at->format('d M Y, H:i') : '-') . " WIB</strong>.",
+                        'desc' => "Sabar ya! Penilaian PKKS baru akan dibuka pada tanggal <br><strong>" . ($instrumen ? ($instrumen->start_at ? $instrumen->start_at->format('d M Y, H:i') : '-') : '-') . " WIB</strong>.",
                         'icon' => 'bx-alarm',
                         'color' => 'warning',
                         'label' => 'Segera Hadir'
                     ],
                     'expired' => [
                         'title' => 'Waktu Berakhir',
-                        'desc' => "Mohon maaf, masa pengisian penilaian PKKS untuk periode ini telah ditutup pada <strong>" . ($instrumen->end_at ? $instrumen->end_at->format('d M Y, H:i') : '-') . "</strong>.",
+                        'desc' => "Mohon maaf, masa pengisian penilaian PKKS untuk periode ini telah ditutup pada <strong>" . ($instrumen ? ($instrumen->end_at ? $instrumen->end_at->format('d M Y, H:i') : '-') : '-') . "</strong>.",
                         'icon' => 'bx-timer',
                         'color' => 'danger',
                         'label' => 'Selesai'
