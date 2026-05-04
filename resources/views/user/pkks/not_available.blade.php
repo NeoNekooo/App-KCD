@@ -19,7 +19,7 @@
                     {{-- Animated Icon Container --}}
                     <div class="icon-container mb-4">
                         <div class="pulse-ring"></div>
-                        <div class="avatar avatar-xl bg-label-primary mx-auto shadow-sm floating-anim" style="width: 120px; height: 120px;">
+                        <div class="avatar avatar-xl mx-auto shadow-sm floating-anim rounded-circle" style="width: 120px; height: 120px; background: rgba(105, 108, 255, 0.1);">
                             <span class="avatar-initial rounded-circle bg-gradient-primary">
                                 <i class="bx bx-file-find text-white" style="font-size: 4.5rem !important;"></i>
                             </span>
