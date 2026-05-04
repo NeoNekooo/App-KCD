@@ -576,13 +576,13 @@ Route::prefix('admin')->name('admin.')->middleware(['auth:web,pengguna', '2fa', 
         Route::delete('/{id}', [\App\Http\Controllers\Admin\Pkks\PkksInstrumenController::class, 'destroy'])->name('destroy');
     });
 
-    // --- PKKS - PORTAL PENILAIAN (GURU/SISWA) ---
-    Route::prefix('penilaian-pkks')->name('pkks.penilaian.')->group(function () {
-        Route::get('/', [\App\Http\Controllers\Pkks\PkksPenilaianController::class, 'index'])->name('index');
-        Route::get('/{id}', [\App\Http\Controllers\Pkks\PkksPenilaianController::class, 'show'])->name('show');
-        Route::post('/{id}', [\App\Http\Controllers\Pkks\PkksPenilaianController::class, 'store'])->name('store');
-    });
+}); // End of Admin Group
 
+// --- PKKS - PORTAL PENILAIAN (GURU/SISWA) ---
+Route::prefix('penilaian-pkks')->name('pkks.penilaian.')->group(function () {
+    Route::get('/', [\App\Http\Controllers\Pkks\PkksPenilaianController::class, 'index'])->name('index');
+    Route::get('/{id}', [\App\Http\Controllers\Pkks\PkksPenilaianController::class, 'show'])->name('show');
+    Route::post('/{id}', [\App\Http\Controllers\Pkks\PkksPenilaianController::class, 'store'])->name('store');
 });
 
 // Auth Routes (Breeze/Default)
