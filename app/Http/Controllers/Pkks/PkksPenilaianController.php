@@ -37,8 +37,8 @@ class PkksPenilaianController extends Controller
             } elseif (now() > $instrumen->end_at) {
                 $status = 'expired';
             } else {
-                // PAS WAKTUNYA! Langsung redirect ke halaman soal
-                return redirect()->route('pkks.penilaian.show', $instrumen->id);
+                // PAS WAKTUNYA! Langsung redirect ke halaman soal (Gunakan rute form baru)
+                return redirect()->route('admin.pkks.penilaian.form', $instrumen->id);
             }
         }
 
