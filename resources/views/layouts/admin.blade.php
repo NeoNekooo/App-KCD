@@ -7,7 +7,8 @@
     <title>@yield('title') | {{ $appSettings['site_name'] ?? 'MANDALA' }}</title>
 
     <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="{{ !empty($appSettings['favicon']) ? url('storage/' . $appSettings['favicon']) : asset('assets/img/favicon/favicon.ico') }}" />
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="{{ !empty($appSettings['favicon']) ? asset('storage/' . $appSettings['favicon']) . '?v=' . time() : asset('assets/img/favicon/favicon.ico') }}" />
 
     <link rel="stylesheet" href="{{ asset('vendor/fonts/boxicons.css') }}" />
     @vite(['resources/css/app.css', 'resources/js/app.js'])
