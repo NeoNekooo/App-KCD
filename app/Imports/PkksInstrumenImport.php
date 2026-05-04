@@ -11,7 +11,8 @@ use Maatwebsite\Excel\Concerns\WithHeadingRow;
 class PkksInstrumenImport implements ToCollection, WithHeadingRow
 {
     protected $instrumenId;
-    protected $currentKompetensiId = null;
+    protected $currentParentId = null;
+    protected $currentChildId = null;
 
     public function __construct($instrumenId)
     {
@@ -21,22 +22,40 @@ class PkksInstrumenImport implements ToCollection, WithHeadingRow
     public function collection(Collection $rows)
     {
         foreach ($rows as $row) {
-            // Jika kolom 'kompetensi' diisi, cari atau buat kompetensi baru
-            if (!empty($row['kompetensi'])) {
-                $kompetensi = PkksKompetensi::firstOrCreate([
+            // 1. LEVEL 1: POINT UTAMA
+            if (!empty($row['point_utama'])) {
+                $parent = PkksKompetensi::firstOrCreate([
                     'pkks_instrumen_id' => $this->instrumenId,
-                    'nama' => $row['kompetensi']
+                    'parent_id' => null,
+                    'nama' => $row['point_utama']
                 ], [
-                    'urutan' => PkksKompetensi::where('pkks_instrumen_id', $this->instrumenId)->count() + 1
+                    'urutan' => PkksKompetensi::where('pkks_instrumen_id', $this->instrumenId)->whereNull('parent_id')->count() + 1
                 ]);
                 
-                $this->currentKompetensiId = $kompetensi->id;
+                $this->currentParentId = $parent->id;
+                $this->currentChildId = null; // Reset anak kalau bapaknya ganti
             }
 
-            // Jika ada nomor dan kriteria, masukkan sebagai indikator
-            if ($this->currentKompetensiId && !empty($row['kriteria'])) {
+            // 2. LEVEL 2: SUB KATEGORI (MANAJERIAL, DLL)
+            if ($this->currentParentId && !empty($row['kompetensi'])) {
+                $child = PkksKompetensi::firstOrCreate([
+                    'pkks_instrumen_id' => $this->instrumenId,
+                    'parent_id' => $this->currentParentId,
+                    'nama' => $row['kompetensi']
+                ], [
+                    'urutan' => PkksKompetensi::where('parent_id', $this->currentParentId)->count() + 1
+                ]);
+                
+                $this->currentChildId = $child->id;
+            }
+
+            // 3. LEVEL 3: INDIKATOR (BUTIR SOAL)
+            // Bisa nempel ke Child (Sub) atau langsung ke Parent (kalau gak ada sub)
+            $targetId = $this->currentChildId ?: $this->currentParentId;
+
+            if ($targetId && !empty($row['kriteria'])) {
                 PkksIndikator::create([
-                    'pkks_kompetensi_id' => $this->currentKompetensiId,
+                    'pkks_kompetensi_id' => $targetId,
                     'nomor' => $row['no'] ?? $row['nomor'] ?? '-',
                     'kriteria' => $row['kriteria'],
                     'bukti_identifikasi' => $row['bukti'] ?? $row['bukti_identifikasi'] ?? null,

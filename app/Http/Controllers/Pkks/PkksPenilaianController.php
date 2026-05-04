@@ -24,8 +24,7 @@ class PkksPenilaianController extends Controller
         }
 
         // Cari instrumen aktif buat jenjang sekolah dia tahun ini
-        $instrumen = PkksInstrumen::with(['kompetensis.indikators'])
-            ->where('jenjang', $sekolah->bentuk_pendidikan_id_str)
+        $instrumen = PkksInstrumen::where('jenjang', $sekolah->bentuk_pendidikan_id_str)
             ->where('is_active', true)
             ->where('tahun', date('Y'))
             ->first();
@@ -33,6 +32,13 @@ class PkksPenilaianController extends Controller
         if (!$instrumen) {
             return view('user.pkks.not_available', compact('sekolah'));
         }
+
+        // Ambil Hirarki Soal (Parent -> Children -> Indikators)
+        $kompetensis = PkksKompetensi::with(['children.indikators'])
+            ->where('pkks_instrumen_id', $instrumen->id)
+            ->whereNull('parent_id')
+            ->orderBy('urutan')
+            ->get();
 
         // Validasi Waktu (Auto-Lock)
         $now = Carbon::now();
@@ -46,7 +52,7 @@ class PkksPenilaianController extends Controller
         }
 
         // Kalau semua OK, langsung gass tampilkan soal!
-        return view('user.pkks.show', compact('instrumen', 'kepsek'));
+        return view('user.pkks.show', compact('instrumen', 'kepsek', 'kompetensis'));
     }
 
     /**

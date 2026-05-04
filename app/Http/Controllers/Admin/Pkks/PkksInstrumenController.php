@@ -48,8 +48,15 @@ class PkksInstrumenController extends Controller
 
     public function manage($id)
     {
-        $instrumen = PkksInstrumen::with(['kompetensis.indikators'])->findOrFail($id);
-        return view('admin.pkks.instrumen.manage', compact('instrumen'));
+        $instrumen = PkksInstrumen::findOrFail($id);
+        // Ambil hanya yang level atas (Parent)
+        $kompetensis = PkksKompetensi::with(['children.indikators', 'indikators'])
+            ->where('pkks_instrumen_id', $id)
+            ->whereNull('parent_id')
+            ->orderBy('urutan')
+            ->get();
+
+        return view('admin.pkks.instrumen.manage', compact('instrumen', 'kompetensis'));
     }
 
     // Tambah Kompetensi Manual
@@ -59,11 +66,12 @@ class PkksInstrumenController extends Controller
         
         PkksKompetensi::create([
             'pkks_instrumen_id' => $id,
+            'parent_id' => $request->parent_id, // Tambahan ini Bre
             'nama' => $request->nama,
             'urutan' => PkksKompetensi::where('pkks_instrumen_id', $id)->count() + 1
         ]);
 
-        return back()->with('success', 'Kompetensi berhasil ditambah!');
+        return back()->with('success', 'Kategori berhasil ditambah!');
     }
 
     // Update Kompetensi
