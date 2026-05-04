@@ -16,19 +16,34 @@ class PengawasMappingController extends Controller
      */
     public function index()
     {
-        // Ambil daftar pengawas (Filter: role mengandung kata 'pengawas')
+        // Ambil daftar pengawas
         $pengawas = User::where(DB::raw('LOWER(role)'), 'LIKE', '%pengawas%')
-            ->withCount('pengawasPembinas')
             ->orderBy('name', 'asc')
             ->get();
 
-        // Ambil SEMUA sekolah (nanti kita sortir di View pake JS agar lebih dinamis)
-        $sekolahs = Sekolah::orderBy('nama', 'asc')->get();
-        
-        // Ambil ID sekolah-sekolah yang sudah di-mapping (Global)
-        $mappedSchoolIds = PengawasPembina::pluck('sekolah_id')->toArray();
+        // Ambil daftar Jenjang yang ada di sekolah
+        $jenjangs = Sekolah::select('bentuk_pendidikan_id_str as nama')
+            ->whereNotNull('bentuk_pendidikan_id_str')
+            ->groupBy('bentuk_pendidikan_id_str')
+            ->orderBy('bentuk_pendidikan_id_str', 'asc')
+            ->get();
 
-        return view('admin.pkks.mapping_pengawas.index', compact('pengawas', 'sekolahs', 'mappedSchoolIds'));
+        // Ambil SEMUA sekolah dengan info pengawasnya (kalau ada)
+        $sekolahs = Sekolah::with(['pengawasPembina.pengawas'])->orderBy('nama', 'asc')->get();
+        
+        // Buat mapping: sekolah_id => pengawas_id (untuk mempermudah di JS)
+        $mapping = PengawasPembina::pluck('pengawas_id', 'sekolah_id')->toArray();
+
+        return view('admin.pkks.mapping_pengawas.index', compact('pengawas', 'sekolahs', 'jenjangs', 'mapping'));
+    }
+
+    /**
+     * Ambil mapping semua sekolah (AJAX)
+     */
+    public function getFullMapping()
+    {
+        $mappings = PengawasPembina::with('pengawas:id,name')->get();
+        return response()->json($mappings);
     }
 
     /**
@@ -98,6 +113,11 @@ class PengawasMappingController extends Controller
                 }
                 // Pake DB::table langsung biar lebih cepet dan pasti
                 DB::table('pengawas_pembinas')->insert($data);
+            }
+
+            // 1. Update Jenjang di tabel Users (Otomatis jadi Pengawas jenjang tersebut)
+            if ($request->jenjang) {
+                User::where('id', $request->pengawas_id)->update(['jenjang' => $request->jenjang]);
             }
 
             DB::commit();

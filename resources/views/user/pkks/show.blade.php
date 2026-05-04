@@ -11,9 +11,9 @@
                 <div class="col-md-8">
                     <h4 class="fw-bold mb-1 text-primary">{{ $instrumen->nama }}</h4>
                     <p class="text-muted mb-0">
-                        <i class="bx bx-user-circle me-1"></i> Penilaian untuk: <strong>{{ $kepsek->nama ?? '-' }}</strong> 
-                        <span class="mx-2">|</span>
-                        <i class="bx bx-calendar me-1"></i> Tahun {{ $instrumen->tahun }}
+                        <i class="bx bx-buildings me-1"></i> Sekolah: <strong>{{ $sekolah->nama ?? '-' }}</strong> 
+                        <span class="mx-3">|</span>
+                        <i class="bx bx-user-circle me-1"></i> Kepsek: <strong>{{ $kepsek->nama ?? '-' }}</strong> 
                     </p>
                 </div>
                 <div class="col-md-4 mt-3 mt-md-0">
@@ -31,6 +31,7 @@
 
     <form action="{{ route('admin.pkks.penilaian.store', $instrumen->id) }}" method="POST">
         @csrf
+        <input type="hidden" name="sekolah_id" value="{{ $sekolah->sekolah_id }}">
         
         @foreach($kompetensis as $parent)
         <div class="mb-5">

@@ -31,6 +31,11 @@ class Sekolah extends Model
         return $this->hasMany(Pengguna::class, 'sekolah_id', 'sekolah_id');
     }
 
+    public function pengawasPembina()
+    {
+        return $this->hasOne(PengawasPembina::class, 'sekolah_id', 'sekolah_id');
+    }
+
     /**
      * Accessor Logo URL (SUPER CLEAN & PINTER)
      */

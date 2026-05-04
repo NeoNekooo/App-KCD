@@ -53,6 +53,24 @@
                         </div>
 
                         <div class="row g-4 mb-4">
+                            <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Jenjang Sekolah</label>
+                            @if(isset($fixedJenjang) && $fixedJenjang)
+                                <input type="text" class="form-control bg-light" value="{{ $fixedJenjang }}" readonly>
+                                <input type="hidden" name="jenjang" value="{{ $fixedJenjang }}">
+                                <small class="text-primary mt-1 d-block"><i class="bx bx-lock-alt me-1"></i> Terkunci sesuai mapping Anda.</small>
+                            @else
+                                <select name="jenjang" class="form-select border-2" required>
+                                    <option value="">-- Pilih Jenjang --</option>
+                                    <option value="SMK">SMK</option>
+                                    <option value="SMA">SMA</option>
+                                    <option value="SLB">SLB</option>
+                                </select>
+                            @endif
+                        </div>
+                        </div>
+
+                        <div class="row g-4 mb-4">
                             <div class="col-md-6">
                                 <label class="form-label fw-bold text-dark"><i class="bx bx-list-check me-1"></i>Skala Nilai (Maks)</label>
                                 <select name="skor_maks" class="form-select form-select-lg border-2" required>

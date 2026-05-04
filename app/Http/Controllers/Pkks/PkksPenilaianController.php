@@ -17,19 +17,16 @@ class PkksPenilaianController extends Controller
     public function index()
     {
         $user = auth('pengguna')->user();
-        $sekolah = Sekolah::where('sekolah_id', $user->sekolah_id)->first();
-        
-        if (!$sekolah) {
-            return back()->with('error', 'Data sekolah tidak ditemukan.');
-        }
+        if (!$user) return redirect()->route('login');
 
-        // 1. Cari instrumen yang "Aktif" (is_active) buat jenjang dia tahun ini
+        $sekolah = Sekolah::where('sekolah_id', $user->sekolah_id)->first();
+        if (!$sekolah) return back()->with('error', 'Data sekolah tidak ditemukan.');
+
         $instrumen = PkksInstrumen::where('jenjang', $sekolah->bentuk_pendidikan_id_str)
             ->where('is_active', true)
             ->where('tahun', date('Y'))
             ->first();
 
-        // 2. Tentukan status berdasarkan waktu
         $status = 'not_found';
         if ($instrumen) {
             if (now() < $instrumen->start_at) {
@@ -37,12 +34,10 @@ class PkksPenilaianController extends Controller
             } elseif (now() > $instrumen->end_at) {
                 $status = 'expired';
             } else {
-                // PAS WAKTUNYA! Langsung redirect ke halaman soal (Gunakan rute form baru)
                 return redirect()->route('admin.pkks.penilaian.form', $instrumen->id);
             }
         }
 
-        // Tampilkan halaman status (Belum ada, Belum mulai, atau Selesai)
         return view('user.pkks.not_available', compact('sekolah', 'instrumen', 'status'));
     }
 
@@ -51,19 +46,30 @@ class PkksPenilaianController extends Controller
      */
     public function show($id)
     {
-        $user = auth('pengguna')->user();
+        // 1. Tentukan Konteks Sekolah
+        $sekolahId = null;
+        if (auth('web')->check()) {
+            $sekolahId = request('sekolah_id'); // Pengawas kirim ID sekolah via query string
+        } else {
+            $user = auth('pengguna')->user();
+            $sekolahId = $user->sekolah_id ?? null;
+        }
+
+        if (!$sekolahId) return redirect()->route('admin.pkks.penilaian.show')->with('error', 'Konteks sekolah tidak ditemukan.');
+
         $instrumen = PkksInstrumen::with(['kompetensis.indikators'])->findOrFail($id);
         
         // Validasi Waktu (Auto-Lock)
         $now = Carbon::now();
         if ($instrumen->start_at && $now->lt($instrumen->start_at)) {
-            return redirect()->route('admin.pkks.penilaian.index')->with('error', 'Penilaian belum dibuka. Silakan tunggu jadwal dimulai.');
+            return redirect()->route('admin.pkks.penilaian.show')->with('error', 'Penilaian belum dibuka.');
         }
         if ($instrumen->end_at && $now->gt($instrumen->end_at)) {
-            return redirect()->route('admin.pkks.penilaian.index')->with('error', 'Maaf, waktu penilaian sudah ditutup.');
+            return redirect()->route('admin.pkks.penilaian.show')->with('error', 'Maaf, waktu penilaian sudah ditutup.');
         }
 
-        $kepsek = Gtk::where('sekolah_id', $user->sekolah_id)
+        $sekolah = Sekolah::where('sekolah_id', $sekolahId)->first();
+        $kepsek = Gtk::where('sekolah_id', $sekolahId)
             ->where('jenis_ptk_id_str', 'LIKE', '%Kepala Sekolah%')
             ->first();
 
@@ -74,7 +80,7 @@ class PkksPenilaianController extends Controller
             ->orderBy('urutan')
             ->get();
 
-        return view('user.pkks.show', compact('instrumen', 'kepsek', 'kompetensis'));
+        return view('user.pkks.show', compact('instrumen', 'kepsek', 'kompetensis', 'sekolah'));
     }
 
     /**
@@ -82,16 +88,29 @@ class PkksPenilaianController extends Controller
      */
     public function store(Request $request, $id)
     {
-        $user = auth('pengguna')->user();
         $instrumen = PkksInstrumen::findOrFail($id);
-        $sekolah = Sekolah::where('sekolah_id', $user->sekolah_id)->first();
+        
+        // 1. Tentukan Konteks Pengguna & Sekolah
+        $user = null;
+        $sekolahId = null;
+
+        if (auth('web')->check()) {
+            $user = auth('web')->user();
+            $sekolahId = $request->sekolah_id; // Pengawas kirim via hidden input
+        } else {
+            $user = auth('pengguna')->user();
+            $sekolahId = $user->sekolah_id;
+        }
+
+        $sekolah = Sekolah::where('sekolah_id', $sekolahId)->first();
+        if (!$sekolah) return back()->with('error', 'Sekolah tidak valid.');
         
         $request->validate([
             'jawaban' => 'required|array',
             'jawaban.*' => 'required|integer|min:1|max:' . $instrumen->skor_maks,
         ]);
 
-        $kepsek = Gtk::where('sekolah_id', $user->sekolah_id)
+        $kepsek = Gtk::where('sekolah_id', $sekolahId)
             ->where('jenis_ptk_id_str', 'LIKE', '%Kepala Sekolah%')
             ->first();
 
@@ -101,7 +120,7 @@ class PkksPenilaianController extends Controller
             $penilaian = \App\Models\PkksPenilaian::create([
                 'instansi_id' => $sekolah->instansi_id, 
                 'pkks_instrumen_id' => $id,
-                'sekolah_id' => $user->sekolah_id,
+                'sekolah_id' => $sekolahId,
                 'kepala_sekolah_id' => $kepsek->id ?? null,
                 'penilai_id' => $user->id,
                 'penilai_type' => get_class($user),

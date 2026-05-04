@@ -16,31 +16,47 @@ class PkksInstrumenController extends Controller
     public function index()
     {
         $instrumens = PkksInstrumen::withCount(['kompetensis', 'penilaians'])
-            ->orderBy('tahun', 'desc')
-            ->orderBy('jenjang', 'asc')
-            ->get();
+        $user = auth()->user();
+        $query = PkksInstrumen::orderBy('tahun', 'desc')->orderBy('created_at', 'desc');
+
+        // 🔥 Jika Pengawas, hanya tampilkan soal sesuai jenjangnya
+        if (str_contains(strtolower($user->role), 'pengawas') && $user->jenjang) {
+            $query->where('jenjang', $user->jenjang);
+        }
+
+        $instrumens = $query->get();
         return view('admin.pkks.instrumen.index', compact('instrumens'));
     }
 
     public function create()
     {
-        // Ambil Jenjang yang ada di tabel sekolah (Dinamis Bre!)
-        $jenjangs = \App\Models\Sekolah::distinct()->pluck('bentuk_pendidikan_id_str')->filter()->sort();
-        return view('admin.pkks.instrumen.create', compact('jenjangs'));
+        $user = auth()->user();
+        // Jika pengawas sudah punya jenjang, kirim ke view buat di-lock
+        $fixedJenjang = (str_contains(strtolower($user->role), 'pengawas')) ? $user->jenjang : null;
+        
+        return view('admin.pkks.instrumen.create', compact('fixedJenjang'));
     }
 
     public function store(Request $request)
     {
+        $user = auth()->user();
+        $data = $request->all();
+
+        // 🔥 Force Jenjang dari profil kalau dia Pengawas
+        if (str_contains(strtolower($user->role), 'pengawas') && $user->jenjang) {
+            $data['jenjang'] = $user->jenjang;
+        }
+
         $request->validate([
             'nama' => 'required|string|max:255',
-            'jenjang' => 'required',
+            'jenjang' => 'required|string',
             'tahun' => 'required|integer',
             'start_at' => 'required|date',
             'end_at' => 'required|date|after:start_at',
             'skor_maks' => 'required|integer'
         ]);
 
-        $instrumen = PkksInstrumen::create($request->all());
+        $instrumen = PkksInstrumen::create($data);
 
         return redirect()->route('admin.pkks.instrumen.manage', $instrumen->id)
             ->with('success', 'Paket instrumen berhasil dibuat! Silakan tambah kompetensi.');

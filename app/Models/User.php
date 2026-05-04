@@ -26,6 +26,7 @@ class User extends Authenticatable
         'password',
         'username',
         'role',
+        'jenjang',
         'pegawai_kcd_id',
         'google2fa_secret',
         'google2fa_enabled',
