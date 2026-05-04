@@ -572,6 +572,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth:web,pengguna', '2fa', 
         Route::post('/kompetensi/{kompetensiId}/indikator', [\App\Http\Controllers\Admin\Pkks\PkksInstrumenController::class, 'storeIndikator'])->name('indikator.store');
         Route::put('/indikator/{id}', [\App\Http\Controllers\Admin\Pkks\PkksInstrumenController::class, 'updateIndikator'])->name('indikator.update');
         Route::delete('/indikator/{id}', [\App\Http\Controllers\Admin\Pkks\PkksInstrumenController::class, 'destroyIndikator'])->name('indikator.destroy');
+        Route::patch('/{id}/toggle', [\App\Http\Controllers\Admin\Pkks\PkksInstrumenController::class, 'toggleActive'])->name('toggle');
         Route::delete('/{id}', [\App\Http\Controllers\Admin\Pkks\PkksInstrumenController::class, 'destroy'])->name('destroy');
     });
 

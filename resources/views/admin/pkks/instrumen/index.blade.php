@@ -37,9 +37,18 @@
                     </div>
                 </div>
                 <div class="card-body p-4">
-                    <div class="mb-4">
-                        <h5 class="card-title fw-bold text-dark mb-1">{{ $item->nama }}</h5>
-                        <div class="text-muted small">Dibuat pada {{ $item->created_at->format('d M Y') }}</div>
+                    <div class="mb-4 d-flex justify-content-between align-items-start">
+                        <div>
+                            <h5 class="card-title fw-bold text-dark mb-1">{{ $item->nama }}</h5>
+                            <div class="text-muted small">Dibuat pada {{ $item->created_at->format('d M Y') }}</div>
+                        </div>
+                        <form action="{{ route('admin.pkks.instrumen.toggle', $item->id) }}" method="POST">
+                            @csrf @method('PATCH')
+                            <button type="submit" class="btn btn-xs {{ $item->is_active ? 'btn-label-success' : 'btn-label-danger' }} rounded-pill px-3 shadow-sm">
+                                <i class="bx {{ $item->is_active ? 'bx-check' : 'bx-power-off' }} me-1"></i>
+                                {{ $item->is_active ? 'Aktif' : 'Non-Aktif' }}
+                            </button>
+                        </form>
                     </div>
                     
                     <div class="row g-2 mb-4">

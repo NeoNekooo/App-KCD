@@ -137,6 +137,15 @@ class PkksInstrumenController extends Controller
         return back()->with('success', 'Soal-soal berhasil di-import dari Excel!');
     }
 
+    public function toggleActive($id)
+    {
+        $instrumen = PkksInstrumen::findOrFail($id);
+        $instrumen->update(['is_active' => !$instrumen->is_active]);
+
+        $status = $instrumen->is_active ? 'diaktifkan' : 'dinonaktifkan';
+        return back()->with('success', "Instrumen berhasil $status!");
+    }
+
     public function destroy($id)
     {
         PkksInstrumen::findOrFail($id)->delete();

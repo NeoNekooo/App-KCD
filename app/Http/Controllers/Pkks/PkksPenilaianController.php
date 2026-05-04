@@ -23,36 +23,27 @@ class PkksPenilaianController extends Controller
             return back()->with('error', 'Data sekolah tidak ditemukan.');
         }
 
-        // Cari instrumen aktif buat jenjang sekolah dia tahun ini
+        // 1. Cari instrumen yang "Aktif" (is_active) buat jenjang dia tahun ini
         $instrumen = PkksInstrumen::where('jenjang', $sekolah->bentuk_pendidikan_id_str)
             ->where('is_active', true)
             ->where('tahun', date('Y'))
             ->first();
 
-        if (!$instrumen) {
-            return view('user.pkks.not_available', compact('sekolah'));
+        // 2. Tentukan status berdasarkan waktu
+        $status = 'not_found';
+        if ($instrumen) {
+            if (now() < $instrumen->start_at) {
+                $status = 'not_started';
+            } elseif (now() > $instrumen->end_at) {
+                $status = 'expired';
+            } else {
+                // PAS WAKTUNYA! Langsung redirect ke halaman soal
+                return redirect()->route('pkks.penilaian.show', $instrumen->id);
+            }
         }
 
-        // Ambil Hirarki Soal (Parent -> Children -> Indikators)
-        $kompetensis = PkksKompetensi::with(['children.indikators'])
-            ->where('pkks_instrumen_id', $instrumen->id)
-            ->whereNull('parent_id')
-            ->orderBy('urutan')
-            ->get();
-
-        // Validasi Waktu (Auto-Lock)
-        $now = Carbon::now();
-        $kepsek = Gtk::where('sekolah_id', $user->sekolah_id)
-            ->where('jenis_ptk_id_str', 'LIKE', '%Kepala Sekolah%')
-            ->first();
-
-        // Jika Belum Buka atau Sudah Tutup, arahkan ke halaman status
-        if (($instrumen->start_at && $now->lt($instrumen->start_at)) || ($instrumen->end_at && $now->gt($instrumen->end_at))) {
-            return view('user.pkks.status', compact('instrumen', 'sekolah', 'kepsek', 'now'));
-        }
-
-        // Kalau semua OK, langsung gass tampilkan soal!
-        return view('user.pkks.show', compact('instrumen', 'kepsek', 'kompetensis'));
+        // Tampilkan halaman status (Belum ada, Belum mulai, atau Selesai)
+        return view('user.pkks.not_available', compact('sekolah', 'instrumen', 'status'));
     }
 
     /**
