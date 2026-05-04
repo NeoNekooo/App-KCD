@@ -18,6 +18,7 @@ class PengawasMappingController extends Controller
     {
         // Ambil daftar pengawas
         $pengawas = User::where(DB::raw('LOWER(role)'), 'LIKE', '%pengawas%')
+            ->withCount('pengawasPembinas')
             ->orderBy('name', 'asc')
             ->get();
 

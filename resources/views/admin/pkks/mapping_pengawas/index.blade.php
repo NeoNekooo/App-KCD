@@ -18,17 +18,17 @@
         <div class="card-body p-3">
             <div class="row align-items-center">
                 <div class="col-md-4">
-                    <label class="form-label fw-bold small text-uppercase mb-1">Filter Jenjang</label>
-                    <select id="filter-jenjang" class="form-select border-2">
-                        <option value="">-- Tampilkan Semua Jenjang --</option>
+                    <label class="form-label fw-bold small text-uppercase mb-1">Pilih Jenjang Terlebih Dahulu</label>
+                    <select id="filter-jenjang" class="form-select border-2 border-primary">
+                        <option value="">-- Silakan Pilih Jenjang --</option>
                         @foreach($jenjangs as $j)
                         <option value="{{ $j->nama }}">{{ $j->nama }}</option>
                         @endforeach
                     </select>
                 </div>
                 <div class="col-md-8 text-md-end mt-3 mt-md-0">
-                    <div class="small text-muted">
-                        <i class="bx bx-info-circle me-1"></i> Pilih pengawas terlebih dahulu untuk mengelola pemetaan sekolah.
+                    <div class="small text-muted" id="filter-hint">
+                        <i class="bx bx-info-circle me-1"></i> Data sekolah akan muncul setelah jenjang dipilih.
                     </div>
                 </div>
             </div>
@@ -38,7 +38,7 @@
     <div class="row">
         {{-- Tabel Sekolah (Kiri) --}}
         <div class="col-md-8">
-            <div class="card border-0 shadow-sm">
+            <div class="card border-0 shadow-sm h-100">
                 <div class="card-header border-bottom py-3 d-flex justify-content-between align-items-center">
                     <h5 class="mb-0 fw-bold"><i class="bx bx-buildings me-2 text-primary"></i>Daftar Sekolah</h5>
                     <div class="input-group input-group-merge w-50">
@@ -46,7 +46,17 @@
                         <input type="text" class="form-control border-0 bg-light" id="search-sekolah" placeholder="Cari NPSN atau Nama...">
                     </div>
                 </div>
-                <div class="table-responsive" style="max-height: 60vh;">
+                
+                {{-- Placeholder Blank State --}}
+                <div id="blank-state-sekolah" class="card-body py-5 text-center">
+                    <div class="mb-3">
+                        <i class="bx bx-select-multiple text-muted" style="font-size: 5rem; opacity: 0.1;"></i>
+                    </div>
+                    <h5 class="text-muted">Jenjang Belum Dipilih</h5>
+                    <p class="text-muted small">Pilih jenjang sekolah di atas untuk mengelola pemetaan.</p>
+                </div>
+
+                <div class="table-responsive d-none" id="table-container-sekolah" style="max-height: 60vh;">
                     <table class="table table-hover align-middle mb-0" id="table-sekolah">
                         <thead class="table-light sticky-top">
                             <tr>
@@ -57,7 +67,7 @@
                         </thead>
                         <tbody>
                             @foreach($sekolahs as $s)
-                            <tr class="row-sekolah" data-jenjang="{{ $s->bentuk_pendidikan_id_str }}" data-search="{{ strtolower($s->npsn . ' ' . $s->nama) }}">
+                            <tr class="row-sekolah" data-jenjang="{{ $s->bentuk_pendidikan_id_str }}" data-search="{{ strtolower($s->npsn . ' ' . $s->nama) }}" style="display: none;">
                                 <td class="fw-bold">{{ $s->npsn }}</td>
                                 <td>
                                     <div class="fw-bold text-dark">{{ $s->nama }}</div>
@@ -89,32 +99,34 @@
 
         {{-- Side Panel Pengawas (Kanan) --}}
         <div class="col-md-4">
-            <div class="card border-0 shadow-sm overflow-hidden">
-                <div class="card-header bg-primary py-3">
-                    <h6 class="mb-0 text-white fw-bold"><i class="bx bx-user-check me-2"></i>Pilih Pengawas</h6>
+            <div class="card border-0 shadow-sm overflow-hidden h-100">
+                <div class="card-header bg-primary py-3 d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0 text-white fw-bold"><i class="bx bx-user-check me-2"></i>Daftar Pengawas</h6>
                 </div>
                 <div class="card-body p-0">
-                    <div class="p-3 border-bottom">
-                        <div class="input-group input-group-merge">
-                            <span class="input-group-text border-0 bg-light"><i class="bx bx-search"></i></span>
-                            <input type="text" class="form-control border-0 bg-light" id="search-pengawas" placeholder="Cari pengawas...">
+                    <div class="p-3 border-bottom bg-light bg-opacity-50">
+                        <div class="input-group input-group-merge shadow-sm rounded-pill overflow-hidden border-0">
+                            <span class="input-group-text border-0 bg-white"><i class="bx bx-search"></i></span>
+                            <input type="text" class="form-control border-0 bg-white" id="search-pengawas" placeholder="Cari nama pengawas...">
                         </div>
                     </div>
-                    <div class="list-group list-group-flush" style="max-height: 50vh; overflow-y: auto;">
+                    <div class="list-group list-group-flush" style="max-height: 60vh; overflow-y: auto;">
                         @foreach($pengawas as $p)
                         <a href="javascript:void(0);" 
-                           class="list-group-item list-group-item-action btn-pengawas d-flex align-items-center py-3"
+                           class="list-group-item list-group-item-action btn-pengawas d-flex align-items-center py-3 border-bottom"
                            data-id="{{ $p->id }}"
                            data-name="{{ $p->name }}"
                            data-search="{{ strtolower($p->name) }}">
                             <div class="avatar avatar-sm me-3">
-                                <span class="avatar-initial rounded-circle bg-label-primary">{{ substr($p->name, 0, 1) }}</span>
+                                <span class="avatar-initial rounded-circle bg-label-primary shadow-sm">{{ substr($p->name, 0, 1) }}</span>
                             </div>
                             <div class="w-100 overflow-hidden">
-                                <h6 class="mb-0 text-truncate fw-bold">{{ $p->name }}</h6>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h6 class="mb-0 text-truncate fw-bold">{{ $p->name }}</h6>
+                                    <span class="badge bg-primary rounded-pill count-badge" style="font-size: 10px;">{{ $p->pengawas_pembinas_count }} Sekolah</span>
+                                </div>
                                 <small class="text-muted small">ID: {{ $p->id }}</small>
                             </div>
-                            <i class="bx bx-chevron-right ms-auto opacity-25"></i>
                         </a>
                         @endforeach
                     </div>
@@ -123,8 +135,8 @@
 
             <div class="mt-4 p-4 rounded-4 bg-label-primary border border-primary border-opacity-10 d-none" id="mapping-summary">
                 <h6 class="fw-bold mb-2">Informasi Pemetaan</h6>
-                <p class="small mb-0">Pengawas: <strong id="sum-name">-</strong></p>
-                <p class="small mb-0">Sekolah dipilih: <strong id="sum-count">0</strong></p>
+                <p class="small mb-1">Pengawas: <strong id="sum-name">-</strong></p>
+                <p class="small mb-0 text-primary">Sekolah dipilih: <strong id="sum-count">0</strong></p>
             </div>
         </div>
     </div>
@@ -133,14 +145,16 @@
 <style>
     .row-sekolah { transition: all 0.2s; }
     .row-sekolah.assigned-to-other { background-color: rgba(0,0,0,0.02); opacity: 0.8; }
-    .btn-pengawas { border: none !important; margin-bottom: 2px; }
+    .btn-pengawas { border: none !important; transition: all 0.2s; }
     .btn-pengawas:hover { background-color: #f8f9ff; }
     .btn-pengawas.active { 
         background-color: #696cff !important; 
         color: #fff !important; 
         box-shadow: 0 4px 12px rgba(105, 108, 255, 0.3);
+        z-index: 10;
     }
     .btn-pengawas.active h6, .btn-pengawas.active small { color: #fff !important; }
+    .btn-pengawas.active .count-badge { background-color: #fff !important; color: #696cff !important; }
     .check-sekolah { width: 1.5rem; height: 1.5rem; cursor: pointer; }
     .check-sekolah:disabled { cursor: not-allowed; opacity: 0.5; }
     .table-responsive::-webkit-scrollbar { width: 5px; }
@@ -151,17 +165,32 @@
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         let currentPengawasId = null;
-        let globalMapping = @json($mapping); // sekolah_id => pengawas_id
+        let globalMapping = @json($mapping);
         let pengawasData = @json($pengawas->keyBy('id'));
 
         // 1. Filter Jenjang
         const filterJenjang = document.getElementById('filter-jenjang');
+        const blankState = document.getElementById('blank-state-sekolah');
+        const tableContainer = document.getElementById('table-container-sekolah');
+
         filterJenjang.addEventListener('change', function() {
             const val = this.value;
-            document.querySelectorAll('.row-sekolah').forEach(row => {
-                const j = row.getAttribute('data-jenjang');
-                row.style.display = (!val || j === val) ? 'table-row' : 'none';
-            });
+            if (!val) {
+                blankState.classList.remove('d-none');
+                tableContainer.classList.add('d-none');
+            } else {
+                blankState.classList.add('d-none');
+                tableContainer.classList.remove('d-none');
+                
+                document.querySelectorAll('.row-sekolah').forEach(row => {
+                    const j = row.getAttribute('data-jenjang');
+                    row.style.display = (j === val) ? 'table-row' : 'none';
+                });
+                
+                // Clear search sekolah when jenjang changes
+                document.getElementById('search-sekolah').value = '';
+                if(currentPengawasId) refreshTable();
+            }
         });
 
         // 2. Search Sekolah
@@ -169,10 +198,12 @@
         searchSekolah.addEventListener('keyup', function() {
             const val = this.value.toLowerCase();
             const currentJenjang = filterJenjang.value;
+            if(!currentJenjang) return;
+
             document.querySelectorAll('.row-sekolah').forEach(row => {
                 const j = row.getAttribute('data-jenjang');
                 const s = row.getAttribute('data-search');
-                const matchesJenjang = !currentJenjang || j === currentJenjang;
+                const matchesJenjang = j === currentJenjang;
                 const matchesSearch = s.includes(val);
                 row.style.display = (matchesJenjang && matchesSearch) ? 'table-row' : 'none';
             });
@@ -193,7 +224,6 @@
                 const id = this.getAttribute('data-id');
                 const name = this.getAttribute('data-name');
 
-                // Toggle Active
                 document.querySelectorAll('.btn-pengawas').forEach(b => b.classList.remove('active'));
                 this.classList.add('active');
 
@@ -226,7 +256,6 @@
                     if (currentOwnerId == currentPengawasId) {
                         checkbox.checked = true;
                     } else {
-                        // Dipegang orang lain
                         checkbox.disabled = true;
                         row.classList.add('assigned-to-other');
                         ownerBox.classList.remove('d-none');
@@ -242,7 +271,6 @@
             document.getElementById('sum-count').innerText = count;
         }
 
-        // Checkbox change listener
         document.querySelectorAll('.check-sekolah').forEach(cb => {
             cb.addEventListener('change', updateSummary);
         });
@@ -250,6 +278,11 @@
         // 5. Simpan (AJAX)
         document.getElementById('btn-save').addEventListener('click', function() {
             if (!currentPengawasId) return;
+            const currentJenjang = filterJenjang.value;
+            if(!currentJenjang) {
+                Swal.fire({ icon: 'warning', title: 'Perhatian', text: 'Silakan pilih jenjang terlebih dahulu.' });
+                return;
+            }
             
             const selectedIds = Array.from(document.querySelectorAll('.check-sekolah:checked')).map(cb => cb.value);
             const btn = this;
@@ -264,19 +297,21 @@
                 body: JSON.stringify({ 
                     pengawas_id: currentPengawasId, 
                     sekolah_ids: selectedIds,
-                    jenjang: document.getElementById('filter-jenjang').value
+                    jenjang: currentJenjang
                 })
             })
             .then(res => res.json())
             .then(res => {
                 if (res.success) {
                     // Update global mapping local
-                    // 1. Hapus semua sekolah yang sebelumnya dimiliki pengawas ini
                     for (let sid in globalMapping) {
                         if (globalMapping[sid] == currentPengawasId) delete globalMapping[sid];
                     }
-                    // 2. Tambah yang baru dipilih
                     selectedIds.forEach(sid => globalMapping[sid] = currentPengawasId);
+
+                    // Update Badge Count di List Pengawas
+                    const badge = document.querySelector(`.btn-pengawas[data-id="${currentPengawasId}"] .count-badge`);
+                    if(badge) badge.innerText = `${selectedIds.length} Sekolah`;
 
                     Swal.fire({ icon: 'success', title: 'Sukses', text: res.message, timer: 2000, showConfirmButton: false });
                     refreshTable();
