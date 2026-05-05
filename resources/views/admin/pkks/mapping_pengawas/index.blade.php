@@ -22,7 +22,7 @@
         <div class="card-body p-3">
             <div class="row align-items-center">
                 <div class="col-md-4">
-                    <label class="form-label fw-bold small text-uppercase mb-1">Pilih Jenjang Sekolah</label>
+                    <label class="form-label fw-bold small text-uppercase mb-1">Jenjang Sekolah</label>
                     <select id="filter-jenjang" class="form-select border-2 border-primary">
                         <option value="">-- Silakan Pilih Jenjang --</option>
                         @foreach($jenjangs as $j)
@@ -32,7 +32,7 @@
                 </div>
                 <div class="col-md-8 text-md-end mt-3 mt-md-0">
                     <div class="small text-muted">
-                        <i class="bx bx-info-circle me-1"></i> Pilih pengawas di kanan untuk mengelola sekolah di kiri.
+                        <i class="bx bx-info-circle me-1"></i> Klik nama pengawas untuk memuat mapping dan jenjang terkait.
                     </div>
                 </div>
             </div>
@@ -56,8 +56,8 @@
                     <div class="mb-3">
                         <i class="bx bx-select-multiple text-muted opacity-25" style="font-size: 5rem;"></i>
                     </div>
-                    <h5 class="text-muted">Jenjang Belum Dipilih</h5>
-                    <p class="text-muted small">Pilih jenjang sekolah terlebih dahulu.</p>
+                    <h5 class="text-muted">Pilih Pengawas atau Jenjang</h5>
+                    <p class="text-muted small">Pilih pengawas binaan untuk melihat daftar sekolah.</p>
                 </div>
 
                 <div class="table-responsive d-none" id="table-container-sekolah" style="max-height: 65vh;">
@@ -105,7 +105,7 @@
         <div class="col-md-4">
             <div class="card border-0 shadow-sm overflow-hidden h-100">
                 <div class="card-header bg-primary py-3">
-                    <h6 class="mb-0 text-white fw-bold"><i class="bx bx-user-check me-2"></i>Pilih Pengawas</h6>
+                    <h6 class="mb-0 text-white fw-bold"><i class="bx bx-user-check me-2"></i>Daftar Pengawas</h6>
                 </div>
                 <div class="card-body p-0">
                     <div class="p-3 border-bottom bg-light bg-opacity-25">
@@ -120,6 +120,7 @@
                            class="list-group-item list-group-item-action btn-pengawas d-flex align-items-center py-3 border-bottom"
                            data-id="{{ $p->id }}"
                            data-name="{{ $p->name }}"
+                           data-jenjang="{{ $p->jenjang }}"
                            data-search="{{ strtolower($p->name) }}">
                             <div class="avatar avatar-sm me-3">
                                 <span class="avatar-initial rounded-circle bg-label-primary shadow-sm">{{ substr($p->name, 0, 1) }}</span>
@@ -129,7 +130,12 @@
                                     <h6 class="mb-0 text-truncate fw-bold">{{ $p->name }}</h6>
                                     <span class="badge bg-primary rounded-pill count-badge" style="font-size: 10px;">{{ $p->pengawas_pembinas_count }}</span>
                                 </div>
-                                <small class="text-muted small">ID: {{ $p->id }}</small>
+                                <div class="d-flex justify-content-between align-items-center mt-1">
+                                    <small class="text-muted small">ID: {{ $p->id }}</small>
+                                    @if($p->jenjang)
+                                    <span class="badge bg-label-info" style="font-size: 9px;">{{ $p->jenjang }}</span>
+                                    @endif
+                                </div>
                             </div>
                         </a>
                         @endforeach
@@ -141,12 +147,11 @@
 </div>
 
 <style>
-    /* Style untuk sekolah yang punya pengawas terpilih (Glow Biru) */
+    .row-sekolah { transition: all 0.2s; }
     .row-sekolah.active-mapping-row {
         background-color: rgba(105, 108, 255, 0.05) !important;
         border-left: 4px solid #696cff;
     }
-
     .row-sekolah.assigned-to-other { 
         background-color: #f8f9fa !important; 
         opacity: 0.5; 
@@ -183,9 +188,8 @@
         const blankState = document.getElementById('blank-state-sekolah');
         const tableContainer = document.getElementById('table-container-sekolah');
 
-        // 1. Filter Jenjang
-        filterJenjang.addEventListener('change', function() {
-            const val = this.value;
+        // Fungsi Filter Jenjang
+        function applyJenjangFilter(val) {
             if (!val) {
                 blankState.classList.remove('d-none');
                 tableContainer.classList.add('d-none');
@@ -201,6 +205,10 @@
                 document.getElementById('search-sekolah').value = '';
                 if(currentPengawasId) refreshTable();
             }
+        }
+
+        filterJenjang.addEventListener('change', function() {
+            applyJenjangFilter(this.value);
         });
 
         // 2. Klik Pengawas
@@ -208,6 +216,7 @@
             btn.addEventListener('click', function() {
                 const id = this.getAttribute('data-id');
                 const name = this.getAttribute('data-name');
+                const pJenjang = this.getAttribute('data-jenjang');
 
                 document.querySelectorAll('.btn-pengawas').forEach(b => b.classList.remove('active'));
                 this.classList.add('active');
@@ -215,6 +224,12 @@
                 currentPengawasId = id;
                 document.getElementById('sum-name').innerText = name;
                 document.getElementById('action-header').classList.remove('d-none');
+
+                // 🔥 AUTO-FILTER JENJANG: Jika pengawas punya jenjang, otomatis pindahin filternya
+                if (pJenjang && pJenjang !== 'null') {
+                    filterJenjang.value = pJenjang;
+                    applyJenjangFilter(pJenjang);
+                }
 
                 refreshTable();
             });
@@ -231,7 +246,6 @@
                 
                 const currentOwnerId = globalMapping[sid];
 
-                // Reset State
                 checkbox.disabled = false;
                 checkbox.checked = false;
                 row.classList.remove('assigned-to-other');
@@ -240,11 +254,9 @@
 
                 if (currentOwnerId) {
                     if (currentOwnerId == currentPengawasId) {
-                        // Milik Pengawas Terpilih -> Checked & Enabled & Highlight Biru
                         checkbox.checked = true;
                         row.classList.add('active-mapping-row');
                     } else {
-                        // Milik Orang Lain -> Disabled & Greyed Out
                         checkbox.disabled = true;
                         row.classList.add('assigned-to-other');
                         ownerBox.classList.remove('d-none');
@@ -260,7 +272,6 @@
             document.getElementById('sum-count').innerText = count;
         }
 
-        // Checkbox change listener
         document.querySelectorAll('.check-sekolah').forEach(cb => {
             cb.addEventListener('change', updateSummary);
         });
@@ -317,8 +328,27 @@
                         if (globalMapping[sid] == currentPengawasId) delete globalMapping[sid];
                     }
                     selectedIds.forEach(sid => globalMapping[sid] = currentPengawasId);
-                    const badge = document.querySelector(`.btn-pengawas[data-id="${currentPengawasId}"] .count-badge`);
-                    if(badge) badge.innerText = selectedIds.length;
+                    
+                    // Update Badge Count & Jenjang di List Pengawas UI
+                    const pengawasLink = document.querySelector(`.btn-pengawas[data-id="${currentPengawasId}"]`);
+                    if(pengawasLink) {
+                        pengawasLink.querySelector('.count-badge').innerText = selectedIds.length;
+                        pengawasLink.setAttribute('data-jenjang', currentJenjang);
+                        
+                        // Tambah badge jenjang kalau belum ada
+                        let jenjangContainer = pengawasLink.querySelector('.text-muted').parentElement;
+                        let existingBadge = jenjangContainer.querySelector('.badge.bg-label-info');
+                        if(!existingBadge) {
+                            let newBadge = document.createElement('span');
+                            newBadge.className = 'badge bg-label-info';
+                            newBadge.style.fontSize = '9px';
+                            newBadge.innerText = currentJenjang;
+                            jenjangContainer.appendChild(newBadge);
+                        } else {
+                            existingBadge.innerText = currentJenjang;
+                        }
+                    }
+
                     Swal.fire({ icon: 'success', title: 'Sukses', text: res.message, timer: 1500, showConfirmButton: false });
                     refreshTable();
                 } else {
