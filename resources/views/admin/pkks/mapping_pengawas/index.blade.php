@@ -141,8 +141,12 @@
 </div>
 
 <style>
-    .row-sekolah { transition: all 0.2s; }
-    /* Style Abu-Abu untuk sekolah yang dipegang pengawas lain */
+    /* Style untuk sekolah yang punya pengawas terpilih (Glow Biru) */
+    .row-sekolah.active-mapping-row {
+        background-color: rgba(105, 108, 255, 0.05) !important;
+        border-left: 4px solid #696cff;
+    }
+
     .row-sekolah.assigned-to-other { 
         background-color: #f8f9fa !important; 
         opacity: 0.5; 
@@ -231,12 +235,14 @@
                 checkbox.disabled = false;
                 checkbox.checked = false;
                 row.classList.remove('assigned-to-other');
+                row.classList.remove('active-mapping-row');
                 ownerBox.classList.add('d-none');
 
                 if (currentOwnerId) {
                     if (currentOwnerId == currentPengawasId) {
-                        // Milik Pengawas Terpilih -> Checked & Enabled
+                        // Milik Pengawas Terpilih -> Checked & Enabled & Highlight Biru
                         checkbox.checked = true;
+                        row.classList.add('active-mapping-row');
                     } else {
                         // Milik Orang Lain -> Disabled & Greyed Out
                         checkbox.disabled = true;
