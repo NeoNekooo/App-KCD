@@ -6,9 +6,13 @@
 <div class="container-xxl flex-grow-1 container-p-y">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h4 class="fw-bold m-0"><span class="text-muted fw-light">PKKS /</span> Mapping Pengawas</h4>
-        <div>
-            <button type="button" class="btn btn-primary shadow-sm d-none" id="btn-save">
-                <i class="bx bx-save me-1"></i> Simpan Pemetaan
+        <div id="action-header" class="d-flex align-items-center gap-3 d-none">
+            <div class="text-end me-2">
+                <div class="small fw-bold text-dark">Pengawas: <span id="sum-name" class="text-primary">-</span></div>
+                <div class="small text-muted">Terpilih: <span id="sum-count" class="badge bg-label-primary">0</span></div>
+            </div>
+            <button type="button" class="btn btn-primary shadow-sm" id="btn-save">
+                <i class="bx bx-save me-1"></i> Simpan
             </button>
         </div>
     </div>
@@ -18,7 +22,7 @@
         <div class="card-body p-3">
             <div class="row align-items-center">
                 <div class="col-md-4">
-                    <label class="form-label fw-bold small text-uppercase mb-1">Pilih Jenjang Terlebih Dahulu</label>
+                    <label class="form-label fw-bold small text-uppercase mb-1">Pilih Jenjang Sekolah</label>
                     <select id="filter-jenjang" class="form-select border-2 border-primary">
                         <option value="">-- Silakan Pilih Jenjang --</option>
                         @foreach($jenjangs as $j)
@@ -27,8 +31,8 @@
                     </select>
                 </div>
                 <div class="col-md-8 text-md-end mt-3 mt-md-0">
-                    <div class="small text-muted" id="filter-hint">
-                        <i class="bx bx-info-circle me-1"></i> Data sekolah akan muncul setelah jenjang dipilih.
+                    <div class="small text-muted">
+                        <i class="bx bx-info-circle me-1"></i> Pilih pengawas di kanan untuk mengelola sekolah di kiri.
                     </div>
                 </div>
             </div>
@@ -39,30 +43,30 @@
         {{-- Tabel Sekolah (Kiri) --}}
         <div class="col-md-8">
             <div class="card border-0 shadow-sm h-100">
-                <div class="card-header border-bottom py-3 d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0 fw-bold"><i class="bx bx-buildings me-2 text-primary"></i>Daftar Sekolah</h5>
+                <div class="card-header border-bottom py-3 d-flex justify-content-between align-items-center bg-light bg-opacity-50">
+                    <h5 class="mb-0 fw-bold small text-uppercase tracking-wider">Daftar Sekolah</h5>
                     <div class="input-group input-group-merge w-50">
-                        <span class="input-group-text border-0 bg-light"><i class="bx bx-search"></i></span>
-                        <input type="text" class="form-control border-0 bg-light" id="search-sekolah" placeholder="Cari NPSN atau Nama...">
+                        <span class="input-group-text border-0 bg-white"><i class="bx bx-search"></i></span>
+                        <input type="text" class="form-control border-0 bg-white" id="search-sekolah" placeholder="Cari NPSN atau Nama...">
                     </div>
                 </div>
                 
                 {{-- Placeholder Blank State --}}
                 <div id="blank-state-sekolah" class="card-body py-5 text-center">
                     <div class="mb-3">
-                        <i class="bx bx-select-multiple text-muted" style="font-size: 5rem; opacity: 0.1;"></i>
+                        <i class="bx bx-select-multiple text-muted opacity-25" style="font-size: 5rem;"></i>
                     </div>
                     <h5 class="text-muted">Jenjang Belum Dipilih</h5>
-                    <p class="text-muted small">Pilih jenjang sekolah di atas untuk mengelola pemetaan.</p>
+                    <p class="text-muted small">Pilih jenjang sekolah terlebih dahulu.</p>
                 </div>
 
-                <div class="table-responsive d-none" id="table-container-sekolah" style="max-height: 60vh;">
+                <div class="table-responsive d-none" id="table-container-sekolah" style="max-height: 65vh;">
                     <table class="table table-hover align-middle mb-0" id="table-sekolah">
                         <thead class="table-light sticky-top">
                             <tr>
                                 <th width="120">NPSN</th>
                                 <th>Nama Sekolah</th>
-                                <th width="150" class="text-center">Aksi</th>
+                                <th width="100" class="text-center">Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -76,8 +80,8 @@
                                         <span class="text-muted">{{ $s->kecamatan }}</span>
                                     </div>
                                     <div class="owner-info mt-1 d-none" id="owner-{{ $s->sekolah_id }}">
-                                        <span class="badge bg-label-info rounded-pill" style="font-size: 10px;">
-                                            <i class="bx bx-user me-1"></i> <span class="owner-name"></span>
+                                        <span class="badge bg-secondary rounded-pill text-white" style="font-size: 10px; opacity: 0.8;">
+                                            <i class="bx bx-lock-alt me-1"></i> <span class="owner-name"></span>
                                         </span>
                                     </div>
                                 </td>
@@ -100,14 +104,14 @@
         {{-- Side Panel Pengawas (Kanan) --}}
         <div class="col-md-4">
             <div class="card border-0 shadow-sm overflow-hidden h-100">
-                <div class="card-header bg-primary py-3 d-flex justify-content-between align-items-center">
-                    <h6 class="mb-0 text-white fw-bold"><i class="bx bx-user-check me-2"></i>Daftar Pengawas</h6>
+                <div class="card-header bg-primary py-3">
+                    <h6 class="mb-0 text-white fw-bold"><i class="bx bx-user-check me-2"></i>Pilih Pengawas</h6>
                 </div>
                 <div class="card-body p-0">
-                    <div class="p-3 border-bottom bg-light bg-opacity-50">
+                    <div class="p-3 border-bottom bg-light bg-opacity-25">
                         <div class="input-group input-group-merge shadow-sm rounded-pill overflow-hidden border-0">
                             <span class="input-group-text border-0 bg-white"><i class="bx bx-search"></i></span>
-                            <input type="text" class="form-control border-0 bg-white" id="search-pengawas" placeholder="Cari nama pengawas...">
+                            <input type="text" class="form-control border-0 bg-white" id="search-pengawas" placeholder="Cari pengawas...">
                         </div>
                     </div>
                     <div class="list-group list-group-flush" style="max-height: 60vh; overflow-y: auto;">
@@ -123,7 +127,7 @@
                             <div class="w-100 overflow-hidden">
                                 <div class="d-flex justify-content-between align-items-center">
                                     <h6 class="mb-0 text-truncate fw-bold">{{ $p->name }}</h6>
-                                    <span class="badge bg-primary rounded-pill count-badge" style="font-size: 10px;">{{ $p->pengawas_pembinas_count }} Sekolah</span>
+                                    <span class="badge bg-primary rounded-pill count-badge" style="font-size: 10px;">{{ $p->pengawas_pembinas_count }}</span>
                                 </div>
                                 <small class="text-muted small">ID: {{ $p->id }}</small>
                             </div>
@@ -132,19 +136,20 @@
                     </div>
                 </div>
             </div>
-
-            <div class="mt-4 p-4 rounded-4 bg-label-primary border border-primary border-opacity-10 d-none" id="mapping-summary">
-                <h6 class="fw-bold mb-2">Informasi Pemetaan</h6>
-                <p class="small mb-1">Pengawas: <strong id="sum-name">-</strong></p>
-                <p class="small mb-0 text-primary">Sekolah dipilih: <strong id="sum-count">0</strong></p>
-            </div>
         </div>
     </div>
 </div>
 
 <style>
     .row-sekolah { transition: all 0.2s; }
-    .row-sekolah.assigned-to-other { background-color: rgba(0,0,0,0.02); opacity: 0.8; }
+    /* Style Abu-Abu untuk sekolah yang dipegang pengawas lain */
+    .row-sekolah.assigned-to-other { 
+        background-color: #f8f9fa !important; 
+        opacity: 0.5; 
+        filter: grayscale(1);
+    }
+    .row-sekolah.assigned-to-other td { color: #aaa !important; }
+    
     .btn-pengawas { border: none !important; transition: all 0.2s; }
     .btn-pengawas:hover { background-color: #f8f9ff; }
     .btn-pengawas.active { 
@@ -155,10 +160,12 @@
     }
     .btn-pengawas.active h6, .btn-pengawas.active small { color: #fff !important; }
     .btn-pengawas.active .count-badge { background-color: #fff !important; color: #696cff !important; }
-    .check-sekolah { width: 1.5rem; height: 1.5rem; cursor: pointer; }
-    .check-sekolah:disabled { cursor: not-allowed; opacity: 0.5; }
+    
+    .check-sekolah { width: 1.4rem; height: 1.4rem; cursor: pointer; border-width: 2px; }
+    .check-sekolah:disabled { cursor: not-allowed; opacity: 0.3; }
+    
     .table-responsive::-webkit-scrollbar { width: 5px; }
-    .table-responsive::-webkit-scrollbar-thumb { background: #eee; border-radius: 10px; }
+    .table-responsive::-webkit-scrollbar-thumb { background: #ddd; border-radius: 10px; }
 </style>
 
 @push('scripts')
@@ -168,11 +175,11 @@
         let globalMapping = @json($mapping);
         let pengawasData = @json($pengawas->keyBy('id'));
 
-        // 1. Filter Jenjang
         const filterJenjang = document.getElementById('filter-jenjang');
         const blankState = document.getElementById('blank-state-sekolah');
         const tableContainer = document.getElementById('table-container-sekolah');
 
+        // 1. Filter Jenjang
         filterJenjang.addEventListener('change', function() {
             const val = this.value;
             if (!val) {
@@ -187,38 +194,12 @@
                     row.style.display = (j === val) ? 'table-row' : 'none';
                 });
                 
-                // Clear search sekolah when jenjang changes
                 document.getElementById('search-sekolah').value = '';
                 if(currentPengawasId) refreshTable();
             }
         });
 
-        // 2. Search Sekolah
-        const searchSekolah = document.getElementById('search-sekolah');
-        searchSekolah.addEventListener('keyup', function() {
-            const val = this.value.toLowerCase();
-            const currentJenjang = filterJenjang.value;
-            if(!currentJenjang) return;
-
-            document.querySelectorAll('.row-sekolah').forEach(row => {
-                const j = row.getAttribute('data-jenjang');
-                const s = row.getAttribute('data-search');
-                const matchesJenjang = j === currentJenjang;
-                const matchesSearch = s.includes(val);
-                row.style.display = (matchesJenjang && matchesSearch) ? 'table-row' : 'none';
-            });
-        });
-
-        // 3. Search Pengawas
-        const searchPengawas = document.getElementById('search-pengawas');
-        searchPengawas.addEventListener('keyup', function() {
-            const val = this.value.toLowerCase();
-            document.querySelectorAll('.btn-pengawas').forEach(btn => {
-                btn.style.display = btn.getAttribute('data-search').includes(val) ? 'flex' : 'none';
-            });
-        });
-
-        // 4. Klik Pengawas
+        // 2. Klik Pengawas
         document.querySelectorAll('.btn-pengawas').forEach(btn => {
             btn.addEventListener('click', function() {
                 const id = this.getAttribute('data-id');
@@ -229,8 +210,7 @@
 
                 currentPengawasId = id;
                 document.getElementById('sum-name').innerText = name;
-                document.getElementById('btn-save').classList.remove('d-none');
-                document.getElementById('mapping-summary').classList.remove('d-none');
+                document.getElementById('action-header').classList.remove('d-none');
 
                 refreshTable();
             });
@@ -247,6 +227,7 @@
                 
                 const currentOwnerId = globalMapping[sid];
 
+                // Reset State
                 checkbox.disabled = false;
                 checkbox.checked = false;
                 row.classList.remove('assigned-to-other');
@@ -254,8 +235,10 @@
 
                 if (currentOwnerId) {
                     if (currentOwnerId == currentPengawasId) {
+                        // Milik Pengawas Terpilih -> Checked & Enabled
                         checkbox.checked = true;
                     } else {
+                        // Milik Orang Lain -> Disabled & Greyed Out
                         checkbox.disabled = true;
                         row.classList.add('assigned-to-other');
                         ownerBox.classList.remove('d-none');
@@ -271,11 +254,32 @@
             document.getElementById('sum-count').innerText = count;
         }
 
+        // Checkbox change listener
         document.querySelectorAll('.check-sekolah').forEach(cb => {
             cb.addEventListener('change', updateSummary);
         });
 
-        // 5. Simpan (AJAX)
+        // Search Sekolah
+        document.getElementById('search-sekolah').addEventListener('keyup', function() {
+            const val = this.value.toLowerCase();
+            const currentJenjang = filterJenjang.value;
+            if(!currentJenjang) return;
+            document.querySelectorAll('.row-sekolah').forEach(row => {
+                const j = row.getAttribute('data-jenjang');
+                const s = row.getAttribute('data-search');
+                row.style.display = (j === currentJenjang && s.includes(val)) ? 'table-row' : 'none';
+            });
+        });
+
+        // Search Pengawas
+        document.getElementById('search-pengawas').addEventListener('keyup', function() {
+            const val = this.value.toLowerCase();
+            document.querySelectorAll('.btn-pengawas').forEach(btn => {
+                btn.style.display = btn.getAttribute('data-search').includes(val) ? 'flex' : 'none';
+            });
+        });
+
+        // Simpan (AJAX)
         document.getElementById('btn-save').addEventListener('click', function() {
             if (!currentPengawasId) return;
             const currentJenjang = filterJenjang.value;
@@ -289,7 +293,7 @@
             const originalHtml = btn.innerHTML;
 
             btn.disabled = true;
-            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Menyimpan...';
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>';
 
             fetch('{{ route("admin.pkks.mapping-pengawas.update") }}', {
                 method: 'POST',
@@ -303,23 +307,19 @@
             .then(res => res.json())
             .then(res => {
                 if (res.success) {
-                    // Update global mapping local
                     for (let sid in globalMapping) {
                         if (globalMapping[sid] == currentPengawasId) delete globalMapping[sid];
                     }
                     selectedIds.forEach(sid => globalMapping[sid] = currentPengawasId);
-
-                    // Update Badge Count di List Pengawas
                     const badge = document.querySelector(`.btn-pengawas[data-id="${currentPengawasId}"] .count-badge`);
-                    if(badge) badge.innerText = `${selectedIds.length} Sekolah`;
-
-                    Swal.fire({ icon: 'success', title: 'Sukses', text: res.message, timer: 2000, showConfirmButton: false });
+                    if(badge) badge.innerText = selectedIds.length;
+                    Swal.fire({ icon: 'success', title: 'Sukses', text: res.message, timer: 1500, showConfirmButton: false });
                     refreshTable();
                 } else {
                     Swal.fire({ icon: 'error', title: 'Gagal', text: res.message });
                 }
             })
-            .catch(err => Swal.fire({ icon: 'error', title: 'Error', text: 'Terjadi kesalahan sistem.' }))
+            .catch(err => Swal.fire({ icon: 'error', title: 'Error', text: 'Gagal simpan.' }))
             .finally(() => {
                 btn.disabled = false;
                 btn.innerHTML = originalHtml;
