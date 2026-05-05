@@ -216,7 +216,7 @@
             btn.addEventListener('click', function() {
                 const id = this.getAttribute('data-id');
                 const name = this.getAttribute('data-name');
-                const pJenjang = this.getAttribute('data-jenjang');
+                let pJenjang = this.getAttribute('data-jenjang');
 
                 document.querySelectorAll('.btn-pengawas').forEach(b => b.classList.remove('active'));
                 this.classList.add('active');
@@ -225,10 +225,26 @@
                 document.getElementById('sum-name').innerText = name;
                 document.getElementById('action-header').classList.remove('d-none');
 
-                // 🔥 AUTO-FILTER JENJANG: Jika pengawas punya jenjang, otomatis pindahin filternya
+                // 🔥 SMART SCANNING: Jika jenjang di profil kosong, cari dari sekolah yang sudah di-mapping
+                if (!pJenjang || pJenjang === 'null' || pJenjang === '') {
+                    for (let sid in globalMapping) {
+                        if (globalMapping[sid] == id) {
+                            const row = document.querySelector(`.row-sekolah .check-sekolah[value="${sid}"]`)?.closest('.row-sekolah');
+                            if (row) {
+                                pJenjang = row.getAttribute('data-jenjang');
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                // Terapkan Auto-Filter
                 if (pJenjang && pJenjang !== 'null') {
                     filterJenjang.value = pJenjang;
                     applyJenjangFilter(pJenjang);
+                } else {
+                    // Kalau bener-bener belum ada mapping & profile kosong, biarkan user milih jenjang manual
+                    applyJenjangFilter(filterJenjang.value);
                 }
 
                 refreshTable();
