@@ -18,9 +18,20 @@ class PengawasMappingController extends Controller
     {
         // Ambil daftar pengawas
         $pengawas = User::where(DB::raw('LOWER(role)'), 'LIKE', '%pengawas%')
+            ->with(['pengawasPembinas.sekolah'])
             ->withCount('pengawasPembinas')
             ->orderBy('name', 'asc')
             ->get();
+
+        // 🔥 PRE-CALCULATE JENJANG: Jika profil jenjang kosong, ambil dari sekolah binaan pertama
+        foreach ($pengawas as $p) {
+            if (!$p->jenjang) {
+                $firstMapping = $p->pengawasPembinas->first();
+                if ($firstMapping && $firstMapping->sekolah) {
+                    $p->jenjang = $firstMapping->sekolah->bentuk_pendidikan_id_str;
+                }
+            }
+        }
 
         // Ambil daftar Jenjang yang ada di sekolah
         $jenjangs = Sekolah::select('bentuk_pendidikan_id_str as nama')
