@@ -18,11 +18,11 @@
     </div>
 
     {{-- Filter Jenjang --}}
-    <div class="card mb-4 border-0 shadow-sm">
+    <div class="card mb-4 border-0 shadow-sm border-start border-primary border-3">
         <div class="card-body p-3">
             <div class="row align-items-center">
                 <div class="col-md-4">
-                    <label class="form-label fw-bold small text-uppercase mb-1">Jenjang Sekolah</label>
+                    <label class="form-label fw-bold small text-uppercase mb-1 text-primary">Jenjang Sekolah</label>
                     <select id="filter-jenjang" class="form-select border-2 border-primary">
                         <option value="">-- Silakan Pilih Jenjang --</option>
                         @foreach($jenjangs as $j)
@@ -31,8 +31,8 @@
                     </select>
                 </div>
                 <div class="col-md-8 text-md-end mt-3 mt-md-0">
-                    <div class="small text-muted">
-                        <i class="bx bx-info-circle me-1"></i> Klik nama pengawas untuk memuat mapping dan jenjang terkait.
+                    <div class="small text-muted bg-white d-inline-block p-2 rounded shadow-sm">
+                        <i class="bx bx-info-circle me-1 text-info"></i> Klik nama pengawas untuk memuat mapping dan jenjang terkait secara otomatis.
                     </div>
                 </div>
             </div>
@@ -53,11 +53,13 @@
                 
                 {{-- Placeholder Blank State --}}
                 <div id="blank-state-sekolah" class="card-body py-5 text-center">
-                    <div class="mb-3">
-                        <i class="bx bx-select-multiple text-muted opacity-25" style="font-size: 5rem;"></i>
+                    <div id="blank-content">
+                        <div class="mb-3">
+                            <i class="bx bx-select-multiple text-muted opacity-25" style="font-size: 5rem;"></i>
+                        </div>
+                        <h5 class="text-muted">Pilih Pengawas atau Jenjang</h5>
+                        <p class="text-muted small">Silakan pilih pengawas binaan di sebelah kanan.</p>
                     </div>
-                    <h5 class="text-muted">Pilih Pengawas atau Jenjang</h5>
-                    <p class="text-muted small">Pilih pengawas binaan untuk melihat daftar sekolah.</p>
                 </div>
 
                 <div class="table-responsive d-none" id="table-container-sekolah" style="max-height: 65vh;">
@@ -114,7 +116,7 @@
                             <input type="text" class="form-control border-0 bg-white" id="search-pengawas" placeholder="Cari pengawas...">
                         </div>
                     </div>
-                    <div class="list-group list-group-flush" style="max-height: 60vh; overflow-y: auto;">
+                    <div class="list-group list-group-flush" style="max-height: 65vh; overflow-y: auto;">
                         @foreach($pengawas as $p)
                         <a href="javascript:void(0);" 
                            class="list-group-item list-group-item-action btn-pengawas d-flex align-items-center py-3 border-bottom"
@@ -133,7 +135,7 @@
                                 <div class="d-flex justify-content-between align-items-center mt-1">
                                     <small class="text-muted small">ID: {{ $p->id }}</small>
                                     @if($p->jenjang)
-                                    <span class="badge bg-label-info" style="font-size: 9px;">{{ $p->jenjang }}</span>
+                                    <span class="badge bg-label-info p-jenjang-badge" style="font-size: 9px;">{{ $p->jenjang }}</span>
                                     @endif
                                 </div>
                             </div>
@@ -183,12 +185,14 @@
         let currentPengawasId = null;
         let globalMapping = @json($mapping);
         let pengawasData = @json($pengawas->keyBy('id'));
+        let schoolJenjangs = @json($sekolahs->pluck('bentuk_pendidikan_id_str', 'sekolah_id'));
 
         const filterJenjang = document.getElementById('filter-jenjang');
         const blankState = document.getElementById('blank-state-sekolah');
+        const blankContent = document.getElementById('blank-content');
         const tableContainer = document.getElementById('table-container-sekolah');
 
-        // Fungsi Filter Jenjang
+        // 🔥 Fungsi Utama Filter
         function applyJenjangFilter(val) {
             if (!val) {
                 blankState.classList.remove('d-none');
@@ -211,7 +215,7 @@
             applyJenjangFilter(this.value);
         });
 
-        // 2. Klik Pengawas
+        // 🔥 2. Klik Pengawas (Kuncinya di Sini Bre!)
         document.querySelectorAll('.btn-pengawas').forEach(btn => {
             btn.addEventListener('click', function() {
                 const id = this.getAttribute('data-id');
@@ -225,57 +229,46 @@
                 document.getElementById('sum-name').innerText = name;
                 document.getElementById('action-header').classList.remove('d-none');
 
-                // 🔥 AGGRESSIVE SCANNING: Cari jenjang dari mapping yang ada
+                // SCAN JIKA KOSONG
                 if (!pJenjang || pJenjang === 'null' || pJenjang === '') {
-                    // Cari di globalMapping, sekolah mana yang dipegang ID ini
                     for (let sid in globalMapping) {
                         if (globalMapping[sid] == id) {
-                            // Cari row sekolah itu di DOM buat ambil data-jenjang nya
-                            const row = document.querySelector(`.row-sekolah[data-search*="${sid}"]`) || 
-                                        document.querySelector(`.check-sekolah[value="${sid}"]`)?.closest('.row-sekolah');
-                            if (row) {
-                                pJenjang = row.getAttribute('data-jenjang');
-                                break;
-                            }
+                            pJenjang = schoolJenjangs[sid];
+                            if (pJenjang) break;
                         }
                     }
                 }
 
-                // 🔥 FORCE UPDATE UI
+                // FORCE UPDATE
                 if (pJenjang && pJenjang !== 'null' && pJenjang !== '') {
                     filterJenjang.value = pJenjang;
                     applyJenjangFilter(pJenjang);
                 } else {
-                    // Jika benar-benar pengawas baru (belum ada mapping)
                     if (filterJenjang.value) {
                         applyJenjangFilter(filterJenjang.value);
                     } else {
-                        // Tampilkan instruksi khusus buat pengawas baru
-                        blankState.innerHTML = `
+                        blankState.classList.remove('d-none');
+                        tableContainer.classList.add('d-none');
+                        blankContent.innerHTML = `
                             <div class="mb-3 animate__animated animate__pulse animate__infinite">
                                 <i class="bx bx-pointer text-primary" style="font-size: 5rem; opacity: 0.5;"></i>
                             </div>
-                            <h5 class="text-dark">Pengawas <strong>${name}</strong> Belum Memiliki Mapping</h5>
-                            <p class="text-muted">Silakan <strong>Pilih Jenjang Sekolah</strong> di atas untuk mulai memetakan sekolah binaan.</p>
+                            <h5 class="text-dark">Pengawas <strong>${name}</strong> Belum Ada Mapping</h5>
+                            <p class="text-muted">Silakan pilih <strong>Jenjang Sekolah</strong> untuk memulai.</p>
                         `;
-                        blankState.classList.remove('d-none');
-                        tableContainer.classList.add('d-none');
                     }
                 }
-
                 refreshTable();
             });
         });
 
         function refreshTable() {
             if (!currentPengawasId) return;
-
             document.querySelectorAll('.row-sekolah').forEach(row => {
                 const sid = row.querySelector('.check-sekolah').value;
                 const checkbox = row.querySelector('.check-sekolah');
                 const ownerBox = row.querySelector('.owner-info');
                 const ownerName = row.querySelector('.owner-name');
-                
                 const currentOwnerId = globalMapping[sid];
 
                 checkbox.disabled = false;
@@ -296,101 +289,63 @@
                     }
                 }
             });
-            updateSummary();
-        }
-
-        function updateSummary() {
             const count = document.querySelectorAll('.check-sekolah:checked').length;
             document.getElementById('sum-count').innerText = count;
         }
 
         document.querySelectorAll('.check-sekolah').forEach(cb => {
-            cb.addEventListener('change', updateSummary);
-        });
-
-        // Search Sekolah
-        document.getElementById('search-sekolah').addEventListener('keyup', function() {
-            const val = this.value.toLowerCase();
-            const currentJenjang = filterJenjang.value;
-            if(!currentJenjang) return;
-            document.querySelectorAll('.row-sekolah').forEach(row => {
-                const j = row.getAttribute('data-jenjang');
-                const s = row.getAttribute('data-search');
-                row.style.display = (j === currentJenjang && s.includes(val)) ? 'table-row' : 'none';
+            cb.addEventListener('change', () => {
+                const count = document.querySelectorAll('.check-sekolah:checked').length;
+                document.getElementById('sum-count').innerText = count;
             });
         });
 
-        // Search Pengawas
-        document.getElementById('search-pengawas').addEventListener('keyup', function() {
-            const val = this.value.toLowerCase();
-            document.querySelectorAll('.btn-pengawas').forEach(btn => {
-                btn.style.display = btn.getAttribute('data-search').includes(val) ? 'flex' : 'none';
-            });
-        });
-
-        // Simpan (AJAX)
+        // Simpan
         document.getElementById('btn-save').addEventListener('click', function() {
             if (!currentPengawasId) return;
             const currentJenjang = filterJenjang.value;
-            if(!currentJenjang) {
-                Swal.fire({ icon: 'warning', title: 'Perhatian', text: 'Silakan pilih jenjang terlebih dahulu.' });
-                return;
-            }
+            if(!currentJenjang) return Swal.fire({ icon: 'warning', title: 'Pilih Jenjang!' });
             
             const selectedIds = Array.from(document.querySelectorAll('.check-sekolah:checked')).map(cb => cb.value);
             const btn = this;
             const originalHtml = btn.innerHTML;
 
             btn.disabled = true;
-            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>';
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
 
             fetch('{{ route("admin.pkks.mapping-pengawas.update") }}', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' },
-                body: JSON.stringify({ 
-                    pengawas_id: currentPengawasId, 
-                    sekolah_ids: selectedIds,
-                    jenjang: currentJenjang
-                })
+                body: JSON.stringify({ pengawas_id: currentPengawasId, sekolah_ids: selectedIds, jenjang: currentJenjang })
             })
             .then(res => res.json())
             .then(res => {
                 if (res.success) {
-                    for (let sid in globalMapping) {
-                        if (globalMapping[sid] == currentPengawasId) delete globalMapping[sid];
-                    }
+                    for (let sid in globalMapping) if (globalMapping[sid] == currentPengawasId) delete globalMapping[sid];
                     selectedIds.forEach(sid => globalMapping[sid] = currentPengawasId);
                     
-                    // Update Badge Count & Jenjang di List Pengawas UI
-                    const pengawasLink = document.querySelector(`.btn-pengawas[data-id="${currentPengawasId}"]`);
-                    if(pengawasLink) {
-                        pengawasLink.querySelector('.count-badge').innerText = selectedIds.length;
-                        pengawasLink.setAttribute('data-jenjang', currentJenjang);
-                        
-                        // Tambah badge jenjang kalau belum ada
-                        let jenjangContainer = pengawasLink.querySelector('.text-muted').parentElement;
-                        let existingBadge = jenjangContainer.querySelector('.badge.bg-label-info');
-                        if(!existingBadge) {
-                            let newBadge = document.createElement('span');
-                            newBadge.className = 'badge bg-label-info';
-                            newBadge.style.fontSize = '9px';
-                            newBadge.innerText = currentJenjang;
-                            jenjangContainer.appendChild(newBadge);
-                        } else {
-                            existingBadge.innerText = currentJenjang;
-                        }
+                    const pLink = document.querySelector(`.btn-pengawas[data-id="${currentPengawasId}"]`);
+                    if(pLink) {
+                        pLink.querySelector('.count-badge').innerText = selectedIds.length;
+                        pLink.setAttribute('data-jenjang', currentJenjang);
+                        let jBadge = pLink.querySelector('.p-jenjang-badge');
+                        if(!jBadge) {
+                            pLink.querySelector('.small.text-muted').parentElement.insertAdjacentHTML('beforeend', `<span class="badge bg-label-info p-jenjang-badge" style="font-size: 9px;">${currentJenjang}</span>`);
+                        } else { jBadge.innerText = currentJenjang; }
                     }
-
-                    Swal.fire({ icon: 'success', title: 'Sukses', text: res.message, timer: 1500, showConfirmButton: false });
+                    Swal.fire({ icon: 'success', title: 'Berhasil', timer: 1500, showConfirmButton: false });
                     refreshTable();
-                } else {
-                    Swal.fire({ icon: 'error', title: 'Gagal', text: res.message });
                 }
             })
-            .catch(err => Swal.fire({ icon: 'error', title: 'Error', text: 'Gagal simpan.' }))
-            .finally(() => {
-                btn.disabled = false;
-                btn.innerHTML = originalHtml;
+            .finally(() => { btn.disabled = false; btn.innerHTML = originalHtml; });
+        });
+
+        // Search
+        document.getElementById('search-sekolah').addEventListener('keyup', function() {
+            const val = this.value.toLowerCase();
+            const currentJenjang = filterJenjang.value;
+            document.querySelectorAll('.row-sekolah').forEach(row => {
+                row.style.display = (row.getAttribute('data-jenjang') === currentJenjang && row.getAttribute('data-search').includes(val)) ? 'table-row' : 'none';
             });
         });
     });
