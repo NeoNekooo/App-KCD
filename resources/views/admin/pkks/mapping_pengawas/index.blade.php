@@ -225,11 +225,14 @@
                 document.getElementById('sum-name').innerText = name;
                 document.getElementById('action-header').classList.remove('d-none');
 
-                // 🔥 SMART SCANNING: Jika jenjang di profil kosong, cari dari sekolah yang sudah di-mapping
+                // 🔥 AGGRESSIVE SCANNING: Cari jenjang dari mapping yang ada
                 if (!pJenjang || pJenjang === 'null' || pJenjang === '') {
+                    // Cari di globalMapping, sekolah mana yang dipegang ID ini
                     for (let sid in globalMapping) {
                         if (globalMapping[sid] == id) {
-                            const row = document.querySelector(`.row-sekolah .check-sekolah[value="${sid}"]`)?.closest('.row-sekolah');
+                            // Cari row sekolah itu di DOM buat ambil data-jenjang nya
+                            const row = document.querySelector(`.row-sekolah[data-search*="${sid}"]`) || 
+                                        document.querySelector(`.check-sekolah[value="${sid}"]`)?.closest('.row-sekolah');
                             if (row) {
                                 pJenjang = row.getAttribute('data-jenjang');
                                 break;
@@ -238,13 +241,26 @@
                     }
                 }
 
-                // Terapkan Auto-Filter
-                if (pJenjang && pJenjang !== 'null') {
+                // 🔥 FORCE UPDATE UI
+                if (pJenjang && pJenjang !== 'null' && pJenjang !== '') {
                     filterJenjang.value = pJenjang;
                     applyJenjangFilter(pJenjang);
                 } else {
-                    // Kalau bener-bener belum ada mapping & profile kosong, biarkan user milih jenjang manual
-                    applyJenjangFilter(filterJenjang.value);
+                    // Jika benar-benar pengawas baru (belum ada mapping)
+                    if (filterJenjang.value) {
+                        applyJenjangFilter(filterJenjang.value);
+                    } else {
+                        // Tampilkan instruksi khusus buat pengawas baru
+                        blankState.innerHTML = `
+                            <div class="mb-3 animate__animated animate__pulse animate__infinite">
+                                <i class="bx bx-pointer text-primary" style="font-size: 5rem; opacity: 0.5;"></i>
+                            </div>
+                            <h5 class="text-dark">Pengawas <strong>${name}</strong> Belum Memiliki Mapping</h5>
+                            <p class="text-muted">Silakan <strong>Pilih Jenjang Sekolah</strong> di atas untuk mulai memetakan sekolah binaan.</p>
+                        `;
+                        blankState.classList.remove('d-none');
+                        tableContainer.classList.add('d-none');
+                    }
                 }
 
                 refreshTable();
